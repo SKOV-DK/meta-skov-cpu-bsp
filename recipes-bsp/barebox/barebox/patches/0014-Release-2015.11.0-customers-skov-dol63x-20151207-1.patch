@@ -1,7 +1,7 @@
-From 7f87bb02fd0aea475faa98850146d8f67d9e8b63 Mon Sep 17 00:00:00 2001
+From 1bb78c7b0dc455d08e0382f7474bbc42ab0e9b42 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Wed, 25 Nov 2015 15:10:00 +0100
-Subject: [PATCH 14/14] Release 2015.11.0/customers/skov/dol63x/20151127-1
+Subject: [PATCH 14/14] Release 2015.11.0/customers/skov/dol63x/20151207-1
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 45f421812314..598c8d65a440 100644
+index 45f421812314..f856399983f8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -17,7 +17,7 @@ index 45f421812314..598c8d65a440 100644
  PATCHLEVEL = 11
  SUBLEVEL = 0
 -EXTRAVERSION = 2015.11.0
-+EXTRAVERSION =-20151127-1
++EXTRAVERSION =-20151207-1
  NAME = None
  
  # *DOCUMENTATION*

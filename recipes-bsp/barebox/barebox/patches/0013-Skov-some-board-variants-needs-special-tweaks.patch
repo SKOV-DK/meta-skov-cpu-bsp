@@ -1,4 +1,4 @@
-From 1ce1bd98a72fc1f413ed8d8a477c6a31724a6be9 Mon Sep 17 00:00:00 2001
+From 167efc56291e16b01174db65279c0e61cf2720d3 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
 Subject: [PATCH 13/14] Skov: some board variants needs special tweaks
@@ -8,15 +8,221 @@ DTS.
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
- arch/arm/boards/skov-dol63x/version.c | 36 +++++++++++++++++++++++++++++++++++
- arch/arm/dts/imx6qdl-skov-dol63x.dtsi | 11 +++++++++++
- 2 files changed, 47 insertions(+)
+ arch/arm/boards/skov-dol63x/lowlevel.c | 153 +++++++++++++++++++++++++++++++--
+ arch/arm/boards/skov-dol63x/version.c  |  45 ++++++++++
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi  |  39 ++++++---
+ 3 files changed, 219 insertions(+), 18 deletions(-)
 
+diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
+index 1e2d7f8b0b39..f547b8ac8efa 100644
+--- a/arch/arm/boards/skov-dol63x/lowlevel.c
++++ b/arch/arm/boards/skov-dol63x/lowlevel.c
+@@ -575,6 +575,144 @@ static void spl_imx6sdl_dram_init(const struct mx6_ddr_sysinfo *si,
+ 
+ /* ------------------------------------------------------------------------ */
+ 
++#define BKLGT_PWR_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_80ohm | MX6_PAD_CTL_SRE_SLOW
++
++static inline void init_backlight_gpios(int cpu_type, unsigned board_variant)
++{
++	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
++	void __iomem *gpio6base = IOMEM(MX6_GPIO6_BASE_ADDR);
++	void __iomem *gpio1base = IOMEM(MX6_GPIO1_BASE_ADDR);
++	unsigned reg;
++
++	/*
++	 * since revision B a backlight switch is present which can help to
++	 * prevent any kind of flicker when switching on the board. Use it.
++	 * GPIO6/23 controls the backlight. High switches off the backlight.
++	 */
++	switch (board_variant) {
++	case 0 ... 8:
++		break;
++	default:
++		reg = readl(gpio6base + 0x04);
++		reg |= BIT(23);
++		writel(reg, gpio6base + 0x04); /* output */
++		reg = readl(gpio6base + 0x00);
++		reg |= BIT(23);
++		writel(reg, gpio6base + 0x00);
++
++		switch (cpu_type) {
++		case IMX6_CPUTYPE_IMX6S:
++		case IMX6_CPUTYPE_IMX6DL:
++			writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x2D0);
++			writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x6B8);
++			break;
++		case IMX6_CPUTYPE_IMX6D:
++		case IMX6_CPUTYPE_IMX6Q:
++			writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x068);
++			writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x37C);
++			break;
++		}
++	}
++
++	/*
++	 * switch brightness to the lowest available value. This is what we
++	 * can do for revision A boards
++	 * GPIO1/1 controls (via PWM) the brightness. A static low means
++	 * a very dark backlight
++	 */
++	reg = readl(gpio1base + 0x04);
++	reg |= BIT(1);
++	writel(reg, gpio1base + 0x04); /* output */
++	reg = readl(gpio1base + 0x00);
++	reg &= ~BIT(1);
++	writel(reg, gpio1base + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x210);
++		writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x5E0);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x224);
++		writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x5F4);
++		break;
++	}
++}
++
++#define MMC_PWR_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_80ohm | MX6_PAD_CTL_SRE_SLOW
++
++/*
++ * Some variants needs special tweaks and they needs them as early as possible
++ * Note: do not call this function in early boot, you may switch off the SD
++ * card you need to boot from...
++ */
++static inline void init_mmc_gpios(int cpu_type, unsigned board_variant)
++{
++	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
++	void __iomem *gpiobase = IOMEM(MX6_GPIO7_BASE_ADDR);
++	unsigned reg;
++
++	/*
++	 * all revisions have an SD card voltage IO selector, to select 1.8 V or
++	 * 3.3 V to be used for the IO signals from/to the SD card.
++	 * GPIO7/13 selects the voltage: high means 1.8 V, low means 3.3 V
++	 */
++	/* Select 3.3 V IO supply */
++	reg = readl(gpiobase + 0x04);
++	reg |= BIT(13);
++	writel(reg, gpiobase + 0x04); /* output */
++	reg = readl(gpiobase + 0x00);
++	reg &= ~BIT(13);
++	writel(reg, gpiobase + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x21C);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x5ec);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x250);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x620);
++		break;
++	}
++
++	if (board_variant < 13)
++		return; /* no way to switch the SD card's power supply */
++
++	/*
++	 * Turn off SD cards power in order to reset it.
++	 * Revision C has an additional MMC power supply switch. It seems
++	 * we need to reset the card by power cycling, else we get
++	 * read errors when we accessing it. This happens after warm starts
++	 * or by external triggered reset (and I guess when the watchdog resets
++	 * the system as well).
++	 * GPIO7/8 is used for this purpose and must be high to enable the power
++	 */
++	reg = readl(gpiobase + 0x04);
++	reg |= BIT(8);
++	writel(reg, gpiobase + 0x04); /* output */
++	reg = readl(gpiobase + 0x00);
++	reg &= ~BIT(8);
++	writel(reg, gpiobase + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x334);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x71C);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x2D0);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x6B8);
++		break;
++	}
++}
++
+ #define LED_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_240ohm | MX6_PAD_CTL_SRE_SLOW
+ 
+ static inline void setup_leds(int cpu_type)
+@@ -744,12 +882,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
+  * This routine does not return if starting the image from SD card or NOR
+  * was successfull. It restarts skov_dol63x_start() instead
+  */
+-static void skov_dol63x_init(int cpu_type)
++static void skov_dol63x_init(int cpu_type, unsigned board_variant)
+ {
+-	unsigned board_rev;
+-
+-	board_rev = skov_dol63x_get_version(cpu_type);
+-	switch (board_rev) {
++	switch (board_variant) {
+ 	case 1: /* P1 i.MX6S, low cost, old count */
+ 	case 4: /* P1 i.MX6S, low cost, new count */
+ 		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
+@@ -850,7 +985,7 @@ static void skov_dol63x_init(int cpu_type)
+ 					&skov_dol63x_cfg_2x128Mb_800MHz);
+ 		break;
+ 	default:
+-		pr_err("Unsupported board revision: 0x%x\n", board_rev);
++		pr_err("Unsupported board revision: 0x%x\n", board_variant);
+ 		/* FIXME don't continue */
+ 		break;
+ 	}
+@@ -869,18 +1004,22 @@ extern char __dtb_z_imx6dl_skov_dol63x_start[];
+ static noinline void skov_dol63x_start(void)
+ {
+ 	int cpu_type = __imx6_cpu_type();
++	unsigned board_variant = skov_dol63x_get_version(cpu_type);
+ 
+ 	if (get_pc() <= MX6_MMDC_PORT0_BASE_ADDR) {
+ 		/* first call: do the lowlevel things first */
++		init_backlight_gpios(cpu_type, board_variant);
+ 		setup_leds(cpu_type);
+ 		setup_uart(cpu_type);
+ 		pr_info("Starting to init DOL63x system...\n");
+-		skov_dol63x_init(cpu_type);
++		skov_dol63x_init(cpu_type, board_variant);
+ 		pr_err("Unable to start bootloader\n");
+ 		while(1)
+ 			;
+ 	}
+ 
++	init_mmc_gpios(cpu_type, board_variant);
++
+ 	/* boot this platform (second call) */
+ 	switch (cpu_type) {
+ 	case IMX6_CPUTYPE_IMX6S:
 diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
-index 166f668a19c4..cb780ef4e365 100644
+index 166f668a19c4..cd56e26eb9e1 100644
 --- a/arch/arm/boards/skov-dol63x/version.c
 +++ b/arch/arm/boards/skov-dol63x/version.c
-@@ -97,6 +97,40 @@ static const struct board_description dol63x_variants[] = {
+@@ -72,6 +72,7 @@ static const struct board_description dol63x_variants[] = {
+ 		.dts_compatible = "skov,dol63x-imxq-revB",
+ 	},
+ 	[12] = {
++		/* FIXME this one is a revision 'C' according to the schematics */
+ 		.value = "max performance",
+ 		.revision = "B",
+ 		.soc = "i.MX6Q",
+@@ -97,6 +98,48 @@ static const struct board_description dol63x_variants[] = {
  	},
  };
  
@@ -25,6 +231,7 @@ index 166f668a19c4..cb780ef4e365 100644
 + *
 + * Revision A has no backlight control, since revision B it is present (GPIO6/23)
 + * Revision A needs GPIO1/24 to be high
++ * Revision C can control the SD main power supply
 + */
 +static void tweak_board(unsigned var)
 +{
@@ -48,16 +255,23 @@ index 166f668a19c4..cb780ef4e365 100644
 +	}
 +
 +	/* SD card handling */
-+	gpio_request(200, "mmc power supply");
-+	gpio_direction_output(200, 1); /* switch on */
 +	gpio_request(205, "mmc io supply");
 +	gpio_direction_output(205, 0); /* select 3.3 V IO voltage */
++
++	switch (var) {
++	case 0 ... 12:
++		break;
++	default:
++		/* keep in sync with devicetree's 'regulator-boot-on' setting for this regulator */
++		gpio_request(200, "mmc power supply");
++		gpio_direction_output(200, 1); /* switch on */
++	}
 +}
 +
  static int skov_version_probe(struct device_d *dev)
  {
  	struct device_node *np = dev->device_node;
-@@ -139,6 +173,8 @@ static int skov_version_probe(struct device_d *dev)
+@@ -139,6 +182,8 @@ static int skov_version_probe(struct device_d *dev)
  	globalvar_add_simple("board.soc", dol63x_variants[var].soc == NULL ? "undefined" : dol63x_variants[var].soc);
  	globalvar_add_simple("board.dts", dol63x_variants[var].dts_compatible == NULL ? "undefined" : dol63x_variants[var].dts_compatible);
  
@@ -67,10 +281,10 @@ index 166f668a19c4..cb780ef4e365 100644
  	return 0;
  
 diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-index f5c493085854..30b89d6c8fe9 100644
+index f5c493085854..283034acfec5 100644
 --- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-@@ -123,6 +123,17 @@
+@@ -123,17 +123,34 @@
  
  &iomuxc {
  	pinctrl-names = "default";
@@ -79,15 +293,60 @@ index f5c493085854..30b89d6c8fe9 100644
 +	pinctrl_hog: hoggrp {
 +		/* we need a few pins as GPIOs */
 +		fsl,pins = <
++			/* MMC IO voltage select */
++			MX6QDL_PAD_GPIO_18__GPIO7_IO13 0x40000058
++			/* MMC Power Supply Switch (since revision C)
++			MX6QDL_PAD_SD3_RST__GPIO7_IO08 0x40000058
++			/* Backlight Power Supply Switch (since revision B)
++			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23 0x40000058
++			/* Backlight Brightness */
++			MX6QDL_PAD_GPIO_1__GPIO1_IO01 0x40000058
++			/* must be high */
 +			MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 0x13000
-+			MX6QDL_PAD_GPIO_18__GPIO7_IO13 0x17059
-+			MX6QDL_PAD_SD3_RST__GPIO7_IO08 0x1b0b0
-+			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23 0x1b0b0
 +		>;
 +	};
  
  	pinctrl_version: versiongrp {
  		fsl,pins = <
+-			MX6QDL_PAD_SD4_DAT0__GPIO2_IO08 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT2__GPIO2_IO10 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT3__GPIO2_IO11 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT4__GPIO2_IO12 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT5__GPIO2_IO13 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT6__GPIO2_IO14 0x1b0b0
+-			MX6QDL_PAD_SD4_DAT7__GPIO2_IO15 0x1b0b0
++			MX6QDL_PAD_SD4_DAT0__GPIO2_IO08 0x1b040
++			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09 0x1b040
++			MX6QDL_PAD_SD4_DAT2__GPIO2_IO10 0x1b040
++			MX6QDL_PAD_SD4_DAT3__GPIO2_IO11 0x1b040
++			MX6QDL_PAD_SD4_DAT4__GPIO2_IO12 0x1b040
++			MX6QDL_PAD_SD4_DAT5__GPIO2_IO13 0x1b040
++			MX6QDL_PAD_SD4_DAT6__GPIO2_IO14 0x1b040
++			MX6QDL_PAD_SD4_DAT7__GPIO2_IO15 0x1b040
+ 		>;
+ 	};
+ 
+@@ -149,7 +166,7 @@
+ 			MX6QDL_PAD_EIM_D17__ECSPI1_MISO 0x100b1
+ 			MX6QDL_PAD_EIM_D18__ECSPI1_MOSI 0x100b1
+ 			MX6QDL_PAD_EIM_D16__ECSPI1_SCLK 0x100b1
+-			MX6QDL_PAD_EIM_D24__GPIO3_IO24 0x100b1 /* CS# signal */
++			MX6QDL_PAD_EIM_D24__GPIO3_IO24 0x40000058 /* CS# signal */
+ 		>;
+ 	};
+ 
+@@ -176,8 +193,8 @@
+ 			MX6QDL_PAD_SD3_DAT1__SD3_DATA1 0x17059
+ 			MX6QDL_PAD_SD3_DAT2__SD3_DATA2 0x17059
+ 			MX6QDL_PAD_SD3_DAT3__SD3_DATA3 0x17059
+-			MX6QDL_PAD_SD3_DAT4__GPIO7_IO01 0x17059 /* WP */
+-			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00 0x1b0b0 /* CD */
++			MX6QDL_PAD_SD3_DAT4__GPIO7_IO01 0x1b040 /* WP */
++			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00 0x1b040 /* CD */
+ 		>;
+ 	};
+ 
 -- 
 2.1.4
 

@@ -17,7 +17,7 @@ SRC_URI += "\
   file://patches/0011-blspec-define-a-partition-name-in-order-to-use-Bareb.patch \
   file://patches/0012-Skov-Use-local-environment-variants-to-handle-the-re.patch \
   file://patches/0013-Skov-some-board-variants-needs-special-tweaks.patch \
-  file://patches/0014-Release-2015.11.0-customers-skov-dol63x-20151127-1.patch \
+  file://patches/0014-Release-2015.11.0-customers-skov-dol63x-20151207-1.patch \
   "
 
 COMPATIBLE_MACHINE = "dol-63x-*"
