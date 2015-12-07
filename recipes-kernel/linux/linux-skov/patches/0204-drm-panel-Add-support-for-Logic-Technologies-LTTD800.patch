@@ -11,18 +11,33 @@ simple panel driver.
 
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
- drivers/gpu/drm/panel/panel-simple.c | 34 ++++++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
+ .../panel/logictechnologies,lttd800480070-l2rt.txt |  7 +++++
+ drivers/gpu/drm/panel/panel-simple.c               | 34 ++++++++++++++++++++++
+ 2 files changed, 41 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
 
+diff --git a/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
+new file mode 100644
+index 000000000000..ed05dc15cb97
+--- /dev/null
++++ b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
+@@ -0,0 +1,7 @@
++Logic Technologies LTTD800480070-L2RT 7.0" WVGA TFT LCD panel
++
++Required properties:
++- compatible: should be "logictechnologies,lttd800480070-l2rt"
++
++This binding is compatible with the simple-panel binding, which is specified
++in simple-panel.txt in this directory.
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index ccd89ab59bf2..7bd32d06910f 100644
+index ccd89ab59bf2..c1bf9f33860b 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
 @@ -953,6 +953,37 @@ static const struct panel_desc lg_lp129qe = {
  	},
  };
  
-+static const struct drm_display_mode logic_technologies_lttd800480070_l2rt_mode  = {
++static const struct drm_display_mode logic_techno_lttd800480070_l2rt_mode  = {
 +	.clock = 33000,
 +	.hdisplay = 800,
 +	.hsync_start = 800 + 112,
@@ -36,8 +51,8 @@ index ccd89ab59bf2..7bd32d06910f 100644
 +	.vrefresh = 60,
 +};
 +
-+static const struct panel_desc logic_technologies_lttd800480070_l2rt = {
-+	.modes = &logic_technologies_lttd800480070_l2rt_mode,
++static const struct panel_desc logic_techno_lttd800480070_l2rt = {
++	.modes = &logic_techno_lttd800480070_l2rt_mode,
 +	.num_modes = 1,
 +	.bpc = 8,
 +	.size = {
@@ -61,7 +76,7 @@ index ccd89ab59bf2..7bd32d06910f 100644
  		.data = &lg_lp129qe,
  	}, {
 +		.compatible = "logictechnologies,lttd800480070-l2rt",
-+		.data = &logic_technologies_lttd800480070_l2rt,
++		.data = &logic_techno_lttd800480070_l2rt,
 +	}, {
  		.compatible = "nec,nl4827hc19-05b",
  		.data = &nec_nl4827hc19_05b,

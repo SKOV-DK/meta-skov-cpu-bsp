@@ -1,0 +1,66 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Wed, 2 Dec 2015 14:02:15 +0100
+Subject: [PATCH] DTS: handle input GPIOs correctly
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi  | 1 +
+ arch/arm/boot/dts/imx6qdl-cpuA.dtsi | 3 ++-
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi | 3 ++-
+ arch/arm/boot/dts/imx6qdl-cpuC.dtsi | 3 ++-
+ 4 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 078595b373a5..6ad8cd2dda7f 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -342,6 +342,7 @@
+ 	pinctrl_board: dol63x_grp {
+ 		pinctrl_hog: hoggrp {
+ 			fsl,pins = <
++				/* external pull up */
+ 				MX6QDL_PAD_EIM_D30__GPIO3_IO30		0xb0		/* ethernet phy interrupt */
+ 			>;
+ 		};
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+index b2833f44e420..aa8a2e7bfbd2 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+@@ -30,7 +30,8 @@
+ &pinctrl_board {
+ 	pinctrl_ads7846: ads7846grp {
+ 		fsl,pins = <
+-			MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0xb0		/* TSC2046 Pen down irq */
++			/* external pull up */
++			MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0x10040		/* TSC2046 Pen down irq */
+ 		>;
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index 45f560b71fbd..f85543e648d9 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -21,7 +21,8 @@
+ 
+ 	pinctrl_ads7846: ads7846grp {
+ 		fsl,pins = <
+-			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0		/* TSC2046 Pen down irq */
++			/* external pull up */
++			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0x10040		/* TSC2046 Pen down irq */
+ 		>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+index 36d6222211ef..672209400bcf 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+@@ -21,7 +21,8 @@
+ 
+ 	pinctrl_ads7846: ads7846grp {
+ 		fsl,pins = <
+-			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0	/* TSC2046 Pen down irq */
++			/* external pull up */
++			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0x10040		/* TSC2046 Pen down irq */
+ 		>;
+ 	};
+ 

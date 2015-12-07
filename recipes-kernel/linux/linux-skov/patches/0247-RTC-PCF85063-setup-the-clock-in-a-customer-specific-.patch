@@ -1,0 +1,59 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Fri, 4 Dec 2015 15:06:15 +0100
+Subject: [PATCH] RTC/PCF85063: setup the clock in a customer specific way
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ drivers/rtc/rtc-pcf85063.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
+index 651513686078..9f6b5b8c60ee 100644
+--- a/drivers/rtc/rtc-pcf85063.c
++++ b/drivers/rtc/rtc-pcf85063.c
+@@ -21,6 +21,8 @@
+ #define PCF85063_REG_CTRL1		0x00 /* status */
+ #define PCF85063_REG_CTRL1_STOP		BIT(5)
+ #define PCF85063_REG_CTRL2		0x01
++#define PCF85063_REG_CTRL2_COF_OFF	0x07
++#define PCF85063_REG_OFFSET		0x02
+ 
+ #define PCF85063_REG_SC			0x04 /* datetime */
+ #define PCF85063_REG_SC_OS		0x80
+@@ -219,6 +221,25 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+ 	.set_time	= pcf85063_rtc_set_time
+ };
+ 
++/* Board specific setup for DOL63x */
++static int pcf85063_init_for_skov(struct i2c_client *client)
++{
++	int rc;
++	u8 data[3] = {
++		PCF85063_REG_CTRL2, /* where to start to write */
++		PCF85063_REG_CTRL2_COF_OFF, /* disable clock out */
++		0x00, /* disable any offset corrections */
++	};
++
++	rc = i2c_master_send(client, data, sizeof(data));
++	if (rc != sizeof(data)) {
++		dev_err(&client->dev, "Failing to configure device\n");
++		return -EIO;
++	}
++
++	return 0;
++}
++
+ static int pcf85063_probe(struct i2c_client *client,
+ 				const struct i2c_device_id *id)
+ {
+@@ -238,6 +259,10 @@ static int pcf85063_probe(struct i2c_client *client,
+ 
+ 	i2c_set_clientdata(client, pcf85063);
+ 
++	if (pcf85063_init_for_skov(client) < 0)
++		dev_warn(&client->dev,
++			 "Board specific setup failed. Trying to continue\n");
++
+ 	pcf85063->rtc = devm_rtc_device_register(&client->dev,
+ 				pcf85063_driver.driver.name,
+ 				&pcf85063_rtc_ops, THIS_MODULE);

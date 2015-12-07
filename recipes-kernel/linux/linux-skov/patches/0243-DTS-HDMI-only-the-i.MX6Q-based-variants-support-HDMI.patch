@@ -1,0 +1,47 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Fri, 4 Dec 2015 14:47:06 +0100
+Subject: [PATCH] DTS/HDMI: only the i.MX6Q based variants support HDMI
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts | 4 ++++
+ arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts | 4 ++++
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi           | 1 -
+ 3 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+index 550694b8970b..99cc70ff4c64 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+@@ -25,3 +25,7 @@
+ &sata {
+ 	status = "disabled";
+ };
++
++&i2c2 {
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+index e4a933ff3e01..41a7e15ca4ad 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+@@ -25,3 +25,7 @@
+ &sata {
+ 	status = "disabled";
+ };
++
++&i2c2 {
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index db63b2edea6b..354231c6758d 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -324,7 +324,6 @@
+ };
+ 
+ &i2c2 {
+-	status = "okay";
+ 	clock-frequency = <100000>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_i2c2_2>;

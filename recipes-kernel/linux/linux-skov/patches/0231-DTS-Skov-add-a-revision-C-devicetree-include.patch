@@ -1,0 +1,184 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Mon, 30 Nov 2015 12:20:15 +0100
+Subject: [PATCH] DTS/Skov: add a revision C devicetree include
+
+Since variant C the SD card power supply is switchable. In previous
+variants this power supply is always on.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6dl-skov-dol63x-revC.dts |  2 +-
+ arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts  |  2 +-
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi            | 11 ----
+ arch/arm/boot/dts/imx6qdl-cpuA.dtsi           |  4 ++
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi           |  4 ++
+ arch/arm/boot/dts/imx6qdl-cpuC.dtsi           | 76 +++++++++++++++++++++++++++
+ 6 files changed, 86 insertions(+), 13 deletions(-)
+ create mode 100644 arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+
+diff --git a/arch/arm/boot/dts/imx6dl-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6dl-skov-dol63x-revC.dts
+index afa335b45844..99e091bf573f 100644
+--- a/arch/arm/boot/dts/imx6dl-skov-dol63x-revC.dts
++++ b/arch/arm/boot/dts/imx6dl-skov-dol63x-revC.dts
+@@ -15,7 +15,7 @@
+ #include <dt-bindings/interrupt-controller/irq.h>
+ #include "imx6dl.dtsi"
+ #include "imx6qdl-cpu.dtsi"
+-#include "imx6qdl-cpuB.dtsi"
++#include "imx6qdl-cpuC.dtsi"
+ 
+ / {
+ 	model = "Freescale i.MX6 SKOV Solo Board";
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+index 967ba4409bce..e4a933ff3e01 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+@@ -15,7 +15,7 @@
+ #include <dt-bindings/interrupt-controller/irq.h>
+ #include "imx6q.dtsi"
+ #include "imx6qdl-cpu.dtsi"
+-#include "imx6qdl-cpuB.dtsi"
++#include "imx6qdl-cpuC.dtsi"
+ 
+ / {
+ 	model = "Freescale i.MX6 SKOV Quad Board";
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 40c000dfc7bf..d42405bd4cb9 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -152,16 +152,11 @@
+ 
+ 		/* MMC power supply */
+ 		vcc_mmc: sdcard_power_supply {
+-			pinctrl-names = "default";
+-			pinctrl-0 = <&pinctrl_vcc_mmc>;
+ 			compatible = "regulator-fixed";
+ 			vin-supply = <&reg_3p3v>;
+ 			regulator-name = "mmc_vcc_supply";
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;
+-			gpio = <&gpio7 8 GPIO_ACTIVE_HIGH>;
+-			enable-active-high;
+-			startup-delay-us = <100>;
+ 		};
+ 
+ 		/* MMC IO voltage select */
+@@ -363,12 +358,6 @@
+ 			>;
+ 		};
+ 
+-		pinctrl_vcc_mmc: vcc_mmc_grp {
+-			fsl,pins = <
+-				MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x1b0b0		/* MMC Power Supply Switch */
+-			>;
+-		};
+-
+ 		pinctrl_ecspi1_1: ecspi1grp-1 {
+ 			fsl,pins = <
+ 				MX6QDL_PAD_EIM_D17__ECSPI1_MISO 	0x100b1
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+index ed673a625380..733e7da283d5 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+@@ -34,3 +34,7 @@
+ 		>;
+ 	};
+ };
++
++&vcc_mmc {
++	regulator-always-on;
++};
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index ae7f72d4b52e..d18baccb1582 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -60,3 +60,7 @@
+ 	xceiver-supply = <&reg_3p3v>;
+ 	status = "okay";
+ };
++
++&vcc_mmc {
++	regulator-always-on;
++};
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+new file mode 100644
+index 000000000000..441d57e4b2cb
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+@@ -0,0 +1,76 @@
++/*
++ * Copyright 2014 Rose Technology.
++ * Copyright 2012 Freescale Semiconductor, Inc.
++ * Copyright 2011 Linaro Ltd.
++ *
++ * The code contained herein is licensed under the GNU General Public
++ * License. You may obtain a copy of the GNU General Public License
++ * Version 2 or later at the following locations:
++ *
++ * http://www.opensource.org/licenses/gpl-license.html
++ * http://www.gnu.org/copyleft/gpl.html
++ */
++
++&pinctrl_board {
++	pinctrl_flexcan2_1: flexcan2grp-1 {
++		fsl,pins = <
++			MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 	0x80000000
++			MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
++		>;
++	};
++
++	pinctrl_ads7846: ads7846grp {
++		fsl,pins = <
++			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0	/* TSC2046 Pen down irq */
++		>;
++	};
++
++	pinctrl_backlight: backlight_grp {
++		fsl,pins = <
++			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23	0x1b0b0
++		>;
++	};
++
++	pinctrl_vcc_mmc: vcc_mmc_grp {
++		fsl,pins = <
++			MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x1b0b0		/* MMC Power Supply Switch */
++		>;
++	};
++};
++
++&backlight_lcd {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_backlight>;
++	enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
++};
++
++&gpio6 {
++	backlight {
++		gpios = <23 0>; /* initially switch off the panel backlight */
++		output-high;
++		gpio-initval;
++	};
++};
++
++&ads7846 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ads7846>;
++	pendown-gpio = <&gpio3 19 0>;
++	interrupt-parent = <&gpio3>;
++	interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&can2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan2_1>;
++	xceiver-supply = <&reg_3p3v>;
++	status = "okay";
++};
++
++&vcc_mmc {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_vcc_mmc>;
++	gpio = <&gpio7 8 GPIO_ACTIVE_HIGH>;
++	enable-active-high;
++	startup-delay-us = <100>;
++};

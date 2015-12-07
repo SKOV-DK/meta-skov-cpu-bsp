@@ -1,0 +1,51 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Wed, 2 Dec 2015 14:01:35 +0100
+Subject: [PATCH] DTS: handle GPIO lines for all pin controles
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index eedca0a36550..078595b373a5 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -437,14 +437,17 @@
+ 
+ 		pinctrl_usdhc3_2: usdhc3grp-2 {
+ 			fsl,pins = <
++				/* SoC internal pull up required */
+ 				MX6QDL_PAD_SD3_CMD__SD3_CMD		0x17059
+ 				MX6QDL_PAD_SD3_CLK__SD3_CLK		0x10059
+ 				MX6QDL_PAD_SD3_DAT0__SD3_DATA0		0x17059
+ 				MX6QDL_PAD_SD3_DAT1__SD3_DATA1		0x17059
+ 				MX6QDL_PAD_SD3_DAT2__SD3_DATA2		0x17059
+ 				MX6QDL_PAD_SD3_DAT3__SD3_DATA3		0x17059
+-				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x17059		/* WP */
+-				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x1b0b0		/* CD */
++				/* SoC internal pull up required */
++				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x4001b040	/* WP */
++				/* SoC internal pull up required */
++				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x4001b040	/* CD */
+ 			>;
+ 		};
+ 
+@@ -456,6 +459,8 @@
+ 				MX6QDL_PAD_SD3_DAT1__SD3_DATA1		0x170b9
+ 				MX6QDL_PAD_SD3_DAT2__SD3_DATA2		0x170b9
+ 				MX6QDL_PAD_SD3_DAT3__SD3_DATA3		0x170b9
++				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x4001b040
++				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x4001b040
+ 			>;
+ 		};
+ 
+@@ -467,6 +472,8 @@
+ 				MX6QDL_PAD_SD3_DAT1__SD3_DATA1		0x170f9
+ 				MX6QDL_PAD_SD3_DAT2__SD3_DATA2		0x170f9
+ 				MX6QDL_PAD_SD3_DAT3__SD3_DATA3		0x170f9
++				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x4001b040
++				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x4001b040
+ 			>;
+ 		};
+ 

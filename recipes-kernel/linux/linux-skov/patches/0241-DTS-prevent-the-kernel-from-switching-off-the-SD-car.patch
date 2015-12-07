@@ -1,0 +1,24 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Wed, 2 Dec 2015 14:03:24 +0100
+Subject: [PATCH] DTS: prevent the kernel from switching off the SD card
+
+It seems switching off the SD card prevents the i.MX6 ROM code from booting
+from SD at warm starts.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpuC.dtsi | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+index 672209400bcf..97284a974c1c 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
+@@ -74,4 +74,7 @@
+ 	gpio = <&gpio7 8 GPIO_ACTIVE_HIGH>;
+ 	enable-active-high;
+ 	startup-delay-us = <100>;
++	/* don't switch off the SD card automatically */
++	regulator-always-on;
++	regulator-boot-on;
+ };
