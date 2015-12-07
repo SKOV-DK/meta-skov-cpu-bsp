@@ -1,0 +1,30 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Wed, 25 Nov 2015 11:57:25 +0100
+Subject: [PATCH] DTS: add some info
+
+Might be useful to understand the hardware
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index f8f6e564afc7..0425a008ee7e 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -540,12 +540,14 @@
+ };
+ 
+ &pwm2 {
++	/* used for backlight brightness */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm2_2>;
+ 	status = "okay";
+ };
+ 
+ &pwm3 {
++	/* used for LCD contrast control */
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_pwm3_2>;
+ 	status = "okay";

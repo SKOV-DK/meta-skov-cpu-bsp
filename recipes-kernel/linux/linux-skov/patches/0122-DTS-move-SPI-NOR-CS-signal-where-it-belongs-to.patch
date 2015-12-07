@@ -1,0 +1,29 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 13:58:53 +0100
+Subject: [PATCH] DTS: move SPI NOR CS-signal where it belongs to
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 94e73535e0aa..bda0c7b1aeb1 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -321,7 +321,6 @@
+ 	pinctrl_board: dol63x_grp {
+ 		pinctrl_hog: hoggrp {
+ 			fsl,pins = <
+-				MX6QDL_PAD_EIM_D24__GPIO3_IO24		0x80000000	/* spi-nor CS */
+ 				MX6QDL_PAD_EIM_RW__GPIO2_IO26		0x80000000	/* mcp2003 CS */
+ 				MX6QDL_PAD_EIM_D20__GPIO3_IO20		0x80000000	/* TSC2046 CS */
+ 				MX6QDL_PAD_GPIO_5__GPIO1_IO05  		0xb0   		/* ethernet phy reset */
+@@ -355,6 +354,7 @@
+ 				MX6QDL_PAD_EIM_D17__ECSPI1_MISO 	0x100b1
+ 				MX6QDL_PAD_EIM_D18__ECSPI1_MOSI 	0x100b1
+ 				MX6QDL_PAD_EIM_D16__ECSPI1_SCLK 	0x100b1
++				MX6QDL_PAD_EIM_D24__GPIO3_IO24		0x100b1		/* spi-nor CS */
+ 			>;
+ 		};
+ 

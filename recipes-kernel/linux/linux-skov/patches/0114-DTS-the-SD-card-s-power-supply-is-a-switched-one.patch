@@ -1,0 +1,33 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 11:07:13 +0100
+Subject: [PATCH] DTS: the SD card's power supply is a switched one
+
+The power supply isn't a 'always-on' supply like comments suggest.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 5104d71a3906..e7af28d7d01a 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -131,7 +131,7 @@
+ 		};
+ 
+ 		/* MMC power supply */
+-		vcc_sdhi3: regulator@0 {
++		vcc_mmc: sdcard_power_supply {
+ 			compatible = "regulator-fixed";
+ 			vin-supply = <&reg_3p3v>;
+ 			regulator-name = "SDHI3 Vcc";
+@@ -514,7 +514,7 @@
+ 	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
+ 	wp-gpios = <&gpio7 1 0>;
+ 	cd-gpios = <&gpio7 0 0>;
+-	vmmc-supply = <&reg_3p3v>;
+ 	status = "okay";
++	vmmc-supply = <&vcc_mmc>;
+ 	fsl,delay-line;
+ };

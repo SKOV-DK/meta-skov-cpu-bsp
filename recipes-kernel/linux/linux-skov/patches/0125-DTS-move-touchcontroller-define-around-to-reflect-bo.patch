@@ -1,0 +1,81 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 15:19:49 +0100
+Subject: [PATCH] DTS: move touchcontroller define around to reflect board
+ revision changes
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpuA.dtsi | 18 ++++++++++++++----
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi | 16 ++++++++++++++--
+ 2 files changed, 28 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+index 2f8f62bac7b0..ed673a625380 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+@@ -11,6 +11,14 @@
+  * http://www.gnu.org/copyleft/gpl.html
+  */
+ 
++&ads7846 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ads7846>;
++	pendown-gpio = <&gpio4 14 0>;
++	interrupt-parent = <&gpio4>;
++	interrupts = <14 IRQ_TYPE_LEVEL_LOW>;
++};
++
+ /* MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 is a gpio which should be high */
+ &gpio1 {
+ 	status = "okay";
+@@ -19,8 +27,10 @@
+ 	pin = <24>;
+ };
+ 
+-&pinctrl_hog {
+-	fsl,pins = <
+-		MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0xb0		/* TSC2046 Pen down irq */
+-	>;
++&pinctrl_board {
++	pinctrl_ads7846: ads7846grp {
++		fsl,pins = <
++			MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0xb0	/* TSC2046 Pen down irq */
++		>;
++	};
+ };
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index 89d82d560357..ecbcfe835aa0 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -11,10 +11,8 @@
+  * http://www.gnu.org/copyleft/gpl.html
+  */
+ 
+-
+ &pinctrl_hog {
+ 	fsl,pins = <
+-		MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0		/* TSC2046 Pen down irq */
+ 		MX6QDL_PAD_RGMII_TD3__GPIO6_IO23        0x80000000      /* BKLGT_SHDN */
+ 	>;
+ };
+@@ -26,6 +24,20 @@
+ 			MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
+ 		>;
+ 	};
++
++	pinctrl_ads7846: ads7846grp {
++		fsl,pins = <
++			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0	/* TSC2046 Pen down irq */
++		>;
++	};
++};
++
++&ads7846 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ads7846>;
++	pendown-gpio = <&gpio3 19 0>;
++	interrupt-parent = <&gpio3>;
++	interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
+ };
+ 
+ &can2 {

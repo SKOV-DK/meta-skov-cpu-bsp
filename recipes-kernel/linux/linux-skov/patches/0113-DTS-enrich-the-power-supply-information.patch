@@ -1,0 +1,93 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 11:03:57 +0100
+Subject: [PATCH] DTS: enrich the power supply information
+
+In order to make the SD card fully working add more information how the
+power supply network on the DOL63x is connected.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 29 +++++++++++++++++++++++------
+ 1 file changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index eef3a321adb1..5104d71a3906 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -59,6 +59,7 @@
+ 	regulators {
+ 		compatible = "simple-bus";
+ 
++		/* power in from 24 V */
+ 		reg_5p0v: 5p0v {
+ 			compatible = "regulator-fixed";
+ 			regulator-name = "5P0V";
+@@ -67,16 +68,27 @@
+ 			regulator-always-on;
+ 		};
+ 
+-		reg_1p8v: 1p8v {
++		reg_1p2v: 1p2v {
+ 			compatible = "regulator-fixed";
+-			regulator-name = "1P8V";
+-			regulator-min-microvolt = <1800000>;
+-			regulator-max-microvolt = <1800000>;
++			vin-supply = <&reg_5p0v>;
++			regulator-name = "1P2V";
++			regulator-min-microvolt = <1200000>;
++			regulator-max-microvolt = <1200000>;
++			regulator-always-on;
++		};
++
++		reg_1p5v: 1p5v {
++			compatible = "regulator-fixed";
++			vin-supply = <&reg_5p0v>;
++			regulator-name = "1P5V";
++			regulator-min-microvolt = <1500000>;
++			regulator-max-microvolt = <1500000>;
+ 			regulator-always-on;
+ 		};
+ 
+ 		reg_2p5v: 2p5v {
+ 			compatible = "regulator-fixed";
++			vin-supply = <&reg_5p0v>;
+ 			regulator-name = "2P5V";
+ 			regulator-min-microvolt = <2500000>;
+ 			regulator-max-microvolt = <2500000>;
+@@ -85,6 +97,7 @@
+ 
+ 		reg_3p3v: 3p3v {
+ 			compatible = "regulator-fixed";
++			vin-supply = <&reg_5p0v>;
+ 			regulator-name = "3P3V";
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;
+@@ -101,22 +114,26 @@
+ 
+ 		reg_usb_otg_vbus: usb_otg_vbus {
+ 			compatible = "regulator-fixed";
++			vin-supply = <&reg_5p0v>;
+ 			regulator-name = "usb_otg_vbus";
+ 			regulator-min-microvolt = <5000000>;
+ 			regulator-max-microvolt = <5000000>;
+-			enable-active-high;
++			regulator-always-on;
+ 		};
+ 
+ 		reg_usb_h1_vbus: usb_h1_vbus {
+ 			compatible = "regulator-fixed";
++			vin-supply = <&reg_5p0v>;
+ 			regulator-name = "usb_h1_vbus";
+ 			regulator-min-microvolt = <5000000>;
+ 			regulator-max-microvolt = <5000000>;
+-			enable-active-high;
++			regulator-always-on;
+ 		};
+ 
++		/* MMC power supply */
+ 		vcc_sdhi3: regulator@0 {
+ 			compatible = "regulator-fixed";
++			vin-supply = <&reg_3p3v>;
+ 			regulator-name = "SDHI3 Vcc";
+ 			regulator-min-microvolt = <3300000>;
+ 			regulator-max-microvolt = <3300000>;

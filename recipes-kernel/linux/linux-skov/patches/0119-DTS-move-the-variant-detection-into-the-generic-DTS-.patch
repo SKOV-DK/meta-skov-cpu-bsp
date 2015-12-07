@@ -1,0 +1,84 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 13:01:38 +0100
+Subject: [PATCH] DTS: move the variant detection into the generic DTS part
+
+It it shared by all variants.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi  | 12 ++++++++++++
+ arch/arm/boot/dts/imx6qdl-cpuA.dtsi | 13 -------------
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi | 13 -------------
+ 3 files changed, 12 insertions(+), 26 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 4da834337bf5..94a2bfa4f37c 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -56,6 +56,18 @@
+                 };
+ 	};
+ 
++	skov_version {
++		compatible = "skov-version";
++		v0-gpio = <&gpio2 10 0>;
++		v1-gpio = <&gpio2 15 0>;
++		v2-gpio = <&gpio2 8 0>;
++		v3-gpio = <&gpio2 9 0>;
++		v4-gpio = <&gpio2 12 0>;
++		v5-gpio = <&gpio2 14 0>;
++		v6-gpio = <&gpio2 11 0>;
++		v7-gpio = <&gpio2 13 0>;
++	};
++
+ 	regulators {
+ 		compatible = "simple-bus";
+ 
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+index e0041022c9d4..7931009bd4ef 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+@@ -10,19 +10,6 @@
+  * http://www.opensource.org/licenses/gpl-license.html
+  * http://www.gnu.org/copyleft/gpl.html
+  */
+-/ {
+-	skov_version {
+-		compatible = "skov-version";
+-		v0-gpio = <&gpio2 10 0>;
+-		v1-gpio = <&gpio2 15 0>;
+-		v2-gpio = <&gpio2 8 0>;
+-		v3-gpio = <&gpio2 9 0>;
+-		v4-gpio = <&gpio2 12 0>;
+-		v5-gpio = <&gpio2 14 0>;
+-		v6-gpio = <&gpio2 11 0>;
+-		v7-gpio = <&gpio2 13 0>;
+-	};
+-};
+ 
+ &ecspi4 {
+ 	fsl,spi-num-chipselects = <1>;
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index e90d07ccf6c1..82331a0d1c49 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -10,19 +10,6 @@
+  * http://www.opensource.org/licenses/gpl-license.html
+  * http://www.gnu.org/copyleft/gpl.html
+  */
+-/ {
+-	skov_version {
+-		compatible = "skov-version";
+-		v0-gpio = <&gpio2 10 0>;
+-		v1-gpio = <&gpio2 15 0>;
+-		v2-gpio = <&gpio2 8 0>;
+-		v3-gpio = <&gpio2 9 0>;
+-		v4-gpio = <&gpio2 12 0>;
+-		v5-gpio = <&gpio2 14 0>;
+-		v6-gpio = <&gpio2 11 0>;
+-		v7-gpio = <&gpio2 13 0>;
+-	};
+-};
+ 
+ &ecspi4 {
+ 	fsl,spi-num-chipselects = <1>;

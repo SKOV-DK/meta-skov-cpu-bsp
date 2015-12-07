@@ -1,0 +1,29 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 13:59:23 +0100
+Subject: [PATCH] DTS: move MCP2003 CS-signal where it belongs to
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index bda0c7b1aeb1..83ac96404b33 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -321,7 +321,6 @@
+ 	pinctrl_board: dol63x_grp {
+ 		pinctrl_hog: hoggrp {
+ 			fsl,pins = <
+-				MX6QDL_PAD_EIM_RW__GPIO2_IO26		0x80000000	/* mcp2003 CS */
+ 				MX6QDL_PAD_EIM_D20__GPIO3_IO20		0x80000000	/* TSC2046 CS */
+ 				MX6QDL_PAD_GPIO_5__GPIO1_IO05  		0xb0   		/* ethernet phy reset */
+ 				MX6QDL_PAD_EIM_D30__GPIO3_IO30 		0xb0   		/* ethernet phy interrupt */
+@@ -363,6 +362,7 @@
+ 				MX6QDL_PAD_EIM_OE__ECSPI2_MISO 		0x100b1
+ 				MX6QDL_PAD_EIM_CS1__ECSPI2_MOSI 	0x100b1
+ 				MX6QDL_PAD_EIM_CS0__ECSPI2_SCLK 	0x100b1
++				MX6QDL_PAD_EIM_RW__GPIO2_IO26		0x100b1		/* mcp2003 CS */
+ 			>;
+ 		};
+ 

@@ -1,0 +1,31 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Wed, 25 Nov 2015 11:58:00 +0100
+Subject: [PATCH] DTS: add more power supply entries
+
+Make the drivers happy and the hardware description more complete
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 0425a008ee7e..40c000dfc7bf 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -219,6 +219,7 @@
+ 	panel {
+ 		compatible = "logictechnologies,lttd800480070-l2rt";
+ 		backlight = <&backlight_lcd>;
++		power-supply = <&reg_3p3v>;
+ 
+ 		port {
+ 			panel_in: endpoint {
+@@ -299,6 +300,7 @@
+ 	phy-mode = "rmii";
+ 	phy-reset-gpios = <&gpio1 5 0>;
+ 	phy-reset-duration = "100";
++	phy-supply = <&reg_3p3v>;
+ 	#address-cells = <0>;
+ 	#size-cells = <1>;
+ 	fixed-link {

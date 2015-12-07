@@ -1,0 +1,137 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Fri, 13 Nov 2015 10:02:52 +0100
+Subject: [PATCH] ARM: dts: dol63x: Switch to modern way of wiring a panel
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi  | 62 +++++++++++++++----------------------
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi | 10 ------
+ 2 files changed, 25 insertions(+), 47 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index e33b23a5f963..6fd27a32634b 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -10,6 +10,9 @@
+  * http://www.opensource.org/licenses/gpl-license.html
+  * http://www.gnu.org/copyleft/gpl.html
+  */
++
++#include <dt-bindings/gpio/gpio.h>
++
+ / {
+ 	chosen {
+ 		stdout-path = &uart2;
+@@ -122,66 +125,51 @@
+ 	};
+ 
+ 	display@di0 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
+ 		status = "okay";
+ 		compatible = "fsl,imx-parallel-display";
+-		interface-pix-fmt = "rgb24";
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_ipu1_4>;
+ 
+-		port {
++		port@0 {
++			reg = <0>;
++
+ 			display0_in: endpoint {
+ 				remote-endpoint = <&ipu1_di0_disp0>;
+ 			};
+ 		};
+ 
+-		display-timings {
+-			bits-per-pixel = <24>;
+-			native-mode = <&timing0>;
+-			timing0: timing0 {
+-				panel-name = "LTTD800480070-L2RT";
+-				hactive = <800>;
+-				vactive = <480>;
+-				hback-porch = <85>;
+-				hfront-porch = <112>;
+-				vback-porch = <29>;
+-				vfront-porch = <38>;
+-				hsync-len = <3>;
+-				vsync-len = <3>;
+-				hsync-active = <0>;
+-				vsync-active = <0>;
+-				clock-frequency = <33000000>;
+-				de-active = <1>;
+-				pixelclk-active = <0>;
+-			};
++		port@1 {
++			reg = <1>;
+ 
+-			timing1: timing1 {
+-				panel-name = "LTTD800480070-L6WH-RT";
+-				hactive = <800>;
+-				vactive = <480>;
+-				hback-porch = <43>;
+-				hfront-porch = <154>;
+-				vback-porch = <20>;
+-				vfront-porch = <47>;
+-				hsync-len = <3>;
+-				vsync-len = <3>;
+-				hsync-active = <0>;
+-				vsync-active = <0>;
+-				clock-frequency = <33000000>;
+-				de-active = <1>;
+-				pixelclk-active = <0>;
++			display0_out: endpoint {
++				remote-endpoint = <&panel_in>;
+ 			};
+ 		};
+ 	};
+ 
+-	backlight_lcd {
++	backlight_lcd: backlight_lcd {
+ 		compatible = "pwm-backlight";
+ 		pwms = <&pwm2 0 20000>;
+ 		brightness-levels = <0 16 32 48 64 80 96 112 128 144 160 176 192 208 224 240 255>;
+ 		default-brightness-level = <8>;
+ 		power-supply = <&reg_3p3v>;
++		enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
+ 		status = "okay";
+ 	};
+ 
++	panel {
++		compatible = "logictechnologies,lttd800480070-l2rt";
++		backlight = <&backlight_lcd>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&display0_out>;
++			};
++		};
++	};
+ };
+ 
+ &ipu1_di0_disp0 {
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index df6126233274..4e11c0c94cd3 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -11,16 +11,6 @@
+  * http://www.gnu.org/copyleft/gpl.html
+  */
+ / {
+-	leds {
+-		compatible = "gpio-leds";
+-
+-		bklgt: BKLGT_SHDN {
+-			label = "BKLGT_SHDN";
+-			gpios = <&gpio6 23 0>;
+-			default-state = "on";
+-		};
+-	};
+-
+ 	skov_version {
+ 		compatible = "skov-version";
+ 		v0-gpio = <&gpio2 10 0>;

@@ -1,0 +1,26 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 17 Nov 2015 11:36:43 +0100
+Subject: [PATCH] of: Add vendor prefix for Logic Technologies Ltd.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add Logic Technologies Ltd. to the list of device tree vendor prefixes.
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ Documentation/devicetree/bindings/vendor-prefixes.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
+index 82d2ac97af74..97e8b6d01fde 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.txt
++++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
+@@ -126,6 +126,7 @@ lg	LG Corporation
+ linux	Linux-specific binding
+ lsi	LSI Corp. (LSI Logic)
+ lltc	Linear Technology Corporation
++logictechnologies	Logic Technologies Ltd.
+ marvell	Marvell Technology Group Ltd.
+ maxim	Maxim Integrated Products
+ mediatek	MediaTek Inc.

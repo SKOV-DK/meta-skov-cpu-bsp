@@ -1,0 +1,37 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 13:51:40 +0100
+Subject: [PATCH] DTS: the backlight is supplied by the input voltage
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 94a2bfa4f37c..0184dfef36f3 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -72,6 +72,14 @@
+ 		compatible = "simple-bus";
+ 
+ 		/* power in from 24 V */
++		reg_24p0v: 24p0v {
++			compatible = "regulator-fixed";
++			regulator-name = "24P0V";
++			regulator-min-microvolt = <24000000>;
++			regulator-max-microvolt = <24000000>;
++			regulator-always-on;
++		};
++
+ 		reg_5p0v: 5p0v {
+ 			compatible = "regulator-fixed";
+ 			regulator-name = "5P0V";
+@@ -204,7 +212,7 @@
+ 		pwms = <&pwm2 0 20000>;
+ 		brightness-levels = <0 16 32 48 64 80 96 112 128 144 160 176 192 208 224 240 255>;
+ 		default-brightness-level = <8>;
+-		power-supply = <&reg_3p3v>;
++		power-supply = <&reg_24p0v>;
+ 		enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
+ 		status = "okay";
+ 	};

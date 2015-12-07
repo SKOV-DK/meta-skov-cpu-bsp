@@ -1,0 +1,101 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 14:22:55 +0100
+Subject: [PATCH] DTS: use a more descriptive name
+
+Show with a useful name this indention is really required, and not an
+accident.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi  |  4 ++--
+ arch/arm/boot/dts/imx6qdl-cpuA.dtsi | 15 ++++-----------
+ arch/arm/boot/dts/imx6qdl-cpuB.dtsi | 29 ++++++++++++-----------------
+ 3 files changed, 18 insertions(+), 30 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 8efc01b32d0d..eef3a321adb1 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -261,7 +261,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hog>;
+ 
+-	hog {
++	pinctrl_board: dol63x_grp {
+ 		pinctrl_hog: hoggrp {
+ 			fsl,pins = <
+ 				MX6QDL_PAD_EIM_D24__GPIO3_IO24		0x80000000	/* spi-nor CS */
+@@ -304,7 +304,7 @@
+ 		};
+ 
+ 		pinctrl_ecspi4_1: ecspi4grp-1 {
+-                       fsl,pins = <
++			fsl,pins = <
+ 				MX6QDL_PAD_EIM_D28__ECSPI4_MOSI 	0x100b1
+ 				MX6QDL_PAD_EIM_D22__ECSPI4_MISO 	0x100b1
+ 				MX6QDL_PAD_EIM_D21__ECSPI4_SCLK 	0x100b1
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+index c252ac197cc3..e0041022c9d4 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
+@@ -64,15 +64,8 @@
+ 	pin = <24>;
+ };
+ 
+-&iomuxc {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_hog>;
+-
+-	hog {
+-		pinctrl_hog: hoggrp {
+-			fsl,pins = <
+-				MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0xb0		/* TSC2046 Pen down irq */
+-			>;
+-		};
+-	};
++&pinctrl_hog {
++	fsl,pins = <
++		MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0xb0		/* TSC2046 Pen down irq */
++	>;
+ };
+diff --git a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+index 4e11c0c94cd3..e90d07ccf6c1 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpuB.dtsi
+@@ -56,24 +56,19 @@
+ 	};
+ };
+ 
+-&iomuxc {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_hog>;
+-
+-	hog {
+-		pinctrl_hog: hoggrp {
+-			fsl,pins = <
+-				MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0		/* TSC2046 Pen down irq */
+-				MX6QDL_PAD_RGMII_TD3__GPIO6_IO23        0x80000000      /* BKLGT_SHDN */
+-			>;
+-		};
++&pinctrl_hog {
++	fsl,pins = <
++		MX6QDL_PAD_EIM_D19__GPIO3_IO19		0xb0		/* TSC2046 Pen down irq */
++		MX6QDL_PAD_RGMII_TD3__GPIO6_IO23        0x80000000      /* BKLGT_SHDN */
++	>;
++};
+ 
+-		pinctrl_flexcan2_1: flexcan2grp-1 {
+-			fsl,pins = <
+-				MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 	0x80000000
+-				MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
+-			>;
+-		};
++&pinctrl_board {
++	pinctrl_flexcan2_1: flexcan2grp-1 {
++		fsl,pins = <
++			MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 	0x80000000
++			MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
++		>;
+ 	};
+ };
+ 

@@ -1,0 +1,67 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 11:11:17 +0100
+Subject: [PATCH] DTS: fully describe the SD card's IO supply
+
+Beside the main power supply, the IO supply for the SD card can be selected
+from 1.8 V or 3.3 V as well.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index d5a69bbffc20..be94697a25e6 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -143,6 +143,22 @@
+ 			enable-active-high;
+ 			startup-delay-us = <100>;
+ 		};
++
++		/* MMC IO voltage select */
++		iovcc_mmc: sdcard_io_supply {
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_io_vcc_mmc>;
++			compatible = "regulator-gpio";
++			vin-supply = <&reg_5p0v>;
++			regulator-name = "mmc_io_supply";
++			regulator-type = "voltage";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3300000>;
++			gpios = <&gpio7 13 GPIO_ACTIVE_HIGH>;
++			states = <1800000 0x1
++				  3300000 0x0>;
++			startup-delay-us = <100>;
++		};
+ 	};
+ 
+ 	display@di0 {
+@@ -293,7 +309,6 @@
+ 				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x80000000	/* USDHC3 CD */
+ 				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* USDHC3 WP */
+ 				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x13000 	/* CAN RS */
+-				MX6QDL_PAD_GPIO_18__SD3_VSELECT 	0x17059		/* SD3 VSelect */
+ 				MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24       0x13000		/* Enet */
+ 				MX6QDL_PAD_SD4_DAT0__GPIO2_IO08		0x1b0b0		/* VC0 */
+ 				MX6QDL_PAD_SD4_DAT1__GPIO2_IO09         0x1b0b0		/* VC1 */
+@@ -306,6 +321,12 @@
+ 			>;
+ 		};
+ 
++		pinctrl_io_vcc_mmc: vcc_io_mmc_grp {
++			fsl,pins = <
++				MX6QDL_PAD_GPIO_18__GPIO7_IO13		0x17059		/* MMC IO Supply Select */
++			>;
++		};
++
+ 		pinctrl_vcc_mmc: vcc_mmc_grp {
+ 			fsl,pins = <
+ 				MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x1b0b0		/* MMC Power Supply Switch */
+@@ -526,5 +547,6 @@
+ 	cap-power-off-card;
+ 	full-pwr-cycle;
+ 	vmmc-supply = <&vcc_mmc>;
++	vqmmc-supply = <&iovcc_mmc>;
+ 	fsl,delay-line;
+ };

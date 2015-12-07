@@ -1,0 +1,23 @@
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Date: Mon, 21 Sep 2015 17:19:54 +0200
+Subject: [PATCH] drm/imx: provide send_vblank with correct pipe
+
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+---
+ drivers/gpu/drm/imx/ipuv3-crtc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/imx/ipuv3-crtc.c b/drivers/gpu/drm/imx/ipuv3-crtc.c
+index 2eb3c3dbba49..2a3c406f5cf6 100644
+--- a/drivers/gpu/drm/imx/ipuv3-crtc.c
++++ b/drivers/gpu/drm/imx/ipuv3-crtc.c
+@@ -212,7 +212,8 @@ static void ipu_crtc_handle_pageflip(struct ipu_crtc *ipu_crtc)
+ 
+ 	spin_lock_irqsave(&drm->event_lock, flags);
+ 	if (ipu_crtc->page_flip_event)
+-		drm_send_vblank_event(drm, -1, ipu_crtc->page_flip_event);
++		drm_send_vblank_event(drm, imx_drm_crtc_id(ipu_crtc->imx_crtc),
++				      ipu_crtc->page_flip_event);
+ 	ipu_crtc->page_flip_event = NULL;
+ 	imx_drm_crtc_vblank_put(ipu_crtc->imx_crtc);
+ 	spin_unlock_irqrestore(&drm->event_lock, flags);

@@ -1,0 +1,59 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Thu, 26 Nov 2015 17:07:07 +0100
+Subject: [PATCH] DTS: disable HDMI
+
+Not all DOL63x variants have an HDMI connector. Disable it on the i.MX6Q
+variants like it is disabled on the i.MX6DL variants (for now).
+
+Without his change the graphics works on i.MX6DL based boards, but not
+on i.MX6Q based boards.
+
+HDMI support will be added later on again, but needs more effort to enable
+legacy framebuffer support within 'kmsfb-manager'.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6q-skov-dol63x-revA.dts | 5 -----
+ arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts | 5 -----
+ arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts | 5 -----
+ 3 files changed, 15 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revA.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revA.dts
+index 7c11304bf1d8..e610efa660cb 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revA.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revA.dts
+@@ -25,8 +25,3 @@
+ &sata {
+ 	status = "disabled";
+ };
+-
+-&hdmi {
+-	status = "okay";
+-	ddc-i2c-bus = <&i2c2>;
+-};
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+index f9be4f7d83aa..550694b8970b 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+@@ -25,8 +25,3 @@
+ &sata {
+ 	status = "disabled";
+ };
+-
+-&hdmi {
+-	status = "okay";
+-	ddc-i2c-bus = <&i2c2>;
+-};
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+index 629147555512..967ba4409bce 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+@@ -25,8 +25,3 @@
+ &sata {
+ 	status = "disabled";
+ };
+-
+-&hdmi {
+-	status = "okay";
+-	ddc-i2c-bus = <&i2c2>;
+-};

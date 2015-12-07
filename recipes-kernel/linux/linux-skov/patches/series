@@ -1,0 +1,50 @@
+# umpf-base: v4.3
+# umpf-name: 4.3/customers/skov/dol63x
+# umpf-version: 4.3/customers/skov/dol63x/20151127-1
+# umpf-topic: v4.3/topic/pwm-backlight-readback
+# umpf-hashinfo: 822b42901b98e39c72c64c8cbb05f32ba5262b4f
+# umpf-topic-range: 6a13feb9c82803e2b815eca72fa7a9f5561d7861..822b42901b98e39c72c64c8cbb05f32ba5262b4f
+0001-pwm-backlight-Avoid-backlight-flicker-when-probed-fr.patch
+0002-backlight-pwm-add-debug-information-for-initial-stat.patch
+# umpf-topic: v4.3/customers/skov/dol63x
+# umpf-hashinfo: 35a84ef1d52a555720ec7d2ac612caa4f0d0e8e7
+# umpf-topic-range: 822b42901b98e39c72c64c8cbb05f32ba5262b4f..b0e6cd16d2a7af15e1a1b1e8814338cf99bcacab
+0101-drm-panel-add-kernel-doc-for-size-attributes-in-pane.patch
+0102-drm-imx-parallel-display-allow-to-determine-bus-form.patch
+0103-of-Add-vendor-prefix-for-Logic-Technologies-Ltd.patch
+0104-drm-panel-Add-support-for-Logic-Technologies-LTTD800.patch
+0105-ARM-dts-Import-Skov-AS-DOL63x-device-trees.patch
+0106-ARM-dts-dol63x-Switch-to-modern-way-of-wiring-a-pane.patch
+0107-ARM-dts-dol63x-Let-the-backlight-initially-be-off-af.patch
+0108-HACK-ipuv3-set-clock-polarity-to-1.patch
+0109-DTS-use-a-more-descriptive-name.patch
+0110-Skov-DO63x-use-a-more-descriptive-file-name.patch
+0111-Skov-DO63x-add-device-trees-for-the-C-revisions-of-t.patch
+0112-Skov-DO63x-provide-the-most-specific-compatible-stri.patch
+0113-DTS-enrich-the-power-supply-information.patch
+0114-DTS-the-SD-card-s-power-supply-is-a-switched-one.patch
+0115-DTS-fully-describe-the-SD-card-s-power-supply.patch
+0116-DTS-fully-describe-the-SD-card-s-IO-supply.patch
+0117-DTS-collect-pin-multiplexing-to-the-unit-where-they-.patch
+0118-DTS-fill-the-remaining-SD-socket-capabilities.patch
+0119-DTS-move-the-variant-detection-into-the-generic-DTS-.patch
+0120-DTS-the-backlight-is-supplied-by-the-input-voltage.patch
+0121-DTS-move-CAN-pinmux-where-it-belongs-to.patch
+0122-DTS-move-SPI-NOR-CS-signal-where-it-belongs-to.patch
+0123-DTS-move-MCP2003-CS-signal-where-it-belongs-to.patch
+0124-DTS-touchcontroller-move-its-shared-part-to-the-comm.patch
+0125-DTS-move-touchcontroller-define-around-to-reflect-bo.patch
+0126-DTS-since-revision-B-the-backlight-has-an-additional.patch
+0127-DTS-add-some-info.patch
+0128-DTS-add-more-power-supply-entries.patch
+0129-drm-imx-provide-send_vblank-with-correct-pipe.patch
+0130-DTS-disable-HDMI.patch
+# umpf-topic: v4.3/topic/bgi
+# umpf-hashinfo: 5221d28cc07a8dc98240e7da466b6c920ee0021e
+# umpf-topic-range: b0e6cd16d2a7af15e1a1b1e8814338cf99bcacab..7d6c43512dc085e8c22fcf1ad1ac25defa3230f6
+0201-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch
+0202-fuse-cuse-implement-mmap.patch
+# umpf-release: 4.3/customers/skov/dol63x/20151127-1
+# umpf-topic-range: 7d6c43512dc085e8c22fcf1ad1ac25defa3230f6..c47c2a7794e0ff46fc74adf0315326ee8ebc5666
+0301-Release-4.3-customers-skov-dol63x-20151127-1.patch
+# umpf-end
