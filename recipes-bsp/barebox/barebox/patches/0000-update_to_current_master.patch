@@ -1,0 +1,5588 @@
+Subject: Interim update to master until the December release is happen.
+
+diff --git a/Documentation/filesystems/smhfs.rst b/Documentation/filesystems/smhfs.rst
+new file mode 100644
+index 000000000000..28de14677da4
+--- /dev/null
++++ b/Documentation/filesystems/smhfs.rst
+@@ -0,0 +1,57 @@
++.. index:: smhfs (filesystem)
++
++.. _filesystems_smhfs:
++
++File I/O over ARM semihosting support
++=====================================
++
++Target Side Setup
++-----------------
++
++barebox can communicate with debug programms attached via SWD/JTAG by
++means of ARM semihosting protocol.
++
++Not all of the I/O primitives neccessary to implement a full
++filesystem are exposed in ARM semihosting API and because of that some
++aspects of filesystem funcionality are missing. Implementation does
++not have support for listing directories. This means a
++:ref:`command_ls` to a SMHFS-mounted path will show an empty
++directory. Nevertheless, the files are there.
++
++Example::
++
++  mount -t smhfs /dev/null /mnt/smhfs
++
++
++Host Side Setup
++---------------
++
++FIXME: Currently OpenOCD does not work correctly if Barebox is built
++with MMU enabled, so before using this featrue, please make sure that
++MMU is disabled in your particular configuration
++
++To make semihosting work host machine connected to the target via
++JTAG/SWD must have semihosting capable debug software running. One
++such tool would be OpenOCD. For ARM9 and ARM11 CPUs most recent
++release of OpenOCD should suffice, however for ARMv7A based devices
++patched version from here http://openocd.zylin.com/#/c/2908/ has to be
++used.
++
++The following steps are required to set up a operational semihosting
++channel:
++
++      1. In a terminal start OpenOCD and specify your particular board
++         and debug adapter used.
++
++      2. In a separate terminal connect to OpenOCD via telnet
++
++	   telnet localhost 4444
++
++      3. In resulting telnet session execute the following commands:
++
++           halt
++	   arm semihosting on
++	   resume
++
++After that is done all of the semihosting related functions should be
++ready to use.
+diff --git a/Makefile b/Makefile
+index 5770f2d3a33e..1029dc157d10 100644
+--- a/Makefile
++++ b/Makefile
+@@ -484,6 +484,9 @@ export KBUILD_BINARY ?= barebox.bin
+ barebox-flash-image: $(KBUILD_IMAGE) FORCE
+ 	$(call if_changed,ln)
+ 
++barebox-flash-images: $(KBUILD_IMAGE)
++	@echo $^ > $@
++
+ images: barebox.bin FORCE
+ 	$(Q)$(MAKE) $(build)=images $@
+ images/%.s: barebox.bin FORCE
+@@ -492,7 +495,7 @@ images/%.s: barebox.bin FORCE
+ ifdef CONFIG_PBL_MULTI_IMAGES
+ all: barebox.bin images
+ else
+-all: barebox-flash-image
++all: barebox-flash-image barebox-flash-images
+ endif
+ 
+ common-$(CONFIG_PBL_IMAGE)	+= pbl/
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 203f912e96e5..95103c1c9ab4 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -17,6 +17,11 @@ config ARM_LINUX
+ config HAVE_MACH_ARM_HEAD
+ 	bool
+ 
++config ARM_USE_COMPRESSED_DTB
++	bool
++	select UNCOMPRESS
++	select LZO_DECOMPRESS
++
+ menu "System Type"
+ 
+ config BUILTIN_DTB
+@@ -325,6 +330,15 @@ config ARM_UNWIND
+ 	  the performance is not affected. Currently, this feature
+ 	  only works with EABI compilers. If unsure say Y.
+ 
++config ARM_SEMIHOSTING
++	bool "enable ARM semihosting support"
++	help
++	  This option enables ARM semihosting support in barebox. ARM
++	  semihosting is a communication discipline that allows code
++	  running on target ARM cpu perform system calls and access
++	  the data on the host computer connected to the target via
++	  debugging channel (JTAG, SWD). If unsure say N
++
+ endmenu
+ 
+ source common/Kconfig
+diff --git a/arch/arm/Makefile b/arch/arm/Makefile
+index 721aa9bd9d8e..cae05ff52bab 100644
+--- a/arch/arm/Makefile
++++ b/arch/arm/Makefile
+@@ -13,6 +13,13 @@ AS		+= -EL
+ LD		+= -EL
+ endif
+ 
++# Unaligned access is not supported when MMU is disabled, so given how
++# at least some of the code would be executed with MMU off, lets be
++# conservative and instruct the compiler not to generate any unaligned
++# accesses
++CFLAGS += -mno-unaligned-access
++
++
+ # This selects which instruction set is used.
+ # Note that GCC does not numerically define an architecture version
+ # macro, but instead defines a whole series of macros which makes
+diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
+index 013229db71cd..2229817dba73 100644
+--- a/arch/arm/boards/Makefile
++++ b/arch/arm/boards/Makefile
+@@ -109,6 +109,7 @@ obj-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES)		+= ebv-socrates/
+ obj-$(CONFIG_MACH_SOCFPGA_TERASIC_SOCKIT)	+= terasic-sockit/
+ obj-$(CONFIG_MACH_SOLIDRUN_CUBOX)		+= solidrun-cubox/
+ obj-$(CONFIG_MACH_SOLIDRUN_MICROSOM)		+= solidrun-microsom/
++obj-$(CONFIG_MACH_TECHNEXION_WANDBOARD)		+= technexion-wandboard/
+ obj-$(CONFIG_MACH_TNY_A9260)			+= tny-a926x/
+ obj-$(CONFIG_MACH_TNY_A9263)			+= tny-a926x/
+ obj-$(CONFIG_MACH_TNY_A9G20)			+= tny-a926x/
+diff --git a/arch/arm/boards/eltec-hipercam/flash-header-eltec-hipercam.imxcfg b/arch/arm/boards/eltec-hipercam/flash-header-eltec-hipercam.imxcfg
+index 455417e2b254..90f7e0199ec0 100644
+--- a/arch/arm/boards/eltec-hipercam/flash-header-eltec-hipercam.imxcfg
++++ b/arch/arm/boards/eltec-hipercam/flash-header-eltec-hipercam.imxcfg
+@@ -1,5 +1,6 @@
+ soc imx6
+ loadaddr 0x10000000
++dcdofs 0x400
+ 
+ wm 32 0x020e04bc 0x00000030
+ wm 32 0x020e04c0 0x00000030
+diff --git a/arch/arm/boards/embedsky-e9/board.c b/arch/arm/boards/embedsky-e9/board.c
+index e8aac0c1b073..23bfec1b7794 100644
+--- a/arch/arm/boards/embedsky-e9/board.c
++++ b/arch/arm/boards/embedsky-e9/board.c
+@@ -41,6 +41,8 @@
+ #include <mach/usb.h>
+ #include <envfs.h>
+ #include <bootsource.h>
++#include <bbu.h>
++#include <mach/bbu.h>
+ 
+ #define PHY_ID_RTL8211E	0x001cc915
+ #define PHY_ID_MASK	0xffffffff
+@@ -81,6 +83,12 @@ static int e9_devices_init(void)
+ 
+ 	defaultenv_append_directory(defaultenv_e9);
+ 
++	imx6_bbu_internal_mmc_register_handler("sd", "/dev/mmc1",
++		BBU_HANDLER_FLAG_DEFAULT);
++
++	imx6_bbu_internal_mmc_register_handler("emmc", "/dev/mmc3",
++		BBU_HANDLER_FLAG_DEFAULT);
++
+ 	return 0;
+ }
+ device_initcall(e9_devices_init);
+diff --git a/arch/arm/boards/freescale-mx6-sabresd/lowlevel.c b/arch/arm/boards/freescale-mx6-sabresd/lowlevel.c
+index 73eed1d068fc..b329f4684ef6 100644
+--- a/arch/arm/boards/freescale-mx6-sabresd/lowlevel.c
++++ b/arch/arm/boards/freescale-mx6-sabresd/lowlevel.c
+@@ -1,9 +1,28 @@
++#include <debug_ll.h>
+ #include <common.h>
+ #include <linux/sizes.h>
+ #include <mach/generic.h>
+ #include <asm/barebox-arm-head.h>
+ #include <asm/barebox-arm.h>
+ 
++static inline void setup_uart(void)
++{
++	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
++
++	imx6_ungate_all_peripherals();
++
++	writel(0x1b0b1, iomuxbase + 0x0650);
++	writel(3, iomuxbase + 0x0280);
++
++	writel(0x1b0b1, iomuxbase + 0x0654);
++	writel(3, iomuxbase + 0x0284);
++	writel(1, iomuxbase + 0x0920);
++
++	imx6_uart_setup_ll();
++
++	putc_ll('>');
++}
++
+ extern char __dtb_imx6q_sabresd_start[];
+ 
+ ENTRY_FUNCTION(start_imx6q_sabresd, r0, r1, r2)
+@@ -12,6 +31,9 @@ ENTRY_FUNCTION(start_imx6q_sabresd, r0, r1, r2)
+ 
+ 	imx6_cpu_lowlevel_init();
+ 
++	if (IS_ENABLED(CONFIG_DEBUG_LL))
++		setup_uart();
++
+ 	fdt = __dtb_imx6q_sabresd_start - get_runtime_offset();
+ 
+ 	barebox_arm_entry(0x10000000, SZ_1G, fdt);
+diff --git a/arch/arm/boards/globalscale-mirabox/kwbimage.cfg b/arch/arm/boards/globalscale-mirabox/kwbimage.cfg
+index 16fb77c31f18..fa8e5a6ee433 100644
+--- a/arch/arm/boards/globalscale-mirabox/kwbimage.cfg
++++ b/arch/arm/boards/globalscale-mirabox/kwbimage.cfg
+@@ -2,4 +2,4 @@ VERSION 1
+ BOOT_FROM nand
+ NAND_BLKSZ 00020000
+ NAND_BADBLK_LOCATION 01
+-BINARY arch/arm/boards/globalscale-mirabox/binary.0 0000005b 00000068
++BINARY ./binary.0 0000005b 00000068
+diff --git a/arch/arm/boards/lenovo-ix4-300d/kwbimage.cfg b/arch/arm/boards/lenovo-ix4-300d/kwbimage.cfg
+index 713efb0b0a89..a9b035e113a5 100644
+--- a/arch/arm/boards/lenovo-ix4-300d/kwbimage.cfg
++++ b/arch/arm/boards/lenovo-ix4-300d/kwbimage.cfg
+@@ -2,4 +2,4 @@ VERSION 1
+ BOOT_FROM nand
+ NAND_BLKSZ 00020000
+ NAND_BADBLK_LOCATION 00
+-BINARY arch/arm/boards/lenovo-ix4-300d/binary.0 0000005b 00000068
++BINARY ./binary.0 0000005b 00000068
+diff --git a/arch/arm/boards/marvell-armada-xp-gp/kwbimage.cfg b/arch/arm/boards/marvell-armada-xp-gp/kwbimage.cfg
+index 3f66aa080edb..eb8a2e7aed57 100644
+--- a/arch/arm/boards/marvell-armada-xp-gp/kwbimage.cfg
++++ b/arch/arm/boards/marvell-armada-xp-gp/kwbimage.cfg
+@@ -1,3 +1,3 @@
+ VERSION 1
+ BOOT_FROM spi
+-BINARY arch/arm/boards/marvell-armada-xp-gp/binary.0 0000005b 00000068
++BINARY ./binary.0 0000005b 00000068
+diff --git a/arch/arm/boards/plathome-openblocks-ax3/kwbimage.cfg b/arch/arm/boards/plathome-openblocks-ax3/kwbimage.cfg
+index 1d0571503a7b..eb8a2e7aed57 100644
+--- a/arch/arm/boards/plathome-openblocks-ax3/kwbimage.cfg
++++ b/arch/arm/boards/plathome-openblocks-ax3/kwbimage.cfg
+@@ -1,3 +1,3 @@
+ VERSION 1
+ BOOT_FROM spi
+-BINARY arch/arm/boards/plathome-openblocks-ax3/binary.0 0000005b 00000068
++BINARY ./binary.0 0000005b 00000068
+diff --git a/arch/arm/boards/technexion-wandboard/Makefile b/arch/arm/boards/technexion-wandboard/Makefile
+new file mode 100644
+index 000000000000..8fc428c80ad5
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/Makefile
+@@ -0,0 +1,3 @@
++obj-y += board.o flash-header-technexion-wandboard.dcd.o
++extra-y += flash-header-technexion-wandboard.dcd.S flash-header-technexion-wandboard.dcd
++lwl-y += lowlevel.o
+diff --git a/arch/arm/boards/technexion-wandboard/board.c b/arch/arm/boards/technexion-wandboard/board.c
+new file mode 100644
+index 000000000000..e7b51cc7280a
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/board.c
+@@ -0,0 +1,78 @@
++/*
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; version 2.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License for more details.
++ */
++
++#include <asm/armlinux.h>
++#include <asm/io.h>
++#include <bootsource.h>
++#include <common.h>
++#include <environment.h>
++#include <envfs.h>
++#include <gpio.h>
++#include <init.h>
++#include <mach/bbu.h>
++#include <mach/generic.h>
++#include <mach/imx6-regs.h>
++#include <mach/imx6.h>
++#include <mfd/imx6q-iomuxc-gpr.h>
++#include <linux/sizes.h>
++#include <linux/phy.h>
++
++#define PHY_ID_AR8031	0x004dd074
++#define AR_PHY_ID_MASK	0xffffffff
++
++static int ar8031_phy_fixup(struct phy_device *dev)
++{
++	u16 val;
++
++	/* Ar803x phy SmartEEE feature cause link status generates glitch,
++	 * which cause ethernet link down/up issue, so disable SmartEEE
++	 */
++	phy_write(dev, 0xd, 0x3);
++	phy_write(dev, 0xe, 0x805d);
++	phy_write(dev, 0xd, 0x4003);
++
++	val = phy_read(dev, 0xe);
++	phy_write(dev, 0xe, val & ~(1 << 8));
++
++	/* To enable AR8031 ouput a 125MHz clk from CLK_25M */
++	phy_write(dev, 0xd, 0x7);
++	phy_write(dev, 0xe, 0x8016);
++	phy_write(dev, 0xd, 0x4007);
++
++	val = phy_read(dev, 0xe);
++	val &= 0xffe3;
++	val |= 0x18;
++	phy_write(dev, 0xe, val);
++
++	/* introduce tx clock delay */
++	phy_write(dev, 0x1d, 0x5);
++	val = phy_read(dev, 0x1e);
++	val |= 0x0100;
++	phy_write(dev, 0x1e, val);
++
++	return 0;
++}
++
++static int wandboard_device_init(void)
++{
++	if (!of_machine_is_compatible("wand,imx6dl-wandboard"))
++		return 0;
++
++	phy_register_fixup_for_uid(PHY_ID_AR8031, AR_PHY_ID_MASK, ar8031_phy_fixup);
++
++	barebox_set_hostname("wandboard");
++
++	imx6_bbu_internal_mmc_register_handler("mmc", "/dev/mmc2.barebox",
++		BBU_HANDLER_FLAG_DEFAULT);
++
++	return 0;
++}
++device_initcall(wandboard_device_init);
+diff --git a/arch/arm/boards/technexion-wandboard/env/boot/mmc2.1 b/arch/arm/boards/technexion-wandboard/env/boot/mmc2.1
+new file mode 100644
+index 000000000000..d11eff7c325d
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/env/boot/mmc2.1
+@@ -0,0 +1,3 @@
++#!/bin/sh
++
++mount /dev/mmc2.1 && boot /mnt/mmc2.1
+diff --git a/arch/arm/boards/technexion-wandboard/env/init/bootsource b/arch/arm/boards/technexion-wandboard/env/init/bootsource
+new file mode 100644
+index 000000000000..732ce5b35d5f
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/env/init/bootsource
+@@ -0,0 +1,7 @@
++#!/bin/sh
++
++if [ -n "$nv.boot.default" ]; then
++	exit
++fi
++
++global.boot.default="mmc2.1 net"
+diff --git a/arch/arm/boards/technexion-wandboard/flash-header-technexion-wandboard.imxcfg b/arch/arm/boards/technexion-wandboard/flash-header-technexion-wandboard.imxcfg
+new file mode 100644
+index 000000000000..33621117d461
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/flash-header-technexion-wandboard.imxcfg
+@@ -0,0 +1,3 @@
++loadaddr 0x00907000
++soc imx6
++dcdofs 0x400
+diff --git a/arch/arm/boards/technexion-wandboard/lowlevel.c b/arch/arm/boards/technexion-wandboard/lowlevel.c
+new file mode 100644
+index 000000000000..d3eb9a03e9b8
+--- /dev/null
++++ b/arch/arm/boards/technexion-wandboard/lowlevel.c
+@@ -0,0 +1,356 @@
++/*
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; version 2.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License for more details.
++ */
++
++#include <debug_ll.h>
++#include <common.h>
++#include <linux/sizes.h>
++#include <mach/generic.h>
++#include <asm/barebox-arm-head.h>
++#include <asm/barebox-arm.h>
++#include <mach/imx6-mmdc.h>
++#include <mach/imx6-ddr-regs.h>
++#include <mach/imx6.h>
++#include <mach/xload.h>
++#include <mach/esdctl.h>
++#include <serial/imx-uart.h>
++
++static void __udelay(int us)
++{
++	volatile int i;
++
++	for (i = 0; i < us * 4; i++);
++}
++
++/*
++ * Driving strength:
++ *   0x30 == 40 Ohm
++ *   0x28 == 48 Ohm
++ */
++
++#define IMX6DQ_DRIVE_STRENGTH		0x30
++#define IMX6SDL_DRIVE_STRENGTH		0x28
++
++/* configure MX6Q/DUAL mmdc DDR io registers */
++static struct mx6dq_iomux_ddr_regs mx6dq_ddr_ioregs = {
++	.dram_sdclk_0 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdclk_1 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_cas = IMX6DQ_DRIVE_STRENGTH,
++	.dram_ras = IMX6DQ_DRIVE_STRENGTH,
++	.dram_reset = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdcke0 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdcke1 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdba2 = 0x00000000,
++	.dram_sdodt0 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdodt1 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs0 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs1 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs2 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs3 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs4 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs5 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs6 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_sdqs7 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm0 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm1 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm2 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm3 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm4 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm5 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm6 = IMX6DQ_DRIVE_STRENGTH,
++	.dram_dqm7 = IMX6DQ_DRIVE_STRENGTH,
++};
++
++/* configure MX6Q/DUAL mmdc GRP io registers */
++static struct mx6dq_iomux_grp_regs mx6dq_grp_ioregs = {
++	.grp_ddr_type = 0x000c0000,
++	.grp_ddrmode_ctl = 0x00020000,
++	.grp_ddrpke = 0x00000000,
++	.grp_addds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_ctlds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_ddrmode = 0x00020000,
++	.grp_b0ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b1ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b2ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b3ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b4ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b5ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b6ds = IMX6DQ_DRIVE_STRENGTH,
++	.grp_b7ds = IMX6DQ_DRIVE_STRENGTH,
++};
++
++/* configure MX6SOLO/DUALLITE mmdc DDR io registers */
++struct mx6sdl_iomux_ddr_regs mx6sdl_ddr_ioregs = {
++	.dram_sdclk_0 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdclk_1 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_cas = IMX6SDL_DRIVE_STRENGTH,
++	.dram_ras = IMX6SDL_DRIVE_STRENGTH,
++	.dram_reset = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdcke0 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdcke1 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdba2 = 0x00000000,
++	.dram_sdodt0 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdodt1 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs0 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs1 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs2 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs3 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs4 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs5 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs6 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_sdqs7 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm0 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm1 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm2 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm3 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm4 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm5 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm6 = IMX6SDL_DRIVE_STRENGTH,
++	.dram_dqm7 = IMX6SDL_DRIVE_STRENGTH,
++};
++
++/* configure MX6SOLO/DUALLITE mmdc GRP io registers */
++struct mx6sdl_iomux_grp_regs mx6sdl_grp_ioregs = {
++	.grp_ddr_type = 0x000c0000,
++	.grp_ddrmode_ctl = 0x00020000,
++	.grp_ddrpke = 0x00000000,
++	.grp_addds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_ctlds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_ddrmode = 0x00020000,
++	.grp_b0ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b1ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b2ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b3ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b4ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b5ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b6ds = IMX6SDL_DRIVE_STRENGTH,
++	.grp_b7ds = IMX6SDL_DRIVE_STRENGTH,
++};
++
++/* H5T04G63AFR-PB */
++static struct mx6_ddr3_cfg h5t04g63afr = {
++	.mem_speed = 1600,
++	.density = 4,
++	.width = 16,
++	.banks = 8,
++	.rowaddr = 15,
++	.coladdr = 10,
++	.pagesz = 2,
++	.trcd = 1375,
++	.trcmin = 4875,
++	.trasmin = 3500,
++};
++
++/* H5TQ2G63DFR-H9 */
++static struct mx6_ddr3_cfg h5tq2g63dfr = {
++	.mem_speed = 1333,
++	.density = 2,
++	.width = 16,
++	.banks = 8,
++	.rowaddr = 14,
++	.coladdr = 10,
++	.pagesz = 2,
++	.trcd = 1350,
++	.trcmin = 4950,
++	.trasmin = 3600,
++};
++
++static struct mx6_mmdc_calibration mx6q_2g_mmdc_calib = {
++	.p0_mpwldectrl0 = 0x001f001f,
++	.p0_mpwldectrl1 = 0x001f001f,
++	.p1_mpwldectrl0 = 0x001f001f,
++	.p1_mpwldectrl1 = 0x001f001f,
++	.p0_mpdgctrl0 = 0x4301030d,
++	.p0_mpdgctrl1 = 0x03020277,
++	.p1_mpdgctrl0 = 0x4300030a,
++	.p1_mpdgctrl1 = 0x02780248,
++	.p0_mprddlctl = 0x4536393b,
++	.p1_mprddlctl = 0x36353441,
++	.p0_mpwrdlctl = 0x41414743,
++	.p1_mpwrdlctl = 0x462f453f,
++};
++
++/* DDR 64bit 2GB */
++static struct mx6_ddr_sysinfo mem_q = {
++	.dsize		= 2,
++	.cs1_mirror	= 0,
++	.cs_density	= 16,
++	.ncs		= 1,
++	.bi_on		= 1,
++	.rtt_nom	= 1,
++	.rtt_wr		= 0,
++	.ralat		= 5,
++	.walat		= 0,
++	.mif3_mode	= 3,
++	.rst_to_cke	= 0x23,
++	.sde_to_rst	= 0x10,
++};
++
++static struct mx6_mmdc_calibration mx6dl_1g_mmdc_calib = {
++	.p0_mpwldectrl0 = 0x001f001f,
++	.p0_mpwldectrl1 = 0x001f001f,
++	.p1_mpwldectrl0 = 0x001f001f,
++	.p1_mpwldectrl1 = 0x001f001f,
++	.p0_mpdgctrl0 = 0x420e020e,
++	.p0_mpdgctrl1 = 0x02000200,
++	.p1_mpdgctrl0 = 0x42020202,
++	.p1_mpdgctrl1 = 0x01720172,
++	.p0_mprddlctl = 0x494c4f4c,
++	.p1_mprddlctl = 0x4a4c4c49,
++	.p0_mpwrdlctl = 0x3f3f3133,
++	.p1_mpwrdlctl = 0x39373f2e,
++};
++
++static struct mx6_mmdc_calibration mx6s_512m_mmdc_calib = {
++	.p0_mpwldectrl0 = 0x0040003c,
++	.p0_mpwldectrl1 = 0x0032003e,
++	.p0_mpdgctrl0 = 0x42350231,
++	.p0_mpdgctrl1 = 0x021a0218,
++	.p0_mprddlctl = 0x4b4b4e49,
++	.p0_mpwrdlctl = 0x3f3f3035,
++};
++
++/* DDR 64bit 1GB */
++static struct mx6_ddr_sysinfo mem_dl = {
++	.dsize		= 2,
++	.cs1_mirror	= 0,
++	.cs_density	= 8,
++	.ncs		= 1,
++	.bi_on		= 1,
++	.rtt_nom	= 1,
++	.rtt_wr		= 0,
++	.ralat		= 5,
++	.walat		= 0,
++	.mif3_mode	= 3,
++	.rst_to_cke	= 0x23,
++	.sde_to_rst	= 0x10,
++};
++
++/* DDR 32bit 512MB */
++static struct mx6_ddr_sysinfo mem_s = {
++	.dsize		= 1,
++	.cs1_mirror	= 0,
++	.cs_density	= 4,
++	.ncs		= 1,
++	.bi_on		= 1,
++	.rtt_nom	= 1,
++	.rtt_wr		= 0,
++	.ralat		= 5,
++	.walat		= 0,
++	.mif3_mode	= 3,
++	.rst_to_cke	= 0x23,
++	.sde_to_rst	= 0x10,
++};
++
++static unsigned long wandboard_dram_init(void)
++{
++	int cpu_type = __imx6_cpu_type();
++	unsigned long memsize;
++
++	switch (cpu_type) {
++	case  IMX6_CPUTYPE_IMX6S:
++		mx6sdl_dram_iocfg(32, &mx6sdl_ddr_ioregs, &mx6sdl_grp_ioregs);
++		mx6_dram_cfg(&mem_s, &mx6s_512m_mmdc_calib, &h5tq2g63dfr);
++		memsize = SZ_512M;
++		break;
++	case IMX6_CPUTYPE_IMX6DL:
++		mx6sdl_dram_iocfg(64, &mx6sdl_ddr_ioregs, &mx6sdl_grp_ioregs);
++		mx6_dram_cfg(&mem_dl, &mx6dl_1g_mmdc_calib, &h5tq2g63dfr);
++		memsize = SZ_1G;
++		break;
++	case IMX6_CPUTYPE_IMX6Q:
++		mx6dq_dram_iocfg(64, &mx6dq_ddr_ioregs, &mx6dq_grp_ioregs);
++		mx6_dram_cfg(&mem_q, &mx6q_2g_mmdc_calib, &h5t04g63afr);
++		memsize = SZ_2G;
++		break;
++	default:
++		return 0;
++	}
++
++	__udelay(100);
++
++	mmdc_do_write_level_calibration();
++	mmdc_do_dqs_calibration();
++#ifdef DEBUG
++	mmdc_print_calibration_results();
++#endif
++	return memsize;
++}
++
++static void setup_uart(void)
++{
++	void __iomem *iomuxbase = (void *)MX6_IOMUXC_BASE_ADDR;
++
++	/* mux the uart */
++	writel(0x00000003, iomuxbase + 0x4c);
++	writel(0x00000000, iomuxbase + 0x8fc);
++
++	imx6_ungate_all_peripherals();
++	imx6_uart_setup((void *)MX6_UART1_BASE_ADDR);
++	pbl_set_putc(imx_uart_putc, (void *)MX6_UART1_BASE_ADDR);
++
++	pr_debug("\n");
++}
++
++static void wandboard_init(void)
++{
++	unsigned long sdram_size;
++
++	setup_uart();
++
++	if (get_pc() > 0x10000000)
++		return;
++
++	sdram_size = wandboard_dram_init();
++
++	pr_debug("SDRAM init finished. SDRAM size 0x%08lx\n", sdram_size);
++
++	imx6_esdhc_start_image(2);
++	pr_info("Loading image from SPI flash\n");
++	imx6_spi_start_image(0);
++}
++
++extern char __dtb_z_imx6dl_wandboard_start[];
++extern char __dtb_z_imx6q_wandboard_start[];
++
++static noinline void wandboard_start(void)
++{
++	int cpu_type = __imx6_cpu_type();
++	void *dtb;
++
++	wandboard_init();
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		dtb = __dtb_z_imx6dl_wandboard_start;
++		break;
++	case IMX6_CPUTYPE_IMX6Q:
++		dtb = __dtb_z_imx6q_wandboard_start;
++		break;
++	default:
++		hang();
++	}
++
++	imx6q_barebox_entry(dtb);
++}
++
++ENTRY_FUNCTION(start_imx6_wandboard, r0, r1, r2)
++{
++	imx6_cpu_lowlevel_init();
++
++	arm_setup_stack(0x0091ffb0);
++
++	relocate_to_current_adr();
++	setup_c();
++	barrier();
++
++	wandboard_start();
++}
+diff --git a/arch/arm/configs/am335x_defconfig b/arch/arm/configs/am335x_defconfig
+index 234042f9bcb3..9563865065ff 100644
+--- a/arch/arm/configs/am335x_defconfig
++++ b/arch/arm/configs/am335x_defconfig
+@@ -88,12 +88,12 @@ CONFIG_NET=y
+ CONFIG_NET_NFS=y
+ CONFIG_NET_NETCONSOLE=y
+ CONFIG_NET_RESOLV=y
+-CONFIG_OFDEVICE=y
+ CONFIG_OF_BAREBOX_DRIVERS=y
+ CONFIG_DRIVER_SERIAL_NS16550=y
+ CONFIG_DRIVER_SERIAL_NS16550_OMAP_EXTENSIONS=y
+ CONFIG_DRIVER_NET_CPSW=y
+ CONFIG_MICREL_PHY=y
++CONFIG_SMSC_PHY=y
+ CONFIG_NET_USB=y
+ CONFIG_NET_USB_ASIX=y
+ CONFIG_NET_USB_SMSC95XX=y
+diff --git a/arch/arm/configs/imx_v7_defconfig b/arch/arm/configs/imx_v7_defconfig
+index ec914605336c..0f3812595d0d 100644
+--- a/arch/arm/configs/imx_v7_defconfig
++++ b/arch/arm/configs/imx_v7_defconfig
+@@ -20,6 +20,7 @@ CONFIG_MACH_SABRESD=y
+ CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB=y
+ CONFIG_MACH_NITROGEN6X=y
+ CONFIG_MACH_SOLIDRUN_MICROSOM=y
++CONFIG_MACH_TECHNEXION_WANDBOARD=y
+ CONFIG_MACH_EMBEST_RIOTBOARD=y
+ CONFIG_MACH_UDOO=y
+ CONFIG_MACH_VARISCITE_MX6=y
+diff --git a/arch/arm/cpu/Makefile b/arch/arm/cpu/Makefile
+index fb3929c94eaf..418bcab75967 100644
+--- a/arch/arm/cpu/Makefile
++++ b/arch/arm/cpu/Makefile
+@@ -1,7 +1,7 @@
+ obj-y += cpu.o
+ obj-$(CONFIG_ARM_EXCEPTIONS) += exceptions.o
+ obj-$(CONFIG_ARM_EXCEPTIONS) += interrupts.o
+-obj-y += start.o setupc.o
++obj-y += start.o setupc.o entry.o
+ 
+ #
+ # Any variants can be called as start-armxyz.S
+@@ -23,7 +23,7 @@ AFLAGS_pbl-cache-armv7.o       :=-Wa,-march=armv7-a
+ pbl-$(CONFIG_CPU_32v7) += cache-armv7.o
+ obj-$(CONFIG_CACHE_L2X0) += cache-l2x0.o
+ 
+-pbl-y += setupc.o
++pbl-y += setupc.o entry.o
+ pbl-$(CONFIG_PBL_SINGLE_IMAGE) += start-pbl.o
+ pbl-$(CONFIG_PBL_MULTI_IMAGES) += uncompress.o
+ 
+diff --git a/arch/arm/cpu/cache-l2x0.c b/arch/arm/cpu/cache-l2x0.c
+index 428dd9324992..0aa2482321e8 100644
+--- a/arch/arm/cpu/cache-l2x0.c
++++ b/arch/arm/cpu/cache-l2x0.c
+@@ -124,12 +124,10 @@ static void l2x0_flush_all(void)
+ 
+ static void l2x0_disable(void)
+ {
+-	writel(0xff, l2x0_base + L2X0_CLEAN_INV_WAY);
+-	while (readl(l2x0_base + L2X0_CLEAN_INV_WAY));
+ 	writel(0, l2x0_base + L2X0_CTRL);
+ }
+ 
+-void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
++void l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
+ {
+ 	__u32 aux;
+ 	__u32 cache_id;
+@@ -161,7 +159,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
+ 		break;
+ 	}
+ 
+-       l2x0_way_mask = (1 << ways) - 1;
++	l2x0_way_mask = (1 << ways) - 1;
+ 
+ 	/*
+ 	 * Check if l2x0 controller is already enabled.
+diff --git a/arch/arm/cpu/cpu.c b/arch/arm/cpu/cpu.c
+index ff8f43d175ec..e8191ecde5a8 100644
+--- a/arch/arm/cpu/cpu.c
++++ b/arch/arm/cpu/cpu.c
+@@ -80,8 +80,10 @@ struct outer_cache_fns outer_cache;
+ void mmu_disable(void)
+ {
+ 	__mmu_cache_flush();
+-	if (outer_cache.disable)
++	if (outer_cache.disable) {
++		outer_cache.flush_all();
+ 		outer_cache.disable();
++	}
+ 	__mmu_cache_off();
+ }
+ 
+diff --git a/arch/arm/cpu/entry.c b/arch/arm/cpu/entry.c
+new file mode 100644
+index 000000000000..3b74c6a6c137
+--- /dev/null
++++ b/arch/arm/cpu/entry.c
+@@ -0,0 +1,38 @@
++#include <types.h>
++
++#include <asm/cache.h>
++
++#include "entry.h"
++
++/*
++ * Main ARM entry point. Call this with the memory region you can
++ * spare for barebox. This doesn't necessarily have to be the full
++ * SDRAM. The currently running binary can be inside or outside of
++ * this region. TEXT_BASE can be inside or outside of this
++ * region. boarddata will be preserved and can be accessed later with
++ * barebox_arm_boarddata().
++ *
++ * -> membase + memsize
++ *   STACK_SIZE              - stack
++ *   16KiB, aligned to 16KiB - First level page table if early MMU support
++ *                             is enabled
++ *   128KiB                  - early memory space
++ * -> maximum end of barebox binary
++ *
++ * Usually a TEXT_BASE of 1MiB below your lowest possible end of memory should
++ * be fine.
++ */
++
++void __naked __noreturn barebox_arm_entry(unsigned long membase,
++					  unsigned long memsize, void *boarddata)
++{
++	arm_setup_stack(membase + memsize - 16);
++	arm_early_mmu_cache_invalidate();
++
++	if (IS_ENABLED(CONFIG_PBL_MULTI_IMAGES))
++		barebox_multi_pbl_start(membase, memsize, boarddata);
++	else if (IS_ENABLED(CONFIG_PBL_SINGLE_IMAGE))
++		barebox_single_pbl_start(membase, memsize, boarddata);
++	else
++		barebox_non_pbl_start(membase, memsize, boarddata);
++}
+diff --git a/arch/arm/cpu/entry.h b/arch/arm/cpu/entry.h
+new file mode 100644
+index 000000000000..f0163a34f7be
+--- /dev/null
++++ b/arch/arm/cpu/entry.h
+@@ -0,0 +1,18 @@
++#ifndef __ENTRY_H__
++#define __ENTRY_H__
++
++#include <common.h>
++
++void __noreturn barebox_non_pbl_start(unsigned long membase,
++				      unsigned long memsize,
++				      void *boarddata);
++
++void __noreturn barebox_multi_pbl_start(unsigned long membase,
++					unsigned long memsize,
++					void *boarddata);
++
++void __noreturn barebox_single_pbl_start(unsigned long membase,
++					 unsigned long memsize,
++					 void *boarddata);
++
++#endif
+diff --git a/arch/arm/cpu/mmu.c b/arch/arm/cpu/mmu.c
+index 470b44895702..784221ce139b 100644
+--- a/arch/arm/cpu/mmu.c
++++ b/arch/arm/cpu/mmu.c
+@@ -20,7 +20,7 @@
+ #include <common.h>
+ #include <dma-dir.h>
+ #include <init.h>
+-#include <asm/mmu.h>
++#include <mmu.h>
+ #include <errno.h>
+ #include <linux/sizes.h>
+ #include <asm/memory.h>
+@@ -81,16 +81,6 @@ static uint32_t pte_flags_uncached;
+ 
+ #define PTE_MASK ((1 << 12) - 1)
+ 
+-uint32_t mmu_get_pte_cached_flags()
+-{
+-	return pte_flags_cached;
+-}
+-
+-uint32_t mmu_get_pte_uncached_flags()
+-{
+-	return pte_flags_uncached;
+-}
+-
+ static void arm_mmu_not_initialized_error(void)
+ {
+ 	/*
+@@ -173,7 +163,7 @@ static void dma_inv_range(unsigned long start, unsigned long end)
+ 	__dma_inv_range(start, end);
+ }
+ 
+-void remap_range(void *_start, size_t size, uint32_t flags)
++static int __remap_range(void *_start, size_t size, u32 pte_flags)
+ {
+ 	unsigned long start = (unsigned long)_start;
+ 	u32 *p;
+@@ -184,13 +174,33 @@ void remap_range(void *_start, size_t size, uint32_t flags)
+ 
+ 	for (i = 0; i < numentries; i++) {
+ 		p[i] &= ~PTE_MASK;
+-		p[i] |= flags | PTE_TYPE_SMALL;
++		p[i] |= pte_flags | PTE_TYPE_SMALL;
+ 	}
+ 
+ 	dma_flush_range((unsigned long)p,
+ 			(unsigned long)p + numentries * sizeof(u32));
+ 
+ 	tlb_invalidate();
++
++	return 0;
++}
++
++int arch_remap_range(void *start, size_t size, unsigned flags)
++{
++	u32 pte_flags;
++
++	switch (flags) {
++	case MAP_CACHED:
++		pte_flags = pte_flags_cached;
++		break;
++	case MAP_UNCACHED:
++		pte_flags = pte_flags_uncached;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	return __remap_range(start, size, pte_flags);
+ }
+ 
+ void *map_io_sections(unsigned long phys, void *_start, size_t size)
+@@ -408,7 +418,7 @@ void *dma_alloc_coherent(size_t size, dma_addr_t *dma_handle)
+ 
+ 	dma_inv_range((unsigned long)ret, (unsigned long)ret + size);
+ 
+-	remap_range(ret, size, pte_flags_uncached);
++	__remap_range(ret, size, pte_flags_uncached);
+ 
+ 	return ret;
+ }
+@@ -424,7 +434,7 @@ void *dma_alloc_writecombine(size_t size, dma_addr_t *dma_handle)
+ 
+ 	dma_inv_range((unsigned long)ret, (unsigned long)ret + size);
+ 
+-	remap_range(ret, size, pte_flags_wc);
++	__remap_range(ret, size, pte_flags_wc);
+ 
+ 	return ret;
+ }
+@@ -442,7 +452,7 @@ void *phys_to_virt(unsigned long phys)
+ void dma_free_coherent(void *mem, dma_addr_t dma_handle, size_t size)
+ {
+ 	size = PAGE_ALIGN(size);
+-	remap_range(mem, size, pte_flags_cached);
++	__remap_range(mem, size, pte_flags_cached);
+ 
+ 	free(mem);
+ }
+diff --git a/arch/arm/cpu/start-pbl.c b/arch/arm/cpu/start-pbl.c
+index f2490fd9efab..2075ffeee75f 100644
+--- a/arch/arm/cpu/start-pbl.c
++++ b/arch/arm/cpu/start-pbl.c
+@@ -45,7 +45,7 @@ void __naked __section(.text_head_entry) pbl_start(void)
+ extern void *input_data;
+ extern void *input_data_end;
+ 
+-static noinline __noreturn void __barebox_arm_entry(unsigned long membase,
++__noreturn void barebox_single_pbl_start(unsigned long membase,
+ 		unsigned long memsize, void *boarddata)
+ {
+ 	uint32_t offset;
+@@ -56,8 +56,6 @@ static noinline __noreturn void __barebox_arm_entry(unsigned long membase,
+ 
+ 	endmem -= STACK_SIZE; /* stack */
+ 
+-	arm_early_mmu_cache_invalidate();
+-
+ 	if (IS_ENABLED(CONFIG_PBL_RELOCATABLE))
+ 		relocate_to_current_adr();
+ 
+@@ -106,28 +104,3 @@ static noinline __noreturn void __barebox_arm_entry(unsigned long membase,
+ 
+ 	barebox(membase, memsize, boarddata);
+ }
+-
+-/*
+- * Main ARM entry point in the compressed image. Call this with the memory
+- * region you can spare for barebox. This doesn't necessarily have to be the
+- * full SDRAM. The currently running binary can be inside or outside of this
+- * region. TEXT_BASE can be inside or outside of this region. boarddata will
+- * be preserved and can be accessed later with barebox_arm_boarddata().
+- *
+- * -> membase + memsize
+- *   STACK_SIZE              - stack
+- *   16KiB, aligned to 16KiB - First level page table if early MMU support
+- *                             is enabled
+- *   128KiB                  - early memory space
+- * -> maximum end of barebox binary
+- *
+- * Usually a TEXT_BASE of 1MiB below your lowest possible end of memory should
+- * be fine.
+- */
+-void __naked __noreturn barebox_arm_entry(unsigned long membase,
+-		unsigned long memsize, void *boarddata)
+-{
+-	arm_setup_stack(membase + memsize - 16);
+-
+-	__barebox_arm_entry(membase, memsize, boarddata);
+-}
+diff --git a/arch/arm/cpu/start.c b/arch/arm/cpu/start.c
+index 8e5097b560e2..c054f3c4400c 100644
+--- a/arch/arm/cpu/start.c
++++ b/arch/arm/cpu/start.c
+@@ -27,6 +27,8 @@
+ #include <asm/unaligned.h>
+ #include <asm/cache.h>
+ #include <memory.h>
++#include <uncompress.h>
++#include <malloc.h>
+ 
+ #include <debug_ll.h>
+ #include "mmu-early.h"
+@@ -34,26 +36,75 @@
+ unsigned long arm_stack_top;
+ static void *barebox_boarddata;
+ 
+-u32 barebox_arm_machine(void)
++static bool blob_is_fdt(const void *blob)
+ {
+-	struct barebox_arm_boarddata *bd;
++	return get_unaligned_be32(blob) == FDT_MAGIC;
++}
+ 
+-	if (!barebox_boarddata)
+-		return 0;
++static bool blob_is_compressed_fdt(const void *blob)
++{
++	const struct barebox_arm_boarddata_compressed_dtb *dtb = blob;
+ 
+-	bd = barebox_boarddata;
++	return dtb->magic == BAREBOX_ARM_BOARDDATA_COMPRESSED_DTB_MAGIC;
++}
+ 
+-	return bd->machine;
++static bool blob_is_arm_boarddata(const void *blob)
++{
++	const struct barebox_arm_boarddata *bd = blob;
++
++	return bd->magic == BAREBOX_ARM_BOARDDATA_MAGIC;
+ }
+ 
+-static void *barebox_boot_dtb;
++u32 barebox_arm_machine(void)
++{
++	if (barebox_boarddata && blob_is_arm_boarddata(barebox_boarddata)) {
++		const struct barebox_arm_boarddata *bd = barebox_boarddata;
++		return bd->machine;
++	} else {
++		return 0;
++	}
++}
+ 
+ void *barebox_arm_boot_dtb(void)
+ {
+-	return barebox_boot_dtb;
++	void *dtb;
++	void *data;
++	int ret;
++	struct barebox_arm_boarddata_compressed_dtb *compressed_dtb;
++
++	if (barebox_boarddata && blob_is_fdt(barebox_boarddata)) {
++		pr_debug("%s: using barebox_boarddata\n", __func__);
++		return barebox_boarddata;
++	}
++
++	if (!IS_ENABLED(CONFIG_ARM_USE_COMPRESSED_DTB) || !barebox_boarddata
++			|| !blob_is_compressed_fdt(barebox_boarddata))
++		return NULL;
++
++	compressed_dtb = barebox_boarddata;
++
++	pr_debug("%s: using compressed_dtb\n", __func__);
++
++	dtb = malloc(compressed_dtb->datalen_uncompressed);
++	if (!dtb)
++		return NULL;
++
++	data = compressed_dtb + 1;
++
++	ret = uncompress(data, compressed_dtb->datalen, NULL, NULL,
++			dtb, NULL, NULL);
++	if (ret) {
++		pr_err("uncompressing dtb failed\n");
++		free(dtb);
++		return NULL;
++	}
++
++	barebox_boarddata = dtb;
++
++	return barebox_boarddata;
+ }
+ 
+-static noinline __noreturn void __start(unsigned long membase,
++__noreturn void barebox_non_pbl_start(unsigned long membase,
+ 		unsigned long memsize, void *boarddata)
+ {
+ 	unsigned long endmem = membase + memsize;
+@@ -70,7 +121,6 @@ static noinline __noreturn void __start(unsigned long membase,
+ 
+ 	pr_debug("memory at 0x%08lx, size 0x%08lx\n", membase, memsize);
+ 
+-	barebox_boarddata = boarddata;
+ 	arm_stack_top = endmem;
+ 	endmem -= STACK_SIZE; /* Stack */
+ 
+@@ -89,21 +139,27 @@ static noinline __noreturn void __start(unsigned long membase,
+ 	}
+ 
+ 	if (boarddata) {
+-		if (get_unaligned_be32(boarddata) == FDT_MAGIC) {
+-			uint32_t totalsize = get_unaligned_be32(boarddata + 4);
++		uint32_t totalsize = 0;
++		const char *name;
++
++		if (blob_is_fdt(boarddata)) {
++			totalsize = get_unaligned_be32(boarddata + 4);
++			name = "DTB";
++		} else if (blob_is_compressed_fdt(boarddata)) {
++			struct barebox_arm_boarddata_compressed_dtb *bd = boarddata;
++			totalsize = bd->datalen + sizeof(*bd);
++			name = "Compressed DTB";
++		} else if (blob_is_arm_boarddata(boarddata)) {
++			totalsize = sizeof(struct barebox_arm_boarddata);
++			name = "machine type";
++		}
++
++		if (totalsize) {
+ 			endmem -= ALIGN(totalsize, 64);
+-			barebox_boot_dtb = (void *)endmem;
+-			pr_debug("found DTB in boarddata, copying to 0x%p\n",
+-					barebox_boot_dtb);
+-			memcpy(barebox_boot_dtb, boarddata, totalsize);
+-		} else if (((struct barebox_arm_boarddata *)boarddata)->magic ==
+-				BAREBOX_ARM_BOARDDATA_MAGIC) {
+-			endmem -= ALIGN(sizeof(struct barebox_arm_boarddata), 64);
+-			barebox_boarddata = (void *)endmem;
+-			pr_debug("found machine type in boarddata, copying to 0x%p\n",
+-					barebox_boarddata);
+-			memcpy(barebox_boarddata, boarddata,
+-					sizeof(struct barebox_arm_boarddata));
++			pr_debug("found %s in boarddata, copying to 0x%lu\n",
++				 name, endmem);
++			barebox_boarddata = memcpy((void *)endmem,
++						      boarddata, totalsize);
+ 		}
+ 	}
+ 
+@@ -149,31 +205,6 @@ void __naked __section(.text_entry) start(void)
+ 	barebox_arm_head();
+ }
+ 
+-/*
+- * Main ARM entry point in the uncompressed image. Call this with the memory
+- * region you can spare for barebox. This doesn't necessarily have to be the
+- * full SDRAM. The currently running binary can be inside or outside of this
+- * region. TEXT_BASE can be inside or outside of this region. boarddata will
+- * be preserved and can be accessed later with barebox_arm_boarddata().
+- *
+- * -> membase + memsize
+- *   STACK_SIZE              - stack
+- *   16KiB, aligned to 16KiB - First level page table if early MMU support
+- *                             is enabled
+- * -> maximum end of barebox binary
+- *
+- * Usually a TEXT_BASE of 1MiB below your lowest possible end of memory should
+- * be fine.
+- */
+-void __naked __noreturn barebox_arm_entry(unsigned long membase,
+-		unsigned long memsize, void *boarddata)
+-{
+-	arm_setup_stack(membase + memsize - 16);
+-
+-	arm_early_mmu_cache_invalidate();
+-
+-	__start(membase, memsize, boarddata);
+-}
+ #else
+ /*
+  * First function in the uncompressed image. We get here from
+@@ -182,6 +213,6 @@ void __naked __noreturn barebox_arm_entry(unsigned long membase,
+ void __naked __section(.text_entry) start(unsigned long membase,
+ 		unsigned long memsize, void *boarddata)
+ {
+-	__start(membase, memsize, boarddata);
++	barebox_non_pbl_start(membase, memsize, boarddata);
+ }
+ #endif
+diff --git a/arch/arm/cpu/uncompress.c b/arch/arm/cpu/uncompress.c
+index b0b7c6d09720..dbf6b1e3f807 100644
+--- a/arch/arm/cpu/uncompress.c
++++ b/arch/arm/cpu/uncompress.c
+@@ -41,7 +41,7 @@ static int __attribute__((__used__))
+ 	__attribute__((__section__(".image_end")))
+ 	__image_end_dummy = 0xdeadbeef;
+ 
+-static void __noreturn noinline uncompress_start_payload(unsigned long membase,
++void __noreturn barebox_multi_pbl_start(unsigned long membase,
+ 		unsigned long memsize, void *boarddata)
+ {
+ 	uint32_t pg_len;
+@@ -52,8 +52,6 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
+ 	void *pg_start;
+ 	unsigned long pc = get_pc();
+ 
+-	arm_early_mmu_cache_invalidate();
+-
+ 	endmem -= STACK_SIZE; /* stack */
+ 
+ 	image_end = (void *)ld_var(__image_end) - get_runtime_offset();
+@@ -114,15 +112,3 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
+ 
+ 	barebox(membase, memsize, boarddata);
+ }
+-
+-/*
+- * For the multi images startup process board code jumps here. We will uncompress
+- * the attached barebox image and start it.
+- */
+-void __naked __noreturn barebox_arm_entry(unsigned long membase,
+-		unsigned long memsize, void *boarddata)
+-{
+-	arm_setup_stack(membase + memsize - 16);
+-
+-	uncompress_start_payload(membase, memsize, boarddata);
+-}
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 60880e4d20b4..c87bd936604e 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -52,6 +52,7 @@ pbl-dtb-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES) += socfpga_cyclone5_socrates.dtb.o
+ pbl-dtb-$(CONFIG_MACH_SOCFPGA_TERASIC_SOCKIT) += socfpga_cyclone5_sockit.dtb.o
+ pbl-dtb-$(CONFIG_MACH_SOLIDRUN_CUBOX) += dove-cubox-bb.dtb.o
+ pbl-dtb-$(CONFIG_MACH_SOLIDRUN_MICROSOM) += imx6dl-hummingboard.dtb.o
++pbl-dtb-$(CONFIG_MACH_TECHNEXION_WANDBOARD) += imx6q-wandboard.dtb.o imx6dl-wandboard.dtb.o
+ pbl-dtb-$(CONFIG_MACH_TORADEX_COLIBRI_T20) += tegra20-colibri-iris.dtb.o
+ pbl-dtb-$(CONFIG_MACH_TOSHIBA_AC100) += tegra20-paz00.dtb.o
+ pbl-dtb-$(CONFIG_MACH_TQMA53) += imx53-mba53.dtb.o
+diff --git a/arch/arm/dts/am335x-phytec-phyflex-som.dtsi b/arch/arm/dts/am335x-phytec-phyflex-som.dtsi
+index 6d488faa9308..c60943ccec39 100644
+--- a/arch/arm/dts/am335x-phytec-phyflex-som.dtsi
++++ b/arch/arm/dts/am335x-phytec-phyflex-som.dtsi
+@@ -224,12 +224,13 @@
+ 	phy_id = <&davinci_mdio>, <2>;
+ 	phy-mode = "rmii";
+ 	dual_emac_res_vlan = <2>;
++	status = "disabled";
+ };
+ 
+ &mac {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&emac_rgmii1_pins &emac_rmii2_pins>;
+-	dual_emac;
++	slaves = <1>;
++	pinctrl-0 = <&emac_rgmii1_pins>;
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm/dts/imx6dl-cm-fx6.dts b/arch/arm/dts/imx6dl-cm-fx6.dts
+index d33d14c6139f..0d96b46bf951 100644
+--- a/arch/arm/dts/imx6dl-cm-fx6.dts
++++ b/arch/arm/dts/imx6dl-cm-fx6.dts
+@@ -13,6 +13,7 @@
+ 
+ /dts-v1/;
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-cm-fx6.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6dl-dfi-fs700-m60-6s.dts b/arch/arm/dts/imx6dl-dfi-fs700-m60-6s.dts
+index 36ea00b32ec2..bee4c765d7f3 100644
+--- a/arch/arm/dts/imx6dl-dfi-fs700-m60-6s.dts
++++ b/arch/arm/dts/imx6dl-dfi-fs700-m60-6s.dts
+@@ -15,6 +15,7 @@
+ #endif
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-dfi-fs700-m60.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6dl-eltec-hipercam.dts b/arch/arm/dts/imx6dl-eltec-hipercam.dts
+index 166f8f124462..592358f0c8bd 100644
+--- a/arch/arm/dts/imx6dl-eltec-hipercam.dts
++++ b/arch/arm/dts/imx6dl-eltec-hipercam.dts
+@@ -1,6 +1,7 @@
+ /dts-v1/;
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ 
+ / {
+ 	model = "ELTEC HiPerCam";
+diff --git a/arch/arm/dts/imx6dl-nitrogen6x.dts b/arch/arm/dts/imx6dl-nitrogen6x.dts
+index 5f4d33ccc4b3..3ac9ff3a0d8b 100644
+--- a/arch/arm/dts/imx6dl-nitrogen6x.dts
++++ b/arch/arm/dts/imx6dl-nitrogen6x.dts
+@@ -13,6 +13,7 @@
+ 
+ /dts-v1/;
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-nitrogen6x.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6dl-phytec-pfla02.dtsi b/arch/arm/dts/imx6dl-phytec-pfla02.dtsi
+index 47154d5d9f7e..e0541e00a9d1 100644
+--- a/arch/arm/dts/imx6dl-phytec-pfla02.dtsi
++++ b/arch/arm/dts/imx6dl-phytec-pfla02.dtsi
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-phytec-pfla02.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6dl-sabrelite.dts b/arch/arm/dts/imx6dl-sabrelite.dts
+index 2de04479dc35..907ed282b76f 100644
+--- a/arch/arm/dts/imx6dl-sabrelite.dts
++++ b/arch/arm/dts/imx6dl-sabrelite.dts
+@@ -12,6 +12,7 @@
+ 
+ /dts-v1/;
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-sabrelite.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6dl-tqma6s.dtsi b/arch/arm/dts/imx6dl-tqma6s.dtsi
+index b2cbb2932080..23081eda30c9 100644
+--- a/arch/arm/dts/imx6dl-tqma6s.dtsi
++++ b/arch/arm/dts/imx6dl-tqma6s.dtsi
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-tqma6x.dtsi"
+ 
+ &iomuxc {
+diff --git a/arch/arm/dts/imx6dl-wandboard.dts b/arch/arm/dts/imx6dl-wandboard.dts
+new file mode 100644
+index 000000000000..a8674004c8be
+--- /dev/null
++++ b/arch/arm/dts/imx6dl-wandboard.dts
+@@ -0,0 +1,37 @@
++#include <arm/imx6dl-wandboard.dts>
++#include <dt-bindings/gpio/gpio.h>
++#include "imx6dl.dtsi"
++
++/ {
++	chosen {
++		linux,stdout-path = &uart1;
++
++		environment@0 {
++			compatible = "barebox,environment";
++			device-path = &environment_usdhc3;
++		};
++	};
++
++	memory {
++		reg = <0x0 0x0>;
++	};
++};
++
++&ocotp {
++	barebox,provide-mac-address = <&fec 0x620>;
++};
++
++&usdhc3 {
++	#address-cells = <1>;
++	#size-cells = <1>;
++
++	partition@0 {
++		label = "barebox";
++		reg = <0x0 0xc0000>;
++	};
++
++	environment_usdhc3: partition@c0000 {
++		label = "barebox-environment";
++		reg = <0xc0000 0x40000>;
++	};
++};
+diff --git a/arch/arm/dts/imx6dl.dtsi b/arch/arm/dts/imx6dl.dtsi
+index 4daf040e667f..5b257db030e1 100644
+--- a/arch/arm/dts/imx6dl.dtsi
++++ b/arch/arm/dts/imx6dl.dtsi
+@@ -1,2 +1 @@
+ #include "imx6qdl.dtsi"
+-#include <arm/imx6dl.dtsi>
+diff --git a/arch/arm/dts/imx6q-embedsky-e9.dtsi b/arch/arm/dts/imx6q-embedsky-e9.dtsi
+index f117cae920cd..e745808f093d 100644
+--- a/arch/arm/dts/imx6q-embedsky-e9.dtsi
++++ b/arch/arm/dts/imx6q-embedsky-e9.dtsi
+@@ -91,42 +91,6 @@
+ 
+ };
+ 
+-&audmux {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_audmux>;
+-	status = "okay";
+-};
+-
+-&fec {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_enet>;
+-	phy-mode = "rgmii";
+-	phy-supply=<&reg_3p3v>;
+-	status = "okay";
+-};
+-
+-&i2c1 {
+-	clock-frequency = <100000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_i2c1>;
+-	status = "okay";
+-
+-};
+-
+-&i2c2 {
+-	clock-frequency = <100000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_i2c2>;
+-	status = "okay";
+-};
+-
+-&i2c3 {
+-	clock-frequency = <100000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_i2c3>;
+-	status = "okay";
+-};
+-
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hog>;
+@@ -302,7 +266,39 @@
+ 	};
+ };
+ 
+-&ldb {
++&audmux {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_audmux>;
++	status = "okay";
++};
++
++&fec {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enet>;
++	phy-mode = "rgmii";
++	phy-supply=<&reg_3p3v>;
++	status = "okay";
++};
++
++&i2c1 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c1>;
++	status = "okay";
++
++};
++
++&i2c2 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++	status = "okay";
++};
++
++&i2c3 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c3>;
+ 	status = "okay";
+ };
+ 
+@@ -382,11 +378,3 @@
+ &sata {
+ 	status = "okay";
+ };
+-
+-&usdhc3 {
+-	status = "disabled";
+-};
+-
+-&ecspi1 {
+-	status = "disabled";
+-};
+diff --git a/arch/arm/dts/imx6q-wandboard.dts b/arch/arm/dts/imx6q-wandboard.dts
+new file mode 100644
+index 000000000000..26d8a0077d1f
+--- /dev/null
++++ b/arch/arm/dts/imx6q-wandboard.dts
+@@ -0,0 +1,37 @@
++#include <arm/imx6q-wandboard.dts>
++#include <dt-bindings/gpio/gpio.h>
++#include "imx6q.dtsi"
++
++/ {
++	chosen {
++		linux,stdout-path = &uart1;
++
++		environment@0 {
++			compatible = "barebox,environment";
++			device-path = &environment_usdhc3;
++		};
++	};
++
++	memory {
++		reg = <0x0 0x0>;
++	};
++};
++
++&ocotp {
++	barebox,provide-mac-address = <&fec 0x620>;
++};
++
++&usdhc3 {
++	#address-cells = <1>;
++	#size-cells = <1>;
++
++	partition@0 {
++		label = "barebox";
++		reg = <0x0 0xc0000>;
++	};
++
++	environment_usdhc3: partition@c0000 {
++		label = "barebox-environment";
++		reg = <0xc0000 0x40000>;
++	};
++};
+diff --git a/arch/arm/dts/imx6s-phytec-pfla02.dtsi b/arch/arm/dts/imx6s-phytec-pfla02.dtsi
+index d84fa4f15f9c..25af12f2bc1e 100644
+--- a/arch/arm/dts/imx6s-phytec-pfla02.dtsi
++++ b/arch/arm/dts/imx6s-phytec-pfla02.dtsi
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ #include "imx6qdl-phytec-pfla02.dtsi"
+ 
+ / {
+diff --git a/arch/arm/dts/imx6s-riotboard.dts b/arch/arm/dts/imx6s-riotboard.dts
+index a522dd99345f..e14363f9af0c 100644
+--- a/arch/arm/dts/imx6s-riotboard.dts
++++ b/arch/arm/dts/imx6s-riotboard.dts
+@@ -7,6 +7,7 @@
+ /dts-v1/;
+ 
+ #include "imx6dl.dtsi"
++#include <arm/imx6dl.dtsi>
+ 
+ / {
+ 	model = "RIoTboard Solo";
+diff --git a/arch/arm/include/asm/barebox-arm.h b/arch/arm/include/asm/barebox-arm.h
+index 0b8acb8b8e4b..76e356413aec 100644
+--- a/arch/arm/include/asm/barebox-arm.h
++++ b/arch/arm/include/asm/barebox-arm.h
+@@ -75,6 +75,15 @@ static inline void boarddata_create(void *adr, u32 machine)
+ 
+ u32 barebox_arm_machine(void);
+ 
++struct barebox_arm_boarddata_compressed_dtb {
++#define BAREBOX_ARM_BOARDDATA_COMPRESSED_DTB_MAGIC 0x7b66bcbd
++	u32 magic;
++	u32 datalen;
++	u32 datalen_uncompressed;
++};
++
++struct barebox_arm_boarddata *barebox_arm_get_boarddata(void);
++
+ #if defined(CONFIG_RELOCATABLE) && defined(CONFIG_ARM_EXCEPTIONS)
+ void arm_fixup_vectors(void);
+ #else
+diff --git a/arch/arm/include/asm/mmu.h b/arch/arm/include/asm/mmu.h
+index 3b19e9ef3c5c..8de654465743 100644
+--- a/arch/arm/include/asm/mmu.h
++++ b/arch/arm/include/asm/mmu.h
+@@ -27,32 +27,17 @@ static inline void setup_dma_coherent(unsigned long offset)
+ }
+ 
+ #ifdef CONFIG_MMU
+-void remap_range(void *_start, size_t size, uint32_t flags);
++#define ARCH_HAS_REMAP
++#define MAP_ARCH_DEFAULT MAP_CACHED
++int arch_remap_range(void *_start, size_t size, unsigned flags);
+ void *map_io_sections(unsigned long physaddr, void *start, size_t size);
+-uint32_t mmu_get_pte_cached_flags(void);
+-uint32_t mmu_get_pte_uncached_flags(void);
+-
+ #else
+-
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ static inline void *map_io_sections(unsigned long phys, void *start, size_t size)
+ {
+ 	return (void *)phys;
+ }
+ 
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
+-
+ #endif
+ 
+ #ifdef CONFIG_CACHE_L2X0
+diff --git a/arch/arm/include/asm/semihosting.h b/arch/arm/include/asm/semihosting.h
+new file mode 100644
+index 000000000000..b478dadb3afa
+--- /dev/null
++++ b/arch/arm/include/asm/semihosting.h
+@@ -0,0 +1,19 @@
++#ifndef __ASM_ARM_SEMIHOSTING_H
++#define __ASM_ARM_SEMIHOSTING_H
++
++int semihosting_open(const char *fname, int flags);
++int semihosting_close(int fd);
++int semihosting_writec(char c);
++int semihosting_write0(const char *str);
++ssize_t semihosting_write(int fd, const void *buf, size_t count);
++ssize_t semihosting_read(int fd, void *buf, size_t count);
++int semihosting_readc(void);
++int semihosting_isatty(int fd);
++int semihosting_seek(int fd, loff_t pos);
++int semihosting_flen(int fd);
++int semihosting_remove(const char *fname);
++int semihosting_rename(const char *fname1, const char *fname2);
++int semihosting_errno(void);
++int semihosting_system(const char *command);
++
++#endif
+diff --git a/arch/arm/lib/Makefile b/arch/arm/lib/Makefile
+index a32879537c67..e1c6f5bfd3d8 100644
+--- a/arch/arm/lib/Makefile
++++ b/arch/arm/lib/Makefile
+@@ -20,6 +20,7 @@ pbl-y	+= runtime-offset.o
+ obj-$(CONFIG_ARM_OPTIMZED_STRING_FUNCTIONS)	+= memcpy.o
+ obj-$(CONFIG_ARM_OPTIMZED_STRING_FUNCTIONS)	+= memset.o
+ obj-$(CONFIG_ARM_UNWIND) += unwind.o
++obj-$(CONFIG_ARM_SEMIHOSTING) += semihosting-trap.o semihosting.o
+ obj-$(CONFIG_MODULES) += module.o
+ extra-y += barebox.lds
+ 
+diff --git a/arch/arm/lib/semihosting-trap.S b/arch/arm/lib/semihosting-trap.S
+new file mode 100644
+index 000000000000..9e40ebfe2163
+--- /dev/null
++++ b/arch/arm/lib/semihosting-trap.S
+@@ -0,0 +1,28 @@
++/*
++ * semihosting-trap.S -- Assembly code needed to make a semihosting call
++ *
++ * Copyright (c) 2015 Zodiac Inflight Innovations
++ * Author: Andrey Smirnov <andrew.smirnov@gmail.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/linkage.h>
++#include <asm/unified.h>
++
++.section .text.semihosting_trap
++ENTRY(semihosting_trap)
++	@ In supervisor mode SVC would clobber LR
++	push	{lr}
++	ARM(	svc	#0x123456	)
++	THUMB(	svc	#0xAB		)
++	pop	{pc}
++ENDPROC(semihosting_trap)
+diff --git a/arch/arm/lib/semihosting.c b/arch/arm/lib/semihosting.c
+new file mode 100644
+index 000000000000..a7351961dcff
+--- /dev/null
++++ b/arch/arm/lib/semihosting.c
+@@ -0,0 +1,227 @@
++/*
++ * semihosting.c -- ARM Semihoting API implementation
++ *
++ * Copyright (c) 2015 Zodiac Inflight Innovations
++ * Author: Andrey Smirnov <andrew.smirnov@gmail.com>
++ *
++ * based on a smiliar code from U-Boot
++ * Copyright (c) 2014 Broadcom Corporation
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <common.h>
++#include <command.h>
++#include <fcntl.h>
++
++#ifndef O_BINARY
++#define O_BINARY	0
++#endif
++
++
++enum {
++	SEMIHOSTING_SYS_OPEN	= 0x01,
++	SEMIHOSTING_SYS_CLOSE	= 0x02,
++	SEMIHOSTING_SYS_WRITEC	= 0x03,
++	SEMIHOSTING_SYS_WRITE0	= 0x04,
++	SEMIHOSTING_SYS_WRITE	= 0x05,
++	SEMIHOSTING_SYS_READ	= 0x06,
++	SEMIHOSTING_SYS_READC	= 0x07,
++	/* SYS_ISERROR is not implemented  */
++	SEMIHOSTING_SYS_ISATTY	= 0x09,
++	SEMIHOSTING_SYS_SEEK	= 0x0a,
++	SEMIHOSTING_SYS_FLEN	= 0x0c,
++	SEMIHOSTING_SYS_REMOVE	= 0x0e,
++	SEMIHOSTING_SYS_RENAME	= 0x0f,
++	SEMIHOSTING_SYS_TIME	= 0x11,
++	SEMIHOSTING_SYS_ERRNO	= 0x13,
++	/* SYS_GET_CMDLINE is not implemented */
++	/* SYS_HEAPINFO is not implemented */
++	/* angel_SWIreason_ReportException is not implemented */
++	SEMIHOSTING_SYS_SYSTEM	= 0x12,
++};
++
++uint32_t semihosting_trap(uint32_t sysnum, void *addr);
++
++static uint32_t semihosting_flags_to_mode(int flags)
++{
++	static const int semihosting_open_modeflags[12] = {
++		O_RDONLY,
++		O_RDONLY | O_BINARY,
++		O_RDWR,
++		O_RDWR | O_BINARY,
++		O_WRONLY | O_CREAT | O_TRUNC,
++		O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
++		O_RDWR | O_CREAT | O_TRUNC,
++		O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
++		O_WRONLY | O_CREAT | O_APPEND,
++		O_WRONLY | O_CREAT | O_APPEND | O_BINARY,
++		O_RDWR | O_CREAT | O_APPEND,
++		O_RDWR | O_CREAT | O_APPEND | O_BINARY
++	};
++
++	int i;
++	for (i = 0; i < ARRAY_SIZE(semihosting_open_modeflags); i++) {
++		if (semihosting_open_modeflags[i] == flags)
++			return i;
++	}
++
++	return 0;
++}
++
++int semihosting_open(const char *fname, int flags)
++{
++	struct __packed {
++		uint32_t fname;
++		uint32_t mode;
++		uint32_t len;
++	} open = {
++		.fname = (uint32_t)fname,
++		.len = strlen(fname),
++		.mode = semihosting_flags_to_mode(flags),
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_OPEN, &open);
++}
++EXPORT_SYMBOL(semihosting_open);
++
++int semihosting_close(int fd)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_CLOSE, &fd);
++}
++EXPORT_SYMBOL(semihosting_close);
++
++int semihosting_writec(char c)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_WRITEC, &c);
++}
++EXPORT_SYMBOL(semihosting_writec);
++
++int semihosting_write0(const char *str)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_WRITE0, (void *)str);
++}
++EXPORT_SYMBOL(semihosting_write0);
++
++struct __packed semihosting_file_io {
++	uint32_t fd;
++	uint32_t memp;
++	uint32_t len;
++};
++
++ssize_t semihosting_write(int fd, const void *buf, size_t count)
++{
++	struct semihosting_file_io write = {
++		.fd = fd,
++		.memp = (uint32_t)buf,
++		.len = count,
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_WRITE, &write);
++}
++EXPORT_SYMBOL(semihosting_write);
++
++ssize_t semihosting_read(int fd, void *buf, size_t count)
++{
++	struct semihosting_file_io read = {
++		.fd = fd,
++		.memp = (uint32_t)buf,
++		.len = count,
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_READ, &read);
++}
++EXPORT_SYMBOL(semihosting_read);
++
++int semihosting_readc(void)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_READC, NULL);
++}
++EXPORT_SYMBOL(semihosting_readc);
++
++int semihosting_isatty(int fd)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_ISATTY, &fd);
++}
++EXPORT_SYMBOL(semihosting_isatty);
++
++int semihosting_seek(int fd, off_t pos)
++{
++	struct __packed {
++		uint32_t fd;
++		uint32_t pos;
++	} seek = {
++		.fd = fd,
++		.pos = pos,
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_SEEK, &seek);
++}
++EXPORT_SYMBOL(semihosting_seek);
++
++int semihosting_flen(int fd)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_FLEN, &fd);
++}
++EXPORT_SYMBOL(semihosting_flen);
++
++int semihosting_remove(const char *fname)
++{
++	struct __packed {
++		uint32_t fname;
++		uint32_t fname_length;
++	} remove = {
++		.fname = (uint32_t)fname,
++		.fname_length = strlen(fname),
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_REMOVE, &remove);
++}
++EXPORT_SYMBOL(semihosting_remove);
++
++int semihosting_rename(const char *fname1, const char *fname2)
++{
++	struct __packed {
++		uint32_t fname1;
++		uint32_t fname1_length;
++		uint32_t fname2;
++		uint32_t fname2_length;
++	} rename = {
++		.fname1 = (uint32_t)fname1,
++		.fname1_length = strlen(fname1),
++		.fname2 = (uint32_t)fname2,
++		.fname2_length = strlen(fname2),
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_RENAME, &rename);
++}
++EXPORT_SYMBOL(semihosting_rename);
++
++int semihosting_errno(void)
++{
++	return semihosting_trap(SEMIHOSTING_SYS_ERRNO, NULL);
++}
++EXPORT_SYMBOL(semihosting_errno);
++
++
++int semihosting_system(const char *command)
++{
++	struct __packed {
++		uint32_t cmd;
++		uint32_t cmd_len;
++	} system = {
++		.cmd = (uint32_t)command,
++		.cmd_len = strlen(command),
++	};
++
++	return semihosting_trap(SEMIHOSTING_SYS_SYSTEM, &system);
++}
++EXPORT_SYMBOL(semihosting_system);
+diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
+index f2dc52d518bf..0a7b517b4c5f 100644
+--- a/arch/arm/mach-imx/Kconfig
++++ b/arch/arm/mach-imx/Kconfig
+@@ -330,6 +330,11 @@ config MACH_SOLIDRUN_MICROSOM
+ 	bool "SolidRun MicroSOM based devices"
+ 	select ARCH_IMX6
+ 
++config MACH_TECHNEXION_WANDBOARD
++	bool "Technexion Wandboard"
++	select ARCH_IMX6
++	select ARM_USE_COMPRESSED_DTB
++
+ config MACH_EMBEST_RIOTBOARD
+ 	bool "Embest RIoTboard"
+ 	select ARCH_IMX6
+diff --git a/arch/arm/mach-imx/imx6-mmdc.c b/arch/arm/mach-imx/imx6-mmdc.c
+index 64fb62401d97..146df573e4ee 100644
+--- a/arch/arm/mach-imx/imx6-mmdc.c
++++ b/arch/arm/mach-imx/imx6-mmdc.c
+@@ -103,9 +103,9 @@ int mmdc_do_write_level_calibration(void)
+ 	val |= 0x00005500;
+ 	writel(val, (P0_IPS + MDPDC));
+ 
+-	/* enable Adopt power down timer: */
++	/* enable auto power down timer: */
+ 	val = readl(P0_IPS + MAPSR);
+-	val &= 0xfffffff7;
++	val &= ~1;
+ 	writel(val, (P0_IPS + MAPSR));
+ 
+ 	/* clear CON_REQ */
+@@ -470,11 +470,11 @@ int mmdc_do_dqs_calibration(void)
+ 	writel(v, P0_IPS + MDPDC);
+ 
+ 	/* enable Adopt power down timer */
+-	v = readl(P0_IPS + MAPSR) & 0xfffffff7;
++	v = readl(P0_IPS + MAPSR) & 0xfffffffe;
+ 	writel(v, P0_IPS + MAPSR);
+ 
+ 	/* restore MDMISC value (RALAT, WALAT) */
+-	writel(esdmisc_val, P1_IPS + MDMISC);
++	writel(esdmisc_val, P0_IPS + MDMISC);
+ 
+ 	/* clear DQS pull ups */
+ 	v = readl(IOMUXC_SW_PAD_CTL_PAD_DRAM_SDQS0) & ~0x7000;
+diff --git a/arch/arm/mach-imx/imx6.c b/arch/arm/mach-imx/imx6.c
+index ceabe19dc2ab..0fdd785c6dc6 100644
+--- a/arch/arm/mach-imx/imx6.c
++++ b/arch/arm/mach-imx/imx6.c
+@@ -23,6 +23,7 @@
+ #include <mach/imx6-regs.h>
+ #include <mach/generic.h>
+ #include <asm/mmu.h>
++#include <asm/cache-l2x0.h>
+ 
+ #define SI_REV 0x260
+ 
+@@ -195,8 +196,6 @@ int imx6_devices_init(void)
+ 	return 0;
+ }
+ 
+-#define L310_PREFETCH_CTRL		0xF60
+-
+ static int imx6_mmu_init(void)
+ {
+ 	void __iomem *l2x0_base = IOMEM(0x00a02000);
+@@ -205,8 +204,8 @@ static int imx6_mmu_init(void)
+ 	if (!cpu_is_mx6())
+ 		return 0;
+ 
+-	/* Configure the L2 PREFETCH and POWER registers */
+-	val = readl(l2x0_base + L310_PREFETCH_CTRL);
++	/* configure the PREFETCH register */
++	val = readl(l2x0_base + L2X0_PREFETCH_CTRL);
+ 	val |= 0x70800000;
+ 
+ 	/*
+@@ -221,10 +220,60 @@ static int imx6_mmu_init(void)
+ 	if (cpu_is_mx6q())
+ 		val &= ~(1 << 30 | 1 << 23);
+ 
+-	writel(val, l2x0_base + L310_PREFETCH_CTRL);
++	writel(val, l2x0_base + L2X0_PREFETCH_CTRL);
++
++	/*
++	 * Set shared attribute override bit in AUX_CTRL register, this is done
++	 * here as it must be done regardless of the usage of the L2 cache in
++	 * barebox itself. The kernel will not touch this bit, but it must be
++	 * set to make the system compliant to the ARMv7 ARM RevC clarifications
++	 * regarding conflicting memory aliases.
++	 */
++	val = readl(l2x0_base + L2X0_AUX_CTRL);
++	val |= (1 << 22);
++	writel(val, l2x0_base + L2X0_AUX_CTRL);
+ 
+ 	l2x0_init(l2x0_base, 0x0, ~0UL);
+ 
+ 	return 0;
+ }
+ postmmu_initcall(imx6_mmu_init);
++
++#define SCU_CONFIG	0x04
++
++static int imx6_fixup_cpus(struct device_node *root, void *context)
++{
++	struct device_node *cpus_node, *np, *tmp;
++	unsigned long scu_phys_base;
++	unsigned int max_core_index;
++
++	cpus_node = of_find_node_by_name(root, "cpus");
++	if (!cpus_node)
++		return 0;
++
++	/* get actual number of available CPU cores from SCU */
++	asm("mrc p15, 4, %0, c15, c0, 0" : "=r" (scu_phys_base));
++	max_core_index = (readl(IOMEM(scu_phys_base) + SCU_CONFIG) & 0x03);
++
++	for_each_child_of_node_safe(cpus_node, tmp, np) {
++		u32 cpu_index;
++
++		if (of_property_read_u32(np, "reg", &cpu_index))
++			continue;
++
++		if (cpu_index > max_core_index)
++			of_delete_node(np);
++	}
++
++	return 0;
++}
++
++static int imx6_fixup_cpus_register(void)
++{
++	if (!of_machine_is_compatible("fsl,imx6q") &&
++	    !of_machine_is_compatible("fsl,imx6dl"))
++		return 0;
++
++	return of_register_fixup(imx6_fixup_cpus, NULL);
++}
++device_initcall(imx6_fixup_cpus_register);
+diff --git a/arch/arm/mach-omap/omap_generic.c b/arch/arm/mach-omap/omap_generic.c
+index 165487c645c7..071a1bfced66 100644
+--- a/arch/arm/mach-omap/omap_generic.c
++++ b/arch/arm/mach-omap/omap_generic.c
+@@ -107,7 +107,8 @@ const char *omap_get_bootmmc_devname(void)
+ 	return omap_bootmmc_dev;
+ }
+ 
+-#if defined(CONFIG_DEFAULT_ENVIRONMENT)
++#if defined(CONFIG_ENV_HANDLING)
++#define ENV_PATH "/boot/barebox.env"
+ static int omap_env_init(void)
+ {
+ 	struct stat s;
+@@ -132,18 +133,19 @@ static int omap_env_init(void)
+ 	free(partname);
+ 
+ 	if (ret) {
+-		printf("no %s. using default env\n", diskdev);
++		pr_err("Failed to load environment: no device '%s'\n", diskdev);
+ 		return 0;
+ 	}
+ 
+ 	mkdir("/boot", 0666);
+ 	ret = mount(diskdev, "fat", "/boot", NULL);
+ 	if (ret) {
+-		printf("failed to mount %s\n", diskdev);
++		pr_err("Failed to load environment: mount %s failed (%d)\n", diskdev, ret);
+ 		return 0;
+ 	}
+ 
+-	default_environment_path_set("/boot/barebox.env");
++	pr_debug("Loading default env from %s on device %s\n", ENV_PATH, diskdev);
++	default_environment_path_set(ENV_PATH);
+ 
+ 	return 0;
+ }
+diff --git a/arch/arm/mach-socfpga/generic.c b/arch/arm/mach-socfpga/generic.c
+index 62593549d6e4..234dc521455a 100644
+--- a/arch/arm/mach-socfpga/generic.c
++++ b/arch/arm/mach-socfpga/generic.c
+@@ -76,7 +76,8 @@ static int socfpga_init(void)
+ }
+ core_initcall(socfpga_init);
+ 
+-#if defined(CONFIG_DEFAULT_ENVIRONMENT)
++#if defined(CONFIG_ENV_HANDLING)
++#define ENV_PATH "/boot/barebox.env"
+ static int socfpga_env_init(void)
+ {
+ 	struct stat s;
+@@ -92,18 +93,19 @@ static int socfpga_env_init(void)
+ 	ret = stat(partname, &s);
+ 
+ 	if (ret) {
+-		printf("no %s. using default env\n", diskdev);
++		pr_err("Failed to load environment: no device '%s'\n", diskdev);
+ 		goto out_free;
+ 	}
+ 
+ 	mkdir("/boot", 0666);
+ 	ret = mount(partname, "fat", "/boot", NULL);
+ 	if (ret) {
+-		printf("failed to mount %s\n", diskdev);
++		pr_err("Failed to load environment: mount %s failed (%d)\n", partname, ret);
+ 		goto out_free;
+ 	}
+ 
+-	default_environment_path_set("/boot/barebox.env");
++	pr_debug("Loading default env from %s on device %s\n", ENV_PATH, diskdev);
++	default_environment_path_set(ENV_PATH);
+ 
+ out_free:
+ 	free(partname);
+diff --git a/arch/blackfin/include/asm/mmu.h b/arch/blackfin/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/blackfin/include/asm/mmu.h
++++ b/arch/blackfin/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/arch/mips/Makefile b/arch/mips/Makefile
+index 6ef2bf75c35f..75761b5e7801 100644
+--- a/arch/mips/Makefile
++++ b/arch/mips/Makefile
+@@ -80,6 +80,7 @@ board-$(CONFIG_BOARD_NETGEAR_WG102)	:= netgear-wg102
+ 
+ machine-$(CONFIG_MACH_MIPS_ATH79)	:= ath79
+ board-$(CONFIG_BOARD_TPLINK_MR3020)	:= tplink-mr3020
++board-$(CONFIG_BOARD_BLACK_SWIFT)	:= black-swift
+ 
+ machine-$(CONFIG_MACH_MIPS_BCM47XX)	:= bcm47xx
+ board-$(CONFIG_BOARD_DLINK_DIR320)	:= dlink-dir-320
+diff --git a/arch/mips/boards/black-swift/Makefile b/arch/mips/boards/black-swift/Makefile
+new file mode 100644
+index 000000000000..dcfc2937d325
+--- /dev/null
++++ b/arch/mips/boards/black-swift/Makefile
+@@ -0,0 +1 @@
++obj-y += board.o
+diff --git a/arch/mips/boards/black-swift/board.c b/arch/mips/boards/black-swift/board.c
+new file mode 100644
+index 000000000000..2e2ed2075b06
+--- /dev/null
++++ b/arch/mips/boards/black-swift/board.c
+@@ -0,0 +1,27 @@
++/*
++ * Copyright (C) 2015 Antony Pavlov <antonynpavlov@gmail.com>
++ *
++ * This file is part of barebox.
++ * See file CREDITS for list of people who contributed to this project.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2
++ * as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <common.h>
++#include <init.h>
++
++static int model_hostname_init(void)
++{
++	barebox_set_hostname("black-swift");
++
++	return 0;
++}
++postcore_initcall(model_hostname_init);
+diff --git a/arch/mips/boards/black-swift/include/board/board_pbl_start.h b/arch/mips/boards/black-swift/include/board/board_pbl_start.h
+new file mode 100644
+index 000000000000..f78e0d9fb28d
+--- /dev/null
++++ b/arch/mips/boards/black-swift/include/board/board_pbl_start.h
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2013, 2015 Antony Pavlov <antonynpavlov@gmail.com>
++ * Copyright (C) 2013 Oleksij Rempel <linux@rempel-privat.de>
++ *
++ * This file is part of barebox.
++ * See file CREDITS for list of people who contributed to this project.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2
++ * as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <asm/pbl_macros.h>
++#include <mach/pbl_macros.h>
++#include <asm/pbl_nmon.h>
++
++	.macro	board_pbl_start
++	.set	push
++	.set	noreorder
++
++	mips_barebox_10h
++
++	mips_disable_interrupts
++
++	pbl_ar9331_pll
++	pbl_ar9331_ddr2_config
++
++	pbl_ar9331_uart_enable
++	debug_ll_ar9331_init
++	mips_nmon
++
++	copy_to_link_location	pbl_start
++
++	.set	pop
++	.endm
+diff --git a/arch/mips/boards/tplink-mr3020/include/board/board_pbl_start.h b/arch/mips/boards/tplink-mr3020/include/board/board_pbl_start.h
+index 944a5103833d..08204fe656a6 100644
+--- a/arch/mips/boards/tplink-mr3020/include/board/board_pbl_start.h
++++ b/arch/mips/boards/tplink-mr3020/include/board/board_pbl_start.h
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include <asm/pbl_macros.h>
++#include <mach/pbl_macros.h>
+ #include <asm/pbl_nmon.h>
+ 
+ 	.macro	board_pbl_start
+@@ -27,6 +28,11 @@
+ 
+ 	mips_disable_interrupts
+ 
++	pbl_ar9331_pll
++	pbl_ar9331_ddr1_config
++
++	pbl_ar9331_uart_enable
++	debug_ll_ar9331_init
+ 	mips_nmon
+ 
+ 	copy_to_link_location	pbl_start
+diff --git a/arch/mips/configs/black-swift_defconfig b/arch/mips/configs/black-swift_defconfig
+new file mode 100644
+index 000000000000..74449687abf3
+--- /dev/null
++++ b/arch/mips/configs/black-swift_defconfig
+@@ -0,0 +1,46 @@
++CONFIG_BUILTIN_DTB=y
++CONFIG_BUILTIN_DTB_NAME="black-swift"
++CONFIG_MACH_MIPS_ATH79=y
++CONFIG_BOARD_BLACK_SWIFT=y
++CONFIG_NMON=y
++CONFIG_NMON_USER_START=y
++CONFIG_NMON_1S_DELAY=0x100000
++CONFIG_NMON_USER_START_DELAY=0x5
++CONFIG_NMON_HELP=y
++CONFIG_PBL_IMAGE=y
++CONFIG_IMAGE_COMPRESSION_XZKERN=y
++CONFIG_MALLOC_TLSF=y
++CONFIG_CMDLINE_EDITING=y
++CONFIG_AUTO_COMPLETE=y
++CONFIG_IMD=y
++CONFIG_PARTITION=y
++CONFIG_DEBUG_LL=y
++CONFIG_LONGHELP=y
++CONFIG_CMD_IOMEM=y
++CONFIG_CMD_MEMINFO=y
++# CONFIG_CMD_BOOTM is not set
++CONFIG_CMD_GO=y
++CONFIG_CMD_LOADB=y
++CONFIG_CMD_LOADY=y
++CONFIG_CMD_RESET=y
++CONFIG_CMD_PARTITION=y
++CONFIG_CMD_GLOBAL=y
++CONFIG_CMD_SHA1SUM=y
++CONFIG_CMD_LET=y
++CONFIG_CMD_SLEEP=y
++CONFIG_CMD_EDIT=y
++CONFIG_CMD_MM=y
++CONFIG_CMD_CLK=y
++CONFIG_CMD_FLASH=y
++CONFIG_CMD_SPI=y
++CONFIG_CMD_OF_NODE=y
++CONFIG_CMD_OF_PROPERTY=y
++CONFIG_CMD_OFTREE=y
++CONFIG_OFDEVICE=y
++CONFIG_DRIVER_SERIAL_AR933X=y
++CONFIG_DRIVER_SPI_ATH79=y
++CONFIG_MTD=y
++# CONFIG_MTD_OOB_DEVICE is not set
++CONFIG_MTD_M25P80=y
++CONFIG_DIGEST_SHA224_GENERIC=y
++CONFIG_DIGEST_SHA256_GENERIC=y
+diff --git a/arch/mips/configs/tplink-mr3020_defconfig b/arch/mips/configs/tplink-mr3020_defconfig
+index b675993e0e21..f2ba2da16766 100644
+--- a/arch/mips/configs/tplink-mr3020_defconfig
++++ b/arch/mips/configs/tplink-mr3020_defconfig
+@@ -1,6 +1,9 @@
+ CONFIG_BUILTIN_DTB=y
+ CONFIG_BUILTIN_DTB_NAME="tplink-mr3020"
+ CONFIG_MACH_MIPS_ATH79=y
++CONFIG_PBL_IMAGE=y
++CONFIG_IMAGE_COMPRESSION_XZKERN=y
++CONFIG_MALLOC_TLSF=y
+ CONFIG_CMDLINE_EDITING=y
+ CONFIG_AUTO_COMPLETE=y
+ CONFIG_LONGHELP=y
+diff --git a/arch/mips/dts/black-swift.dts b/arch/mips/dts/black-swift.dts
+new file mode 100644
+index 000000000000..270374d530e6
+--- /dev/null
++++ b/arch/mips/dts/black-swift.dts
+@@ -0,0 +1,34 @@
++/dts-v1/;
++
++#include "ar9331.dtsi"
++
++/ {
++	model = "Black Swift";
++	compatible = "smartlx,black-swift";
++
++	memory {
++		reg = <0x00000000 0x4000000>;
++	};
++
++	aliases {
++		spiflash = &spiflash;
++	};
++};
++
++&serial0 {
++	status = "okay";
++};
++
++&spi {
++	num-chipselects = <1>;
++	status = "okay";
++
++	/* Winbond W25Q128FV SPI flash */
++	spiflash: m25p80@0 {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		compatible = "m25p80";
++		spi-max-frequency = <104000000>;
++		reg = <0>;
++	};
++};
+diff --git a/arch/mips/include/asm/mmu.h b/arch/mips/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/mips/include/asm/mmu.h
++++ b/arch/mips/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/arch/mips/include/asm/pbl_macros.h b/arch/mips/include/asm/pbl_macros.h
+index 1d9d6ab7ef11..681b40a305c5 100644
+--- a/arch/mips/include/asm/pbl_macros.h
++++ b/arch/mips/include/asm/pbl_macros.h
+@@ -28,6 +28,38 @@
+ #include <generated/compile.h>
+ #include <generated/utsrelease.h>
+ 
++	.macro	pbl_reg_writel val addr
++	.set push
++	.set noreorder
++	li	t9, \addr
++	li	t8, \val
++	sw	t8, 0(t9)
++	.set	pop
++	.endm
++
++	.macro	pbl_reg_set val addr
++	.set push
++	.set noreorder
++	li	t9, \addr
++	li	t8, \val
++	lw	t7, 0(t9)
++	or	t7, t8
++	sw	t7, 0(t9)
++	.set	pop
++	.endm
++
++	.macro	pbl_reg_clr clr addr
++	.set push
++	.set noreorder
++	li	t9, \addr
++	li	t8, \clr
++	lw	t7, 0(t9)
++	not	t8, t8
++	and	t7, t8
++	sw	t7, 0(t9)
++	.set	pop
++	.endm
++
+ 	.macro	pbl_sleep reg count
+ 	.set push
+ 	.set noreorder
+diff --git a/arch/mips/lib/c-r4k.c b/arch/mips/lib/c-r4k.c
+index 01b8665193a8..0a9dd0eb9a93 100644
+--- a/arch/mips/lib/c-r4k.c
++++ b/arch/mips/lib/c-r4k.c
+@@ -91,7 +91,38 @@ static void probe_pcache(void)
+ 	}
+ }
+ 
++#define CONFIG_M	(1 << 31)
++#define CONFIG2_SS_OFFSET	8
++#define CONFIG2_SL_OFFSET	4
++#define CONFIG2_SA_OFFSET	0
++static void probe_scache(void)
++{
++	struct cpuinfo_mips *c = &current_cpu_data;
++	unsigned int config2, config1, config = read_c0_config();
++	unsigned int ss, sl, sa;
++
++	if ((config & CONFIG_M) == 0)
++		goto noscache;
++	config1 = read_c0_config1();
++	if ((config1 & CONFIG_M) == 0)
++		goto noscache;
++	config2 = read_c0_config2();
++	ss = 0xf & (config2 >> CONFIG2_SS_OFFSET);
++	sl = 0xf & (config2 >> CONFIG2_SL_OFFSET);
++	sa = 0xf & (config2 >> CONFIG2_SA_OFFSET);
++	if (sl == 0)
++		goto noscache;
++	c->scache.linesz = 1 << (sl + 1);
++	c->scache.sets = 64 << ss;
++	c->scache.ways = 1 + sa;
++	c->scache.waysize = c->scache.linesz * c->scache.sets;
++	return;
++noscache:
++	c->scache.flags = MIPS_CACHE_NOT_PRESENT;
++}
++
+ void r4k_cache_init(void)
+ {
+ 	probe_pcache();
++	probe_scache();
+ }
+diff --git a/arch/mips/lib/cpu-probe.c b/arch/mips/lib/cpu-probe.c
+index 4622bcdd61de..71dbaf63827d 100644
+--- a/arch/mips/lib/cpu-probe.c
++++ b/arch/mips/lib/cpu-probe.c
+@@ -75,8 +75,6 @@ static void decode_configs(struct cpuinfo_mips *c)
+ 	c->options = MIPS_CPU_4KEX | MIPS_CPU_4K_CACHE | MIPS_CPU_COUNTER |
+ 	             MIPS_CPU_DIVEC | MIPS_CPU_LLSC | MIPS_CPU_MCHECK;
+ 
+-	c->scache.flags = MIPS_CACHE_NOT_PRESENT;
+-
+ 	ok = decode_config0(c);			/* Read Config registers.  */
+ 	BUG_ON(!ok);				/* Arch spec violation!  */
+ }
+diff --git a/arch/mips/lib/cpuinfo.c b/arch/mips/lib/cpuinfo.c
+index 1b171697ba6d..fb02a4d20217 100644
+--- a/arch/mips/lib/cpuinfo.c
++++ b/arch/mips/lib/cpuinfo.c
+@@ -28,7 +28,7 @@ static char *way_string[] = { NULL, "direct mapped", "2-way",
+ 
+ static int do_cpuinfo(int argc, char *argv[])
+ {
+-	unsigned int icache_size, dcache_size;
++	unsigned int icache_size, dcache_size, scache_size;
+ 	struct cpuinfo_mips *c = &current_cpu_data;
+ 
+ 	printk(KERN_INFO "CPU revision is: %08x (%s)\n",
+@@ -48,6 +48,15 @@ static int do_cpuinfo(int argc, char *argv[])
+ 	       (c->dcache.flags & MIPS_CACHE_ALIASES) ?
+ 			"cache aliases" : "no aliases",
+ 	       c->dcache.linesz);
++	if (c->scache.flags & MIPS_CACHE_NOT_PRESENT)
++		return 0;
++	scache_size = c->scache.sets * c->scache.ways * c->scache.linesz;
++	printk("Secondary data cache %ldkB, %s, %s, %s, linesize %d bytes\n",
++	       scache_size >> 10, way_string[c->scache.ways],
++	       (c->scache.flags & MIPS_CACHE_PINDEX) ? "PIPT" : "VIPT",
++	       (c->scache.flags & MIPS_CACHE_ALIASES) ?
++			"cache aliases" : "no aliases",
++	       c->scache.linesz);
+ 
+ 	return 0;
+ }
+diff --git a/arch/mips/mach-ath79/Kconfig b/arch/mips/mach-ath79/Kconfig
+index f730b37ac500..9b8e3946e624 100644
+--- a/arch/mips/mach-ath79/Kconfig
++++ b/arch/mips/mach-ath79/Kconfig
+@@ -13,6 +13,12 @@ config BOARD_TPLINK_MR3020
+ 	select HAVE_IMAGE_COMPRESSION
+ 	select HAS_NMON
+ 
++config BOARD_BLACK_SWIFT
++	bool "Black Swift"
++	select HAVE_PBL_IMAGE
++	select HAVE_IMAGE_COMPRESSION
++	select HAS_NMON
++
+ endchoice
+ 
+ endif
+diff --git a/arch/mips/mach-ath79/include/mach/ar71xx_regs.h b/arch/mips/mach-ath79/include/mach/ar71xx_regs.h
+index b82a8c38c7f9..4cbe94a487d6 100644
+--- a/arch/mips/mach-ath79/include/mach/ar71xx_regs.h
++++ b/arch/mips/mach-ath79/include/mach/ar71xx_regs.h
+@@ -23,6 +23,8 @@
+ 
+ #define AR71XX_APB_BASE		0x18000000
+ 
++#define AR71XX_DDR_CTRL_BASE	(AR71XX_APB_BASE + 0x00000000)
++#define AR71XX_DDR_CTRL_SIZE	0x100
+ #define AR71XX_GPIO_BASE	(AR71XX_APB_BASE + 0x00040000)
+ #define AR71XX_GPIO_SIZE	0x100
+ #define AR71XX_PLL_BASE		(AR71XX_APB_BASE + 0x00050000)
+@@ -34,6 +36,24 @@
+ #define AR933X_UART_SIZE	0x14
+ 
+ /*
++ * DDR_CTRL block
++ */
++#define AR933X_DDR_CONFIG		0x00
++#define AR933X_DDR_CONFIG2		0x04
++#define AR933X_DDR_MODE			0x08
++#define AR933X_DDR_EXT_MODE		0x0c
++#define AR933X_DDR_CTRL			0x10
++#define AR933X_DDR_REFRESH		0x14
++#define AR933X_DDR_RD_DATA		0x18
++#define AR933X_DDR_TAP_CTRL0		0x1c
++#define AR933X_DDR_TAP_CTRL1		0x20
++#define AR933X_DDR_TAP_CTRL1		0x20
++
++#define AR933X_DDR_DDR_DDR2_CONFIG	0x8c
++#define AR933X_DDR_DDR_EMR2		0x90
++#define AR933X_DDR_DDR_EMR3		0x94
++
++/*
+  * GPIO block
+  */
+ #define AR71XX_GPIO_REG_OE		0x00
+@@ -47,6 +67,9 @@
+ #define AR71XX_GPIO_REG_INT_PENDING	0x20
+ #define AR71XX_GPIO_REG_INT_ENABLE	0x24
+ #define AR71XX_GPIO_REG_FUNC		0x28
++/* Warning! GPIO_FUNC[15] must be written with 1 */
++#define AR933X_GPIO_FUNC_RSRV15			BIT(15)
++#define AR933X_GPIO_FUNC_UART_EN		BIT(1)
+ 
+ /*
+  * PLL block
+@@ -63,6 +86,7 @@
+ #define AR933X_PLL_CPU_CONFIG_REFDIV_MASK	0x1f
+ #define AR933X_PLL_CPU_CONFIG_OUTDIV_SHIFT	23
+ #define AR933X_PLL_CPU_CONFIG_OUTDIV_MASK	0x7
++#define AR933X_PLL_CPU_CONFIG_PLLPWD		BIT(30)
+ 
+ #define AR933X_PLL_CLOCK_CTRL_BYPASS		BIT(2)
+ #define AR933X_PLL_CLOCK_CTRL_CPU_DIV_SHIFT	5
+diff --git a/arch/mips/mach-ath79/include/mach/debug_ll.h b/arch/mips/mach-ath79/include/mach/debug_ll.h
+index d3813afb7dda..e0c3f797b271 100644
+--- a/arch/mips/mach-ath79/include/mach/debug_ll.h
++++ b/arch/mips/mach-ath79/include/mach/debug_ll.h
+@@ -63,6 +63,35 @@ static inline void PUTC_LL(int ch)
+  * Macros for use in assembly language code
+  */
+ 
++#define AR933X_UART_CS_REG		0x04
++#define UART_CS_REG	((KSEG1 | AR933X_UART_BASE) | AR933X_UART_CS_REG)
++#define AR933X_UART_CS_IF_MODE_S	2
++#define	  AR933X_UART_CS_IF_MODE_DCE	2
++#define AR933X_UART_CS_TX_READY_ORIDE	BIT(7)
++#define AR933X_UART_CS_RX_READY_ORIDE	BIT(8)
++
++/*
++ * simple uart clock setup
++ * from u-boot_mod/u-boot/cpu/mips/ar7240/hornet_serial.c
++ */
++#define BAUD_CLOCK 25000000
++#define CLOCK_SCALE ((BAUD_CLOCK / (16 * CONFIG_BAUDRATE)) - 1)
++#define CLOCK_STEP 0x2000
++
++#define AR933X_UART_CLOCK_REG		0x08
++#define CLOCK_REG	((KSEG1 | AR933X_UART_BASE) | AR933X_UART_CLOCK_REG)
++
++.macro debug_ll_ar9331_init
++#ifdef CONFIG_DEBUG_LL
++
++	pbl_reg_writel ((AR933X_UART_CS_IF_MODE_DCE << AR933X_UART_CS_IF_MODE_S) \
++			| AR933X_UART_CS_TX_READY_ORIDE \
++			| AR933X_UART_CS_RX_READY_ORIDE), UART_CS_REG
++	pbl_reg_writel ((CLOCK_SCALE << 16) | CLOCK_STEP), CLOCK_REG
++
++#endif /* CONFIG_DEBUG_LL */
++.endm
++
+ /*
+  * output a character in a0
+  */
+diff --git a/arch/mips/mach-ath79/include/mach/pbl_macros.h b/arch/mips/mach-ath79/include/mach/pbl_macros.h
+new file mode 100644
+index 000000000000..c00dd28f5aaf
+--- /dev/null
++++ b/arch/mips/mach-ath79/include/mach/pbl_macros.h
+@@ -0,0 +1,182 @@
++#ifndef __ASM_MACH_ATH79_PBL_MACROS_H
++#define __ASM_MACH_ATH79_PBL_MACROS_H
++
++#include <asm/addrspace.h>
++#include <asm/regdef.h>
++#include <mach/ar71xx_regs.h>
++
++#define PLL_BASE		(KSEG1 | AR71XX_PLL_BASE)
++#define PLL_CPU_CONFIG_REG	(PLL_BASE | AR933X_PLL_CPU_CONFIG_REG)
++#define PLL_CPU_CONFIG2_REG	(PLL_BASE | AR933X_PLL_CPU_CONFIG2_REG)
++#define PLL_CLOCK_CTRL_REG	(PLL_BASE | AR933X_PLL_CLOCK_CTRL_REG)
++
++#define DEF_25MHZ_PLL_CLOCK_CTRL \
++				((2 - 1) << AR933X_PLL_CLOCK_CTRL_AHB_DIV_SHIFT \
++				| (1 - 1) << AR933X_PLL_CLOCK_CTRL_DDR_DIV_SHIFT \
++				| (1 - 1) << AR933X_PLL_CLOCK_CTRL_CPU_DIV_SHIFT)
++#define DEF_25MHZ_SETTLE_TIME	(34000 / 40)
++#define DEF_25MHZ_PLL_CONFIG	( 1 << AR933X_PLL_CPU_CONFIG_OUTDIV_SHIFT \
++				| 1 << AR933X_PLL_CPU_CONFIG_REFDIV_SHIFT \
++				| 32 << AR933X_PLL_CPU_CONFIG_NINT_SHIFT)
++
++.macro	pbl_ar9331_pll
++	.set	push
++	.set	noreorder
++
++	/* Most devices have 25 MHz Ref clock. */
++	pbl_reg_writel (DEF_25MHZ_PLL_CLOCK_CTRL | AR933X_PLL_CLOCK_CTRL_BYPASS), \
++		PLL_CLOCK_CTRL_REG
++	pbl_reg_writel DEF_25MHZ_SETTLE_TIME, PLL_CPU_CONFIG2_REG
++	pbl_reg_writel (DEF_25MHZ_PLL_CONFIG | AR933X_PLL_CPU_CONFIG_PLLPWD), \
++		PLL_CPU_CONFIG_REG
++
++	/* power on CPU PLL */
++	pbl_reg_clr	AR933X_PLL_CPU_CONFIG_PLLPWD, PLL_CPU_CONFIG_REG
++	/* disable PLL bypass */
++	pbl_reg_clr	AR933X_PLL_CLOCK_CTRL_BYPASS, PLL_CLOCK_CTRL_REG
++
++	pbl_sleep	t2, 40
++
++	.set	pop
++.endm
++
++#define DDR_BASE		(KSEG1 | AR71XX_DDR_CTRL_BASE)
++#define DDR_CONFIG		(DDR_BASE | AR933X_DDR_CONFIG)
++#define DDR_CONFIG2		(DDR_BASE | AR933X_DDR_CONFIG2)
++#define DDR_MODE		(DDR_BASE | AR933X_DDR_MODE)
++#define DDR_EXT_MODE		(DDR_BASE | AR933X_DDR_EXT_MODE)
++
++#define DDR_CTRL		(DDR_BASE | AR933X_DDR_CTRL)
++/* Forces an EMR3S (Extended Mode Register 3 Set) update cycle */
++#define DDR_CTRL_EMR3		BIT(5)
++/* Forces an EMR2S (Extended Mode Register 2 Set) update cycle */
++#define DDR_CTRL_EMR2		BIT(4)
++#define DDR_CTRL_PREA		BIT(3) /* Forces a PRECHARGE ALL cycle */
++#define DDR_CTRL_REF		BIT(2) /* Forces an AUTO REFRESH cycle */
++/* Forces an EMRS (Extended Mode Register 2 Set) update cycle */
++#define DDR_CTRL_EMRS		BIT(1)
++/* Forces a MRS (Mode Register Set) update cycle */
++#define DDR_CTRL_MRS		BIT(0)
++
++#define DDR_REFRESH		(DDR_BASE | AR933X_DDR_REFRESH)
++#define DDR_RD_DATA		(DDR_BASE | AR933X_DDR_RD_DATA)
++#define DDR_TAP_CTRL0		(DDR_BASE | AR933X_DDR_TAP_CTRL0)
++#define DDR_TAP_CTRL1		(DDR_BASE | AR933X_DDR_TAP_CTRL1)
++
++#define DDR_DDR2_CONFIG		(DDR_BASE | AR933X_DDR_DDR_DDR2_CONFIG)
++#define DDR_EMR2		(DDR_BASE | AR933X_DDR_DDR_EMR2)
++#define DDR_EMR3		(DDR_BASE | AR933X_DDR_DDR_EMR3)
++
++.macro	pbl_ar9331_ddr1_config
++	.set	push
++	.set	noreorder
++
++	pbl_reg_writel	0x7fbc8cd0, DDR_CONFIG
++	pbl_reg_writel	0x9dd0e6a8, DDR_CONFIG2
++
++	pbl_reg_writel	DDR_CTRL_PREA, DDR_CTRL
++
++	/* 0x133: on reset Mode Register value */
++	pbl_reg_writel	0x133, DDR_MODE
++	pbl_reg_writel	DDR_CTRL_MRS, DDR_CTRL
++
++	/*
++	 * DDR_EXT_MODE[1] = 1: Reduced Drive Strength
++	 * DDR_EXT_MODE[0] = 0: Enable DLL
++	 */
++	pbl_reg_writel	0x2, DDR_EXT_MODE
++	pbl_reg_writel	DDR_CTRL_EMRS, DDR_CTRL
++
++	pbl_reg_writel	DDR_CTRL_PREA, DDR_CTRL
++
++	/* DLL out of reset, CAS Latency 3 */
++	pbl_reg_writel	0x33, DDR_MODE
++	pbl_reg_writel	DDR_CTRL_MRS, DDR_CTRL
++
++	/* Refresh control. Bit 14 is enable. Bits<13:0> Refresh time */
++	pbl_reg_writel	0x4186, DDR_REFRESH
++	/* This register is used along with DQ Lane 0; DQ[7:0], DQS_0 */
++	pbl_reg_writel	0x8, DDR_TAP_CTRL0
++	/* This register is used along with DQ Lane 1; DQ[15:8], DQS_1 */
++	pbl_reg_writel	0x9, DDR_TAP_CTRL1
++
++	/*
++	 * DDR read and capture bit mask.
++	 * Each bit represents a cycle of valid data.
++	 * 0xff: use 16-bit DDR
++	 */
++	pbl_reg_writel	0xff, DDR_RD_DATA
++
++	.set	pop
++.endm
++
++.macro	pbl_ar9331_ddr2_config
++	.set	push
++	.set	noreorder
++
++	pbl_reg_writel	0x7fbc8cd0, DDR_CONFIG
++	pbl_reg_writel	0x9dd0e6a8, DDR_CONFIG2
++
++	/* Enable DDR2 */
++	pbl_reg_writel	0x00000a59, DDR_DDR2_CONFIG
++	pbl_reg_writel	DDR_CTRL_PREA, DDR_CTRL
++
++	/* Disable High Temperature Self-Refresh Rate */
++	pbl_reg_writel	0x00000000, DDR_EMR2
++	pbl_reg_writel	DDR_CTRL_EMR2, DDR_CTRL
++
++	pbl_reg_writel	0x00000000, DDR_EMR3
++	pbl_reg_writel	DDR_CTRL_EMR3, DDR_CTRL
++
++	/* Enable DLL */
++	pbl_reg_writel	0x00000000, DDR_EXT_MODE
++	pbl_reg_writel	DDR_CTRL_EMRS, DDR_CTRL
++
++	/* Reset DLL */
++	pbl_reg_writel	0x00000100, DDR_MODE
++	pbl_reg_writel	DDR_CTRL_MRS, DDR_CTRL
++
++	pbl_reg_writel	DDR_CTRL_PREA, DDR_CTRL
++	pbl_reg_writel	DDR_CTRL_REF, DDR_CTRL
++	pbl_reg_writel	DDR_CTRL_REF, DDR_CTRL
++
++	/* Write recovery (WR) 6 clock, CAS Latency 3, Burst Length 8 */
++	pbl_reg_writel	0x00000a33, DDR_MODE
++	pbl_reg_writel	DDR_CTRL_MRS, DDR_CTRL
++
++	/*
++	 * DDR_EXT_MODE[9:7] = 0x7: (OCD Calibration defaults)
++	 * DDR_EXT_MODE[1] = 1: Reduced Drive Strength
++	 * DDR_EXT_MODE[0] = 0: Enable DLL
++	 */
++	pbl_reg_writel	0x00000382, DDR_EXT_MODE
++	pbl_reg_writel	DDR_CTRL_EMRS, DDR_CTRL
++
++	/*
++	 * DDR_EXT_MODE[9:7] = 0x0: (OCD exit)
++	 * DDR_EXT_MODE[1] = 1: Reduced Drive Strength
++	 * DDR_EXT_MODE[0] = 0: Enable DLL
++	 */
++	pbl_reg_writel	0x00000402, DDR_EXT_MODE
++	pbl_reg_writel	DDR_CTRL_EMRS, DDR_CTRL
++
++	/* Refresh control. Bit 14 is enable. Bits <13:0> Refresh time */
++	pbl_reg_writel	0x00004186, DDR_REFRESH
++	/* DQS 0 Tap Control (needs tuning) */
++	pbl_reg_writel	0x00000008, DDR_TAP_CTRL0
++	/* DQS 1 Tap Control (needs tuning) */
++	pbl_reg_writel	0x00000009, DDR_TAP_CTRL1
++	/* For 16-bit DDR */
++	pbl_reg_writel	0x000000ff, DDR_RD_DATA
++
++	.set	pop
++.endm
++
++#define GPIO_FUNC	((KSEG1 | AR71XX_GPIO_BASE) | AR71XX_GPIO_REG_FUNC)
++
++.macro	pbl_ar9331_uart_enable
++	pbl_reg_set AR933X_GPIO_FUNC_UART_EN \
++			| AR933X_GPIO_FUNC_RSRV15, GPIO_FUNC
++.endm
++
++#endif /* __ASM_MACH_ATH79_PBL_MACROS_H */
+diff --git a/arch/nios2/include/asm/mmu.h b/arch/nios2/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/nios2/include/asm/mmu.h
++++ b/arch/nios2/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/arch/openrisc/include/asm/mmu.h b/arch/openrisc/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/openrisc/include/asm/mmu.h
++++ b/arch/openrisc/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/arch/ppc/cpu-85xx/mmu.c b/arch/ppc/cpu-85xx/mmu.c
+index 7e86e6b2b631..6b93c3e8db9a 100644
+--- a/arch/ppc/cpu-85xx/mmu.c
++++ b/arch/ppc/cpu-85xx/mmu.c
+@@ -14,17 +14,29 @@
+ 
+ #include <common.h>
+ #include <asm/cache.h>
++#include <mmu.h>
+ #include <mach/mmu.h>
+ 
+-void remap_range(void *_start, size_t size, uint32_t flags)
++int arch_remap_range(void *_start, size_t size, unsigned flags)
+ {
+-	uint32_t ptr, start, tsize, valid, wimge;
++	uint32_t ptr, start, tsize, valid, wimge, pte_flags;
+ 	unsigned long epn;
+ 	phys_addr_t rpn = 0;
+ 	int esel = 0;
+ 
++	switch (flags) {
++	case MAP_UNCACHED:
++		pte_flags = MAS2_I;
++		break;
++	case MAP_CACHED:
++		pte_flags = 0;
++		break;
++	default:
++		return -EINVAL;
++	}
++
+ 	ptr = start = (uint32_t)_start;
+-	wimge = flags | MAS2_M;
++	wimge = pte_flags | MAS2_M;
+ 
+ 	while (ptr < (start + size)) {
+ 		esel = e500_find_tlb_idx((void *)ptr, 1);
+@@ -41,14 +53,6 @@ void remap_range(void *_start, size_t size, uint32_t flags)
+ 		/* convert tsize to bytes to increment address. */
+ 		ptr += (1ULL << ((tsize) + 10));
+ 	}
+-}
+ 
+-uint32_t mmu_get_pte_cached_flags(void)
+-{
+ 	return 0;
+ }
+-
+-uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return MAS2_I;
+-}
+diff --git a/arch/ppc/include/asm/mmu.h b/arch/ppc/include/asm/mmu.h
+index 6e15975545e7..c691de1c77b0 100644
+--- a/arch/ppc/include/asm/mmu.h
++++ b/arch/ppc/include/asm/mmu.h
+@@ -557,25 +557,13 @@ extern int write_bat(ppc_bat_t bat, unsigned long upper, unsigned long lower);
+ 
+ #ifndef __ASSEMBLY__
+ 
++#define MAP_ARCH_DEFAULT MAP_CACHED
++
+ #ifdef CONFIG_MMU
+-void remap_range(void *_start, size_t size, uint32_t flags);
+-uint32_t mmu_get_pte_cached_flags(void);
+-uint32_t mmu_get_pte_uncached_flags(void);
+-#else
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
+-#endif /* CONFIG_MMU */
++#define ARCH_HAS_REMAP
++int arch_remap_range(void *_start, size_t size, unsigned flags);
++#endif
++
+ #endif
+ 
+ #endif /* _PPC_MMU_H_ */
+diff --git a/arch/sandbox/include/asm/mmu.h b/arch/sandbox/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/sandbox/include/asm/mmu.h
++++ b/arch/sandbox/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/arch/x86/include/asm/mmu.h b/arch/x86/include/asm/mmu.h
+index bf654206ace5..95af87142027 100644
+--- a/arch/x86/include/asm/mmu.h
++++ b/arch/x86/include/asm/mmu.h
+@@ -1,18 +1,6 @@
+ #ifndef __ASM_MMU_H
+ #define __ASM_MMU_H
+ 
+-static inline void remap_range(void *_start, size_t size, uint32_t flags)
+-{
+-}
+-
+-static inline uint32_t mmu_get_pte_cached_flags(void)
+-{
+-	return 0;
+-}
+-
+-static inline uint32_t mmu_get_pte_uncached_flags(void)
+-{
+-	return 0;
+-}
++#define MAP_ARCH_DEFAULT MAP_UNCACHED
+ 
+ #endif /* __ASM_MMU_H */
+diff --git a/commands/clk.c b/commands/clk.c
+index 4e7ca60a29ff..e9459a3fd3bc 100644
+--- a/commands/clk.c
++++ b/commands/clk.c
+@@ -3,6 +3,8 @@
+ #include <getopt.h>
+ #include <linux/clk.h>
+ #include <linux/err.h>
++#include <environment.h>
++#include <malloc.h>
+ 
+ static int do_clk_enable(int argc, char *argv[])
+ {
+@@ -38,7 +40,7 @@ static int do_clk_disable(int argc, char *argv[])
+ 
+ 	clk_disable(clk);
+ 
+-	return 0;
++	return COMMAND_SUCCESS;
+ }
+ 
+ BAREBOX_CMD_START(clk_disable)
+@@ -77,6 +79,59 @@ BAREBOX_CMD_START(clk_set_rate)
+ 	BAREBOX_CMD_HELP(cmd_clk_set_rate_help)
+ BAREBOX_CMD_END
+ 
++static int do_clk_get_rate(int argc, char *argv[])
++{
++	int opt;
++	struct clk *clk;
++	unsigned long rate;
++	const char *variable_name = NULL;
++
++	while ((opt = getopt(argc, argv, "s:")) > 0) {
++		switch (opt) {
++		case 's':
++			variable_name = optarg;
++			break;
++		default:
++			return COMMAND_ERROR_USAGE;
++		}
++	}
++
++	if (optind == argc) {
++		fprintf(stderr, "No clock name given\n");
++		return COMMAND_ERROR_USAGE;
++	}
++
++	clk = clk_lookup(argv[optind]);
++	if (IS_ERR(clk))
++		return PTR_ERR(clk);
++
++	rate = clk_get_rate(clk);
++
++	if (variable_name) {
++		char *t;
++
++		t = asprintf("%lu", rate);
++		setenv(variable_name, t);
++		free(t);
++	} else
++		printf("%lu\n", rate);
++
++	return COMMAND_SUCCESS;
++}
++
++BAREBOX_CMD_HELP_START(clk_get_rate)
++BAREBOX_CMD_HELP_TEXT("Show clock CLK rate")
++BAREBOX_CMD_HELP_OPT("-s VARNAME",  "set variable VARNAME instead of showing information")
++BAREBOX_CMD_HELP_END
++
++BAREBOX_CMD_START(clk_get_rate)
++	.cmd		= do_clk_get_rate,
++	BAREBOX_CMD_DESC("get a clocks rate")
++	BAREBOX_CMD_OPTS("[-s VARNAME] CLK")
++	BAREBOX_CMD_GROUP(CMD_GRP_HWMANIP)
++	BAREBOX_CMD_HELP(cmd_clk_get_rate_help)
++BAREBOX_CMD_END
++
+ static int do_clk_dump(int argc, char *argv[])
+ {
+ 	int opt, verbose = 0;
+@@ -94,7 +149,7 @@ static int do_clk_dump(int argc, char *argv[])
+ 
+ 	clk_dump(verbose);
+ 
+-	return 0;
++	return COMMAND_SUCCESS;
+ }
+ 
+ BAREBOX_CMD_HELP_START(clk_dump)
+diff --git a/commands/edit.c b/commands/edit.c
+index b28e2b92a194..c014892fc4b2 100644
+--- a/commands/edit.c
++++ b/commands/edit.c
+@@ -258,6 +258,7 @@ static int save_file(const char *path)
+ {
+ 	struct line *line, *tmp;
+ 	int fd;
++	int ret = 0;
+ 
+ 	fd = open(path, O_WRONLY | O_TRUNC | O_CREAT);
+ 	if (fd < 0) {
+@@ -269,12 +270,20 @@ static int save_file(const char *path)
+ 
+ 	while(line) {
+ 		tmp = line->next;
+-		write(fd, line->data, strlen(line->data));
+-		write(fd, "\n", 1);
++		ret = write_full(fd, line->data, strlen(line->data));
++		if (ret < 0)
++			goto out;
++		ret = write_full(fd, "\n", 1);
++		if (ret < 0)
++			goto out;
+ 		line = tmp;
+ 	}
++
++	ret = 0;
++
++out:
+ 	close(fd);
+-	return 0;
++	return ret;
+ }
+ 
+ static void insert_char(char c)
+@@ -375,6 +384,7 @@ static int do_edit(int argc, char *argv[])
+ 	int i;
+ 	int linepos;
+ 	int c;
++	int ret = COMMAND_SUCCESS;
+ 
+ 	if (argc != 2)
+ 		return COMMAND_ERROR_USAGE;
+@@ -533,7 +543,7 @@ static int do_edit(int argc, char *argv[])
+ 			}
+ 			break;
+ 		case 4:
+-			save_file(argv[1]);
++			ret = save_file(argv[1]);
+ 			goto out;
+ 		case 3:
+ 			goto out;
+@@ -546,7 +556,7 @@ out:
+ 	free_buffer();
+ 	printf("%c[2J%c[r", 27, 27);
+ 	printf("\n");
+-	return 0;
++	return ret;
+ }
+ 
+ static const char *edit_aliases[] = { "sedit", NULL};
+diff --git a/commands/loadb.c b/commands/loadb.c
+index be5830da3260..aabb00ab2084 100644
+--- a/commands/loadb.c
++++ b/commands/loadb.c
+@@ -681,9 +681,9 @@ static int do_load_serial_bin(int argc, char *argv[])
+ BAREBOX_CMD_HELP_START(loadb)
+ BAREBOX_CMD_HELP_TEXT("")
+ BAREBOX_CMD_HELP_TEXT("Options:")
+-BAREBOX_CMD_HELP_OPT("-f FILE", "download to FILE (default image.bin")
++BAREBOX_CMD_HELP_OPT("-f FILE", "download to FILE (default image.bin)")
+ BAREBOX_CMD_HELP_OPT("-o OFFS", "destination file OFFSet (default 0)")
+-BAREBOX_CMD_HELP_OPT("-b BAUD", "baudrate for download (default: console baudrate")
++BAREBOX_CMD_HELP_OPT("-b BAUD", "baudrate for download (default: console baudrate)")
+ BAREBOX_CMD_HELP_END
+ 
+ BAREBOX_CMD_START(loadb)
+diff --git a/commands/memtest.c b/commands/memtest.c
+index 756123001a30..d784a5c0e285 100644
+--- a/commands/memtest.c
++++ b/commands/memtest.c
+@@ -21,137 +21,78 @@
+ 
+ #include <command.h>
+ #include <getopt.h>
+-#include <asm/mmu.h>
+ #include <memory.h>
+ #include <malloc.h>
+ #include <common.h>
+ #include <errno.h>
+-
+ #include <memtest.h>
++#include <mmu.h>
+ 
+-static int alloc_memtest_region(struct list_head *list,
+-		resource_size_t start, resource_size_t size)
+-{
+-	struct resource *r_new;
+-	struct mem_test_resource *r;
+-
+-	r = xzalloc(sizeof(struct mem_test_resource));
+-	r_new = request_sdram_region("memtest", start, size);
+-	if (!r_new)
+-		return -EINVAL;
+-
+-	r->r = r_new;
+-	list_add_tail(&r->list, list);
+-
+-	return 0;
+-}
+-
+-static int request_memtest_regions(struct list_head *list)
++static int do_test_one_area(struct mem_test_resource *r, int bus_only,
++		unsigned cache_flag)
+ {
+ 	int ret;
+-	struct memory_bank *bank;
+-	struct resource *r, *r_prev = NULL;
+-	resource_size_t start, end, size;
+ 
+-	for_each_memory_bank(bank) {
+-		/*
+-		 * If we don't have any allocated region on bank,
+-		 * we use the whole bank boundary
+-		 */
+-		if (list_empty(&bank->res->children)) {
+-			start = PAGE_ALIGN(bank->res->start);
+-			size = PAGE_ALIGN_DOWN(bank->res->end - start + 1);
++	printf("Testing memory space: "
++			"0x%08x -> 0x%08x:\n",
++			r->r->start,  r->r->end);
+ 
+-			if (size) {
+-				ret = alloc_memtest_region(list, start, size);
+-				if (ret < 0)
+-					return ret;
+-			}
++	remap_range((void *)r->r->start, r->r->end -
++			r->r->start + 1, cache_flag);
+ 
+-			continue;
+-		}
++	ret = mem_test_bus_integrity(r->r->start, r->r->end);
++	if (ret < 0)
++		return ret;
+ 
+-		r = list_first_entry(&bank->res->children,
+-				     struct resource, sibling);
+-		start = PAGE_ALIGN(bank->res->start);
+-		end = PAGE_ALIGN_DOWN(r->start);
+-		r_prev = r;
+-		if (start != end) {
+-			size = end - start;
+-			ret = alloc_memtest_region(list, start, size);
+-			if (ret < 0)
+-				return ret;
+-		}
+-		/*
+-		 * We assume that the regions are sorted in this list
+-		 * So the first element has start boundary on bank->res->start
+-		 * and the last element hast end boundary on bank->res->end.
+-		 *
+-		 * Between used regions. Start from second entry.
+-		 */
+-		list_for_each_entry_from(r, &bank->res->children, sibling) {
+-			start = PAGE_ALIGN(r_prev->end + 1);
+-			end = r->start - 1;
+-			r_prev = r;
+-			if (start >= end)
+-				continue;
+-
+-			size = PAGE_ALIGN_DOWN(end - start + 1);
+-			if (size == 0)
+-				continue;
+-			ret = alloc_memtest_region(list, start, size);
+-			if (ret < 0)
+-				return ret;
+-		}
++	if (bus_only)
++		return 0;
+ 
+-		/*
+-		 * Do on head element for bank boundary.
+-		 */
+-		r = list_last_entry(&bank->res->children,
+-				     struct resource, sibling);
+-		start = PAGE_ALIGN(r->end);
+-		end = bank->res->end;
+-		size = PAGE_ALIGN_DOWN(end - start + 1);
+-		if (size && start < end && start > r->end) {
+-			ret = alloc_memtest_region(list, start, size);
+-			if (ret < 0)
+-				return ret;
+-		}
+-	}
++	ret = mem_test_moving_inversions(r->r->start, r->r->end);
++	if (ret < 0)
++		return ret;
++	printf("done.\n\n");
+ 
+ 	return 0;
+ }
+ 
+-static int __do_memtest(struct list_head *memtest_regions,
+-		int bus_only, uint32_t cache_flag)
++static int do_memtest_thorough(struct list_head *memtest_regions,
++		int bus_only, unsigned cache_flag)
+ {
+ 	struct mem_test_resource *r;
+ 	int ret;
+ 
+ 	list_for_each_entry(r, memtest_regions, list) {
+-		printf("Testing memory space: "
+-				"0x%08x -> 0x%08x:\n",
+-				r->r->start,  r->r->end);
+-		remap_range((void *)r->r->start, r->r->end -
+-				r->r->start + 1, cache_flag);
+-
+-		ret = mem_test(r->r->start, r->r->end, bus_only);
+-		if (ret < 0)
++		ret = do_test_one_area(r, bus_only, cache_flag);
++		if (ret)
+ 			return ret;
+-		printf("done.\n\n");
+ 	}
+ 
+ 	return 0;
+ }
+ 
++static int do_memtest_biggest(struct list_head *memtest_regions,
++		int bus_only, unsigned cache_flag)
++{
++	struct mem_test_resource *r;
++
++	r = mem_test_biggest_region(memtest_regions);
++	if (!r)
++		return -EINVAL;
++
++	return do_test_one_area(r, bus_only, cache_flag);
++}
++
+ static int do_memtest(int argc, char *argv[])
+ {
+ 	int bus_only = 0, ret, opt;
+-	uint32_t i, max_i = 1, pte_flags_cached, pte_flags_uncached;
+-	struct mem_test_resource *r, *r_tmp;
++	uint32_t i, max_i = 1;
+ 	struct list_head memtest_used_regions;
++	int (*memtest)(struct list_head *, int, unsigned);
++	int cached = 0, uncached = 0;
+ 
+-	while ((opt = getopt(argc, argv, "i:b")) > 0) {
++	memtest = do_memtest_biggest;
++
++	while ((opt = getopt(argc, argv, "i:btcu")) > 0) {
+ 		switch (opt) {
+ 		case 'i':
+ 			max_i = simple_strtoul(optarg, NULL, 0);
+@@ -159,59 +100,67 @@ static int do_memtest(int argc, char *argv[])
+ 		case 'b':
+ 			bus_only = 1;
+ 			break;
++		case 't':
++			memtest = do_memtest_thorough;
++			break;
++		case 'c':
++			cached = 1;
++			break;
++		case 'u':
++			uncached = 1;
++			break;
+ 		default:
+ 			return COMMAND_ERROR_USAGE;
+ 		}
+ 	}
+ 
++	if (!arch_can_remap() && (cached || uncached)) {
++		printf("Cannot map cached or uncached\n");
++		return -EINVAL;
++	}
++
+ 	if (optind > argc)
+ 		return COMMAND_ERROR_USAGE;
+ 
+-	/*
+-	 * Get pte flags for enable and disable cache support on page.
+-	 */
+-	pte_flags_cached = mmu_get_pte_cached_flags();
+-	pte_flags_uncached = mmu_get_pte_uncached_flags();
+-
+ 	INIT_LIST_HEAD(&memtest_used_regions);
+ 
+-	ret = request_memtest_regions(&memtest_used_regions);
++	ret = mem_test_request_regions(&memtest_used_regions);
+ 	if (ret < 0)
+ 		goto out;
+ 
+ 	for (i = 1; (i <= max_i) || !max_i; i++) {
++		printf("Start iteration %u", i);
+ 		if (max_i)
+-			printf("Start iteration %u of %u.\n", i, max_i);
+-		/*
+-		 * First try a memtest with caching enabled.
+-		 */
+-		if (IS_ENABLED(CONFIG_MMU)) {
++			printf(" of %u.\n", max_i);
++		else
++			putchar('\n');
++
++		if (cached) {
+ 			printf("Do memtest with caching enabled.\n");
+-			ret = __do_memtest(&memtest_used_regions,
+-					bus_only, pte_flags_cached);
++			ret = memtest(&memtest_used_regions,
++					bus_only, MAP_CACHED);
++			if (ret < 0)
++				goto out;
++		}
++
++		if (uncached) {
++			printf("Do memtest with caching disabled.\n");
++			ret = memtest(&memtest_used_regions,
++					bus_only, MAP_UNCACHED);
++			if (ret < 0)
++				goto out;
++		}
++
++		if (!cached && !uncached) {
++			ret = memtest(&memtest_used_regions,
++					bus_only, MAP_DEFAULT);
+ 			if (ret < 0)
+ 				goto out;
+ 		}
+-		/*
+-		 * Second try a memtest with caching disabled.
+-		 */
+-		printf("Do memtest with caching disabled.\n");
+-		ret = __do_memtest(&memtest_used_regions,
+-				bus_only, pte_flags_uncached);
+-		if (ret < 0)
+-			goto out;
+ 	}
+ 
+ out:
+-	list_for_each_entry_safe(r, r_tmp, &memtest_used_regions, list) {
+-		/*
+-		 * Ensure to leave with a cached on non used sdram regions.
+-		 */
+-		remap_range((void *)r->r->start, r->r->end -
+-				r->r->start + 1, pte_flags_cached);
+-		release_sdram_region(r->r);
+-		free(r);
+-	}
++	mem_test_release_regions(&memtest_used_regions);
+ 
+ 	if (ret < 0) {
+ 		/*
+@@ -234,6 +183,9 @@ BAREBOX_CMD_HELP_START(memtest)
+ BAREBOX_CMD_HELP_TEXT("Options:")
+ BAREBOX_CMD_HELP_OPT("-i ITERATIONS", "perform number of iterations (default 1, 0 is endless)")
+ BAREBOX_CMD_HELP_OPT("-b", "perform only a test on bus lines")
++BAREBOX_CMD_HELP_OPT("-c", "cached. Test using cached memory")
++BAREBOX_CMD_HELP_OPT("-u", "uncached. Test using uncached memory")
++BAREBOX_CMD_HELP_OPT("-t", "thorough. test all free areas. If unset, only test biggest free area")
+ BAREBOX_CMD_HELP_END
+ 
+ BAREBOX_CMD_START(memtest)
+diff --git a/commands/of_dump.c b/commands/of_dump.c
+index 513a4b88a0fc..b15f54ae0413 100644
+--- a/commands/of_dump.c
++++ b/commands/of_dump.c
+@@ -31,6 +31,16 @@
+ #include <getopt.h>
+ #include <linux/err.h>
+ 
++static void of_print_nodenames(struct device_node *node)
++{
++	struct device_node *n;
++
++	printf("%s\n", node->full_name);
++
++	list_for_each_entry(n, &node->children, parent_list)
++		of_print_nodenames(n);
++}
++
+ static int do_of_dump(int argc, char *argv[])
+ {
+ 	int opt;
+@@ -40,8 +50,9 @@ static int do_of_dump(int argc, char *argv[])
+ 	char *dtbfile = NULL;
+ 	size_t size;
+ 	const char *nodename;
++	int names_only = 0;
+ 
+-	while ((opt = getopt(argc, argv, "Ff:")) > 0) {
++	while ((opt = getopt(argc, argv, "Ff:n")) > 0) {
+ 		switch (opt) {
+ 		case 'f':
+ 			dtbfile = optarg;
+@@ -49,6 +60,9 @@ static int do_of_dump(int argc, char *argv[])
+ 		case 'F':
+ 			fix = 1;
+ 			break;
++		case 'n':
++			names_only = 1;
++			break;
+ 		default:
+ 			return COMMAND_ERROR_USAGE;
+ 		}
+@@ -111,7 +125,10 @@ static int do_of_dump(int argc, char *argv[])
+ 		goto out;
+ 	}
+ 
+-	of_print_nodes(node, 0);
++	if (names_only)
++		of_print_nodenames(node);
++	else
++		of_print_nodes(node, 0);
+ 
+ out:
+ 	if (of_free)
+diff --git a/common/command.c b/common/command.c
+index dc2cb88eaf30..03c70834d181 100644
+--- a/common/command.c
++++ b/common/command.c
+@@ -83,7 +83,7 @@ int execute_command(int argc, char **argv)
+ #else
+ 		printf ("Unknown command '%s'\n", argv[0]);
+ #endif
+-		ret = 1;	/* give up after bad command */
++		ret = COMMAND_ERROR;	/* give up after bad command */
+ 	}
+ 
+ 	getopt_context_restore(&gc);
+diff --git a/common/filetype.c b/common/filetype.c
+index dc2ff3f5f0ce..9ec8ebf7c2da 100644
+--- a/common/filetype.c
++++ b/common/filetype.c
+@@ -369,9 +369,10 @@ enum filetype cdev_detect_type(const char *name)
+ 	struct cdev *cdev;
+ 	void *buf;
+ 
+-	cdev = cdev_by_name(name);
++	cdev = cdev_open(name, O_RDONLY);
+ 	if (!cdev)
+ 		return type;
++
+ 	buf = xzalloc(FILE_TYPE_SAFE_BUFSIZE);
+ 	ret = cdev_read(cdev, buf, FILE_TYPE_SAFE_BUFSIZE, 0, 0);
+ 	if (ret < 0)
+@@ -396,5 +397,6 @@ enum filetype cdev_detect_type(const char *name)
+ 
+ err_out:
+ 	free(buf);
++	cdev_close(cdev);
+ 	return type;
+ }
+diff --git a/common/memtest.c b/common/memtest.c
+index d8d1154c8bee..401b902c78ed 100644
+--- a/common/memtest.c
++++ b/common/memtest.c
+@@ -27,6 +27,133 @@
+ #include <linux/sizes.h>
+ #include <errno.h>
+ #include <memtest.h>
++#include <malloc.h>
++#include <mmu.h>
++
++static int alloc_memtest_region(struct list_head *list,
++		resource_size_t start, resource_size_t size)
++{
++	struct resource *r_new;
++	struct mem_test_resource *r;
++
++	r = xzalloc(sizeof(struct mem_test_resource));
++	r_new = request_sdram_region("memtest", start, size);
++	if (!r_new)
++		return -EINVAL;
++
++	r->r = r_new;
++	list_add_tail(&r->list, list);
++
++	return 0;
++}
++
++int mem_test_request_regions(struct list_head *list)
++{
++	int ret;
++	struct memory_bank *bank;
++	struct resource *r, *r_prev = NULL;
++	resource_size_t start, end, size;
++
++	for_each_memory_bank(bank) {
++		/*
++		 * If we don't have any allocated region on bank,
++		 * we use the whole bank boundary
++		 */
++		if (list_empty(&bank->res->children)) {
++			start = PAGE_ALIGN(bank->res->start);
++			size = PAGE_ALIGN_DOWN(bank->res->end - start + 1);
++
++			if (size) {
++				ret = alloc_memtest_region(list, start, size);
++				if (ret < 0)
++					return ret;
++			}
++
++			continue;
++		}
++
++		r = list_first_entry(&bank->res->children,
++				     struct resource, sibling);
++		start = PAGE_ALIGN(bank->res->start);
++		end = PAGE_ALIGN_DOWN(r->start);
++		r_prev = r;
++		if (start != end) {
++			size = end - start;
++			ret = alloc_memtest_region(list, start, size);
++			if (ret < 0)
++				return ret;
++		}
++		/*
++		 * We assume that the regions are sorted in this list
++		 * So the first element has start boundary on bank->res->start
++		 * and the last element hast end boundary on bank->res->end.
++		 *
++		 * Between used regions. Start from second entry.
++		 */
++		list_for_each_entry_from(r, &bank->res->children, sibling) {
++			start = PAGE_ALIGN(r_prev->end + 1);
++			end = r->start - 1;
++			r_prev = r;
++			if (start >= end)
++				continue;
++
++			size = PAGE_ALIGN_DOWN(end - start + 1);
++			if (size == 0)
++				continue;
++			ret = alloc_memtest_region(list, start, size);
++			if (ret < 0)
++				return ret;
++		}
++
++		/*
++		 * Do on head element for bank boundary.
++		 */
++		r = list_last_entry(&bank->res->children,
++				     struct resource, sibling);
++		start = PAGE_ALIGN(r->end);
++		end = bank->res->end;
++		size = PAGE_ALIGN_DOWN(end - start + 1);
++		if (size && start < end && start > r->end) {
++			ret = alloc_memtest_region(list, start, size);
++			if (ret < 0)
++				return ret;
++		}
++	}
++
++	return 0;
++}
++
++void mem_test_release_regions(struct list_head *list)
++{
++	struct mem_test_resource *r, *r_tmp;
++
++	list_for_each_entry_safe(r, r_tmp, list, list) {
++		/*
++		 * Ensure to leave with a cached on non used sdram regions.
++		 */
++		remap_range((void *)r->r->start, r->r->end -
++				r->r->start + 1, MAP_DEFAULT);
++
++		release_sdram_region(r->r);
++		free(r);
++	}
++}
++
++struct mem_test_resource *mem_test_biggest_region(struct list_head *list)
++{
++	struct mem_test_resource *r, *best = NULL;
++	resource_size_t size = 0;
++
++	list_for_each_entry(r, list, list) {
++		resource_size_t now = resource_size(r->r);
++		if (now > size) {
++			size = now;
++			best = r;
++		}
++	}
++
++	return best;
++}
+ 
+ static void mem_test_report_failure(const char *failure_description,
+ 				    resource_size_t expected_value,
+@@ -220,10 +347,24 @@ int mem_test_bus_integrity(resource_size_t _start,
+ 	return 0;
+ }
+ 
+-int mem_test_dram(resource_size_t _start,
+-		  resource_size_t _end)
++static int update_progress(resource_size_t offset)
++{
++	/* Only check every 4k to reduce overhead */
++	if (offset & (SZ_4K - 1))
++		return 0;
++
++	if (ctrlc())
++		return -EINTR;
++
++	show_progress(offset);
++
++	return 0;
++}
++
++int mem_test_moving_inversions(resource_size_t _start, resource_size_t _end)
+ {
+-	volatile resource_size_t *start, num_words, offset, temp, anti_pattern;
++	volatile resource_size_t *start, num_words, offset, pattern, expected;
++	int ret;
+ 
+ 	_start = ALIGN(_start, sizeof(resource_size_t));
+ 	_end = ALIGN_DOWN(_end, sizeof(resource_size_t)) - 1;
+@@ -234,8 +375,8 @@ int mem_test_dram(resource_size_t _start,
+ 	start = (resource_size_t *)_start;
+ 	num_words = (_end - _start + 1)/sizeof(resource_size_t);
+ 
+-	printf("Starting integrity check of physicaly ram.\n"
+-	       "Filling ram with patterns...\n");
++	printf("Starting moving inversions test of RAM:\n"
++	       "Fill with address, compare, fill with inverted address, compare again\n");
+ 
+ 	/*
+ 	 * Description: Test the integrity of a physical
+@@ -248,115 +389,55 @@ int mem_test_dram(resource_size_t _start,
+ 	 *		selected by the caller.
+ 	 */
+ 
+-	/*
+-	 * Fill memory with a known pattern.
+-	 */
+-	init_progression_bar(num_words);
++	init_progression_bar(3 * num_words);
+ 
++	/* Fill memory with a known pattern */
+ 	for (offset = 0; offset < num_words; offset++) {
+-		/*
+-		 * Every 4K we update the progressbar.
+-		 */
+-
+-		if (!(offset & (SZ_4K - 1))) {
+-			if (ctrlc())
+-				return -EINTR;
+-			show_progress(offset);
+-		}
++		ret = update_progress(offset);
++		if (ret)
++			return ret;
+ 		start[offset] = offset + 1;
+ 	}
+-	show_progress(offset);
+ 
+-	printf("\nCompare written patterns...\n");
+-	/*
+-	 * Check each location and invert it for the second pass.
+-	 */
+-	init_progression_bar(num_words - 1);
++	/* Check each location and invert it for the second pass */
+ 	for (offset = 0; offset < num_words; offset++) {
+-		if (!(offset & (SZ_4K - 1))) {
+-			if (ctrlc())
+-				return -EINTR;
+-			show_progress(offset);
+-		}
++		ret = update_progress(num_words + offset);
++		if (ret)
++			return ret;
+ 
+-		temp = start[offset];
+-		if (temp != (offset + 1)) {
+-			printf("\n");
+-			mem_test_report_failure("read/write",
+-						(offset + 1),
+-						temp, &start[offset]);
+-			return -EIO;
+-		}
++		pattern = start[offset];
++		expected = offset + 1;
+ 
+-		anti_pattern = ~(offset + 1);
+-		start[offset] = anti_pattern;
++		if (pattern != expected)
++			goto mem_err;
++
++		start[offset] = ~start[offset];
+ 	}
+-	show_progress(offset);
+ 
+-	printf("\nFilling ram with inverted pattern and compare it...\n");
+-	/*
+-	 * Check each location for the inverted pattern and zero it.
+-	 */
+-	init_progression_bar(num_words - 1);
++	/* Check each location for the inverted pattern and zero it */
+ 	for (offset = 0; offset < num_words; offset++) {
+-		if (!(offset & (SZ_4K - 1))) {
+-			if (ctrlc())
+-				return -EINTR;
+-			show_progress(offset);
+-		}
++		ret = update_progress(2 * num_words + offset);
++		if (ret)
++			return ret;
+ 
+-		anti_pattern = ~(offset + 1);
+-		temp = start[offset];
++		pattern = start[offset];
++		expected = ~(offset + 1);
+ 
+-		if (temp != anti_pattern) {
+-			printf("\n");
+-			mem_test_report_failure("read/write",
+-						anti_pattern,
+-						temp, &start[offset]);
+-			return -EIO;
+-		}
++		if (pattern != expected)
++			goto mem_err;
+ 
+ 		start[offset] = 0;
+ 	}
+-	show_progress(offset);
++	show_progress(3 * num_words);
+ 
+-	/*
+-	 * end of progressbar
+-	 */
++	/* end of progressbar */
+ 	printf("\n");
+ 
+ 	return 0;
+-}
+-
+-/*
+- * Perform a memory test. The complete test
+- * loops until interrupted by ctrl-c.
+- *
+- * Prameters:
+- * start: start address for memory test.
+- * end: end address of memory test.
+- * bus_only: skip integrity check and do only a address/data bus
+- *	     testing.
+- *
+- * Return value can be -EINVAL for invalid parameter or -EINTR
+- * if memory test was interrupted.
+- */
+-int mem_test(resource_size_t _start,
+-	       resource_size_t _end, int bus_only)
+-{
+-	int ret;
+ 
+-	ret = mem_test_bus_integrity(_start, _end);
+-
+-	if (ret < 0)
+-		return ret;
+-
+-	/*
+-	 * We tested only the bus if != 0
+-	 * leaving here
+-	 */
+-	if (!bus_only)
+-		ret = mem_test_dram(_start, _end);
++mem_err:
++	printf("\n");
++	mem_test_report_failure("read/write", expected, pattern, &start[offset]);
+ 
+-	return ret;
++	return -EIO;
+ }
+diff --git a/common/parser.c b/common/parser.c
+index ed414d04ea23..6136dbf36f5f 100644
+--- a/common/parser.c
++++ b/common/parser.c
+@@ -253,7 +253,8 @@ int run_command(const char *cmd)
+ 			continue;
+ 		}
+ 
+-		rc = execute_command(argc, argv);
++		if (execute_command(argc, argv) != COMMAND_SUCCESS)
++			rc = -1;
+ 	}
+ 
+ 	return rc;
+@@ -265,7 +266,6 @@ int run_shell(void)
+ {
+ 	static char lastcommand[CONFIG_CBSIZE] = { 0, };
+ 	int len;
+-	int rc = 1;
+ 
+ 	login();
+ 
+@@ -275,14 +275,14 @@ int run_shell(void)
+ 		if (len > 0)
+ 			strcpy (lastcommand, console_buffer);
+ 
+-		if (len == -1)
++		if (len == -1) {
+ 			puts ("<INTERRUPT>\n");
+-		else
+-			rc = run_command(lastcommand);
+-
+-		if (rc <= 0) {
+-			/* invalid command or not repeatable, forget it */
+-			lastcommand[0] = 0;
++		} else {
++			const int rc = run_command(lastcommand);
++			if (rc < 0) {
++				/* invalid command or not repeatable, forget it */
++				lastcommand[0] = 0;
++			}
+ 		}
+ 	}
+ 	return 0;
+diff --git a/drivers/ata/disk_ata_drive.c b/drivers/ata/disk_ata_drive.c
+index ee1709e2ff51..d30d0ad9975c 100644
+--- a/drivers/ata/disk_ata_drive.c
++++ b/drivers/ata/disk_ata_drive.c
+@@ -26,16 +26,6 @@
+ #include <disks.h>
+ #include <dma.h>
+ 
+-static int ata_id_is_valid(const uint16_t *id)
+-{
+-	if ((id[ATA_ID_FIELD_VALID] & 1) == 0) {
+-		pr_debug("Drive's ID seems invalid\n");
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+ static uint64_t ata_id_n_sectors(uint16_t *id)
+ {
+ 	if (ata_id_has_lba(id)) {
+@@ -244,13 +234,6 @@ static int ata_port_init(struct ata_port *port)
+ 
+ 	ata_fix_endianess(port->id, SECTOR_SIZE / sizeof(uint16_t));
+ 
+-	rc = ata_id_is_valid(port->id);
+-	if (rc) {
+-		dev_err(dev, "ata id invalid\n");
+-		free(port->id);
+-		return rc;
+-	}
+-
+ #ifdef DEBUG
+ 	ata_dump_id(port->id);
+ #endif
+diff --git a/drivers/clk/mvebu/Makefile b/drivers/clk/mvebu/Makefile
+index 6255a5f56d6b..4b2c3c84311b 100644
+--- a/drivers/clk/mvebu/Makefile
++++ b/drivers/clk/mvebu/Makefile
+@@ -1,5 +1,5 @@
+ obj-y				+= common.o
+-obj-$(CONFIG_ARCH_ARMADA_370)	+= armada-370.o
+-obj-$(CONFIG_ARCH_ARMADA_XP)	+= armada-xp.o
++obj-$(CONFIG_ARCH_ARMADA_370)	+= armada-370.o corediv.o
++obj-$(CONFIG_ARCH_ARMADA_XP)	+= armada-xp.o corediv.o
+ obj-$(CONFIG_ARCH_DOVE)		+= dove.o
+ obj-$(CONFIG_ARCH_KIRKWOOD)	+= kirkwood.o
+diff --git a/drivers/clk/mvebu/corediv.c b/drivers/clk/mvebu/corediv.c
+new file mode 100644
+index 000000000000..55f6e6ad62e8
+--- /dev/null
++++ b/drivers/clk/mvebu/corediv.c
+@@ -0,0 +1,262 @@
++/*
++ * MVEBU Core divider clock
++ *
++ * Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
++ *
++ * Based on Linux driver
++ *   Copyright (C) 2013 Marvell
++ *   Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2.  This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#include <common.h>
++#include <init.h>
++#include <io.h>
++#include <of.h>
++#include <linux/clk.h>
++#include <linux/err.h>
++#include <linux/clkdev.h>
++
++/*
++ * This structure describes the hardware details (bit offset and mask)
++ * to configure one particular core divider clock. Those hardware
++ * details may differ from one SoC to another. This structure is
++ * therefore typically instantiated statically to describe the
++ * hardware details.
++ */
++struct clk_corediv_desc {
++	unsigned int mask;
++	unsigned int offset;
++	unsigned int fieldbit;
++};
++
++/*
++ * This structure describes the hardware details to configure the core
++ * divider clocks on a given SoC. Amongst others, it points to the
++ * array of core divider clock descriptors for this SoC, as well as
++ * the corresponding operations to manipulate them.
++ */
++struct clk_corediv_soc_desc {
++	const struct clk_corediv_desc *descs;
++	unsigned int ndescs;
++	const struct clk_ops ops;
++	u32 ratio_reload;
++	u32 enable_bit_offset;
++	u32 ratio_offset;
++};
++
++/*
++ * This structure represents one core divider clock for the clock
++ * framework, and is dynamically allocated for each core divider clock
++ * existing in the current SoC.
++ */
++struct clk_corediv {
++	struct clk clk;
++	void __iomem *reg;
++	const struct clk_corediv_desc *desc;
++	const struct clk_corediv_soc_desc *soc_desc;
++};
++
++static struct clk_onecell_data clk_data;
++
++/*
++ * Description of the core divider clocks available. For now, we
++ * support only NAND, and it is available at the same register
++ * locations regardless of the SoC.
++ */
++static const struct clk_corediv_desc mvebu_corediv_desc[] = {
++	{ .mask = 0x3f, .offset = 8, .fieldbit = 1 }, /* NAND clock */
++};
++
++#define CORE_CLK_DIV_RATIO_MASK	0xff
++
++#define to_corediv_clk(p) container_of(p, struct clk_corediv, clk)
++
++static int clk_corediv_is_enabled(struct clk *clk)
++{
++	struct clk_corediv *corediv = to_corediv_clk(clk);
++	const struct clk_corediv_soc_desc *soc_desc = corediv->soc_desc;
++	const struct clk_corediv_desc *desc = corediv->desc;
++	u32 enable_mask = BIT(desc->fieldbit) << soc_desc->enable_bit_offset;
++
++	return !!(readl(corediv->reg) & enable_mask);
++}
++
++static int clk_corediv_enable(struct clk *clk)
++{
++	struct clk_corediv *corediv = to_corediv_clk(clk);
++	const struct clk_corediv_soc_desc *soc_desc = corediv->soc_desc;
++	const struct clk_corediv_desc *desc = corediv->desc;
++	u32 reg;
++
++	reg = readl(corediv->reg);
++	reg |= (BIT(desc->fieldbit) << soc_desc->enable_bit_offset);
++	writel(reg, corediv->reg);
++
++	return 0;
++}
++
++static void clk_corediv_disable(struct clk *clk)
++{
++	struct clk_corediv *corediv = to_corediv_clk(clk);
++	const struct clk_corediv_soc_desc *soc_desc = corediv->soc_desc;
++	const struct clk_corediv_desc *desc = corediv->desc;
++	u32 reg;
++
++	reg = readl(corediv->reg);
++	reg &= ~(BIT(desc->fieldbit) << soc_desc->enable_bit_offset);
++	writel(reg, corediv->reg);
++}
++
++static unsigned long clk_corediv_recalc_rate(struct clk *clk,
++					     unsigned long parent_rate)
++{
++	struct clk_corediv *corediv = to_corediv_clk(clk);
++	const struct clk_corediv_soc_desc *soc_desc = corediv->soc_desc;
++	const struct clk_corediv_desc *desc = corediv->desc;
++	u32 reg, div;
++
++	reg = readl(corediv->reg + soc_desc->ratio_offset);
++	div = (reg >> desc->offset) & desc->mask;
++	return parent_rate / div;
++}
++
++static long clk_corediv_round_rate(struct clk *clk, unsigned long rate,
++				   unsigned long *parent_rate)
++{
++	/* Valid ratio are 1:4, 1:5, 1:6 and 1:8 */
++	u32 div;
++
++	div = *parent_rate / rate;
++	if (div < 4)
++		div = 4;
++	else if (div > 6)
++		div = 8;
++
++	return *parent_rate / div;
++}
++
++static int clk_corediv_set_rate(struct clk *clk, unsigned long rate,
++				unsigned long parent_rate)
++{
++	struct clk_corediv *corediv = to_corediv_clk(clk);
++	const struct clk_corediv_soc_desc *soc_desc = corediv->soc_desc;
++	const struct clk_corediv_desc *desc = corediv->desc;
++	u32 reg, div;
++
++	div = parent_rate / rate;
++
++	/* Write new divider to the divider ratio register */
++	reg = readl(corediv->reg + soc_desc->ratio_offset);
++	reg &= ~(desc->mask << desc->offset);
++	reg |= (div & desc->mask) << desc->offset;
++	writel(reg, corediv->reg + soc_desc->ratio_offset);
++
++	/* Set reload-force for this clock */
++	reg = readl(corediv->reg) | BIT(desc->fieldbit);
++	writel(reg, corediv->reg);
++
++	/* Now trigger the clock update */
++	reg = readl(corediv->reg) | soc_desc->ratio_reload;
++	writel(reg, corediv->reg);
++
++	/*
++	 * Wait for clocks to settle down, and then clear all the
++	 * ratios request and the reload request.
++	 */
++	udelay(1000);
++	reg &= ~(CORE_CLK_DIV_RATIO_MASK | soc_desc->ratio_reload);
++	writel(reg, corediv->reg);
++	udelay(1000);
++
++	return 0;
++}
++
++static const struct clk_corediv_soc_desc armada370_corediv_soc = {
++	.descs = mvebu_corediv_desc,
++	.ndescs = ARRAY_SIZE(mvebu_corediv_desc),
++	.ops = {
++		.enable = clk_corediv_enable,
++		.disable = clk_corediv_disable,
++		.is_enabled = clk_corediv_is_enabled,
++		.recalc_rate = clk_corediv_recalc_rate,
++		.round_rate = clk_corediv_round_rate,
++		.set_rate = clk_corediv_set_rate,
++	},
++	.ratio_reload = BIT(8),
++	.enable_bit_offset = 24,
++	.ratio_offset = 0x8,
++};
++
++static struct of_device_id mvebu_corediv_clk_ids[] = {
++	{ .compatible = "marvell,armada-370-corediv-clock",
++	  .data = &armada370_corediv_soc },
++	{ }
++};
++
++static int mvebu_corediv_clk_probe(struct device_d *dev)
++{
++	struct device_node *np = dev->device_node;
++	const struct of_device_id *match;
++	const struct clk_corediv_soc_desc *soc_desc;
++	struct clk_corediv *corediv;
++	struct clk *parent;
++	void __iomem *base;
++	int n;
++
++	match = of_match_node(mvebu_corediv_clk_ids, np);
++	if (!match)
++		return -EINVAL;
++	soc_desc = (const struct clk_corediv_soc_desc *)match->data;
++
++	base = dev_request_mem_region(dev, 0);
++	if (IS_ERR(base))
++		return PTR_ERR(base);
++
++	parent = of_clk_get(np, 0);
++	if (IS_ERR(parent))
++		return PTR_ERR(parent);
++
++	clk_data.clk_num = soc_desc->ndescs;
++	clk_data.clks = xzalloc(clk_data.clk_num * sizeof(*clk_data.clks));
++	corediv = xzalloc(clk_data.clk_num * sizeof(*corediv));
++
++	for (n = 0; n < clk_data.clk_num; n++) {
++		const char *clk_name;
++		struct clk *clk = &corediv->clk;
++
++		if (of_property_read_string_index(np,
++				"clock-output-names", n, &clk_name)) {
++			dev_warn(dev, "missing clock output name %d\n", n);
++			continue;
++		}
++
++		clk->ops = &soc_desc->ops;
++		clk->name = clk_name;
++		clk->flags = 0;
++		clk->parent_names = &parent->name;
++		clk->num_parents = 1;
++		corediv->soc_desc = soc_desc;
++		corediv->desc = &soc_desc->descs[n];
++		corediv->reg = base;
++		clk_data.clks[n] = clk;
++		WARN_ON(IS_ERR_VALUE(clk_register(clk)));
++	}
++
++	return of_clk_add_provider(np, of_clk_src_onecell_get, &clk_data);
++}
++
++static struct driver_d mvebu_corediv_clk_driver = {
++	.probe	= mvebu_corediv_clk_probe,
++	.name	= "mvebu-corediv-clk",
++	.of_compatible = DRV_OF_COMPAT(mvebu_corediv_clk_ids),
++};
++
++static int mvebu_corediv_clk_init(void)
++{
++	return platform_driver_register(&mvebu_corediv_clk_driver);
++}
++postcore_initcall(mvebu_corediv_clk_init);
+diff --git a/drivers/input/usb_kbd.c b/drivers/input/usb_kbd.c
+index 8c08aba79963..655d0c7b25ac 100644
+--- a/drivers/input/usb_kbd.c
++++ b/drivers/input/usb_kbd.c
+@@ -274,7 +274,7 @@ static void usb_kbd_poll(struct poller_struct *poller)
+ 	struct usb_kbd_pdata *data = container_of(poller,
+ 						  struct usb_kbd_pdata, poller);
+ 	struct usb_device *usbdev = data->usbdev;
+-	int diff, tout;
++	int diff, tout, ret;
+ 
+ 	if (data->lock)
+ 		return;
+@@ -284,7 +284,10 @@ static void usb_kbd_poll(struct poller_struct *poller)
+ 		goto exit;
+ 	data->last_poll = get_time_ns();
+ 
+-	if (0 > data->do_poll(data)) {
++	ret = data->do_poll(data);
++	if (ret == -EAGAIN)
++		goto exit;
++	if (ret < 0) {
+ 		/* exit and lock forever */
+ 		dev_err(&usbdev->dev,
+ 			"usb_submit_int_msg() failed. Keyboard disconnect?\n");
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index 90001153d78f..29c0d5474ebf 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -947,14 +947,13 @@ out:
+ static char *mci_version_string(struct mci *mci)
+ {
+ 	static char version[sizeof("x.xx")];
+-	unsigned major, minor, micro;
++	unsigned major, minor;
+ 
+ 	major = (mci->version >> 8) & 0xf;
+-	minor = (mci->version >> 4) & 0xf;
+-	micro = mci->version & 0xf;
++	minor = mci->version & 0xff;
+ 
+-	sprintf(version, "%u.%u", major,
+-			micro ? (minor << 4) | micro : minor);
++	/* Shift off last digit of minor if it's 0 */
++	sprintf(version, "%u.%x", major, minor & 0xf ? minor : minor >> 4);
+ 
+ 	return version;
+ }
+diff --git a/drivers/mtd/core.c b/drivers/mtd/core.c
+index d873369d5d40..62307db70954 100644
+--- a/drivers/mtd/core.c
++++ b/drivers/mtd/core.c
+@@ -340,6 +340,8 @@ int mtd_read(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
+ int mtd_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
+ 		const u_char *buf)
+ {
++	*retlen = 0;
++
+ 	return mtd->write(mtd, to, len, retlen, buf);
+ }
+ 
+diff --git a/drivers/net/mvneta.c b/drivers/net/mvneta.c
+index aab52c45deec..1690f3b576c7 100644
+--- a/drivers/net/mvneta.c
++++ b/drivers/net/mvneta.c
+@@ -761,6 +761,7 @@ static int mvneta_probe(struct device_d *dev)
+ 
+ static struct of_device_id mvneta_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-370-neta", },
++	{ .compatible = "marvell,armada-xp-neta" },
+ 	{ }
+ };
+ 
+diff --git a/drivers/net/phy/phy.c b/drivers/net/phy/phy.c
+index 2b3c5e2e022f..25c999c5502b 100644
+--- a/drivers/net/phy/phy.c
++++ b/drivers/net/phy/phy.c
+@@ -502,13 +502,16 @@ int phy_wait_aneg_done(struct phy_device *phydev)
+ 		return 0;
+ 
+ 	while (!is_timeout(start, PHY_AN_TIMEOUT * SECOND)) {
+-		if (phy_aneg_done(phydev) > 0) {
+-			phydev->link = 1;
+-			return 0;
+-		}
++		if (phy_aneg_done(phydev) > 0)
++			break;
+ 	}
+ 
+-	phydev->link = 0;
++	do {
++		genphy_update_link(phydev);
++		if (phydev->link == 1)
++			return 0;
++	} while (!is_timeout(start, PHY_AN_TIMEOUT * SECOND));
++
+ 	return -ETIMEDOUT;
+ }
+ 
+diff --git a/drivers/usb/core/usb.c b/drivers/usb/core/usb.c
+index a3fb1e880875..ce229f2fcc31 100644
+--- a/drivers/usb/core/usb.c
++++ b/drivers/usb/core/usb.c
+@@ -84,10 +84,25 @@ static void print_usb_device(struct usb_device *dev)
+ 
+ static int host_busnum = 1;
+ 
++static inline int usb_host_acquire(struct usb_host *host)
++{
++	if (host->sem)
++		return -EAGAIN;
++	host->sem++;
++	return 0;
++}
++
++static inline void usb_host_release(struct usb_host *host)
++{
++	if (host->sem > 0)
++		host->sem--;
++}
++
+ int usb_register_host(struct usb_host *host)
+ {
+ 	list_add_tail(&host->list, &host_list);
+ 	host->busnum = host_busnum++;
++	host->sem = 0;
+ 	asynch_allowed = 1;
+ 	return 0;
+ }
+@@ -563,8 +578,17 @@ int usb_submit_int_msg(struct usb_device *dev, unsigned long pipe,
+ 			void *buffer, int transfer_len, int interval)
+ {
+ 	struct usb_host *host = dev->host;
++	int ret;
++
++	ret = usb_host_acquire(host);
++	if (ret)
++		return ret;
++
++	ret = host->submit_int_msg(dev, pipe, buffer, transfer_len, interval);
+ 
+-	return host->submit_int_msg(dev, pipe, buffer, transfer_len, interval);
++	usb_host_release(host);
++
++	return ret;
+ }
+ 
+ /*
+@@ -590,6 +614,10 @@ int usb_control_msg(struct usb_device *dev, unsigned int pipe,
+ 		return -1;
+ 	}
+ 
++	ret = usb_host_acquire(host);
++	if (ret)
++		return ret;
++
+ 	/* set setup command */
+ 	setup_packet->requesttype = requesttype;
+ 	setup_packet->request = request;
+@@ -603,6 +631,9 @@ int usb_control_msg(struct usb_device *dev, unsigned int pipe,
+ 
+ 	ret = host->submit_control_msg(dev, pipe, data, size, setup_packet,
+ 			timeout);
++
++	usb_host_release(host);
++
+ 	if (ret)
+ 		return ret;
+ 
+@@ -623,8 +654,15 @@ int usb_bulk_msg(struct usb_device *dev, unsigned int pipe,
+ 	if (len < 0)
+ 		return -1;
+ 
++	ret = usb_host_acquire(host);
++	if (ret)
++		return ret;
++
+ 	dev->status = USB_ST_NOT_PROC; /* not yet processed */
+ 	ret = host->submit_bulk_msg(dev, pipe, data, len, timeout);
++
++	usb_host_release(host);
++
+ 	if (ret)
+ 		return ret;
+ 
+diff --git a/drivers/usb/host/ehci-hcd.c b/drivers/usb/host/ehci-hcd.c
+index b43b6c7f5163..91c6d73c302d 100644
+--- a/drivers/usb/host/ehci-hcd.c
++++ b/drivers/usb/host/ehci-hcd.c
+@@ -51,8 +51,6 @@ struct ehci_priv {
+ 	int periodic_schedules;
+ 	struct QH *periodic_queue;
+ 	uint32_t *periodic_list;
+-	int sem;
+-	struct device_d *usedby;
+ };
+ 
+ struct int_queue {
+@@ -138,20 +136,6 @@ static struct descriptor {
+ 
+ #define ehci_is_TDI()	(ehci->flags & EHCI_HAS_TT)
+ 
+-static void inline ehci_reentrance_detect(struct ehci_priv *ehci,
+-					  struct usb_device *dev,
+-					  const char *fname)
+-{
+-	if (ehci->sem)
+-		dev_err(&dev->dev, "%s: re-entrance %d (%s:%s)\n",
+-			fname,
+-			ehci->sem,
+-			ehci->usedby->driver->name,
+-			ehci->usedby->name);
+-	ehci->sem++;
+-	ehci->usedby = &dev->dev;
+-}
+-
+ static int handshake(uint32_t *ptr, uint32_t mask, uint32_t done, int usec)
+ {
+ 	uint32_t result;
+@@ -688,7 +672,7 @@ ehci_submit_root(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 				 * root
+ 				 */
+ 				ehci_powerup_fixup(ehci);
+-				mdelay_non_interruptible(50);
++				mdelay(50);
+ 				ehci->portreset |= 1 << port;
+ 				/* terminate the reset */
+ 				ehci_writel(status_reg, reg & ~EHCI_PS_PR);
+@@ -751,7 +735,7 @@ ehci_submit_root(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 		goto unknown;
+ 	}
+ 
+-	mdelay_non_interruptible(1);
++	mdelay(1);
+ 	len = min3(srclen, (int)le16_to_cpu(req->length), length);
+ 	if (srcptr != NULL && len > 0)
+ 		memcpy(buffer, srcptr, len);
+@@ -888,7 +872,7 @@ static int ehci_init(struct usb_host *host)
+ 	ehci_writel(&ehci->hcor->or_configflag, cmd);
+ 	/* unblock posted write */
+ 	cmd = ehci_readl(&ehci->hcor->or_usbcmd);
+-	mdelay_non_interruptible(5);
++	mdelay(5);
+ 
+ 	ehci->rootdev = 0;
+ 
+@@ -904,18 +888,12 @@ submit_bulk_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ {
+ 	struct usb_host *host = dev->host;
+ 	struct ehci_priv *ehci = to_ehci(host);
+-	int ret;
+-
+-	ehci_reentrance_detect(ehci, dev, __func__);
+ 
+ 	if (usb_pipetype(pipe) != PIPE_BULK) {
+ 		dev_dbg(ehci->dev, "non-bulk pipe (type=%lu)", usb_pipetype(pipe));
+-		ehci->sem--;
+ 		return -1;
+ 	}
+-	ret = ehci_submit_async(dev, pipe, buffer, length, NULL);
+-	ehci->sem--;
+-	return ret;
++	return ehci_submit_async(dev, pipe, buffer, length, NULL);
+ }
+ 
+ static int
+@@ -924,9 +902,6 @@ submit_control_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ {
+ 	struct usb_host *host = dev->host;
+ 	struct ehci_priv *ehci = to_ehci(host);
+-	int ret;
+-
+-	ehci_reentrance_detect(ehci, dev, __func__);
+ 
+ 	if (usb_pipetype(pipe) != PIPE_CONTROL) {
+ 		dev_dbg(ehci->dev, "non-control pipe (type=%lu)", usb_pipetype(pipe));
+@@ -936,13 +911,9 @@ submit_control_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 	if (usb_pipedevice(pipe) == ehci->rootdev) {
+ 		if (ehci->rootdev == 0)
+ 			dev->speed = USB_SPEED_HIGH;
+-		ret = ehci_submit_root(dev, pipe, buffer, length, setup);
+-		ehci->sem--;
+-		return ret;
++		return ehci_submit_root(dev, pipe, buffer, length, setup);
+ 	}
+-	ret = ehci_submit_async(dev, pipe, buffer, length, setup);
+-	ehci->sem--;
+-	return ret;
++	return ehci_submit_async(dev, pipe, buffer, length, setup);
+ }
+ 
+ static int
+@@ -983,7 +954,9 @@ enable_periodic(struct ehci_priv *ehci)
+ 		printf("EHCI failed: timeout when enabling periodic list\n");
+ 		return -ETIMEDOUT;
+ 	}
+-	mdelay_non_interruptible(1);
++
++	mdelay(1);
++
+ 	return 0;
+ }
+ 
+@@ -1265,8 +1238,6 @@ submit_int_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 	void *backbuffer;
+ 	int result = 0, ret;
+ 
+-	ehci_reentrance_detect(ehci, dev, __func__);
+-
+ 	dev_dbg(ehci->dev, "dev=%p, pipe=%lu, buffer=%p, length=%d, interval=%d",
+ 	      dev, pipe, buffer, length, interval);
+ 
+@@ -1274,10 +1245,8 @@ submit_int_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 				   DMA_BIDIRECTIONAL);
+ 
+ 	queue = ehci_create_int_queue(dev, pipe, 1, length, buffer, interval);
+-	if (!queue) {
+-		ehci->sem--;
++	if (!queue)
+ 		return -EINVAL;
+-	}
+ 
+ 	start = get_time_ns();
+ 	while ((backbuffer = ehci_poll_int_queue(dev, queue)) == NULL)
+@@ -1303,7 +1272,6 @@ submit_int_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
+ 	ret = ehci_destroy_int_queue(dev, queue);
+ 	if (!result)
+ 		result = ret;
+-	ehci->sem--;
+ 	return result;
+ }
+ 
+diff --git a/drivers/usb/imx/imx-usb-misc.c b/drivers/usb/imx/imx-usb-misc.c
+index be95b89aff24..af1a32110c9a 100644
+--- a/drivers/usb/imx/imx-usb-misc.c
++++ b/drivers/usb/imx/imx-usb-misc.c
+@@ -31,7 +31,7 @@
+ #define MX25_H1_SIC_SHIFT	21
+ #define MX25_H1_SIC_MASK	(0x3 << MX25_H1_SIC_SHIFT)
+ #define MX25_H1_PP_BIT		(1 << 18)
+-#define MX25_H1_PM_BIT		(1 << 8)
++#define MX25_H1_PM_BIT		(1 << 16)
+ #define MX25_H1_IPPUE_UP_BIT	(1 << 7)
+ #define MX25_H1_IPPUE_DOWN_BIT	(1 << 6)
+ #define MX25_H1_TLL_BIT		(1 << 5)
+diff --git a/drivers/video/fb.c b/drivers/video/fb.c
+index 3672c4420294..d159d607f529 100644
+--- a/drivers/video/fb.c
++++ b/drivers/video/fb.c
+@@ -31,6 +31,12 @@ static int fb_ioctl(struct cdev* cdev, int req, void *data)
+ 	return 0;
+ }
+ 
++static void fb_release_shadowfb(struct fb_info *info)
++{
++	free(info->screen_base_shadow);
++	info->screen_base_shadow = NULL;
++}
++
+ static int fb_alloc_shadowfb(struct fb_info *info)
+ {
+ 	if (info->screen_base_shadow && info->shadowfb)
+@@ -47,8 +53,7 @@ static int fb_alloc_shadowfb(struct fb_info *info)
+ 		memcpy(info->screen_base_shadow, info->screen_base,
+ 				info->line_length * info->yres);
+ 	} else {
+-		free(info->screen_base_shadow);
+-		info->screen_base_shadow = NULL;
++		fb_release_shadowfb(info);
+ 	}
+ 
+ 	return 0;
+@@ -79,6 +84,8 @@ int fb_disable(struct fb_info *info)
+ 
+ 	info->fbops->fb_disable(info);
+ 
++	fb_release_shadowfb(info);
++
+ 	info->enabled = false;
+ 
+ 	return 0;
+@@ -92,9 +99,9 @@ static int fb_enable_set(struct param_d *param, void *priv)
+ 	enable = info->p_enable;
+ 
+ 	if (enable)
+-		info->fbops->fb_enable(info);
++		fb_enable(info);
+ 	else
+-		info->fbops->fb_disable(info);
++		fb_disable(info);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/video/fbconsole.c b/drivers/video/fbconsole.c
+index b10503eb842a..c38d13c304b6 100644
+--- a/drivers/video/fbconsole.c
++++ b/drivers/video/fbconsole.c
+@@ -192,8 +192,9 @@ static void printchar(struct fbc_priv *priv, int c)
+ 
+ 		buf = gui_screen_render_buffer(priv->sc);
+ 
+-		memcpy(buf, buf + line_height, line_height * (priv->rows + 1));
++		memcpy(buf, buf + line_height, line_height * priv->rows);
+ 		memset(buf + line_height * priv->rows, 0, line_height);
++
+ 		gu_screen_blit(priv->sc);
+ 		priv->y = priv->rows;
+ 	}
+diff --git a/drivers/video/imx-ipu-fb.c b/drivers/video/imx-ipu-fb.c
+index a87e720d9615..03d191a3315f 100644
+--- a/drivers/video/imx-ipu-fb.c
++++ b/drivers/video/imx-ipu-fb.c
+@@ -27,7 +27,7 @@
+ #include <malloc.h>
+ #include <errno.h>
+ #include <asm-generic/div64.h>
+-#include <asm/mmu.h>
++#include <mmu.h>
+ #include <mach/imx-ipu-fb.h>
+ #include <linux/clk.h>
+ #include <linux/err.h>
+@@ -1030,8 +1030,7 @@ static int imxfb_probe(struct device_d *dev)
+ 	fbi->info.screen_base = pdata->framebuffer;
+ 	if (fbi->info.screen_base) {
+ 		remap_range(fbi->info.screen_base,
+-			fbi->info.screen_size,
+-			mmu_get_pte_uncached_flags());
++			fbi->info.screen_size, MAP_UNCACHED);
+ 	} else {
+ 		fbi->info.screen_base = dma_alloc_coherent(fbi->info.screen_size,
+ 							   DMA_ADDRESS_BROKEN);
+diff --git a/drivers/video/imx-ipu-v3/ipufb.c b/drivers/video/imx-ipu-v3/ipufb.c
+index a96883cf99d3..747e0947891a 100644
+--- a/drivers/video/imx-ipu-v3/ipufb.c
++++ b/drivers/video/imx-ipu-v3/ipufb.c
+@@ -308,7 +308,7 @@ static int ipufb_probe(struct device_d *dev)
+ 
+ 	node = of_graph_get_port_by_id(dev->parent->device_node, 2 + pdata->di);
+ 	if (node && of_graph_port_is_available(node)) {
+-		dev_info(fbi->dev, "register vpl for %s\n", dev->parent->device_node->full_name);
++		dev_dbg(fbi->dev, "register vpl for %s\n", dev->parent->device_node->full_name);
+ 
+ 		fbi->vpl.node = dev->parent->device_node;
+ 		ret = vpl_register(&fbi->vpl);
+diff --git a/drivers/video/omap.c b/drivers/video/omap.c
+index 3603ad2ccb34..884365f60946 100644
+--- a/drivers/video/omap.c
++++ b/drivers/video/omap.c
+@@ -35,7 +35,7 @@
+ #include <mach/omap4-silicon.h>
+ #include <mach/omap-fb.h>
+ 
+-#include <asm/mmu.h>
++#include <mmu.h>
+ 
+ #include "omap.h"
+ 
+@@ -487,8 +487,7 @@ static int omapfb_probe(struct device_d *dev)
+ 				(void __iomem *)pdata->screen->start;
+ 		fbi->prealloc_screen.size = resource_size(pdata->screen);
+ 		remap_range(fbi->prealloc_screen.addr,
+-			fbi->prealloc_screen.size,
+-			mmu_get_pte_uncached_flags());
++			fbi->prealloc_screen.size, MAP_UNCACHED);
+ 	}
+ 
+ 	rc = omapfb_reset(fbi);
+diff --git a/drivers/video/stm.c b/drivers/video/stm.c
+index 1b42a18356de..e5c1ef39746b 100644
+--- a/drivers/video/stm.c
++++ b/drivers/video/stm.c
+@@ -25,7 +25,7 @@
+ #include <xfuncs.h>
+ #include <io.h>
+ #include <dma.h>
+-#include <asm/mmu.h>
++#include <mmu.h>
+ #include <stmp-device.h>
+ #include <linux/clk.h>
+ #include <linux/err.h>
+@@ -332,8 +332,7 @@ static int stmfb_activate_var(struct fb_info *fb_info)
+ 		fb_info->screen_base = fbi->fixed_screen;
+ 		fbi->memory_size = fbi->fixed_screen_size;
+ 		remap_range(fbi->fixed_screen,
+-				fbi->fixed_screen_size,
+-				mmu_get_pte_uncached_flags());
++				fbi->fixed_screen_size, MAP_UNCACHED);
+ 	} else {
+ 		fb_info->screen_base = dma_alloc_coherent(size, NULL);
+ 		if (!fb_info->screen_base)
+diff --git a/fs/Kconfig b/fs/Kconfig
+index feab537b989e..9217bc81ea1e 100644
+--- a/fs/Kconfig
++++ b/fs/Kconfig
+@@ -80,4 +80,13 @@ config FS_UIMAGEFS
+ 	select CRC32
+ 	prompt "uImage FS support"
+ 
++config FS_SMHFS
++	depends on ARM_SEMIHOSTING
++	bool
++	prompt "Semihosting FS support"
++	help
++	  If enabled this filesystem provides access to the files
++	  located on a debugging host connected to the target running
++	  Barebox
++
+ endmenu
+diff --git a/fs/Makefile b/fs/Makefile
+index f5aae91a60cf..46932057c1b7 100644
+--- a/fs/Makefile
++++ b/fs/Makefile
+@@ -13,3 +13,4 @@ obj-$(CONFIG_FS_BPKFS) += bpkfs.o
+ obj-$(CONFIG_FS_UIMAGEFS)	+= uimagefs.o
+ obj-$(CONFIG_FS_EFI)	 += efi.o
+ obj-$(CONFIG_FS_EFIVARFS) += efivarfs.o
++obj-$(CONFIG_FS_SMHFS) += smhfs.o
+diff --git a/fs/devfs-core.c b/fs/devfs-core.c
+index 62571fb8a392..2541ea36e6cb 100644
+--- a/fs/devfs-core.c
++++ b/fs/devfs-core.c
+@@ -121,9 +121,13 @@ int cdev_do_open(struct cdev *cdev, unsigned long flags)
+ 
+ struct cdev *cdev_open(const char *name, unsigned long flags)
+ {
+-	struct cdev *cdev = cdev_by_name(name);
++	struct cdev *cdev;
+ 	int ret;
+ 
++	if (!strncmp(name, "/dev/", 5))
++		name += 5;
++
++	cdev = cdev_by_name(name);
+ 	if (!cdev)
+ 		return NULL;
+ 
+diff --git a/fs/devfs.c b/fs/devfs.c
+index c6db25cb14de..5c96682f9628 100644
+--- a/fs/devfs.c
++++ b/fs/devfs.c
+@@ -228,6 +228,13 @@ static int devfs_stat(struct device_d *_dev, const char *filename, struct stat *
+ 
+ static int devfs_probe(struct device_d *dev)
+ {
++	struct fs_device_d *fsdev = dev_to_fs_device(dev);
++
++	if (strcmp(fsdev->path, "/dev")) {
++		dev_err(dev, "devfs can only be mounted on /dev/\n");
++		return -EINVAL;
++	}
++
+ 	return 0;
+ }
+ 
+diff --git a/fs/fs.c b/fs/fs.c
+index c2a20e17d7eb..4983fc7ec17a 100644
+--- a/fs/fs.c
++++ b/fs/fs.c
+@@ -1205,8 +1205,6 @@ static const char *detect_fs(const char *filename)
+ 	struct driver_d *drv;
+ 	struct fs_driver_d *fdrv;
+ 
+-	if (!strncmp(filename, "/dev/", 5))
+-		filename += 5;
+ 	type = cdev_detect_type(filename);
+ 
+ 	if (type == filetype_unknown)
+@@ -1224,12 +1222,7 @@ static const char *detect_fs(const char *filename)
+ 
+ int fsdev_open_cdev(struct fs_device_d *fsdev)
+ {
+-	const char *backingstore = fsdev->backingstore;
+-
+-	if (!strncmp(backingstore , "/dev/", 5))
+-		backingstore += 5;
+-
+-	fsdev->cdev = cdev_open(backingstore, O_RDWR);
++	fsdev->cdev = cdev_open(fsdev->backingstore, O_RDWR);
+ 	if (!fsdev->cdev)
+ 		return -EINVAL;
+ 
+diff --git a/fs/smhfs.c b/fs/smhfs.c
+new file mode 100644
+index 000000000000..f1b6d6bb1b08
+--- /dev/null
++++ b/fs/smhfs.c
+@@ -0,0 +1,178 @@
++/*
++ * smhfs.c -- Driver implementing pseudo FS interface on top of ARM
++ *            semihosting
++ *
++ * Copyright (c) 2015 Zodiac Inflight Innovations
++ * Author: Andrey Smirnov <andrew.smirnov@gmail.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <common.h>
++#include <command.h>
++#include <init.h>
++#include <fs.h>
++#include <errno.h>
++#include <linux/stat.h>
++#include <asm/semihosting.h>
++
++static int file_to_fd(const FILE *f)
++{
++	return (int)f->priv;
++}
++
++static int smhfs_create(struct device_d __always_unused *dev,
++			const char __always_unused *pathname,
++			mode_t __always_unused mode)
++{
++	return 0;
++}
++
++static int smhfs_mkdir(struct device_d __always_unused *dev,
++		       const char __always_unused *pathname)
++{
++	return -ENOSYS;
++}
++
++static int smhfs_rm(struct device_d __always_unused *dev,
++		    const char *pathname)
++{
++	/* Get rid of leading '/' */
++	pathname = &pathname[1];
++
++	if (semihosting_remove(pathname) != 0)
++		return -semihosting_errno();
++	else
++		return 0;
++}
++
++static int smhfs_truncate(struct device_d __always_unused *dev,
++			  FILE __always_unused *f,
++			  ulong __always_unused size)
++{
++	return 0;
++}
++
++static int smhfs_open(struct device_d __always_unused *dev,
++		      FILE *file, const char *filename)
++{
++	int fd;
++	/* Get rid of leading '/' */
++	filename = &filename[1];
++
++	fd = semihosting_open(filename, file->flags);
++	if (fd < 0)
++		goto error;
++
++	file->priv = (void *)fd;
++	file->size = semihosting_flen(fd);
++	if (file->size < 0)
++		goto error;
++
++	return 0;
++error:
++	return -semihosting_errno();
++}
++
++static int smhfs_close(struct device_d __always_unused *dev,
++		       FILE *f)
++{
++	if (semihosting_close(file_to_fd(f)))
++		return -semihosting_errno();
++	else
++		return 0;
++}
++
++static int smhfs_write(struct device_d __always_unused *dev,
++		       FILE *f, const void *inbuf, size_t insize)
++{
++	if (semihosting_write(file_to_fd(f), inbuf, insize))
++		return -semihosting_errno();
++	else
++		return insize;
++}
++
++static int smhfs_read(struct device_d __always_unused *dev,
++		      FILE *f, void *buf, size_t insize)
++{
++	if (!semihosting_read(file_to_fd(f), buf, insize))
++		return insize;
++	else
++		return -semihosting_errno();
++}
++
++static loff_t smhfs_lseek(struct device_d __always_unused *dev,
++			  FILE *f, loff_t pos)
++{
++	if (semihosting_seek(file_to_fd(f), pos)) {
++		return -semihosting_errno();
++	} else {
++		f->pos = pos;
++		return f->pos;
++	}
++}
++
++static DIR* smhfs_opendir(struct device_d __always_unused *dev,
++			  const char __always_unused *pathname)
++{
++	return NULL;
++}
++
++static int smhfs_stat(struct device_d __always_unused *dev,
++		      const char *filename, struct stat *s)
++{
++	FILE file;
++
++	if (smhfs_open(NULL, &file, filename) == 0) {
++		s->st_mode = S_IFREG | S_IRWXU | S_IRWXG | S_IRWXO;
++		s->st_size = file.size;
++	}
++	smhfs_close(NULL, &file);
++
++	return 0;
++}
++
++static int smhfs_probe(struct device_d __always_unused *dev)
++{
++	/* TODO: Add provisions to detect if debugger is connected */
++	return 0;
++}
++
++static void smhfs_remove(struct device_d __always_unused *dev)
++{
++}
++
++static struct fs_driver_d smhfs_driver = {
++	.open      = smhfs_open,
++	.close     = smhfs_close,
++	.read      = smhfs_read,
++	.lseek     = smhfs_lseek,
++	.opendir   = smhfs_opendir,
++	.stat      = smhfs_stat,
++	.create    = smhfs_create,
++	.unlink    = smhfs_rm,
++	.mkdir     = smhfs_mkdir,
++	.rmdir     = smhfs_rm,
++	.write     = smhfs_write,
++	.truncate  = smhfs_truncate,
++	.flags     = FS_DRIVER_NO_DEV,
++	.drv = {
++		.probe  = smhfs_probe,
++		.remove = smhfs_remove,
++		.name = "smhfs",
++	}
++};
++
++static int smhfs_init(void)
++{
++	return register_fs_driver(&smhfs_driver);
++}
++coredevice_initcall(smhfs_init);
+diff --git a/images/Makefile b/images/Makefile
+index a5f589b303ca..6a445112158d 100644
+--- a/images/Makefile
++++ b/images/Makefile
+@@ -121,10 +121,26 @@ targets += $(foreach m, $(image-y), $(FILE_$(m)))
+ 
+ SECONDARY: $(addprefix $(obj)/,$(targets))
+ 
+-images: $(addprefix $(obj)/, $(image-y)) FORCE
++# Images with full paths
++image-y-path := $(addprefix $(obj)/,$(image-y))
++# File will have a list of images generated
++flash-list := $(obj)/../barebox-flash-images
++# Symlink, which will point to non-existent 'multi-image-build' if there are
++# multiple images
++flash-link := $(obj)/../barebox-flash-image
++link-dest := $(if $(filter 1,$(words $(image-y))),$(image-y-path),multi-image-build)
++multi-image-build:
++
++images: $(image-y-path) $(flash-link) $(flash-list) FORCE
+ 	@echo "images built:"
+ 	@for i in $(image-y); do echo $$i; done
+ 
++$(flash-link): $(link-dest) FORCE
++	$(call if_changed,ln)
++
++$(flash-list): $(image-y-path)
++	@for i in $^; do echo $$i; done > $@
++
+ clean-files := *.pbl *.pblb *.pblx *.map start_*.imximg *.img barebox.z start_*.kwbimg \
+ 	start_*.kwbuartimg *.socfpgaimg *.mlo *.t20img *.t20img.cfg *.t30img \
+ 	*.t30img.cfg *.t124img *.t124img.cfg *.mlospi *.mlo *.mxsbs *.mxssd
+diff --git a/images/Makefile.imx b/images/Makefile.imx
+index c33b1531787d..a09afd695bee 100644
+--- a/images/Makefile.imx
++++ b/images/Makefile.imx
+@@ -207,6 +207,11 @@ CFG_start_imx6dl_hummingboard.pblx.imximg = $(board)/solidrun-microsom/flash-hea
+ FILE_barebox-solidrun-imx6dl-hummingboard.img = start_imx6dl_hummingboard.pblx.imximg
+ image-$(CONFIG_MACH_SOLIDRUN_MICROSOM) += barebox-solidrun-imx6dl-hummingboard.img
+ 
++pblx-$(CONFIG_MACH_TECHNEXION_WANDBOARD) += start_imx6_wandboard
++CFG_start_imx6_wandboard.imx-sram-img = $(board)/technexion-wandboard/flash-header-technexion-wandboard.imxcfg
++FILE_barebox-imx6-wandboard.img = start_imx6_wandboard.imx-sram-img
++image-$(CONFIG_MACH_TECHNEXION_WANDBOARD) += barebox-imx6-wandboard.img
++
+ pblx-$(CONFIG_MACH_NITROGEN6X) += start_imx6q_nitrogen6x_1g
+ CFG_start_imx6q_nitrogen6x_1g.pblx.imximg = $(board)/boundarydevices-nitrogen6x/flash-header-nitrogen6q-1g.imxcfg
+ FILE_barebox-boundarydevices-imx6q-nitrogen6x-1g.img = start_imx6q_nitrogen6x_1g.pblx.imximg
+@@ -254,8 +259,8 @@ image-$(CONFIG_MACH_VARISCITE_MX6) += barebox-variscite-custom.img
+ 
+ pblx-$(CONFIG_MACH_EMBEDSKY_E9) += start_imx6q_embedsky_e9
+ CFG_start_imx6q_embedsky_e9.pblx.imximg = $(board)/embedsky-e9/flash-header-e9.imxcfg
+-FILE_barebox-freescale-imx6q-embedsky-e9.img = start_imx6q_embedsky_e9.pblx.imximg
+-image-$(CONFIG_MACH_EMBEDSKY_E9) += barebox-freescale-imx6q-embedsky-e9.img
++FILE_barebox-embedsky-imx6q-e9.img = start_imx6q_embedsky_e9.pblx.imximg
++image-$(CONFIG_MACH_EMBEDSKY_E9) += barebox-embedsky-imx6q-e9.img
+ 
+ pblx-$(CONFIG_MACH_EMBEST_RIOTBOARD) += start_imx6s_riotboard
+ CFG_start_imx6s_riotboard.pblx.imximg = $(board)/embest-riotboard/flash-header-embest-riotboard.imxcfg
+diff --git a/images/Makefile.mvebu b/images/Makefile.mvebu
+index dcf2235f8cb5..0325f9961594 100644
+--- a/images/Makefile.mvebu
++++ b/images/Makefile.mvebu
+@@ -30,7 +30,7 @@ OPTS_start_lenovo_ix4_300d.pblx.kwbuartimg = -m uart $(LENOVO_IX4_300D_KWBOPTS)
+ FILE_barebox-lenovo-ix4-300d.img   = start_lenovo_ix4_300d.pblx.kwbimg
+ FILE_barebox-lenovo-ix4-300d-uart.img = start_lenovo_ix4_300d.pblx.kwbuartimg
+ FILE_barebox-lenovo-ix4-300d-2nd.img = start_lenovo_ix4_300d.pblx
+-pblx-$(CONFIG_MACH_LENOVO_IX4_300D) += start_lenovo_ix4_300d.pblx
++pblx-$(CONFIG_MACH_LENOVO_IX4_300D) += start_lenovo_ix4_300d
+ image-$(CONFIG_MACH_LENOVO_IX4_300D) += barebox-lenovo-ix4-300d.img
+ image-$(CONFIG_MACH_LENOVO_IX4_300D) += barebox-lenovo-ix4-300d-uart.img
+ image-$(CONFIG_MACH_LENOVO_IX4_300D) += barebox-lenovo-ix4-300d-2nd.img
+diff --git a/include/clock.h b/include/clock.h
+index 7f0f1eccc4fe..d65e404e865d 100644
+--- a/include/clock.h
++++ b/include/clock.h
+@@ -1,8 +1,7 @@
+-#include <types.h>
+-
+ #ifndef CLOCK_H
+ #define CLOCK_H
+ 
++#include <types.h>
+ #include <linux/time.h>
+ 
+ #define CLOCKSOURCE_MASK(bits) (uint64_t)((bits) < 64 ? ((1ULL<<(bits))-1) : -1)
+diff --git a/include/memtest.h b/include/memtest.h
+index a337be832f41..0100a6c58cd9 100644
+--- a/include/memtest.h
++++ b/include/memtest.h
+@@ -8,7 +8,11 @@ struct mem_test_resource {
+ 	struct list_head list;
+ };
+ 
+-int mem_test(resource_size_t _start,
+-		resource_size_t _end, int bus_only);
++int mem_test_request_regions(struct list_head *list);
++void mem_test_release_regions(struct list_head *list);
++struct mem_test_resource *mem_test_biggest_region(struct list_head *list);
++
++int mem_test_bus_integrity(resource_size_t _start, resource_size_t _end);
++int mem_test_moving_inversions(resource_size_t _start, resource_size_t _end);
+ 
+ #endif /* __MEMTEST_H */
+diff --git a/include/mmu.h b/include/mmu.h
+new file mode 100644
+index 000000000000..66b246f6d270
+--- /dev/null
++++ b/include/mmu.h
+@@ -0,0 +1,41 @@
++#ifndef __MMU_H
++#define __MMU_H
++
++#define MAP_UNCACHED	0
++#define MAP_CACHED	1
++
++/*
++ * Depending on the architecture the default mapping can be
++ * cached or uncached. Without ARCH_HAS_REMAP being set this
++ * is mapping type is the only one supported.
++ */
++#define MAP_DEFAULT	MAP_ARCH_DEFAULT
++
++#include <asm/mmu.h>
++
++#ifndef ARCH_HAS_REMAP
++static inline int arch_remap_range(void *start, size_t size, unsigned flags)
++{
++	if (flags == MAP_ARCH_DEFAULT)
++		return 0;
++
++	return -EINVAL;
++}
++
++static inline bool arch_can_remap(void)
++{
++	return false;
++}
++#else
++static inline bool arch_can_remap(void)
++{
++	return true;
++}
++#endif
++
++static inline int remap_range(void *start, size_t size, unsigned flags)
++{
++	return arch_remap_range(start, size, flags);
++}
++
++#endif
+diff --git a/include/net.h b/include/net.h
+index d7a475132a0c..2a37a43a5c15 100644
+--- a/include/net.h
++++ b/include/net.h
+@@ -60,7 +60,6 @@ struct eth_device {
+ 	IPaddr_t serverip;
+ 	IPaddr_t netmask;
+ 	IPaddr_t gateway;
+-	char ethaddr_param[6];
+ 	char ethaddr[6];
+ };
+ 
+diff --git a/include/usb/usb.h b/include/usb/usb.h
+index 8f3ce2aeff24..aedc527f58c3 100644
+--- a/include/usb/usb.h
++++ b/include/usb/usb.h
+@@ -152,6 +152,7 @@ struct usb_host {
+ 	struct device_d *hw_dev;
+ 	int busnum;
+ 	struct usb_device *root_dev;
++	int sem;
+ };
+ 
+ int usb_register_host(struct usb_host *);
+diff --git a/lib/logo/Makefile b/lib/logo/Makefile
+index f5f229f8fd01..eb7aee080e65 100644
+--- a/lib/logo/Makefile
++++ b/lib/logo/Makefile
+@@ -41,7 +41,6 @@ cmd_logo_S =							\
+ quiet_cmd_logo = LOGO.S   $@
+ cmd_logo =							\
+ (								\
+-	echo OPTS: $(OPTS_$(@F));				\
+ 	inkscape -z $(OPTS_$(@F)) -e $@ $< > /dev/null;		\
+ )
+ 
+diff --git a/net/eth.c b/net/eth.c
+index b22e55668a60..fb3f22f10e76 100644
+--- a/net/eth.c
++++ b/net/eth.c
+@@ -285,47 +285,61 @@ static int eth_param_set_ethaddr(struct param_d *param, void *priv)
+ {
+ 	struct eth_device *edev = priv;
+ 
+-	return eth_set_ethaddr(edev, edev->ethaddr_param);
++	return eth_set_ethaddr(edev, edev->ethaddr);
+ }
+ 
+ #ifdef CONFIG_OFTREE
+-static int eth_of_fixup(struct device_node *root, void *unused)
++static void eth_of_fixup_node(struct device_node *root,
++			      const char *node_path, int ethid,
++			      const u8 ethaddr[6])
+ {
+-	struct eth_device *edev;
+ 	struct device_node *node;
+ 	int ret;
+ 
+-	/*
+-	 * Add the mac-address property for each network device we
+-	 * find a nodepath for and which has a valid mac address.
+-	 */
+-	list_for_each_entry(edev, &netdev_list, list) {
+-		if (!is_valid_ether_addr(edev->ethaddr)) {
+-			dev_dbg(&edev->dev,
+-				"%s: no valid mac address, cannot fixup\n",
+-				__func__);
+-			continue;
+-		}
+-
+-		if (edev->nodepath) {
+-			node = of_find_node_by_path_from(root, edev->nodepath);
+-		} else {
+-			char eth[12];
+-			sprintf(eth, "ethernet%d", edev->dev.id);
+-			node = of_find_node_by_alias(root, eth);
+-		}
++	if (!is_valid_ether_addr(ethaddr)) {
++		pr_debug("%s: no valid mac address, cannot fixup\n",
++			 __func__);
++		return;
++	}
+ 
+-		if (!node) {
+-			dev_dbg(&edev->dev, "%s: no node to fixup\n", __func__);
+-			continue;
+-		}
++	if (node_path) {
++		node = of_find_node_by_path_from(root, node_path);
++	} else {
++		char eth[12];
++		sprintf(eth, "ethernet%d", ethid);
++		node = of_find_node_by_alias(root, eth);
++	}
+ 
+-		ret = of_set_property(node, "mac-address", edev->ethaddr, 6, 1);
+-		if (ret)
+-			pr_err("Setting mac-address property of %s failed with: %s\n",
+-					node->full_name, strerror(-ret));
++	if (!node) {
++		pr_debug("%s: no node to fixup\n", __func__);
++		return;
+ 	}
+ 
++	ret = of_set_property(node, "mac-address", ethaddr, 6, 1);
++	if (ret)
++		pr_err("Setting mac-address property of %s failed with: %s\n",
++		       node->full_name, strerror(-ret));
++}
++
++static int eth_of_fixup(struct device_node *root, void *unused)
++{
++	struct eth_ethaddr *addr;
++	struct eth_device *edev;
++
++	/*
++	 * Add the mac-address property for each ethaddr and then each network
++	 * device we find a node path for and which has a valid mac address.
++	 * This will find both network devices barebox was told about as well as
++	 * addresses registered by boards but for which no network device was
++	 * ever loaded.
++	 */
++	list_for_each_entry(addr, &ethaddr_list, list)
++		eth_of_fixup_node(root, addr->node ? addr->node->full_name : NULL,
++				  addr->ethid, addr->ethaddr);
++
++	list_for_each_entry(edev, &netdev_list, list)
++		eth_of_fixup_node(root, edev->nodepath, edev->dev.id, edev->ethaddr);
++
+ 	return 0;
+ }
+ 
+@@ -369,7 +383,7 @@ int eth_register(struct eth_device *edev)
+ 	dev_add_param_ip(dev, "gateway", NULL, NULL, &edev->gateway, edev);
+ 	dev_add_param_ip(dev, "netmask", NULL, NULL, &edev->netmask, edev);
+ 	dev_add_param_mac(dev, "ethaddr", eth_param_set_ethaddr, NULL,
+-			edev->ethaddr_param, edev);
++			edev->ethaddr, edev);
+ 
+ 	if (edev->init)
+ 		edev->init(edev);
+diff --git a/pbl/console.c b/pbl/console.c
+index 3574753d23ef..4cefe748080f 100644
+--- a/pbl/console.c
++++ b/pbl/console.c
+@@ -32,7 +32,7 @@ int console_puts(unsigned int ch, const char *str)
+ 
+ 	while (*str) {
+ 		if (*str == '\n')
+-			putc_ll('\r');
++			console_putc(CONSOLE_STDOUT, '\r');
+ 
+ 		console_putc(CONSOLE_STDOUT, *str);
+ 		str++;
+diff --git a/scripts/checkpatch.pl b/scripts/checkpatch.pl
+index 8d9643465060..f3fd3395f17a 100755
+--- a/scripts/checkpatch.pl
++++ b/scripts/checkpatch.pl
+@@ -2013,8 +2013,8 @@ sub process {
+ 
+ # function brace can't be on same line, except for #defines of do while,
+ # or if closed on same line
+-		if (($line=~/$Type\s*$Ident\(.*\).*\s{/) and
+-		    !($line=~/\#\s*define.*do\s{/) and !($line=~/}/)) {
++		if (($line=~/$Type\s*$Ident\(.*\).*\s\{/) and
++		    !($line=~/\#\s*define.*do\s\{/) and !($line=~/}/)) {
+ 			ERROR("open brace '{' following function declarations go on the next line\n" . $herecurr);
+ 		}
+ 
+@@ -2264,8 +2264,8 @@ sub process {
+ ## 		}
+ 
+ #need space before brace following if, while, etc
+-		if (($line =~ /\(.*\){/ && $line !~ /\($Type\){/) ||
+-		    $line =~ /do{/) {
++		if (($line =~ /\(.*\)\{/ && $line !~ /\($Type\){/) ||
++		    $line =~ /do\{/) {
+ 			ERROR("space required before the open brace '{'\n" . $herecurr);
+ 		}
+ 
+diff --git a/scripts/gen-dtb-s b/scripts/gen-dtb-s
+index a92049556773..40c60855ec48 100755
+--- a/scripts/gen-dtb-s
++++ b/scripts/gen-dtb-s
+@@ -51,6 +51,25 @@ echo "__dtb_${name}_end:"
+ echo ".global __dtb_${name}_end"
+ echo ".balign STRUCT_ALIGNMENT"
+ 
++lzop -f -9 $dtb -o $dtb.lzo
++if [ $? != 0 ]; then
++	exit 1
++fi
++compressed=$(stat $dtb.lzo -c "%s")
++uncompressed=$(stat $dtb -c "%s")
++
++echo ".section .dtb.rodata.${name}.z,\"a\""
++echo ".balign STRUCT_ALIGNMENT"
++echo ".global __dtb_z_${name}_start"
++echo "__dtb_z_${name}_start:"
++printf ".word 0x%08x\n"  0x7b66bcbd
++printf ".word 0x%08x\n"  $compressed
++printf ".word 0x%08x\n"  $uncompressed
++echo ".incbin \"$dtb.lzo\""
++echo "__dtb_z_${name}_end:"
++echo ".global __dtb_z_${name}_end"
++echo ".balign STRUCT_ALIGNMENT"
++
+ if [ "$imd" = "y" ]; then
+ 	echo ".word __imd_${name}_start"
+ fi
+diff --git a/scripts/kwbimage.c b/scripts/kwbimage.c
+index 5b8e73892cfb..448ac2a5d416 100644
+--- a/scripts/kwbimage.c
++++ b/scripts/kwbimage.c
+@@ -51,6 +51,7 @@
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <libgen.h>
+ 
+ #define ALIGN_SUP(x, a) (((x) + (a - 1)) & ~(a - 1))
+ 
+@@ -187,7 +188,7 @@ struct image_cfg_element {
+ 		unsigned int version;
+ 		unsigned int bootfrom;
+ 		struct {
+-			const char *file;
++			char *file;
+ 			unsigned int args[BINARY_MAX_ARGS];
+ 			unsigned int nargs;
+ 		} binary;
+@@ -1003,7 +1004,8 @@ static void *image_create_v1(struct image_cfg_element *image_cfg,
+ }
+ 
+ static int image_create_config_parse_oneline(char *line,
+-					     struct image_cfg_element *el)
++					     struct image_cfg_element *el,
++					     char *configpath)
+ {
+ 	char *keyword, *saveptr;
+ 
+@@ -1056,7 +1058,10 @@ static int image_create_config_parse_oneline(char *line,
+ 		int argi = 0;
+ 
+ 		el->type = IMAGE_CFG_BINARY;
+-		el->binary.file = strdup(value);
++		if (*value == '/')
++			el->binary.file = strdup(value);
++		else
++			asprintf(&el->binary.file, "%s/%s", configpath, value);
+ 		while (1) {
+ 			value = strtok_r(NULL, " ", &saveptr);
+ 			if (!value)
+@@ -1098,12 +1103,22 @@ static int image_create_config_parse_oneline(char *line,
+  * elements 'image_cfg', and return the number of configuration
+  * elements in 'cfgn'.
+  */
+-static int image_create_config_parse(FILE *fcfg,
++static int image_create_config_parse(const char *input,
+ 				     struct image_cfg_element *image_cfg,
+ 				     int *cfgn)
+ {
+ 	int ret;
+ 	int cfgi = 0;
++	FILE *fcfg;
++	char *configpath = dirname(strdup(input));
++
++	fcfg = fopen(input, "r");
++	if (!fcfg) {
++		fprintf(stderr, "Could not open input file %s\n",
++			input);
++		free(configpath);
++		return -1;
++	}
+ 
+ 	/* Parse the configuration file */
+ 	while (!feof(fcfg)) {
+@@ -1126,20 +1141,26 @@ static int image_create_config_parse(FILE *fcfg,
+ 
+ 		/* Parse the current line */
+ 		ret = image_create_config_parse_oneline(line,
+-							&image_cfg[cfgi]);
++							&image_cfg[cfgi],
++							configpath);
+ 		if (ret)
+-			return ret;
++			goto out;
+ 
+ 		cfgi++;
+ 
+ 		if (cfgi >= IMAGE_CFG_ELEMENT_MAX) {
+ 			fprintf(stderr, "Too many configuration elements in .cfg file\n");
+-			return -1;
++			ret = -1;
++			goto out;
+ 		}
+ 	}
+ 
++	ret = 0;
+ 	*cfgn = cfgi;
+-	return 0;
++out:
++	fclose(fcfg);
++	free(configpath);
++	return ret;
+ }
+ 
+ static int image_override_payload(struct image_cfg_element *image_cfg,
+@@ -1316,34 +1337,24 @@ static int image_create(const char *input, const char *output,
+ 			int verbose)
+ {
+ 	struct image_cfg_element *image_cfg;
+-	FILE *fcfg, *outputimg;
++	FILE *outputimg;
+ 	void *image = NULL;
+ 	int version;
+ 	size_t imagesz;
+ 	int cfgn;
+ 	int ret;
+ 
+-	fcfg = fopen(input, "r");
+-	if (!fcfg) {
+-		fprintf(stderr, "Could not open input file %s\n",
+-			input);
+-		return -1;
+-	}
+-
+ 	image_cfg = malloc(IMAGE_CFG_ELEMENT_MAX *
+ 			   sizeof(struct image_cfg_element));
+ 	if (!image_cfg) {
+ 		fprintf(stderr, "Cannot allocate memory\n");
+-		fclose(fcfg);
+ 		return -1;
+ 	}
+ 
+ 	memset(image_cfg, 0,
+ 	       IMAGE_CFG_ELEMENT_MAX * sizeof(struct image_cfg_element));
+-	rewind(fcfg);
+ 
+-	ret = image_create_config_parse(fcfg, image_cfg, &cfgn);
+-	fclose(fcfg);
++	ret = image_create_config_parse(input, image_cfg, &cfgn);
+ 	if (ret) {
+ 		free(image_cfg);
+ 		return -1;

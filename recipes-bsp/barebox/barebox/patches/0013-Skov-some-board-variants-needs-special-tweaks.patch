@@ -1,0 +1,93 @@
+From 1ce1bd98a72fc1f413ed8d8a477c6a31724a6be9 Mon Sep 17 00:00:00 2001
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 24 Nov 2015 16:06:10 +0100
+Subject: [PATCH 13/14] Skov: some board variants needs special tweaks
+
+Due to space limitation we cannot handle this differences with multiple
+DTS.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/version.c | 36 +++++++++++++++++++++++++++++++++++
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi | 11 +++++++++++
+ 2 files changed, 47 insertions(+)
+
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+index 166f668a19c4..cb780ef4e365 100644
+--- a/arch/arm/boards/skov-dol63x/version.c
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -97,6 +97,40 @@ static const struct board_description dol63x_variants[] = {
+ 	},
+ };
+ 
++/*
++ * Some variants need tweaks to make them work
++ *
++ * Revision A has no backlight control, since revision B it is present (GPIO6/23)
++ * Revision A needs GPIO1/24 to be high
++ */
++static void tweak_board(unsigned var)
++{
++	switch (var) {
++	case 0 ... 8:
++		/* MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 is a gpio which should be high */
++		gpio_request(24, "must_be_high");
++		gpio_direction_output(24, 1);
++		break;
++	}
++
++	/* backlight handling */
++	switch (var) {
++	case 0 ... 8:
++		break;
++	default:
++		gpio_request(183, "backlight switch");
++		gpio_direction_output(183, 1); /* switch it off as early as possible */
++		gpio_request(1, "backlight brightness");
++		gpio_direction_output(1, 0); /* dark */
++	}
++
++	/* SD card handling */
++	gpio_request(200, "mmc power supply");
++	gpio_direction_output(200, 1); /* switch on */
++	gpio_request(205, "mmc io supply");
++	gpio_direction_output(205, 0); /* select 3.3 V IO voltage */
++}
++
+ static int skov_version_probe(struct device_d *dev)
+ {
+ 	struct device_node *np = dev->device_node;
+@@ -139,6 +173,8 @@ static int skov_version_probe(struct device_d *dev)
+ 	globalvar_add_simple("board.soc", dol63x_variants[var].soc == NULL ? "undefined" : dol63x_variants[var].soc);
+ 	globalvar_add_simple("board.dts", dol63x_variants[var].dts_compatible == NULL ? "undefined" : dol63x_variants[var].dts_compatible);
+ 
++	tweak_board(var);
++
+ 	free(number);
+ 	return 0;
+ 
+diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+index f5c493085854..30b89d6c8fe9 100644
+--- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+@@ -123,6 +123,17 @@
+ 
+ &iomuxc {
+ 	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hog>;
++
++	pinctrl_hog: hoggrp {
++		/* we need a few pins as GPIOs */
++		fsl,pins = <
++			MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 0x13000
++			MX6QDL_PAD_GPIO_18__GPIO7_IO13 0x17059
++			MX6QDL_PAD_SD3_RST__GPIO7_IO08 0x1b0b0
++			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23 0x1b0b0
++		>;
++	};
+ 
+ 	pinctrl_version: versiongrp {
+ 		fsl,pins = <
+-- 
+2.1.4
+

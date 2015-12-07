@@ -1,0 +1,28 @@
+From 35ffe6f389f8bcb49b030805ecd65ac7c76b3a80 Mon Sep 17 00:00:00 2001
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Fri, 23 Oct 2015 15:14:42 +0200
+Subject: [PATCH 07/14] pbl-console: something to fix?
+
+---
+ pbl/console.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pbl/console.c b/pbl/console.c
+index 4cefe748080f..b395f39dd482 100644
+--- a/pbl/console.c
++++ b/pbl/console.c
+@@ -32,9 +32,9 @@ int console_puts(unsigned int ch, const char *str)
+ 
+ 	while (*str) {
+ 		if (*str == '\n')
+-			console_putc(CONSOLE_STDOUT, '\r');
++			console_putc(ch, '\r'); /* Why? */
+ 
+-		console_putc(CONSOLE_STDOUT, *str);
++		console_putc(ch, *str);
+ 		str++;
+ 		n++;
+ 	}
+-- 
+2.1.4
+

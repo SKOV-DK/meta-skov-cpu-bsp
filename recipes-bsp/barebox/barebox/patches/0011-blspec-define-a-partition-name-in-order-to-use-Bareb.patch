@@ -1,0 +1,52 @@
+From 938b052d126dcdc08dc0d6439a8788dff415719c Mon Sep 17 00:00:00 2001
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Thu, 19 Nov 2015 16:38:47 +0100
+Subject: [PATCH 11/14] blspec: define a partition name in order to use
+ Barebox's blspec feature
+
+This entry lets barebox automatically attach to '/dev/nand0' and mounts
+the new volumes on demand.
+
+Barebox's "linux-appendroot" feature needs a partition name to create the
+kernel's "ubi.mtd=<part-name>" parameter. This change also change the
+paths to be searched along when the "bootchooser" is running.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+index 27d834e66f32..f5c493085854 100644
+--- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+@@ -54,12 +54,12 @@
+ 
+ 		system0 { /* the node's name here must match the subnode's name in the 'state' node */
+ 			default_attempts = <3>;
+-			boot = "/dev/nand0.ubi.system0"; /* must be in conjunction with the runtime path */
++			boot = "nand0.firmware.ubi.system0"; /* must be in conjunction with the runtime path in 'dev' */
+ 		};
+ 
+ 		system1 { /* the node's name here must match the subnode's name in the 'state' node */
+ 			default_attempts = <3>;
+-			boot = "/dev/nand0.ubi.system1"; /* must be in conjunction with the runtime path */
++			boot = "nand0.firmware.ubi.system1"; /* must be in conjunction with the runtime path in 'dev' */
+ 		};
+ 	};
+ 
+@@ -260,6 +260,11 @@
+ 	pinctrl-0 = <&pinctrl_gpmi_nand>;
+ 	nand-on-flash-bbt;
+ 	status = "okay";
++
++	partition@0 {
++		label = "firmware";
++		reg = <0x00000000 0x000000000>; /* keep zero sized to enable autodetection */
++	};
+ };
+ 
+ /* define the SPI based 8 MiB NOR flash layout */
+-- 
+2.1.4
+
