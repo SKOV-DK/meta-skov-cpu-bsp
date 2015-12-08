@@ -1,4 +1,4 @@
-From eb7f450a8af9da55685e8d3d1337b2787428d453 Mon Sep 17 00:00:00 2001
+From afb74229ed499fa36f6ea197585b80077c76c91a Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Fri, 20 Feb 2015 09:19:14 +0100
 Subject: [PATCH 06/14] bootstate: add framework for redundant boot scenarios

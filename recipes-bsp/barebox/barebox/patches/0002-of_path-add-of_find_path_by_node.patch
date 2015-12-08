@@ -1,4 +1,4 @@
-From ed49054b962b21e9e011a1eb7a419fc4b9b9df45 Mon Sep 17 00:00:00 2001
+From d0da7e29502004db1592b47ed69ea25787429e46 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Tue, 20 Oct 2015 10:29:04 +0200
 Subject: [PATCH 02/14] of_path: add of_find_path_by_node()

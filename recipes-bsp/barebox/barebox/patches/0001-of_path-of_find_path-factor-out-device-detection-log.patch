@@ -1,4 +1,4 @@
-From bd9ac1608b9efcb537a7a26fead80d1ff6a17f36 Mon Sep 17 00:00:00 2001
+From 2359c67afde4190de6b67718a6af86fe165f95b1 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Tue, 20 Oct 2015 10:05:33 +0200
 Subject: [PATCH 01/14] of_path: of_find_path() factor out device detection

@@ -1,4 +1,4 @@
-From d4b2d6ab083a12be70bcb130939f255bbd9d7693 Mon Sep 17 00:00:00 2001
+From 03d81c3b81fe8db36101e1b27471c80f367602da Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Thu, 19 Nov 2015 16:38:47 +0100
 Subject: [PATCH 11/14] blspec: define a partition name in order to use

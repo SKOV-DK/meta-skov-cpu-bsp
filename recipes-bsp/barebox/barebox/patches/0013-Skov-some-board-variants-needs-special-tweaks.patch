@@ -1,4 +1,4 @@
-From 167efc56291e16b01174db65279c0e61cf2720d3 Mon Sep 17 00:00:00 2001
+From 2d2b108d7971e37bc83c1c58f2bcd27ab40a1ff9 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
 Subject: [PATCH 13/14] Skov: some board variants needs special tweaks

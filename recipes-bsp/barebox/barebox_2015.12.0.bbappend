@@ -3,7 +3,6 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://defconfig"
 
 SRC_URI += "\
-  file://patches/0000-update_to_current_master.patch \
   file://patches/0001-of_path-of_find_path-factor-out-device-detection-log.patch \
   file://patches/0002-of_path-add-of_find_path_by_node.patch \
   file://patches/0003-state-make-use-of-of_find_path_by_node-and-add-retur.patch \
@@ -17,7 +16,7 @@ SRC_URI += "\
   file://patches/0011-blspec-define-a-partition-name-in-order-to-use-Bareb.patch \
   file://patches/0012-Skov-Use-local-environment-variants-to-handle-the-re.patch \
   file://patches/0013-Skov-some-board-variants-needs-special-tweaks.patch \
-  file://patches/0014-Release-2015.11.0-customers-skov-dol63x-20151207-1.patch \
+  file://patches/0014-Release-2015.21.0-customers-skov-dol63x-20151208-1.patch \
   "
 
 COMPATIBLE_MACHINE = "dol-63x-*"

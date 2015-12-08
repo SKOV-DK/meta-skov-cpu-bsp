@@ -1,4 +1,4 @@
-From ea41d6c723a74cccfe47d3a237a80323bdf83fcc Mon Sep 17 00:00:00 2001
+From bb6f4eb5ab327a4b21485515b796155ef84db873 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 14:57:57 +0100
 Subject: [PATCH 09/14] blspec: Prepare for a different compatible string
