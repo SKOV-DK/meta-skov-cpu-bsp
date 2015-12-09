@@ -1,4 +1,4 @@
-From 7fb02897d7e713d1204078d02580388bc2a00c13 Mon Sep 17 00:00:00 2001
+From 60d0f89d51dbc87d68b51ff19d0ca1d6fd62d65e Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 8 Dec 2015 09:59:19 +0100
 Subject: [PATCH 08/14] Skov: add base platform support.
@@ -21,10 +21,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-dol63x.dts                |  24 +
  arch/arm/dts/imx6q-skov-dol63x.dts                 |  24 +
- arch/arm/dts/imx6qdl-skov-dol63x.dtsi              | 276 +++++++
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi              | 280 +++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
  images/Makefile.imx                                |   5 +
- 11 files changed, 1279 insertions(+)
+ 11 files changed, 1283 insertions(+)
  create mode 100644 arch/arm/boards/skov-dol63x/Makefile
  create mode 100644 arch/arm/boards/skov-dol63x/board.c
  create mode 100644 arch/arm/boards/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg
@@ -1086,10 +1086,10 @@ index 000000000000..d0c72b70e290
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 new file mode 100644
-index 000000000000..8b6ccf87e6a7
+index 000000000000..249121660963
 --- /dev/null
 +++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,280 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
 + *
@@ -1365,6 +1365,10 @@ index 000000000000..8b6ccf87e6a7
 +		label = "barebox-state";
 +		reg = <0x7C0000 0x40000>; /* four times mirrored */
 +	};
++};
++
++&ocotp {
++	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
 index 0a7b517b4c5f..1bc7b6ec5217 100644

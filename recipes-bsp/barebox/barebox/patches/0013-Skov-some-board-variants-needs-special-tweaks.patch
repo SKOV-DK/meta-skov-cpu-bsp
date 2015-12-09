@@ -1,4 +1,4 @@
-From 37671ea8bfba4df134f13c03d7f46933db6db5bc Mon Sep 17 00:00:00 2001
+From a581926491e12c87ed26b110d356d7f717226964 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
 Subject: [PATCH 13/14] Skov: some board variants needs special tweaks
@@ -284,7 +284,7 @@ index 166f668a19c4..a18a0e460c89 100644
  	return 0;
  
 diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-index f5c493085854..44beb7f558e4 100644
+index 81300458f948..0af004a09431 100644
 --- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 @@ -123,17 +123,34 @@

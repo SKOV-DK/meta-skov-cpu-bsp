@@ -1,4 +1,4 @@
-From e38fcbb42c591e50041596a27f4d0a1319a42160 Mon Sep 17 00:00:00 2001
+From 04fd4c03b141d76569c78f9a0bc4d24b9e61abbc Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:02:24 +0100
 Subject: [PATCH 10/14] Skov: create some information at run-time
@@ -201,7 +201,7 @@ index 000000000000..166f668a19c4
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-index 8b6ccf87e6a7..27d834e66f32 100644
+index 249121660963..6902e3f18639 100644
 --- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 @@ -39,15 +39,11 @@
