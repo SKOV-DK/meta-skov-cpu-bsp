@@ -4,15 +4,18 @@ Subject: [PATCH] RTC/PCF85063: setup the clock in a customer specific way
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
- drivers/rtc/rtc-pcf85063.c | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ drivers/rtc/rtc-pcf85063.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index 651513686078..9f6b5b8c60ee 100644
+index 651513686078..c18a1c6b779c 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
-@@ -21,6 +21,8 @@
+@@ -19,8 +19,11 @@
+ #define DRV_VERSION "0.0.1"
+ 
  #define PCF85063_REG_CTRL1		0x00 /* status */
++#define PCF85063_REG_CTRL1_CAP_SEL	BIT(0)
  #define PCF85063_REG_CTRL1_STOP		BIT(5)
  #define PCF85063_REG_CTRL2		0x01
 +#define PCF85063_REG_CTRL2_COF_OFF	0x07
@@ -20,7 +23,7 @@ index 651513686078..9f6b5b8c60ee 100644
  
  #define PCF85063_REG_SC			0x04 /* datetime */
  #define PCF85063_REG_SC_OS		0x80
-@@ -219,6 +221,25 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+@@ -219,6 +222,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
  	.set_time	= pcf85063_rtc_set_time
  };
  
@@ -28,11 +31,25 @@ index 651513686078..9f6b5b8c60ee 100644
 +static int pcf85063_init_for_skov(struct i2c_client *client)
 +{
 +	int rc;
-+	u8 data[3] = {
-+		PCF85063_REG_CTRL2, /* where to start to write */
++	u8 data[4] = {
++		PCF85063_REG_CTRL1, /* where to start to write */
++		0x00, /* default */
 +		PCF85063_REG_CTRL2_COF_OFF, /* disable clock out */
 +		0x00, /* disable any offset corrections */
 +	};
++
++	/*
++	 * there are no external capacitors populated to define the load of
++	 * the used 32,786 Hz crystal. We use the device's internal capacitor
++	 * load instead.
++	 */
++	if (of_property_match_string(client->dev.of_node,
++				     "quartz_load", "12.5pF") == 0)
++		data[1] |= PCF85063_REG_CTRL1_CAP_SEL;
++
++	if (of_property_match_string(client->dev.of_node,
++				     "quartz_load", "7pF") == 0)
++		data[1] &= ~PCF85063_REG_CTRL1_CAP_SEL;
 +
 +	rc = i2c_master_send(client, data, sizeof(data));
 +	if (rc != sizeof(data)) {
@@ -46,7 +63,7 @@ index 651513686078..9f6b5b8c60ee 100644
  static int pcf85063_probe(struct i2c_client *client,
  				const struct i2c_device_id *id)
  {
-@@ -238,6 +259,10 @@ static int pcf85063_probe(struct i2c_client *client,
+@@ -238,6 +274,10 @@ static int pcf85063_probe(struct i2c_client *client,
  
  	i2c_set_clientdata(client, pcf85063);
  

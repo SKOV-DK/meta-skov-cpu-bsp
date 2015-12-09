@@ -68,11 +68,11 @@ SRC_URI += "\
   file://patches/0243-DTS-HDMI-only-the-i.MX6Q-based-variants-support-HDMI.patch \
   file://patches/0244-DTS-I-C-trim-the-I-C-bus-3-pads.patch \
   file://patches/0245-DTS-I-C-trim-the-I-C-bus-2-pads.patch \
-  file://patches/0246-DTS-RTC-remove-a-no-longer-used-property.patch \
-  file://patches/0247-RTC-PCF85063-setup-the-clock-in-a-customer-specific-.patch \
+  file://patches/0246-RTC-PCF85063-setup-the-clock-in-a-customer-specific-.patch \
+  file://patches/0247-Skov-keep-customer-s-specific-drivers.patch \
   file://patches/0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch \
   file://patches/0302-fuse-cuse-implement-mmap.patch \
-  file://patches/0401-Release-4.3-customers-skov-dol63x-20151207-1.patch \
+  file://patches/0401-Release-4.3-customers-skov-dol63x-20151208-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
