@@ -34,10 +34,10 @@ index e4a933ff3e01..41a7e15ca4ad 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index db63b2edea6b..354231c6758d 100644
+index 373f524f46e8..fd8f21a3be62 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -324,7 +324,6 @@
+@@ -326,7 +326,6 @@
  };
  
  &i2c2 {

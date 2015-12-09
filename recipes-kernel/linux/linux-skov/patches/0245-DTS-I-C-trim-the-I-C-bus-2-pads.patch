@@ -15,10 +15,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index a2ba6083a306..5186ec931aa2 100644
+index 9281ef1fa589..3607eb680e9b 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -494,8 +494,10 @@
+@@ -496,8 +496,10 @@
  
  		pinctrl_i2c2_2: i2c2grp-2 {
  			fsl,pins = <

@@ -8,15 +8,15 @@ wrong things, after the FEC driver has autodetected three phys...
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
- arch/arm/boot/dts/imx6qdl-cpu.dtsi  | 15 +++++++++++++++
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi  | 17 +++++++++++++++++
  arch/arm/boot/dts/imx6qdl-cpuA.dtsi |  8 --------
- 2 files changed, 15 insertions(+), 8 deletions(-)
+ 2 files changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 6ad8cd2dda7f..db63b2edea6b 100644
+index 6ad8cd2dda7f..373f524f46e8 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -302,12 +302,27 @@
+@@ -302,12 +302,29 @@
  	phy-supply = <&reg_3p3v>;
  	#address-cells = <0>;
  	#size-cells = <1>;
@@ -35,10 +35,12 @@ index 6ad8cd2dda7f..db63b2edea6b 100644
  
 +/* signal "active link" on the RMII to the ethernet switch */
 +&gpio1 {
-+	status = "okay";
-+	active_status = "high";
-+	gpios = <&gpio1>;
-+	pin = <24>;
++	active_rmii_link {
++		gpio-hog;
++		gpios = <&gpio1 24 GPIO_ACTIVE_LOW>;
++		output-low;
++		line-name = "rmii-active-link";
++	};
 +};
 +
  &i2c2 {
