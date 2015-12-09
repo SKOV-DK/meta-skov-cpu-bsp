@@ -1,4 +1,4 @@
-From 2d2b108d7971e37bc83c1c58f2bcd27ab40a1ff9 Mon Sep 17 00:00:00 2001
+From 37671ea8bfba4df134f13c03d7f46933db6db5bc Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
 Subject: [PATCH 13/14] Skov: some board variants needs special tweaks
@@ -9,9 +9,9 @@ DTS.
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
  arch/arm/boards/skov-dol63x/lowlevel.c | 153 +++++++++++++++++++++++++++++++--
- arch/arm/boards/skov-dol63x/version.c  |  45 ++++++++++
+ arch/arm/boards/skov-dol63x/version.c  |  48 +++++++++++
  arch/arm/dts/imx6qdl-skov-dol63x.dtsi  |  39 ++++++---
- 3 files changed, 219 insertions(+), 18 deletions(-)
+ 3 files changed, 222 insertions(+), 18 deletions(-)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
 index 1e2d7f8b0b39..f547b8ac8efa 100644
@@ -211,7 +211,7 @@ index 1e2d7f8b0b39..f547b8ac8efa 100644
  	switch (cpu_type) {
  	case IMX6_CPUTYPE_IMX6S:
 diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
-index 166f668a19c4..cd56e26eb9e1 100644
+index 166f668a19c4..a18a0e460c89 100644
 --- a/arch/arm/boards/skov-dol63x/version.c
 +++ b/arch/arm/boards/skov-dol63x/version.c
 @@ -72,6 +72,7 @@ static const struct board_description dol63x_variants[] = {
@@ -222,7 +222,7 @@ index 166f668a19c4..cd56e26eb9e1 100644
  		.value = "max performance",
  		.revision = "B",
  		.soc = "i.MX6Q",
-@@ -97,6 +98,48 @@ static const struct board_description dol63x_variants[] = {
+@@ -97,6 +98,51 @@ static const struct board_description dol63x_variants[] = {
  	},
  };
  
@@ -230,16 +230,19 @@ index 166f668a19c4..cd56e26eb9e1 100644
 + * Some variants need tweaks to make them work
 + *
 + * Revision A has no backlight control, since revision B it is present (GPIO6/23)
-+ * Revision A needs GPIO1/24 to be high
++ * Revision A needs GPIO1/24 to be low to make network working
 + * Revision C can control the SD main power supply
 + */
 +static void tweak_board(unsigned var)
 +{
 +	switch (var) {
 +	case 0 ... 8:
-+		/* MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 is a gpio which should be high */
-+		gpio_request(24, "must_be_high");
-+		gpio_direction_output(24, 1);
++		/*
++		 * MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 is a gpio which must be
++		 * low to enable the RMII from the switch point of view
++		 */
++		gpio_request(24, "must_be_low");
++		gpio_direction_output(24, 0);
 +		break;
 +	}
 +
@@ -271,7 +274,7 @@ index 166f668a19c4..cd56e26eb9e1 100644
  static int skov_version_probe(struct device_d *dev)
  {
  	struct device_node *np = dev->device_node;
-@@ -139,6 +182,8 @@ static int skov_version_probe(struct device_d *dev)
+@@ -139,6 +185,8 @@ static int skov_version_probe(struct device_d *dev)
  	globalvar_add_simple("board.soc", dol63x_variants[var].soc == NULL ? "undefined" : dol63x_variants[var].soc);
  	globalvar_add_simple("board.dts", dol63x_variants[var].dts_compatible == NULL ? "undefined" : dol63x_variants[var].dts_compatible);
  
@@ -281,7 +284,7 @@ index 166f668a19c4..cd56e26eb9e1 100644
  	return 0;
  
 diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-index f5c493085854..283034acfec5 100644
+index f5c493085854..44beb7f558e4 100644
 --- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
 @@ -123,17 +123,34 @@
@@ -302,7 +305,7 @@ index f5c493085854..283034acfec5 100644
 +			/* Backlight Brightness */
 +			MX6QDL_PAD_GPIO_1__GPIO1_IO01 0x40000058
 +			/* must be high */
-+			MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 0x13000
++			MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 0x40000058
 +		>;
 +	};
  
