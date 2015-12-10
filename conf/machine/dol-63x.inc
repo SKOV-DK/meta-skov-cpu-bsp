@@ -15,14 +15,21 @@ include conf/machine/include/tune-cortexa9.inc
 
 IMAGE_FSTYPES += "tar.bz2 ext4"
 
-SERIAL_CONSOLES = "115200;ttymxc0 115200;ttymxc1"
+SERIAL_CONSOLES = "115200;ttymxc1"
 
-PREFERRED_PROVIDER_virtual/bootloader ?= "barebox-skov"
+PREFERRED_PROVIDER_virtual/bootloader ?= "barebox"
 
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-skov"
 
 KERNEL_IMAGETYPE = "zImage"
-KERNEL_DEVICETREE = "imx6q-skov.dtb"
+KERNEL_DEVICETREE = "\
+ imx6q-skov-dol63x-revA.dtb \
+ imx6q-skov-dol63x-revB.dtb \
+ imx6q-skov-dol63x-revC.dtb \
+ imx6dl-skov-dol63x-revA.dtb \
+ imx6dl-skov-dol63x-revB.dtb \
+ imx6dl-skov-dol63x-revC.dtb \
+ "
 
 MACHINE_FEATURES = "usbgadget usbhost vfat touchscreen serial rtc"
 
