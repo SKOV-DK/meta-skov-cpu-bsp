@@ -4,6 +4,8 @@
 
 include conf/machine/include/soc-family.inc
 
+MACHINEOVERRIDES .= ":dol-63x"
+
 MACHINE_EXTRA_RRECOMMENDS = " kernel-modules kernel-devicetree"
 
 EXTRA_IMAGEDEPENDS += "virtual/bootloader"
