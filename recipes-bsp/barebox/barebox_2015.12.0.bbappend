@@ -19,6 +19,8 @@ SRC_URI += "\
   file://patches/0014-Release-2015.12.0-customers-skov-dol63x-20151209-2.patch \
   "
 
+SRC_URI += "file://env"
+
 COMPATIBLE_MACHINE = "dol-63x-*"
 
 #do_deploy_append() {
