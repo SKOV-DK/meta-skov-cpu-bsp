@@ -7,6 +7,7 @@ include conf/machine/include/soc-family.inc
 MACHINEOVERRIDES .= ":dol-63x"
 
 MACHINE_EXTRA_RRECOMMENDS = " kernel-modules kernel-devicetree"
+MACHINE_ESSENTIAL_EXTRA_RDEPENDS = "tslib-calibrate-init"
 
 EXTRA_IMAGEDEPENDS += "virtual/bootloader"
 
