@@ -79,7 +79,7 @@ S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
 # file. Leaving it empty here ensures an early explicit build failure.
-COMPATIBLE_MACHINE = "dol-63x-*"
+COMPATIBLE_MACHINE = "dol-63x"
 
 # do not install kernel images to the rootfs
 RDEPENDS_kernel-base = ""
