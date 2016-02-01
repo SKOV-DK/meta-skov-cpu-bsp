@@ -1,4 +1,4 @@
-From a581926491e12c87ed26b110d356d7f717226964 Mon Sep 17 00:00:00 2001
+From fb37cd51d5a2275df28474fc68a79780f82f26ca Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
 Subject: [PATCH 13/14] Skov: some board variants needs special tweaks
@@ -14,10 +14,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  3 files changed, 222 insertions(+), 18 deletions(-)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
-index 1e2d7f8b0b39..f547b8ac8efa 100644
+index 5c3f14324522..7a43afc889e6 100644
 --- a/arch/arm/boards/skov-dol63x/lowlevel.c
 +++ b/arch/arm/boards/skov-dol63x/lowlevel.c
-@@ -575,6 +575,144 @@ static void spl_imx6sdl_dram_init(const struct mx6_ddr_sysinfo *si,
+@@ -383,6 +383,144 @@ static void spl_imx6sdl_dram_init(const struct mx6_ddr_sysinfo *si,
  
  /* ------------------------------------------------------------------------ */
  
@@ -162,7 +162,7 @@ index 1e2d7f8b0b39..f547b8ac8efa 100644
  #define LED_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_240ohm | MX6_PAD_CTL_SRE_SLOW
  
  static inline void setup_leds(int cpu_type)
-@@ -744,12 +882,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
+@@ -552,12 +690,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
   * This routine does not return if starting the image from SD card or NOR
   * was successfull. It restarts skov_dol63x_start() instead
   */
@@ -177,7 +177,7 @@ index 1e2d7f8b0b39..f547b8ac8efa 100644
  	case 1: /* P1 i.MX6S, low cost, old count */
  	case 4: /* P1 i.MX6S, low cost, new count */
  		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
-@@ -850,7 +985,7 @@ static void skov_dol63x_init(int cpu_type)
+@@ -652,7 +787,7 @@ static void skov_dol63x_init(int cpu_type)
  					&skov_dol63x_cfg_2x128Mb_800MHz);
  		break;
  	default:
@@ -186,7 +186,7 @@ index 1e2d7f8b0b39..f547b8ac8efa 100644
  		/* FIXME don't continue */
  		break;
  	}
-@@ -869,18 +1004,22 @@ extern char __dtb_z_imx6dl_skov_dol63x_start[];
+@@ -671,18 +806,22 @@ extern char __dtb_z_imx6dl_skov_dol63x_start[];
  static noinline void skov_dol63x_start(void)
  {
  	int cpu_type = __imx6_cpu_type();
