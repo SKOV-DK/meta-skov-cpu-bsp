@@ -1,7 +1,7 @@
-From 246bd2ac1c803e587d5213df38e4f5ff1e7bf225 Mon Sep 17 00:00:00 2001
+From aec346afd724db9279597875e799eeb927f55b85 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 8 Dec 2015 09:59:19 +0100
-Subject: [PATCH 08/14] Skov: add base platform support.
+Subject: [PATCH 09/15] Skov: add base platform support.
 
 The Skov platform consists of many variants of CPUs (i.MX6S/DL and i.MX6d/Q),
 NAND memories (size differs from 256 MiB to 8 GiB) and populated SDRAM (256 MiB

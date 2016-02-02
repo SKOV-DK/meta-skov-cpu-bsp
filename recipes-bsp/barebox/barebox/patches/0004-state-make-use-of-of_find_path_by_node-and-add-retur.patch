@@ -1,7 +1,7 @@
-From dd1b9a4237333038011b12e1cc4fee69d0ae5b06 Mon Sep 17 00:00:00 2001
+From f1931ac5457c0eb81d6c0d7e42372a9b8f6869bf Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Wed, 13 May 2015 11:04:55 +0200
-Subject: [PATCH 03/14] state: make use of of_find_path_by_node() and add
+Subject: [PATCH 04/15] state: make use of of_find_path_by_node() and add
  return -EPROBE_DEFER if device is not available
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8

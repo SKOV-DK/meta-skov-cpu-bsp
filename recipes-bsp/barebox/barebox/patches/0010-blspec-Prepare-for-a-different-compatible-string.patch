@@ -1,7 +1,7 @@
-From f6fa59c81850620c0265d5373f48e5d8780778d9 Mon Sep 17 00:00:00 2001
+From 376859ee5b6b28ad6a8a535dee091b8b045b05b4 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 14:57:57 +0100
-Subject: [PATCH 09/14] blspec: Prepare for a different compatible string
+Subject: [PATCH 10/15] blspec: Prepare for a different compatible string
 
 In order to select a spec entry corresponding to run-time detected
 information, prepare the section routine to use a different 'compatible'

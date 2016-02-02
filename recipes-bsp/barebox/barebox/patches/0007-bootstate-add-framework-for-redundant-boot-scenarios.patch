@@ -1,7 +1,7 @@
-From afb74229ed499fa36f6ea197585b80077c76c91a Mon Sep 17 00:00:00 2001
+From 9dc6df228767108eb6c7ab2425c72566477f8511 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Fri, 20 Feb 2015 09:19:14 +0100
-Subject: [PATCH 06/14] bootstate: add framework for redundant boot scenarios
+Subject: [PATCH 07/15] bootstate: add framework for redundant boot scenarios
 
 There are several use cases where a redundant Linux system is needed. The
 barebox,bootstate framework provides the building blocks to model different

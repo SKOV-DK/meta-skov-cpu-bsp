@@ -1,7 +1,7 @@
-From e9b143520c8574053e531eb52765f529fb5d1fb5 Mon Sep 17 00:00:00 2001
+From e62b2e62145697b9919eaa6298dfbf5245d19599 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Thu, 19 Nov 2015 16:38:47 +0100
-Subject: [PATCH 11/14] blspec: define a partition name in order to use
+Subject: [PATCH 12/15] blspec: define a partition name in order to use
  Barebox's blspec feature
 
 This entry lets barebox automatically attach to '/dev/nand0' and mounts

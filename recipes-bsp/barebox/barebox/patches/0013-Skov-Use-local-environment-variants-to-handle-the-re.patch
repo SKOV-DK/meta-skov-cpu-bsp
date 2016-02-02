@@ -1,7 +1,7 @@
-From def6330aa165c8e7ef824bc35916cbc6af2098d6 Mon Sep 17 00:00:00 2001
+From 2a0ab30d3c297376eb1f6ce11ae78d56747359b7 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:35:58 +0100
-Subject: [PATCH 12/14] Skov: Use local environment variants to handle the
+Subject: [PATCH 13/15] Skov: Use local environment variants to handle the
  regular use case (bootchooser and NAND)
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>

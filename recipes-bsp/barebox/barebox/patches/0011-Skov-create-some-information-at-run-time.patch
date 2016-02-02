@@ -1,7 +1,7 @@
-From e9ae73abec32872790fd7c90ad6e12b1d632807e Mon Sep 17 00:00:00 2001
+From 4e7730f6cb7cd31fe8d9d71f926e5866ad0dbaeb Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:02:24 +0100
-Subject: [PATCH 10/14] Skov: create some information at run-time
+Subject: [PATCH 11/15] Skov: create some information at run-time
 
 Some very important information can be detected at run-time via up to 8
 resistors. This information should be used to select the correct devicetree

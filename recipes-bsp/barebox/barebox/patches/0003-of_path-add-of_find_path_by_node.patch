@@ -1,7 +1,7 @@
-From d0da7e29502004db1592b47ed69ea25787429e46 Mon Sep 17 00:00:00 2001
+From 24bcf6381039a20b6c5c010922a144e16ebb4607 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Tue, 20 Oct 2015 10:29:04 +0200
-Subject: [PATCH 02/14] of_path: add of_find_path_by_node()
+Subject: [PATCH 03/15] of_path: add of_find_path_by_node()
 
 This patch adds the function of_find_path_by_node(), which is similar to
 of_find_path(), but it translates a device tree node into a barebox device path

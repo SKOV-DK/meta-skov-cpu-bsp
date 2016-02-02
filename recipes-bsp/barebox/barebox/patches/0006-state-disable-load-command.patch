@@ -1,7 +1,7 @@
-From 4952b13d86fc49451547609f85436c3233690625 Mon Sep 17 00:00:00 2001
+From 02af0278b8f6ad6c92c0594999ba50d378509520 Mon Sep 17 00:00:00 2001
 From: Enrico Jorns <ejo@pengutronix.de>
 Date: Wed, 24 Jun 2015 15:28:25 +0200
-Subject: [PATCH 05/14] state: disable load command
+Subject: [PATCH 06/15] state: disable load command
 
 Explicitly loading environment is not required as it will be loaded if
 available during device probing

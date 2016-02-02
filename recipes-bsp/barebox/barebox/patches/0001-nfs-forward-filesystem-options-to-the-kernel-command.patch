@@ -1,0 +1,82 @@
+From 3395eefa7567564f4c3ad77681a90679af51a2f8 Mon Sep 17 00:00:00 2001
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Tue, 2 Feb 2016 11:58:56 +0100
+Subject: [PATCH 01/15] nfs: forward filesystem options to the kernel command
+ line
+
+Using NFS in conjunction with boot spec and the feature to let Barebox
+auto generate a kernel command line must keep the options the NFS filesystem
+was mounted in Barebox. This patch extends the kernel command line parameter
+on demand if something different than the defaults are used.
+
+The command:
+
+barebox:/ boot nfs://myhost//root
+
+expands to the kernel command line:
+
+nfsroot=myhost:/root,v3,tcp
+
+while the command:
+
+barebox:/ boot nfs://myhost:2049//root
+
+expands now to the kernel command line:
+
+nfsroot=myhost:/root,v3,tcp,mountport=2049,port=2049
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ Documentation/user/booting-linux.rst |  2 +-
+ fs/nfs.c                             | 15 ++++++++++++++-
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/user/booting-linux.rst b/Documentation/user/booting-linux.rst
+index 39084e5afe08..5b021f0662de 100644
+--- a/Documentation/user/booting-linux.rst
++++ b/Documentation/user/booting-linux.rst
+@@ -203,7 +203,7 @@ compatible NFS URI string must be passed to the boot command:
+ 
+ .. code-block:: sh
+ 
+-  boot nfs://nfshost//path/
++  boot nfs://nfshost[:port]//path/
+ 
+ Additionally to the options defined in the original spec barebox understands the
+ ``linux-appendroot`` option. This is a boolean value and if set to ``true`` barebox
+diff --git a/fs/nfs.c b/fs/nfs.c
+index 382475249fc8..effedcc6649c 100644
+--- a/fs/nfs.c
++++ b/fs/nfs.c
+@@ -1311,7 +1311,7 @@ static char *rootnfsopts;
+ 
+ static void nfs_set_rootarg(struct nfs_priv *npriv, struct fs_device_d *fsdev)
+ {
+-	char *str;
++	char *str, *tmp;
+ 	const char *ip;
+ 
+ 	ip = ip_to_string(npriv->server);
+@@ -1319,6 +1319,19 @@ static void nfs_set_rootarg(struct nfs_priv *npriv, struct fs_device_d *fsdev)
+ 			ip, npriv->path, rootnfsopts[0] ? "," : "",
+ 			rootnfsopts);
+ 
++	/* forward specific mount options on demand */
++	if (npriv->nfs_port != PROG_NFS) {
++		tmp = asprintf("%s,port=%hu", str, npriv->nfs_port);
++		free(str);
++		str = tmp;
++	}
++
++	if (npriv->mount_port != PROG_MOUNT) {
++		tmp = asprintf("%s,mountport=%hu", str, npriv->mount_port);
++		free(str);
++		str = tmp;
++	}
++
+ 	fsdev_set_linux_rootarg(fsdev, str);
+ 
+ 	free(str);
+-- 
+2.1.4
+
