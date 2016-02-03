@@ -3,7 +3,7 @@ Date: Fri, 4 Dec 2015 15:42:11 +0100
 Subject: [PATCH] RTC/PCF85063: fix time/date reading (part 1)
 
 When reading the seconds register, all time/date registers are frozen
-until the year register is read. So read all time/date registers in one
+until the year register is read. So, read all time/date registers in one
 turn.
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
@@ -12,7 +12,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 32 insertions(+)
 
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index b6d73dd881f2..b506b8e13ffa 100644
+index 63334cbeca41..75f286697967 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
 @@ -39,6 +39,38 @@ struct pcf85063 {
@@ -38,7 +38,7 @@ index b6d73dd881f2..b506b8e13ffa 100644
 +
 +	/*
 +	 * while reading the time/date registers are blocked and not updated
-+	 * anymore until the access is finished. To not lose the a second
++	 * anymore until the access is finished. To not lose a second
 +	 * event, the access must be finished within one second. So, read all
 +	 * time/date registers in one turn.
 +	 */

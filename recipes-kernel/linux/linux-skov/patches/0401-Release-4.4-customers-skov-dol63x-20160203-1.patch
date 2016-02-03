@@ -1,6 +1,6 @@
 From: Juergen Borleis <jbe@pengutronix.de>
-Date: Wed, 9 Dec 2015 10:52:46 +0100
-Subject: [PATCH] Release 4.3/customers/skov/dol63x/20151209-1
+Date: Wed, 3 Feb 2016 10:45:01 +0100
+Subject: [PATCH] Release 4.4/customers/skov/dol63x/20160203-1
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
@@ -8,15 +8,15 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index d5b37391195f..1ae1c83e9c36 100644
+index c6a265b52c93..a779f3a1b4e8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
  VERSION = 4
- PATCHLEVEL = 3
- SUBLEVEL = 0
+ PATCHLEVEL = 4
+ SUBLEVEL = 1
 -EXTRAVERSION =
-+EXTRAVERSION =-20151209-1
++EXTRAVERSION =-20160203-1
  NAME = Blurry Fish Butt
  
  # *DOCUMENTATION*

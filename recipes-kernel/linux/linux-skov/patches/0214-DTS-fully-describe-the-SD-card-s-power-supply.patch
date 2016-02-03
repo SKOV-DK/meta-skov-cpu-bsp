@@ -8,7 +8,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 14 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index e7af28d7d01a..d5a69bbffc20 100644
+index d1b243575ac3..1623fa5e6202 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -132,12 +132,16 @@
@@ -30,7 +30,7 @@ index e7af28d7d01a..d5a69bbffc20 100644
  		};
  	};
  
-@@ -290,8 +294,6 @@
+@@ -292,8 +296,6 @@
  				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* USDHC3 WP */
  				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x13000 	/* CAN RS */
  				MX6QDL_PAD_GPIO_18__SD3_VSELECT 	0x17059		/* SD3 VSelect */
@@ -39,7 +39,7 @@ index e7af28d7d01a..d5a69bbffc20 100644
  				MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24       0x13000		/* Enet */
  				MX6QDL_PAD_SD4_DAT0__GPIO2_IO08		0x1b0b0		/* VC0 */
  				MX6QDL_PAD_SD4_DAT1__GPIO2_IO09         0x1b0b0		/* VC1 */
-@@ -304,6 +306,12 @@
+@@ -306,6 +308,12 @@
  			>;
  		};
  
@@ -52,7 +52,7 @@ index e7af28d7d01a..d5a69bbffc20 100644
  		pinctrl_ecspi1_1: ecspi1grp-1 {
  			fsl,pins = <
  				MX6QDL_PAD_EIM_D17__ECSPI1_MISO 	0x100b1
-@@ -515,6 +523,8 @@
+@@ -517,6 +525,8 @@
  	wp-gpios = <&gpio7 1 0>;
  	cd-gpios = <&gpio7 0 0>;
  	status = "okay";

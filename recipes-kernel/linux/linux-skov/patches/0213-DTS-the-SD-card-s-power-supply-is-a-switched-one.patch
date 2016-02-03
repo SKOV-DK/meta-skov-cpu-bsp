@@ -10,7 +10,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 5104d71a3906..e7af28d7d01a 100644
+index 1d01ea7b9dc9..d1b243575ac3 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -131,7 +131,7 @@
@@ -22,7 +22,7 @@ index 5104d71a3906..e7af28d7d01a 100644
  			compatible = "regulator-fixed";
  			vin-supply = <&reg_3p3v>;
  			regulator-name = "SDHI3 Vcc";
-@@ -514,7 +514,7 @@
+@@ -516,7 +516,7 @@
  	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
  	wp-gpios = <&gpio7 1 0>;
  	cd-gpios = <&gpio7 0 0>;

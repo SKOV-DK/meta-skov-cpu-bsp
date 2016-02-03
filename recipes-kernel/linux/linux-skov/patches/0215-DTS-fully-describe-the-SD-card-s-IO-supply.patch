@@ -11,7 +11,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 23 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index d5a69bbffc20..be94697a25e6 100644
+index 1623fa5e6202..c6f2f2d6701a 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -143,6 +143,22 @@
@@ -37,7 +37,7 @@ index d5a69bbffc20..be94697a25e6 100644
  	};
  
  	display@di0 {
-@@ -293,7 +309,6 @@
+@@ -295,7 +311,6 @@
  				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x80000000	/* USDHC3 CD */
  				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* USDHC3 WP */
  				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x13000 	/* CAN RS */
@@ -45,7 +45,7 @@ index d5a69bbffc20..be94697a25e6 100644
  				MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24       0x13000		/* Enet */
  				MX6QDL_PAD_SD4_DAT0__GPIO2_IO08		0x1b0b0		/* VC0 */
  				MX6QDL_PAD_SD4_DAT1__GPIO2_IO09         0x1b0b0		/* VC1 */
-@@ -306,6 +321,12 @@
+@@ -308,6 +323,12 @@
  			>;
  		};
  
@@ -58,7 +58,7 @@ index d5a69bbffc20..be94697a25e6 100644
  		pinctrl_vcc_mmc: vcc_mmc_grp {
  			fsl,pins = <
  				MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x1b0b0		/* MMC Power Supply Switch */
-@@ -526,5 +547,6 @@
+@@ -528,5 +549,6 @@
  	cap-power-off-card;
  	full-pwr-cycle;
  	vmmc-supply = <&vcc_mmc>;

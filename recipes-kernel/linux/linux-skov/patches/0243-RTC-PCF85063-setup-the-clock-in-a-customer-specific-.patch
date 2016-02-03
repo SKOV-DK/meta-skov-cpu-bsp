@@ -8,7 +8,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 40 insertions(+)
 
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index 651513686078..c18a1c6b779c 100644
+index 0150e93043c1..f5b7cddc4fb6 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
 @@ -19,8 +19,11 @@
@@ -23,7 +23,7 @@ index 651513686078..c18a1c6b779c 100644
  
  #define PCF85063_REG_SC			0x04 /* datetime */
  #define PCF85063_REG_SC_OS		0x80
-@@ -219,6 +222,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+@@ -215,6 +218,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
  	.set_time	= pcf85063_rtc_set_time
  };
  
@@ -63,7 +63,7 @@ index 651513686078..c18a1c6b779c 100644
  static int pcf85063_probe(struct i2c_client *client,
  				const struct i2c_device_id *id)
  {
-@@ -238,6 +274,10 @@ static int pcf85063_probe(struct i2c_client *client,
+@@ -234,6 +270,10 @@ static int pcf85063_probe(struct i2c_client *client,
  
  	i2c_set_clientdata(client, pcf85063);
  

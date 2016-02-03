@@ -10,7 +10,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  2 files changed, 20 insertions(+), 15 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 60c2f49e5bed..f8f6e564afc7 100644
+index c23c292dea62..8719039e804b 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -213,7 +213,6 @@
@@ -21,7 +21,7 @@ index 60c2f49e5bed..f8f6e564afc7 100644
  		status = "okay";
  	};
  
-@@ -229,14 +228,6 @@
+@@ -230,14 +229,6 @@
  	};
  };
  

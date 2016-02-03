@@ -14,7 +14,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 73 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index 541fb8349b81..651513686078 100644
+index abed9343e474..0150e93043c1 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
 @@ -19,6 +19,7 @@
@@ -73,7 +73,7 @@ index 541fb8349b81..651513686078 100644
  /*
   * In the routines that deal directly with the pcf85063 hardware, we use
   * rtc_time -- month 0-11, hour 0-23, yr = calendar year-epoch.
-@@ -114,41 +156,49 @@ static int pcf85063_get_datetime(struct i2c_client *client, struct rtc_time *tm)
+@@ -110,41 +152,49 @@ static int pcf85063_get_datetime(struct i2c_client *client, struct rtc_time *tm)
  
  static int pcf85063_set_datetime(struct i2c_client *client, struct rtc_time *tm)
  {

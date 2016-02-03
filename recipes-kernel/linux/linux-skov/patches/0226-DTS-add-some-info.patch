@@ -10,10 +10,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index f8f6e564afc7..0425a008ee7e 100644
+index 8719039e804b..40c000dfc7bf 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -540,12 +540,14 @@
+@@ -542,12 +542,14 @@
  };
  
  &pwm2 {

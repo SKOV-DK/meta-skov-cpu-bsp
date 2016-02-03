@@ -17,7 +17,7 @@ Reluctantly-signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/drm_gem_cma_helper.c b/drivers/gpu/drm/drm_gem_cma_helper.c
-index 86cc793cdf79..e00d2fc8950d 100644
+index e109b49cd25d..3bb7c4e32f28 100644
 --- a/drivers/gpu/drm/drm_gem_cma_helper.c
 +++ b/drivers/gpu/drm/drm_gem_cma_helper.c
 @@ -295,7 +295,16 @@ int drm_gem_cma_dumb_map_offset(struct drm_file *file_priv,

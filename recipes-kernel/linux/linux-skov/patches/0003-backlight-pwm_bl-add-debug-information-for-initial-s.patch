@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Fri, 24 Jul 2015 13:02:59 +0200
-Subject: [PATCH] backlight: pwm: add debug information for initial state
+Subject: [PATCH] backlight: pwm_bl: add debug information for initial state
  decision
 
 Add debug information showing how the decision to initially enable or
@@ -8,18 +8,19 @@ disable the backlight was made.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/video/backlight/pwm_bl.c | 21 ++++++++++++++++++---
- 1 file changed, 18 insertions(+), 3 deletions(-)
+ drivers/video/backlight/pwm_bl.c | 22 +++++++++++++++++++---
+ 1 file changed, 19 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/video/backlight/pwm_bl.c b/drivers/video/backlight/pwm_bl.c
-index 65e57da206e3..f4ca3d1560d6 100644
+index a22c1ec29de7..3c9550d66c03 100644
 --- a/drivers/video/backlight/pwm_bl.c
 +++ b/drivers/video/backlight/pwm_bl.c
-@@ -266,16 +266,25 @@ static int pwm_backlight_probe(struct platform_device *pdev)
+@@ -266,16 +266,26 @@ static int pwm_backlight_probe(struct platform_device *pdev)
  		pb->enable_gpio = gpio_to_desc(data->enable_gpio);
  	}
  
-+	dev_dbg(&pdev->dev, "%scontrolled via phandle\n", phandle ? "" : "not ");
++	dev_dbg(&pdev->dev, "%scontrolled via phandle\n",
++		(node && node->phandle) ? "" : "not ");
 +
  	if (pb->enable_gpio) {
 +		bool output, enabled;
@@ -37,26 +38,26 @@ index 65e57da206e3..f4ca3d1560d6 100644
  		 * assume that another driver will enable the backlight at the
  		 * appropriate time. Therefore, if it is disabled, keep it so.
  		 */
--		if (phandle &&
+-		if (node && node->phandle &&
 -		    gpiod_get_direction(pb->enable_gpio) == GPIOF_DIR_OUT &&
 -		    gpiod_get_value(pb->enable_gpio) == 0)
-+		if (phandle && output && !enabled)
++		if (node && node->phandle && output && !enabled)
  			initial_blank = FB_BLANK_POWERDOWN;
  		else
  			gpiod_direction_output(pb->enable_gpio, 1);
-@@ -287,9 +296,15 @@ static int pwm_backlight_probe(struct platform_device *pdev)
+@@ -287,9 +297,15 @@ static int pwm_backlight_probe(struct platform_device *pdev)
  		goto err_alloc;
  	}
  
 +	dev_dbg(&pdev->dev, "power supply regulator is %sabled\n",
 +		regulator_is_enabled(pb->power_supply) ? "en" : "dis");
 +
- 	if (phandle && !regulator_is_enabled(pb->power_supply))
+ 	if (node && node->phandle && !regulator_is_enabled(pb->power_supply))
  		initial_blank = FB_BLANK_POWERDOWN;
  
 +	dev_dbg(&pdev->dev, "backlight will be initially %sabled\n",
 +		(initial_blank == FB_BLANK_UNBLANK) ? "en" : "dis");
 +
  	pb->pwm = devm_pwm_get(&pdev->dev, NULL);
- 	if (IS_ERR(pb->pwm)) {
- 		ret = PTR_ERR(pb->pwm);
+ 	if (IS_ERR(pb->pwm) && PTR_ERR(pb->pwm) != -EPROBE_DEFER && !node) {
+ 		dev_err(&pdev->dev, "unable to request PWM, trying legacy API\n");

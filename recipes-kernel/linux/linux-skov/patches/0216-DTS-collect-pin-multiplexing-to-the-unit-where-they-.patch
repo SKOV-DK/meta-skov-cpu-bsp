@@ -9,10 +9,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index be94697a25e6..57f22c6abd94 100644
+index c6f2f2d6701a..d2273fff316d 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -306,8 +306,6 @@
+@@ -308,8 +308,6 @@
  				MX6QDL_PAD_EIM_D20__GPIO3_IO20		0x80000000	/* TSC2046 CS */
  				MX6QDL_PAD_GPIO_5__GPIO1_IO05  		0xb0   		/* ethernet phy reset */
  				MX6QDL_PAD_EIM_D30__GPIO3_IO30 		0xb0   		/* ethernet phy interrupt */
@@ -21,7 +21,7 @@ index be94697a25e6..57f22c6abd94 100644
  				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x13000 	/* CAN RS */
  				MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24       0x13000		/* Enet */
  				MX6QDL_PAD_SD4_DAT0__GPIO2_IO08		0x1b0b0		/* VC0 */
-@@ -398,6 +396,8 @@
+@@ -400,6 +398,8 @@
  				MX6QDL_PAD_SD3_DAT1__SD3_DATA1 		0x17059
  				MX6QDL_PAD_SD3_DAT2__SD3_DATA2 		0x17059
  				MX6QDL_PAD_SD3_DAT3__SD3_DATA3 		0x17059
@@ -30,7 +30,7 @@ index be94697a25e6..57f22c6abd94 100644
  			>;
  		};
  
-@@ -541,8 +541,8 @@
+@@ -543,8 +543,8 @@
  	pinctrl-0 = <&pinctrl_usdhc3_2>;
  	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
  	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;

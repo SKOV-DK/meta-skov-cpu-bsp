@@ -8,10 +8,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 11 insertions(+)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 57f22c6abd94..4da834337bf5 100644
+index d2273fff316d..37688392d828 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -546,6 +546,17 @@
+@@ -548,6 +548,17 @@
  	status = "okay";
  	cap-power-off-card;
  	full-pwr-cycle;

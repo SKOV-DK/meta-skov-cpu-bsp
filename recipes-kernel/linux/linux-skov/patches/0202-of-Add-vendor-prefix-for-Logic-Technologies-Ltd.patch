@@ -13,10 +13,10 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
-index 82d2ac97af74..97e8b6d01fde 100644
+index 55df1d444e9f..d4e9037932ee 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.txt
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
-@@ -126,6 +126,7 @@ lg	LG Corporation
+@@ -130,6 +130,7 @@ lg	LG Corporation
  linux	Linux-specific binding
  lsi	LSI Corp. (LSI Logic)
  lltc	Linear Technology Corporation
