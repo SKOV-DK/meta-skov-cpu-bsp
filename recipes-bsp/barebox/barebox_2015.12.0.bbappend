@@ -17,7 +17,7 @@ SRC_URI += "\
   file://patches/0012-blspec-define-a-partition-name-in-order-to-use-Bareb.patch \
   file://patches/0013-Skov-Use-local-environment-variants-to-handle-the-re.patch \
   file://patches/0014-Skov-some-board-variants-needs-special-tweaks.patch \
-  file://patches/0015-Release-2016.02.1-customers-skov-dol63x-20160202-1.patch \
+  file://patches/0015-Release-2016.02.2-customers-skov-dol63x-20160205-1.patch \
   "
 
 SRC_URI += "file://env"

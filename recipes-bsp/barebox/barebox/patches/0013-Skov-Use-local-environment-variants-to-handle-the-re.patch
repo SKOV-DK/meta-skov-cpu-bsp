@@ -1,4 +1,4 @@
-From 2a0ab30d3c297376eb1f6ce11ae78d56747359b7 Mon Sep 17 00:00:00 2001
+From 8682840db6cb88d1afa8422a291cb4a04f642e4d Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:35:58 +0100
 Subject: [PATCH 13/15] Skov: Use local environment variants to handle the

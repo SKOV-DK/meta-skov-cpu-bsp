@@ -1,4 +1,4 @@
-From 59bc5f042362c28bd03adb75077e6d0055461684 Mon Sep 17 00:00:00 2001
+From b35cfe6a05c42bee95d9b1b12e2dfe6b72048fe7 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 23 Oct 2015 15:14:42 +0200
 Subject: [PATCH 08/15] pbl-console: something to fix?

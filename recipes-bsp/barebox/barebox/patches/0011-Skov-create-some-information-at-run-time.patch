@@ -1,4 +1,4 @@
-From 4e7730f6cb7cd31fe8d9d71f926e5866ad0dbaeb Mon Sep 17 00:00:00 2001
+From 8848a5b83c3d72a73217f9587c26eebf0ece9c55 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:02:24 +0100
 Subject: [PATCH 11/15] Skov: create some information at run-time

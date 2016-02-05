@@ -1,4 +1,4 @@
-From f1931ac5457c0eb81d6c0d7e42372a9b8f6869bf Mon Sep 17 00:00:00 2001
+From 3314e54337bdf192d9da42d922338abd2552bc39 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Wed, 13 May 2015 11:04:55 +0200
 Subject: [PATCH 04/15] state: make use of of_find_path_by_node() and add

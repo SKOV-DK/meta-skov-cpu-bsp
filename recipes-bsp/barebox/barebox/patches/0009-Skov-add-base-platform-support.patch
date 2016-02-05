@@ -1,4 +1,4 @@
-From aec346afd724db9279597875e799eeb927f55b85 Mon Sep 17 00:00:00 2001
+From bc51eb38c8b06a6175c1c9642667f180faecc010 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 8 Dec 2015 09:59:19 +0100
 Subject: [PATCH 09/15] Skov: add base platform support.

@@ -1,4 +1,4 @@
-From 02af0278b8f6ad6c92c0594999ba50d378509520 Mon Sep 17 00:00:00 2001
+From b553cbb1c7beeb15880f4f4f32fbbc45fedfafe7 Mon Sep 17 00:00:00 2001
 From: Enrico Jorns <ejo@pengutronix.de>
 Date: Wed, 24 Jun 2015 15:28:25 +0200
 Subject: [PATCH 06/15] state: disable load command

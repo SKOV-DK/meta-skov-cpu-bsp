@@ -1,4 +1,4 @@
-From 266ca45a1eaa5834c77c2da68d623e52f9797cde Mon Sep 17 00:00:00 2001
+From 33ebbd2e1f38587bd74d49557f1441a31f53e13c Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Fri, 3 Jul 2015 10:07:28 +0200
 Subject: [PATCH 05/15] state: use name of device node as name if alias is not
