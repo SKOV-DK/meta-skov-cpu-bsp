@@ -1,8 +1,7 @@
-From 3314e54337bdf192d9da42d922338abd2552bc39 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Wed, 13 May 2015 11:04:55 +0200
-Subject: [PATCH 04/15] state: make use of of_find_path_by_node() and add
- return -EPROBE_DEFER if device is not available
+Subject: [PATCH] state: make use of of_find_path_by_node() and add return
+ -EPROBE_DEFER if device is not available
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -61,6 +60,3 @@ index f3e366480fa2..22551478e651 100644
  	ret = of_property_read_string(np, "backend-type", &backend_type);
  	if (ret) {
  		goto out_free;
--- 
-2.1.4
-

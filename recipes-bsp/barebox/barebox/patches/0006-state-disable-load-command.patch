@@ -1,7 +1,6 @@
-From b553cbb1c7beeb15880f4f4f32fbbc45fedfafe7 Mon Sep 17 00:00:00 2001
 From: Enrico Jorns <ejo@pengutronix.de>
 Date: Wed, 24 Jun 2015 15:28:25 +0200
-Subject: [PATCH 06/15] state: disable load command
+Subject: [PATCH] state: disable load command
 
 Explicitly loading environment is not required as it will be loaded if
 available during device probing
@@ -189,6 +188,3 @@ index 08c4e8654b9e..b3966fd99e79 100644
  int state_save(struct state *state);
  void state_info(void);
  
--- 
-2.1.4
-

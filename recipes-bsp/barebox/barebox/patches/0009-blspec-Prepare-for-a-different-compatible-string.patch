@@ -1,7 +1,6 @@
-From 59e701be26b7bf6ca5e1a51bb69c03baaf66450e Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 14:57:57 +0100
-Subject: [PATCH 10/15] blspec: Prepare for a different compatible string
+Subject: [PATCH] blspec: Prepare for a different compatible string
 
 In order to select a spec entry corresponding to run-time detected
 information, prepare the section routine to use a different 'compatible'
@@ -44,6 +43,3 @@ index d5ddb4fbbddc..1000863ad3e8 100644
  
  	if (entry->rootpath)
  		abspath = entry->rootpath;
--- 
-2.1.4
-

@@ -1,7 +1,6 @@
-From 13553ca9f03edf0c54c47d976e29e91b7e49bf13 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Tue, 20 Oct 2015 10:29:04 +0200
-Subject: [PATCH 03/15] of_path: add of_find_path_by_node()
+Subject: [PATCH] of_path: add of_find_path_by_node()
 
 This patch adds the function of_find_path_by_node(), which is similar to
 of_find_path(), but it translates a device tree node into a barebox device path
@@ -60,6 +59,3 @@ index e0ebc39b742d..e60fe8982504 100644
  int of_register_fixup(int (*fixup)(struct device_node *, void *), void *context);
  int of_unregister_fixup(int (*fixup)(struct device_node *, void *), void *context);
  struct device_node *of_find_node_by_alias(struct device_node *root,
--- 
-2.1.4
-

@@ -1,7 +1,6 @@
-From 33ebbd2e1f38587bd74d49557f1441a31f53e13c Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Fri, 3 Jul 2015 10:07:28 +0200
-Subject: [PATCH 05/15] state: use name of device node as name if alias is not
+Subject: [PATCH] state: use name of device node as name if alias is not
  available
 
 Wihtout this patch, when using more than one state device an alias is
@@ -28,6 +27,3 @@ index 22551478e651..d46d5b941c4c 100644
  
  	state = state_new_from_node(alias, np);
  	if (IS_ERR(state))
--- 
-2.1.4
-

@@ -1,3 +1,9 @@
+# umpf-base: v2015.12.0
+# umpf-name: 2015.12.0/customers/skov/dol63x
+# umpf-version: 2015.12.0/customers/skov/dol63x/20160209-1
+# umpf-topic: v2015.12.0/customers/skov/dol63x
+# umpf-hashinfo: 708c247ee97ff81437a8df3e1f36fe21f6d8e2fa
+# umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..708c247ee97ff81437a8df3e1f36fe21f6d8e2fa
 0001-nfs-forward-filesystem-options-to-the-kernel-command.patch
 0002-of_path-of_find_path-factor-out-device-detection-log.patch
 0003-of_path-add-of_find_path_by_node.patch
@@ -5,11 +11,23 @@
 0005-state-use-name-of-device-node-as-name-if-alias-is-no.patch
 0006-state-disable-load-command.patch
 0007-bootstate-add-framework-for-redundant-boot-scenarios.patch
-0008-pbl-console-something-to-fix.patch
-0009-Skov-add-base-platform-support.patch
-0010-blspec-Prepare-for-a-different-compatible-string.patch
-0011-Skov-create-some-information-at-run-time.patch
-0012-blspec-define-a-partition-name-in-order-to-use-Bareb.patch
-0013-Skov-Use-local-environment-variants-to-handle-the-re.patch
-0014-Skov-some-board-variants-needs-special-tweaks.patch
-0015-Release-2016.02.2-customers-skov-dol63x-20160205-1.patch
+0008-Skov-add-base-platform-support.patch
+0009-blspec-Prepare-for-a-different-compatible-string.patch
+0010-Skov-create-some-information-at-run-time.patch
+0011-blspec-define-a-partition-name-in-order-to-use-Bareb.patch
+0012-Skov-Use-local-environment-variants-to-handle-the-re.patch
+0013-Skov-some-board-variants-needs-special-tweaks.patch
+# umpf-topic: v2015.12.0/topic/mtd
+# umpf-hashinfo: 93f81b57df315f3885cc2e5740ea506ee5864a3a
+# umpf-topic-range: 708c247ee97ff81437a8df3e1f36fe21f6d8e2fa..1f69599275bea015445b3d2094d45962834c03fd
+0101-mtd-nand-bb-Fix-8k-page-size-nands.patch
+0102-mtd-Fix-mtdraw-for-Nand-4GiB.patch
+0103-mtd-Make-erase_info-structs-64bit-where-necessary.patch
+0104-mtd-Fix-mtd_op_read-for-devices-4GiB.patch
+0105-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch
+0106-mtd-Fix-erasing-of-devices-4GiB.patch
+0107-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch
+# umpf-release: 2015.12.0/customers/skov/dol63x/20160209-1
+# umpf-topic-range: 1f69599275bea015445b3d2094d45962834c03fd..6dc60cadf59771920704938852fd351dc423c344
+0201-Release-2015.12.0-customers-skov-dol63x-20160209-1.patch
+# umpf-end

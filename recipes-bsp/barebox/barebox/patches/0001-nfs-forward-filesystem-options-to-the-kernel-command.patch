@@ -1,8 +1,6 @@
-From bacdf1452760851358ed4283e05e89854dccd179 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 2 Feb 2016 11:58:56 +0100
-Subject: [PATCH 01/15] nfs: forward filesystem options to the kernel command
- line
+Subject: [PATCH] nfs: forward filesystem options to the kernel command line
 
 Using NFS in conjunction with boot spec and the feature to let Barebox
 auto generate a kernel command line must keep the options the NFS filesystem
@@ -105,6 +103,3 @@ index 382475249fc8..87828fce1318 100644
  	}
  	debug("nfs port: %d\n", npriv->nfs_port);
  
--- 
-2.1.4
-

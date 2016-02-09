@@ -1,8 +1,7 @@
-From 8682840db6cb88d1afa8422a291cb4a04f642e4d Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:35:58 +0100
-Subject: [PATCH 13/15] Skov: Use local environment variants to handle the
- regular use case (bootchooser and NAND)
+Subject: [PATCH] Skov: Use local environment variants to handle the regular
+ use case (bootchooser and NAND)
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
@@ -61,6 +60,3 @@ index 000000000000..fe1a363da1e7
 +++ b/arch/arm/boards/skov-dol63x/env/nv/boot.default
 @@ -0,0 +1 @@
 +bootchooser
--- 
-2.1.4
-

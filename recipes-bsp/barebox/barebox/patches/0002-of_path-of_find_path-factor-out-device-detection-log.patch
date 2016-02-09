@@ -1,8 +1,7 @@
-From 192f67d888b153fbbad0c922282a00361efae4b8 Mon Sep 17 00:00:00 2001
 From: Marc Kleine-Budde <mkl@pengutronix.de>
 Date: Tue, 20 Oct 2015 10:05:33 +0200
-Subject: [PATCH 02/15] of_path: of_find_path() factor out device detection
- logic into separate function
+Subject: [PATCH] of_path: of_find_path() factor out device detection logic
+ into separate function
 
 This patch factors out the device detection logic into separate function, so
 that it can be used from another function.
@@ -117,6 +116,3 @@ index 992972c9b52e..ad64bee08af9 100644
 -	return 0;
 +	return __of_find_path(rnode, propname, outpath, flags);
  }
--- 
-2.1.4
-

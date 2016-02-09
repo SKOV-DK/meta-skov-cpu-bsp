@@ -1,8 +1,7 @@
-From baa90a9bf49429f3b37cf9afac66a86ef96004b8 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Thu, 19 Nov 2015 16:38:47 +0100
-Subject: [PATCH 12/15] blspec: define a partition name in order to use
- Barebox's blspec feature
+Subject: [PATCH] blspec: define a partition name in order to use Barebox's
+ blspec feature
 
 This entry lets barebox automatically attach to '/dev/nand0' and mounts
 the new volumes on demand.
@@ -47,6 +46,3 @@ index 6902e3f18639..81300458f948 100644
  };
  
  /* define the SPI based 8 MiB NOR flash layout */
--- 
-2.1.4
-

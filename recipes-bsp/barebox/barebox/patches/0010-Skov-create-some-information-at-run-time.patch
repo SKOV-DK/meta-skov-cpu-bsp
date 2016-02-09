@@ -1,7 +1,6 @@
-From 8848a5b83c3d72a73217f9587c26eebf0ece9c55 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Fri, 20 Nov 2015 15:02:24 +0100
-Subject: [PATCH 11/15] Skov: create some information at run-time
+Subject: [PATCH] Skov: create some information at run-time
 
 Some very important information can be detected at run-time via up to 8
 resistors. This information should be used to select the correct devicetree
@@ -262,6 +261,3 @@ index 1000863ad3e8..ad997e3b28a0 100644
  	if (compat == NULL) {
  		/* If we don't have a root node every entry is compatible */
  		barebox_root = of_get_root_node();
--- 
-2.1.4
-

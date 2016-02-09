@@ -1,7 +1,6 @@
-From 511853a1cac2f7947f080e195c2bc3f415a47758 Mon Sep 17 00:00:00 2001
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 24 Nov 2015 16:06:10 +0100
-Subject: [PATCH 14/15] Skov: some board variants needs special tweaks
+Subject: [PATCH] Skov: some board variants needs special tweaks
 
 Due to space limitation we cannot handle this differences with multiple
 DTS.
@@ -350,6 +349,3 @@ index 81300458f948..0af004a09431 100644
  		>;
  	};
  
--- 
-2.1.4
-
