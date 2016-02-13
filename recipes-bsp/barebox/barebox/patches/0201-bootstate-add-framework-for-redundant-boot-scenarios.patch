@@ -9,7 +9,7 @@ use cases without the need to start from the scratch over and over again.
 Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
 ---
- .../bindings/barebox/barebox,bootstate.rst         | 242 +++++++
+ .../bindings/barebox/barebox,bootstate.rst         | 244 +++++++
  arch/sandbox/dts/sandbox.dts                       |  83 +++
  commands/Kconfig                                   |   5 +
  commands/Makefile                                  |   1 +
@@ -21,7 +21,7 @@ Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
  drivers/misc/Makefile                              |   1 +
  drivers/misc/bootstate.c                           |  79 ++
  include/bootstate.h                                |  39 +
- 12 files changed, 1358 insertions(+)
+ 12 files changed, 1360 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/barebox/barebox,bootstate.rst
  create mode 100644 commands/bootchooser.c
  create mode 100644 common/bootstate.c
@@ -30,10 +30,10 @@ Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
 
 diff --git a/Documentation/devicetree/bindings/barebox/barebox,bootstate.rst b/Documentation/devicetree/bindings/barebox/barebox,bootstate.rst
 new file mode 100644
-index 000000000000..93187d8d2911
+index 000000000000..1d468cc37859
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/barebox/barebox,bootstate.rst
-@@ -0,0 +1,242 @@
+@@ -0,0 +1,244 @@
 +barebox bootstate
 +=================
 +
@@ -159,6 +159,7 @@ index 000000000000..93187d8d2911
 +  			priority {
 +  				reg = <0x4 0x4>;
 +  				type = "uint32";
++  				default = <20>;
 +  			};
 +  			ok {
 +  				reg = <0x8 0x4>;
@@ -177,6 +178,7 @@ index 000000000000..93187d8d2911
 +  			priority {
 +  				reg = <0x14 0x4>;
 +  				type = "uint32";
++  				default = <10>;
 +  			};
 +  			ok {
 +  				reg = <0x18 0x4>;
@@ -227,7 +229,7 @@ index 000000000000..93187d8d2911
 +value of the boot target is returned, the string should be freed via
 +``free()``.
 +
-+The behaviour can be modified with the flags paramter. The following
++The behaviour can be modified with the flags parameter. The following
 +flags are currently supported:
 +
 +* ``BOOTCHOOSER_FLAG_ATTEMPTS_KEEP``: the ``remaining_attempts``
@@ -256,7 +258,7 @@ index 000000000000..93187d8d2911
 +``boot`` (:ref:`command_boot`) command with the selected boot target
 +as its first and only parameter.
 +
-+The ``bootchooser`` command implements command line paramter versions
++The ``bootchooser`` command implements command line parameter versions
 +of the above described flags:
 +
 +* ``-k``: keep boot attempts
@@ -505,7 +507,7 @@ index 000000000000..06ca5e41d527
 +	BAREBOX_CMD_HELP(cmd_bootchooser_help)
 +BAREBOX_CMD_END
 diff --git a/common/Kconfig b/common/Kconfig
-index 877d3855a203..fae01400f631 100644
+index 877d3855a203..d2630c38d7db 100644
 --- a/common/Kconfig
 +++ b/common/Kconfig
 @@ -751,6 +751,15 @@ config STATE
@@ -515,10 +517,10 @@ index 877d3855a203..fae01400f631 100644
 +config BOOTSTATE
 +	bool "bootstate infrastructure"
 +	depends on OF_BAREBOX_DRIVERS
-+	select STATE
 +	select ENVIRONMENT_VARIABLES
 +	select OFTREE
 +	select PARAMETER
++	select STATE
 +	select BOOTSTATE_DRV
 +
  config RESET_SOURCE

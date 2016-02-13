@@ -1,0 +1,42 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Fri, 12 Feb 2016 23:30:58 +0100
+Subject: [PATCH] dol63x: set defaults for bootsate parameters
+
+default priority set to 20 for both targets
+default remaining_attempts set to 3 for both targets
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+index 0af004a09431..cc53f9ec6517 100644
+--- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+@@ -83,10 +83,12 @@
+ 				remaining_attempts {
+ 					reg = <0x0 0x4>;
+ 					type = "uint32";
++					default = <3>;
+ 				};
+ 				priority {
+ 					reg = <0x4 0x4>;
+ 					type = "uint32";
++					default = <20>;
+ 				};
+ 				ok {
+ 					reg = <0x8 0x4>;
+@@ -101,10 +103,12 @@
+ 				remaining_attempts {
+ 					reg = <0x10 0x4>;
+ 					type = "uint32";
++					default = <3>;
+ 				};
+ 				priority {
+ 					reg = <0x14 0x4>;
+ 					type = "uint32";
++					default = <20>;
+ 				};
+ 				ok {
+ 					reg = <0x18 0x4>;

@@ -8,15 +8,25 @@ directly.
 
 Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
 ---
- drivers/of/of_path.c | 17 ++++++++++++++++-
+ drivers/of/of_path.c | 20 +++++++++++++++++++-
  include/of.h         |  1 +
- 2 files changed, 17 insertions(+), 1 deletion(-)
+ 2 files changed, 20 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/of/of_path.c b/drivers/of/of_path.c
-index ad64bee08af9..690390525919 100644
+index 65fb31bcec59..0e0b43e3a1b2 100644
 --- a/drivers/of/of_path.c
 +++ b/drivers/of/of_path.c
-@@ -126,7 +126,7 @@ static int __of_find_path(struct device_node *node, const char *propname, char *
+@@ -113,6 +113,9 @@ static int __of_find_path(struct device_node *node, struct device_node *rnode, c
+ 	bool add_bb = false;
+ 	int i, ret;
+ 
++	if (!rnode)
++		rnode = node;
++
+ 	op.dev = of_find_device_by_node_path(rnode->full_name);
+ 	if (!op.dev) {
+ 		op.dev = of_find_device_by_node_path(rnode->parent->full_name);
+@@ -126,7 +129,7 @@ static int __of_find_path(struct device_node *node, struct device_node *rnode, c
  
  	i = 1;
  
@@ -25,7 +35,7 @@ index ad64bee08af9..690390525919 100644
  		ret = of_property_read_string_index(node, propname, i++, &str);
  		if (ret)
  			break;
-@@ -149,6 +149,21 @@ static int __of_find_path(struct device_node *node, const char *propname, char *
+@@ -149,6 +152,21 @@ static int __of_find_path(struct device_node *node, struct device_node *rnode, c
  }
  
  /**
@@ -40,7 +50,7 @@ index ad64bee08af9..690390525919 100644
 + */
 +int of_find_path_by_node(struct device_node *node, char **outpath, unsigned flags)
 +{
-+	return __of_find_path(node, NULL, outpath, flags);
++	return __of_find_path(node, NULL, NULL, outpath, flags);
 +}
 +
 +/**

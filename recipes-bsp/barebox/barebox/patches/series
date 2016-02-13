@@ -1,33 +1,40 @@
 # umpf-base: v2015.12.0
 # umpf-name: 2015.12.0/customers/skov/dol63x
-# umpf-version: 2015.12.0/customers/skov/dol63x/20160209-1
+# umpf-version: 2015.12.0/customers/skov/dol63x/20160213-1
 # umpf-topic: v2015.12.0/customers/skov/dol63x
-# umpf-hashinfo: 708c247ee97ff81437a8df3e1f36fe21f6d8e2fa
-# umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..708c247ee97ff81437a8df3e1f36fe21f6d8e2fa
+# umpf-hashinfo: 3cf208e87472d1d23c1a625b9f5df32be443b58b
+# umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..3cf208e87472d1d23c1a625b9f5df32be443b58b
 0001-nfs-forward-filesystem-options-to-the-kernel-command.patch
-0002-of_path-of_find_path-factor-out-device-detection-log.patch
-0003-of_path-add-of_find_path_by_node.patch
-0004-state-make-use-of-of_find_path_by_node-and-add-retur.patch
-0005-state-use-name-of-device-node-as-name-if-alias-is-no.patch
-0006-state-disable-load-command.patch
-0007-bootstate-add-framework-for-redundant-boot-scenarios.patch
-0008-Skov-add-base-platform-support.patch
-0009-blspec-Prepare-for-a-different-compatible-string.patch
-0010-Skov-create-some-information-at-run-time.patch
-0011-blspec-define-a-partition-name-in-order-to-use-Bareb.patch
-0012-Skov-Use-local-environment-variants-to-handle-the-re.patch
-0013-Skov-some-board-variants-needs-special-tweaks.patch
+0002-Skov-add-base-platform-support.patch
+0003-blspec-Prepare-for-a-different-compatible-string.patch
+0004-Skov-create-some-information-at-run-time.patch
+0005-blspec-define-a-partition-name-in-order-to-use-Bareb.patch
+0006-Skov-Use-local-environment-variants-to-handle-the-re.patch
+0007-Skov-some-board-variants-needs-special-tweaks.patch
+0008-dol63x-set-defaults-for-bootsate-parameters.patch
+# umpf-topic: v2015.12.0/topic/state
+# umpf-hashinfo: 9e26841724e0043e3da32f35cd4bb3cba05d4d21
+# umpf-topic-range: 3cf208e87472d1d23c1a625b9f5df32be443b58b..d3ec37da2a08e4e10e91d3d67f50b2833893fe6d
+0101-of_path-of_find_path-factor-out-device-detection-log.patch
+0102-of_path-add-of_find_path_by_node.patch
+0103-state-make-use-of-of_find_path_by_node-and-add-retur.patch
+0104-state-use-name-of-device-node-as-name-if-alias-is-no.patch
+0105-state-disable-load-command.patch
+# umpf-topic: v2015.12.0/topic/bootchooser
+# umpf-hashinfo: 80f2f56be3bf316da00249a807c1899c5ab70ba1
+# umpf-topic-range: d3ec37da2a08e4e10e91d3d67f50b2833893fe6d..fade7e3756d3158f593503a63611f071b833aa93
+0201-bootstate-add-framework-for-redundant-boot-scenarios.patch
 # umpf-topic: v2015.12.0/topic/mtd
 # umpf-hashinfo: 93f81b57df315f3885cc2e5740ea506ee5864a3a
-# umpf-topic-range: 708c247ee97ff81437a8df3e1f36fe21f6d8e2fa..1f69599275bea015445b3d2094d45962834c03fd
-0101-mtd-nand-bb-Fix-8k-page-size-nands.patch
-0102-mtd-Fix-mtdraw-for-Nand-4GiB.patch
-0103-mtd-Make-erase_info-structs-64bit-where-necessary.patch
-0104-mtd-Fix-mtd_op_read-for-devices-4GiB.patch
-0105-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch
-0106-mtd-Fix-erasing-of-devices-4GiB.patch
-0107-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch
-# umpf-release: 2015.12.0/customers/skov/dol63x/20160209-1
-# umpf-topic-range: 1f69599275bea015445b3d2094d45962834c03fd..6dc60cadf59771920704938852fd351dc423c344
-0201-Release-2015.12.0-customers-skov-dol63x-20160209-1.patch
+# umpf-topic-range: fade7e3756d3158f593503a63611f071b833aa93..8a60ca2967bf5e706470dd255a38b527a5e13a7c
+0301-mtd-nand-bb-Fix-8k-page-size-nands.patch
+0302-mtd-Fix-mtdraw-for-Nand-4GiB.patch
+0303-mtd-Make-erase_info-structs-64bit-where-necessary.patch
+0304-mtd-Fix-mtd_op_read-for-devices-4GiB.patch
+0305-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch
+0306-mtd-Fix-erasing-of-devices-4GiB.patch
+0307-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch
+# umpf-release: 2015.12.0/customers/skov/dol63x/20160213-1
+# umpf-topic-range: 8a60ca2967bf5e706470dd255a38b527a5e13a7c..901a85349b9dcaa09cf469147c761a807646076d
+0401-Release-2015.12.0-customers-skov-dol63x-20160213-1.patch
 # umpf-end

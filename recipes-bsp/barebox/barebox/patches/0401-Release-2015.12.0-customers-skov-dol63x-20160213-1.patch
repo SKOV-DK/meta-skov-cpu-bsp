@@ -1,0 +1,22 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Sat, 13 Feb 2016 00:35:42 +0100
+Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160213-1
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index be53d834df4b..bb2ca7a0379d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ VERSION = 2015
+ PATCHLEVEL = 12
+ SUBLEVEL = 0
+-EXTRAVERSION =
++EXTRAVERSION =-20160213-1
+ NAME = None
+ 
+ # *DOCUMENTATION*
