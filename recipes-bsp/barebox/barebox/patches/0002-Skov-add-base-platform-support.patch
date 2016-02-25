@@ -99,7 +99,7 @@ index 000000000000..400a87015425
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
 new file mode 100644
-index 000000000000..5c3f14324522
+index 000000000000..a0eb2891f397
 --- /dev/null
 +++ b/arch/arm/boards/skov-dol63x/lowlevel.c
 @@ -0,0 +1,710 @@
@@ -655,7 +655,7 @@ index 000000000000..5c3f14324522
 + * 00001111       C     512 MiB    256 MiB     i.MX6S
 + *
 + * This routine does not return if starting the image from SD card or NOR
-+ * was successfull. It restarts skov_dol63x_start() instead
++ * was successful. It restarts skov_dol63x_start() instead
 + */
 +static void skov_dol63x_init(int cpu_type)
 +{

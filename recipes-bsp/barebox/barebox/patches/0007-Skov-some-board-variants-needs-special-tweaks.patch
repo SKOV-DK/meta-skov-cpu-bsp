@@ -13,7 +13,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  3 files changed, 222 insertions(+), 18 deletions(-)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
-index 5c3f14324522..7a43afc889e6 100644
+index a0eb2891f397..ac83ea9d9c75 100644
 --- a/arch/arm/boards/skov-dol63x/lowlevel.c
 +++ b/arch/arm/boards/skov-dol63x/lowlevel.c
 @@ -383,6 +383,144 @@ static void spl_imx6sdl_dram_init(const struct mx6_ddr_sysinfo *si,
@@ -163,7 +163,7 @@ index 5c3f14324522..7a43afc889e6 100644
  static inline void setup_leds(int cpu_type)
 @@ -552,12 +690,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
   * This routine does not return if starting the image from SD card or NOR
-  * was successfull. It restarts skov_dol63x_start() instead
+  * was successful. It restarts skov_dol63x_start() instead
   */
 -static void skov_dol63x_init(int cpu_type)
 +static void skov_dol63x_init(int cpu_type, unsigned board_variant)
