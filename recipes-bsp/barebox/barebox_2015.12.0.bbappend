@@ -11,6 +11,7 @@ SRC_URI += "\
   file://patches/0006-Skov-Use-local-environment-variants-to-handle-the-re.patch \
   file://patches/0007-Skov-some-board-variants-needs-special-tweaks.patch \
   file://patches/0008-dol63x-set-defaults-for-bootsate-parameters.patch \
+  file://patches/0009-Skov-add-support-for-board-variants-16-and-17.patch \
   file://patches/0101-of_path-of_find_path-factor-out-device-detection-log.patch \
   file://patches/0102-of_path-add-of_find_path_by_node.patch \
   file://patches/0103-state-make-use-of-of_find_path_by_node-and-add-retur.patch \
@@ -24,7 +25,7 @@ SRC_URI += "\
   file://patches/0305-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch \
   file://patches/0306-mtd-Fix-erasing-of-devices-4GiB.patch \
   file://patches/0307-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch \
-  file://patches/0401-Release-2015.12.0-customers-skov-dol63x-20160213-1.patch \
+  file://patches/0401-Release-2015.12.0-customers-skov-dol63x-20160225-1.patch \
   "
 
 SRC_URI += "file://env"
