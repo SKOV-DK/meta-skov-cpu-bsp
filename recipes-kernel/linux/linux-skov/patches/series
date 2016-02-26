@@ -3,22 +3,22 @@ tty_Retry_failed_reopen_if_tty_teardown_in-progress.patch
 
 # umpf-base: v4.4.1
 # umpf-name: 4.4/customers/skov/dol63x
-# umpf-version: 4.4/customers/skov/dol63x/20160203-1
+# umpf-version: 4.4/customers/skov/dol63x/20160226-1
 # umpf-topic: v4.4/topic/pwm-backlight-readback
 # umpf-hashinfo: 7212da90245f37563c9ce6785bc3cf356be5fb8b
-# umpf-topic-range: f1ab5eafa3625b41c74326a1994a820ff805d5b2..406604bf67badc037954be4bee758d00ec8dcc4b
+# umpf-topic-range: f1ab5eafa3625b41c74326a1994a820ff805d5b2..8beabfecd2cc7907eb99460bccfc884966771cdc
 0001-backlight-pwm_bl-Avoid-backlight-flicker-when-probed.patch
 0002-backlight-pwm_bl-Fix-broken-PWM-backlight-for-non-dt.patch
 0003-backlight-pwm_bl-add-debug-information-for-initial-s.patch
 # umpf-topic: v4.4/topic/rtc_pcfF85063_fixes
 # umpf-hashinfo: 850560e787f5494ec066dc5d20fc2192d24ce310
-# umpf-topic-range: 406604bf67badc037954be4bee758d00ec8dcc4b..8105af0f07a8d8dec37c89b51c719c8205d7e38b
+# umpf-topic-range: 8beabfecd2cc7907eb99460bccfc884966771cdc..01c714cc8a1fa94221cbacc40ab96eec5bb10d94
 0101-RTC-PCF85063-fix-time-date-reading-part-1.patch
 0102-RTC-PCF85063-fix-time-date-reading-part-II.patch
 0103-RTC-PCF85063-fix-time-date-setting.patch
 # umpf-topic: v4.4/customers/skov/dol63x
-# umpf-hashinfo: 9f79eb33157d1bdeece0fb9f8cc62d501a02dc04
-# umpf-topic-range: 8105af0f07a8d8dec37c89b51c719c8205d7e38b..470cc2837065a2108a84f906e4785939b0159b07
+# umpf-hashinfo: 1b8c23d4c06f5f48ff49f269a03a4ab350652868
+# umpf-topic-range: 01c714cc8a1fa94221cbacc40ab96eec5bb10d94..2bfb20c6aa75f091d603f58f4dd4cbc39390dd16
 0201-drm-panel-add-kernel-doc-for-size-attributes-in-pane.patch
 0202-of-Add-vendor-prefix-for-Logic-Technologies-Ltd.patch
 0203-drm-panel-Add-support-for-Logic-Technologies-LTTD800.patch
@@ -65,10 +65,10 @@ tty_Retry_failed_reopen_if_tty_teardown_in-progress.patch
 0244-Skov-keep-customer-s-specific-drivers.patch
 # umpf-topic: v4.4/topic/bgi
 # umpf-hashinfo: 5af949995d3551a4cf56e335f5c7177ba854c4ab
-# umpf-topic-range: 470cc2837065a2108a84f906e4785939b0159b07..ff14fe1954da6d7b3a674a33cd4948fa37941ee6
+# umpf-topic-range: 2bfb20c6aa75f091d603f58f4dd4cbc39390dd16..728619d97ab986e43dc72f82e41cee919b0d7fb4
 0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch
 0302-fuse-cuse-implement-mmap.patch
-# umpf-release: 4.4/customers/skov/dol63x/20160203-1
-# umpf-topic-range: ff14fe1954da6d7b3a674a33cd4948fa37941ee6..26c80d9cd43a9c5b94e88624d3455c55caee1e3e
-0401-Release-4.4-customers-skov-dol63x-20160203-1.patch
+# umpf-release: 4.4/customers/skov/dol63x/20160226-1
+# umpf-topic-range: 728619d97ab986e43dc72f82e41cee919b0d7fb4..11acf86222385130a7c4c4fdfb0a14a764903a00
+0401-Release-4.4-customers-skov-dol63x-20160226-1.patch
 # umpf-end

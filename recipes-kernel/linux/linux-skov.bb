@@ -71,7 +71,7 @@ SRC_URI += "\
   file://patches/0244-Skov-keep-customer-s-specific-drivers.patch \
   file://patches/0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch \
   file://patches/0302-fuse-cuse-implement-mmap.patch \
-  file://patches/0401-Release-4.4-customers-skov-dol63x-20160203-1.patch \
+  file://patches/0401-Release-4.4-customers-skov-dol63x-20160226-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"

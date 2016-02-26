@@ -8,9 +8,9 @@ Acked-by: Juergen Borleis <jbe@pengutronix.de>
  drivers/Makefile            |   1 +
  drivers/skov/Kconfig        |  18 +++
  drivers/skov/Makefile       |   2 +
- drivers/skov/mem_peek.c     | 163 +++++++++++++++++++++
- drivers/skov/skov_version.c | 341 ++++++++++++++++++++++++++++++++++++++++++++
- 6 files changed, 527 insertions(+)
+ drivers/skov/mem_peek.c     | 163 +++++++++++++++++++
+ drivers/skov/skov_version.c | 377 ++++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 563 insertions(+)
  create mode 100644 drivers/skov/Kconfig
  create mode 100644 drivers/skov/Makefile
  create mode 100644 drivers/skov/mem_peek.c
@@ -239,10 +239,10 @@ index 000000000000..61e82b4592df
 +
 diff --git a/drivers/skov/skov_version.c b/drivers/skov/skov_version.c
 new file mode 100644
-index 000000000000..b8417a333999
+index 000000000000..02531075aac0
 --- /dev/null
 +++ b/drivers/skov/skov_version.c
-@@ -0,0 +1,341 @@
+@@ -0,0 +1,377 @@
 +/*
 + * Skov version driver
 + *
@@ -250,19 +250,23 @@ index 000000000000..b8417a333999
 + * Copyright (C) 2013 Rose Technology.
 + *
 + * Various SKOV boards and there version control configuration
-+ * Resistors    - Version -         Rev - Ram    - Flash
-+ * 00000000     - High Performance   A    1024MB -  1024MB
-+ * 00000001     - Low Cost           A    512 MB -  256 MB - Old count
-+ * 00000100     - Low Cost           A    512 MB -  256 MB - New count
-+ * 00000010	- High Performance   A    1024MB -  512 MB - Old count
-+ * 00001000	- High Performance   A    1024MB -  512 MB - New count
-+ * 00001001	- Minium Cost	     B	  256 MB -   16 MB
-+ * 00001010	- Low Cost	     B    256 MB -  256 MB
-+ * 00001011	- High Performance   B	  1024MB -  256 MB
-+ * 00001100	- Max  Performance   B    2028MB - 16384MB
-+ * 00001101	- Low Cost	     C    256 MB -  256 MB
-+ * 00001110	- High Performance   C    1024MB -  256 MB
-+ *
++ * Resistors    - Version -         		Rev - Ram    - Flash
++ * 00000000     - High Performance   	 	 A    1024MB -  1024MB
++ * 00000001     - Low Cost           	 	 A    512 MB -  256 MB
++ * 00000100     - Low Cost           	 	 A    512 MB -  256 MB
++ * 00000010	- High Performance   	 	 A    1024MB -  512 MB
++ * 00001000	- High Performance   	 	 A    1024MB -  512 MB
++ * 00001001	- Minium Cost	     	 	 B    256 MB -   16 MB
++ * 00001010	- Low Cost	     	 	 B    256 MB -  256 MB
++ * 00001011	- High Performance   	 	 B    1024MB -  256 MB
++ * 00001100	- Max  Performance   	 	 B    2028MB - 16384MB
++ * 00001101	- Low Cost	     	 	 C    256 MB -  256 MB
++ * 00001110	- High Performance   	 	 C    1024MB -  256 MB
++ * 00001111	- Middle Performance		 C    512 MB -  256 MB
++ * 00010000	- i.MX6 CPU SoloCore		 C    512 MB -  4096MB
++ * 00010001	- i.MX6 CPU QuadCore		 C    2048MB -  8192MB
++ * 00010010	- i.MX6 CPU QuadCore+		 C    4192MB - 16384MB
++ * 00010011	- i.MX6 CPU SoloCore		 C    512 MB -  2048MB
 + */
 +#include <linux/err.h>
 +#include <linux/clk.h>
@@ -299,7 +303,11 @@ index 000000000000..b8417a333999
 +	"Minimum Cost",
 +	"Low Cost",
 +	"High Performance",
-+	"Maximum Performance"
++	"Maximum Performance",
++	"Middle Performance",
++	"i.MX6 CPU SoloCore",
++	"i.MX6 CPU QuadCore",
++	"i.MX6 CPU QuadCore+"
 +};
 +
 +static const unsigned int mem[] = {
@@ -349,7 +357,10 @@ index 000000000000..b8417a333999
 +
 +	if (strcmp(attr->attr.name, "mem") == 0) {
 +		switch(svpd->var ) {
++		case 18:
++			return sprintf(buf, "%u\n", mem[4]);
 +		case 12:
++		case 17:
 +			return sprintf(buf, "%u\n", mem[3]);
 +		case 0:
 +		case 2:
@@ -359,6 +370,9 @@ index 000000000000..b8417a333999
 +			return sprintf(buf, "%u\n", mem[2]);
 +		case 1:
 +		case 4:
++		case 15:
++		case 16:
++		case 19:
 +			return sprintf(buf, "%u\n", mem[1]);
 +		case 9:
 +		case 10:
@@ -382,12 +396,26 @@ index 000000000000..b8417a333999
 +			return sprintf(buf, "%s\n", rev[1]);
 +		case 13:
 +		case 14:
++		case 15:
++		case 16:
++		case 17:
++		case 18:
++		case 19:
 +			return sprintf(buf, "%s\n", rev[2]);
 +		default:
 +                	return sprintf(buf, "%s\n", "Board type can not be detected");
 +		}
 +	} else if (strcmp(attr->attr.name, "description") == 0) {
 +		switch(svpd->var) {
++		case 18:
++			return sprintf(buf, "%s\n", description[7]);
++		case 17:
++			return sprintf(buf, "%s\n", description[6]);
++		case 16:
++		case 19:
++			return sprintf(buf, "%s\n", description[5]);
++		case 15:
++			return sprintf(buf, "%s\n", description[4]);
 +		case 12:
 +			return sprintf(buf, "%s\n", description[3]);
 +		case 0:
@@ -404,12 +432,19 @@ index 000000000000..b8417a333999
 +		case 9:
 +			return sprintf(buf, "%s\n", description[0]);
 +		default:
-+			return sprintf(buf, "%s\n", "Board type can not be detected");        
++			return sprintf(buf, "%s\n", "Board type can not be detected");
 +		}
 +	} else if (strcmp(attr->attr.name, "nand") == 0) {
 +		switch(svpd->var) {
 +		case 12:
++		case 18:
 +			return sprintf(buf, "%u\n", nand[10]);
++		case 17:
++			return sprintf(buf, "%u\n", nand[9]);
++		case 16:
++			return sprintf(buf, "%u\n", nand[8]);
++		case 19:
++			return sprintf(buf, "%u\n", nand[7]);
 +		case 0:
 +			return sprintf(buf, "%u\n", nand[6]);
 +		case 1:
@@ -418,6 +453,7 @@ index 000000000000..b8417a333999
 +		case 11:
 +		case 13:
 +		case 14:
++		case 15:
 +			return sprintf(buf, "%u\n", nand[4]);
 +		case 2:
 +		case 8:
