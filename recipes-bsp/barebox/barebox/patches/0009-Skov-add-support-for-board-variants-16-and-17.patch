@@ -8,7 +8,7 @@ Subject: [PATCH] Skov: add support for board variants 16 and 17
  2 files changed, 41 insertions(+)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
-index ac83ea9d9c75..a336b507ef37 100644
+index ac83ea9d9c75..6922e0a35dbc 100644
 --- a/arch/arm/boards/skov-dol63x/lowlevel.c
 +++ b/arch/arm/boards/skov-dol63x/lowlevel.c
 @@ -686,6 +686,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
@@ -31,9 +31,9 @@ index ac83ea9d9c75..a336b507ef37 100644
 +			return;
 +		}
 +		pr_debug("Initializing for board variant 16\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
-+					&skov_dol63x_calib_4x128Mb_1066MHz,
-+					&skov_dol63x_cfg_4x128Mb_1066MHz);
++		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x128Mb_800MHz,
++					&skov_dol63x_calib_2x128Mb_800MHz,
++					&skov_dol63x_cfg_2x128Mb_800MHz);
 +		break;
 +	case 17: /* i.MX6Q "Quad_R2G_F8G" */
 +		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
