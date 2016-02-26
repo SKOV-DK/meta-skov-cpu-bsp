@@ -1,9 +1,9 @@
 # umpf-base: v2015.12.0
 # umpf-name: 2015.12.0/customers/skov/dol63x
-# umpf-version: 2015.12.0/customers/skov/dol63x/20160225-1
+# umpf-version: 2015.12.0/customers/skov/dol63x/20160226-1
 # umpf-topic: v2015.12.0/customers/skov/dol63x
-# umpf-hashinfo: 073a10c1684521d2b4bc503879c119d1a52f9804
-# umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..0a29c0ad642309000b566af09ddf9de47fe2c39c
+# umpf-hashinfo: 666b010471707fa33db9ae9faef93bc65b88a3dd
+# umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..78226be1d24a179f3189ec8f1a7950e25672d94b
 0001-nfs-forward-filesystem-options-to-the-kernel-command.patch
 0002-Skov-add-base-platform-support.patch
 0003-blspec-Prepare-for-a-different-compatible-string.patch
@@ -15,7 +15,7 @@
 0009-Skov-add-support-for-board-variants-16-and-17.patch
 # umpf-topic: v2015.12.0/topic/state
 # umpf-hashinfo: 9e26841724e0043e3da32f35cd4bb3cba05d4d21
-# umpf-topic-range: 0a29c0ad642309000b566af09ddf9de47fe2c39c..a6edc263acb369f4c656c8ff4f1284148c806550
+# umpf-topic-range: 78226be1d24a179f3189ec8f1a7950e25672d94b..946e36b7b9d64673d052c154d24e5b2e57fdea12
 0101-of_path-of_find_path-factor-out-device-detection-log.patch
 0102-of_path-add-of_find_path_by_node.patch
 0103-state-make-use-of-of_find_path_by_node-and-add-retur.patch
@@ -23,11 +23,11 @@
 0105-state-disable-load-command.patch
 # umpf-topic: v2015.12.0/topic/bootchooser
 # umpf-hashinfo: 80f2f56be3bf316da00249a807c1899c5ab70ba1
-# umpf-topic-range: a6edc263acb369f4c656c8ff4f1284148c806550..46e3072b9e16951d4a96cba4aa1c196699c1ae0b
+# umpf-topic-range: 946e36b7b9d64673d052c154d24e5b2e57fdea12..156e5519028ffd84f9f8138713e0bd94a288d881
 0201-bootstate-add-framework-for-redundant-boot-scenarios.patch
 # umpf-topic: v2015.12.0/topic/mtd
 # umpf-hashinfo: 93f81b57df315f3885cc2e5740ea506ee5864a3a
-# umpf-topic-range: 46e3072b9e16951d4a96cba4aa1c196699c1ae0b..31695f81481143a9a27102b62bcbb5603944e302
+# umpf-topic-range: 156e5519028ffd84f9f8138713e0bd94a288d881..8c002157fe485de883bd81dafbe826d12152c3b7
 0301-mtd-nand-bb-Fix-8k-page-size-nands.patch
 0302-mtd-Fix-mtdraw-for-Nand-4GiB.patch
 0303-mtd-Make-erase_info-structs-64bit-where-necessary.patch
@@ -35,7 +35,7 @@
 0305-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch
 0306-mtd-Fix-erasing-of-devices-4GiB.patch
 0307-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch
-# umpf-release: 2015.12.0/customers/skov/dol63x/20160225-1
-# umpf-topic-range: 31695f81481143a9a27102b62bcbb5603944e302..0b54fb2ae5665d590ac266792a273b3f33062dd1
-0401-Release-2015.12.0-customers-skov-dol63x-20160225-1.patch
+# umpf-release: 2015.12.0/customers/skov/dol63x/20160226-1
+# umpf-topic-range: 8c002157fe485de883bd81dafbe826d12152c3b7..757c0d53bb79d694f5dfe0f2be3ee55821bcc879
+0401-Release-2015.12.0-customers-skov-dol63x-20160226-1.patch
 # umpf-end

@@ -25,7 +25,7 @@ SRC_URI += "\
   file://patches/0305-mtd-Fix-mtd_op_erase-for-devices-4GiB.patch \
   file://patches/0306-mtd-Fix-erasing-of-devices-4GiB.patch \
   file://patches/0307-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch \
-  file://patches/0401-Release-2015.12.0-customers-skov-dol63x-20160225-1.patch \
+  file://patches/0401-Release-2015.12.0-customers-skov-dol63x-20160226-1.patch \
   "
 
 SRC_URI += "file://env"

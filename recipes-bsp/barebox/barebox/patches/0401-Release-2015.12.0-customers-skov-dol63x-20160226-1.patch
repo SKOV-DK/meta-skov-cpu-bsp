@@ -1,13 +1,13 @@
 From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-Date: Thu, 25 Feb 2016 10:15:24 +0100
-Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160225-1
+Date: Fri, 26 Feb 2016 11:03:54 +0100
+Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160226-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index be53d834df4b..7ee65a879f52 100644
+index be53d834df4b..6ea6aa18fa05 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -15,7 +15,7 @@ index be53d834df4b..7ee65a879f52 100644
  PATCHLEVEL = 12
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20160225-1
++EXTRAVERSION =-20160226-1
  NAME = None
  
  # *DOCUMENTATION*

@@ -3,12 +3,12 @@ Date: Thu, 25 Feb 2016 10:07:10 +0100
 Subject: [PATCH] Skov: add support for board variants 16 and 17
 
 ---
- arch/arm/boards/skov-dol63x/lowlevel.c | 22 ++++++++++++++++++++++
+ arch/arm/boards/skov-dol63x/lowlevel.c | 23 +++++++++++++++++++++++
  arch/arm/boards/skov-dol63x/version.c  | 18 ++++++++++++++++++
- 2 files changed, 40 insertions(+)
+ 2 files changed, 41 insertions(+)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
-index ac83ea9d9c75..5f3f24d840e2 100644
+index ac83ea9d9c75..a336b507ef37 100644
 --- a/arch/arm/boards/skov-dol63x/lowlevel.c
 +++ b/arch/arm/boards/skov-dol63x/lowlevel.c
 @@ -686,6 +686,9 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
@@ -21,7 +21,7 @@ index ac83ea9d9c75..5f3f24d840e2 100644
   *
   * This routine does not return if starting the image from SD card or NOR
   * was successful. It restarts skov_dol63x_start() instead
-@@ -786,6 +789,25 @@ static void skov_dol63x_init(int cpu_type, unsigned board_variant)
+@@ -786,6 +789,26 @@ static void skov_dol63x_init(int cpu_type, unsigned board_variant)
  					&skov_dol63x_calib_2x128Mb_800MHz,
  					&skov_dol63x_cfg_2x128Mb_800MHz);
  		break;
@@ -34,6 +34,7 @@ index ac83ea9d9c75..5f3f24d840e2 100644
 +		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
 +					&skov_dol63x_calib_4x128Mb_1066MHz,
 +					&skov_dol63x_cfg_4x128Mb_1066MHz);
++		break;
 +	case 17: /* i.MX6Q "Quad_R2G_F8G" */
 +		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
 +			pr_err("Invalid SoC! i.MX6Q expected\n");
@@ -43,7 +44,7 @@ index ac83ea9d9c75..5f3f24d840e2 100644
 +		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x256Mb_1066MHz,
 +					&skov_dol63x_calib_4x256Mb_1066MHz,
 +					&skov_dol63x_cfg_4x256Mb_1066MHz);
-+
++		break;
  	default:
  		pr_err("Unsupported board revision: 0x%x\n", board_variant);
  		/* FIXME don't continue */
