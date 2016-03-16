@@ -30,7 +30,7 @@ SRC_URI += "\
 
 SRC_URI += "file://env"
 
-COMPATIBLE_MACHINE = "dol-63x"
+COMPATIBLE_MACHINE = "imx6-cpu"
 
 #do_deploy_append() {
 #        install -d ${DEPLOY_DIR_TOOLS}
