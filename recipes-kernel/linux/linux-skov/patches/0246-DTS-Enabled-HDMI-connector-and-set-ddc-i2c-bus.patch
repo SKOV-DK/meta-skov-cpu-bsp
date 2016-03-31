@@ -1,0 +1,35 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Thu, 31 Mar 2016 14:22:20 +0200
+Subject: [PATCH] DTS: Enabled HDMI connector and set ddc-i2c-bus
+
+---
+ arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts | 5 +++++
+ arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts | 5 +++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+index 99cc70ff4c64..0732a9ae860a 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revB.dts
+@@ -29,3 +29,8 @@
+ &i2c2 {
+ 	status = "okay";
+ };
++
++&hdmi {
++	status = "okay";
++	ddc-i2c-bus = <&i2c2>;
++};
+diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+index 41a7e15ca4ad..1c7291c3e583 100644
+--- a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
++++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
+@@ -29,3 +29,8 @@
+ &i2c2 {
+ 	status = "okay";
+ };
++
++&hdmi {
++	status = "okay";
++	ddc-i2c-bus = <&i2c2>;
++};

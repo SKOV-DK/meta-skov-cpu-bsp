@@ -1,0 +1,22 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Thu, 31 Mar 2016 14:47:12 +0200
+Subject: [PATCH] Release 4.4/customers/skov/dol63x/20160331-1
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index c6a265b52c93..eb845bd512c1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ VERSION = 4
+ PATCHLEVEL = 4
+ SUBLEVEL = 1
+-EXTRAVERSION =
++EXTRAVERSION =-20160331-1
+ NAME = Blurry Fish Butt
+ 
+ # *DOCUMENTATION*
