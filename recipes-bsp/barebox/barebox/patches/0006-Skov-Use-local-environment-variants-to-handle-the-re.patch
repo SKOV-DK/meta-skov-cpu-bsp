@@ -60,3 +60,10 @@ index 000000000000..fe1a363da1e7
 +++ b/arch/arm/boards/skov-dol63x/env/nv/boot.default
 @@ -0,0 +1 @@
 +bootchooser
+diff --git a/arch/arm/boards/skov-dol63x/env/nv/linux.bootargs.hdmi b/arch/arm/boards/skov-dol63x/env/nv/linux.bootargs.hdmi
+new file mode 100644
+index 000000000000..fe1a363da1e8
+--- /dev/null
++++ b/arch/arm/boards/skov-dol63x/env/nv/linux.bootargs.hdmi
+@@ -0,0 +1 @@
++video=HDMI-A-1:800x480-24@60e
