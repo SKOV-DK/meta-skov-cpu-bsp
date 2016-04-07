@@ -1,0 +1,27 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 30 Mar 2016 11:52:09 +0200
+Subject: [PATCH] ARM: pbl-multi: Fix SDRAM at end of address space
+
+When SDRAM reaches to the end of the address space the comparison
+membase + memsize evaluates to 0, so pc - membase < memsize can never
+be true. Fix this by substracting membase on both sides of the
+comparison.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/cpu/uncompress.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/cpu/uncompress.c b/arch/arm/cpu/uncompress.c
+index 5bcce6b9e36d..b8e2e9ffd779 100644
+--- a/arch/arm/cpu/uncompress.c
++++ b/arch/arm/cpu/uncompress.c
+@@ -60,7 +60,7 @@ void __noreturn barebox_multi_pbl_start(unsigned long membase,
+ 		 * to the current address. Otherwise it may be a readonly location.
+ 		 * Copy and relocate to the start of the memory in this case.
+ 		 */
+-		if (pc > membase && pc < membase + memsize)
++		if (pc > membase && pc - membase < memsize)
+ 			relocate_to_current_adr();
+ 		else
+ 			relocate_to_adr(membase);

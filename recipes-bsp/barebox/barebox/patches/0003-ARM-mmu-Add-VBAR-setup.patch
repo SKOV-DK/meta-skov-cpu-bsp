@@ -1,0 +1,35 @@
+From: Andrey Smirnov <andrew.smirnov@gmail.com>
+Date: Sun, 10 Jan 2016 16:58:11 -0800
+Subject: [PATCH] ARM: mmu: Add VBAR setup
+
+Add code to make sure that normal vector exception table, when it is
+used due to unavailability of the high vector table, was not re-mapped
+from 0x0 via VBAR by someone else before us.
+
+Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/cpu/mmu.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/cpu/mmu.c b/arch/arm/cpu/mmu.c
+index 784221ce139b..bc5325fabaef 100644
+--- a/arch/arm/cpu/mmu.c
++++ b/arch/arm/cpu/mmu.c
+@@ -302,6 +302,16 @@ static void vectors_init(void)
+ 		 * live without being able to catch NULL pointer dereferences
+ 		 */
+ 		exc = arm_create_pte(0x0);
++
++		if (cpu_architecture() >= CPU_ARCH_ARMv7) {
++			/*
++			 * ARMv7 CPUs allow to remap low vectors from
++			 * 0x0 to an arbitrary address using VBAR
++			 * register, so let's make sure we have it
++			 * pointing to the correct address
++			 */
++			set_vbar(0x0);
++		}
+ 	}
+ 
+ 	arm_fixup_vectors();
