@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+require recipes-bsp/barebox/barebox.inc
 
 SRC_URI += "file://defconfig"
 
@@ -45,10 +45,3 @@ SRC_URI += "\
 SRC_URI += "file://env"
 
 COMPATIBLE_MACHINE = "imx6-cpu"
-
-#do_deploy_append() {
-#        install -d ${DEPLOY_DIR_TOOLS}
-#        install -m 0755 scripts/imx/imx-usb-loader ${DEPLOY_DIR_TOOLS}/imx-usb-loader-${PV}
-#        rm -f ${DEPLOY_DIR_TOOLS}/imx-usb-loader
-#        ln -sf ./imx-usb-loader-${PV} ${DEPLOY_DIR_TOOLS}/imx-usb-loader
-#}
