@@ -42,6 +42,11 @@ SRC_URI += "\
   file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160407-1.patch \
   "
 
-SRC_URI += "file://env"
+SRC_URI += "\
+  file://env/nv/autoboot_timeout \
+  file://env/nv/linux.bootargs.base \
+  file://env/nv/linux.bootargs.hdmi \
+  file://env/nv/boot.default \
+  "
 
 COMPATIBLE_MACHINE = "imx6-cpu"
