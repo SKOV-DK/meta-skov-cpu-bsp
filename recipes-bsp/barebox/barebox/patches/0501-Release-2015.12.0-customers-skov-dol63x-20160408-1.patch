@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Thu, 7 Apr 2016 08:12:27 +0200
-Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160407-1
+Date: Fri, 8 Apr 2016 14:04:20 +0200
+Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160408-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index be53d834df4b..7fe30a54d8af 100644
+index be53d834df4b..8d56b492fae4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -19,7 +19,7 @@ index be53d834df4b..7fe30a54d8af 100644
  PATCHLEVEL = 12
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20160407-1
++EXTRAVERSION =-20160408-1
  NAME = None
  
  # *DOCUMENTATION*
