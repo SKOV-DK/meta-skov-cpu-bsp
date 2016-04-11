@@ -51,7 +51,6 @@ SRC_URI += "\
   file://patches/0224-DTS-move-touchcontroller-define-around-to-reflect-bo.patch \
   file://patches/0225-DTS-since-revision-B-the-backlight-has-an-additional.patch \
   file://patches/0226-DTS-add-some-info.patch \
-  file://patches/0227-DTS-disable-HDMI.patch \
   file://patches/0228-DTS-Skov-add-a-revision-C-devicetree-include.patch \
   file://patches/0229-DTS-fix-layout.patch \
   file://patches/0230-DTS-Skov-GPIO-Re-factor-the-pin-setup-for-the-board-.patch \
@@ -70,7 +69,6 @@ SRC_URI += "\
   file://patches/0243-RTC-PCF85063-setup-the-clock-in-a-customer-specific-.patch \
   file://patches/0244-Skov-keep-customer-s-specific-drivers.patch \
   file://patches/0245-DTS-added-skov-dtbs-to-Makefile.patch \
-  file://patches/0246-DTS-Enabled-HDMI-connector-and-set-ddc-i2c-bus.patch \
   file://patches/0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch \
   file://patches/0302-fuse-cuse-implement-mmap.patch \
   file://patches/0401-Release-4.4-customers-skov-dol63x-20160331-1.patch \
