@@ -1,5 +1,9 @@
 require barebox-skov.inc
 
+SRC_URI += "\
+  file://env/bin/init \
+  "
+
 PROVIDES_remove = "virtual/bootloader"
 
 SRC_URI[md5sum] = "1ef8926cd2eadc39ce779b8377e7cfcc"
