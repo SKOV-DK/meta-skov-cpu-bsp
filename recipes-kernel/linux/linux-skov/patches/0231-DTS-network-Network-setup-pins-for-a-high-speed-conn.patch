@@ -10,10 +10,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 14 insertions(+), 11 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 823db91eb65b..464e4a68eb01 100644
+index 3843c685a797..2fd5922074ed 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -340,9 +340,7 @@
+@@ -339,9 +339,7 @@
  	pinctrl_board: dol63x_grp {
  		pinctrl_hog: hoggrp {
  			fsl,pins = <
@@ -23,7 +23,7 @@ index 823db91eb65b..464e4a68eb01 100644
  			>;
  		};
  
-@@ -395,15 +393,20 @@
+@@ -394,15 +392,20 @@
  
  		pinctrl_enet_4: enetgrp-4 {
  			fsl,pins = <

@@ -10,10 +10,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  3 files changed, 10 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index d62efafaceff..0136161cf77c 100644
+index 287b215eda7a..5c377fe4b251 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -362,7 +362,7 @@
+@@ -361,7 +361,7 @@
  
  		pinctrl_io_vcc_mmc: vcc_io_mmc_grp {
  			fsl,pins = <
@@ -22,7 +22,7 @@ index d62efafaceff..0136161cf77c 100644
  			>;
  		};
  
-@@ -371,7 +371,8 @@
+@@ -370,7 +370,8 @@
  				MX6QDL_PAD_EIM_D17__ECSPI1_MISO		0x100b1
  				MX6QDL_PAD_EIM_D18__ECSPI1_MOSI		0x100b1
  				MX6QDL_PAD_EIM_D16__ECSPI1_SCLK		0x100b1
@@ -32,7 +32,7 @@ index d62efafaceff..0136161cf77c 100644
  			>;
  		};
  
-@@ -380,7 +381,8 @@
+@@ -379,7 +380,8 @@
  				MX6QDL_PAD_EIM_OE__ECSPI2_MISO		0x100b1
  				MX6QDL_PAD_EIM_CS1__ECSPI2_MOSI		0x100b1
  				MX6QDL_PAD_EIM_CS0__ECSPI2_SCLK		0x100b1
@@ -42,7 +42,7 @@ index d62efafaceff..0136161cf77c 100644
  			>;
  		};
  
-@@ -389,7 +391,8 @@
+@@ -388,7 +390,8 @@
  				MX6QDL_PAD_EIM_D28__ECSPI4_MOSI 	0x100b1
  				MX6QDL_PAD_EIM_D22__ECSPI4_MISO		0x100b1
  				MX6QDL_PAD_EIM_D21__ECSPI4_SCLK		0x100b1

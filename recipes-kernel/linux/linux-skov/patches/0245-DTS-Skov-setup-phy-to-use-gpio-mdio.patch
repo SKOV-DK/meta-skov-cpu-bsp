@@ -1,0 +1,80 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Thu, 7 Apr 2016 13:13:09 +0200
+Subject: [PATCH] DTS/Skov: setup phy to use gpio mdio
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi | 30 +++++++++++++++++++++++-------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+index 3607eb680e9b..7535376c7b6e 100644
+--- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+@@ -33,6 +33,7 @@
+ 		usb1 = &usbotg;
+ 		rtc0 = &i2c_rtc;
+ 		rtc1 = &snvs;
++	        mdio-gpio0 = &mdio0;
+ 	};
+ 
+ 	leds {
+@@ -58,6 +59,20 @@
+                 };
+ 	};
+ 
++	mdio0: mdio {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_mdio_1>;
++		compatible = "virtual,mdio-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		gpios = <&gpio1 31 0
++			 &gpio1 22 0>;
++
++		ethphy1: ethernet-phy@1 {
++			reg = <1>;
++		};
++	};
++
+ 	skov_version {
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pinctrl_skov_version>;
+@@ -297,6 +312,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_enet_4>;
+ 	phy-mode = "rmii";
++	phy-handle = <&ethphy1>;
+ 	phy-reset-gpios = <&gpio1 5 0>;
+ 	phy-reset-duration = "100";
+ 	phy-supply = <&reg_3p3v>;
+@@ -309,10 +325,6 @@
+ 	 * MDIO phy#2 is port 2 e.g. RMII port, with no real and usable
+ 	 * phy emulation
+ 	 */
+-	fixed-link {
+-		speed = <100>;
+-		full-duplex;
+-	};
+ };
+ 
+ /* signal "active link" on the RMII to the ethernet switch */
+@@ -413,11 +425,15 @@
+ 			>;
+ 		};
+ 
++		pinctrl_mdio_1: mdio-1 {
++			fsl,pins = <
++				MX6QDL_PAD_ENET_MDIO__GPIO1_IO22	0x100b1
++				MX6QDL_PAD_ENET_MDC__GPIO1_IO31		0x000b1
++			>;
++		};
++
+ 		pinctrl_enet_4: enetgrp-4 {
+ 			fsl,pins = <
+-				/* MDIO speed up to 5 MHz */
+-				MX6QDL_PAD_ENET_MDIO__ENET_MDIO		0x100b1
+-				MX6QDL_PAD_ENET_MDC__ENET_MDC		0x000b1
+ 				/* RMII 50 MHz */
+ 				MX6QDL_PAD_ENET_CRS_DV__ENET_RX_EN	0x100f5
+ 				MX6QDL_PAD_ENET_TX_EN__ENET_TX_EN	0x100f5

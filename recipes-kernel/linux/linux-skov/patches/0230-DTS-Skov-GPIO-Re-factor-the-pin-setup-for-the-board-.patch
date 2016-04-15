@@ -11,7 +11,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 16 insertions(+), 8 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index a5fa79c2a075..823db91eb65b 100644
+index 71520295bc29..3843c685a797 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -57,6 +57,8 @@
@@ -23,7 +23,7 @@ index a5fa79c2a075..823db91eb65b 100644
  		compatible = "skov-version";
  		v0-gpio = <&gpio2 10 0>;
  		v1-gpio = <&gpio2 15 0>;
-@@ -341,14 +343,20 @@
+@@ -340,14 +342,20 @@
  				MX6QDL_PAD_GPIO_5__GPIO1_IO05		0xb0		/* ethernet phy reset */
  				MX6QDL_PAD_EIM_D30__GPIO3_IO30		0xb0		/* ethernet phy interrupt */
  				MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24	0x13000		/* Enet */

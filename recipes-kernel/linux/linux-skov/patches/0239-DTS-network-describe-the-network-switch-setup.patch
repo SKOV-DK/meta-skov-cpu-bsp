@@ -13,7 +13,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  2 files changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 6ad8cd2dda7f..373f524f46e8 100644
+index 85aca8e47745..fd8f21a3be62 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -302,12 +302,29 @@
@@ -44,8 +44,8 @@ index 6ad8cd2dda7f..373f524f46e8 100644
 +};
 +
  &i2c2 {
- 	status = "okay";
  	clock-frequency = <100000>;
+ 	pinctrl-names = "default";
 diff --git a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi b/arch/arm/boot/dts/imx6qdl-cpuA.dtsi
 index aa8a2e7bfbd2..327de3581f14 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpuA.dtsi

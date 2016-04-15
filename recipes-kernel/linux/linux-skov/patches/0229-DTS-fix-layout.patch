@@ -10,11 +10,11 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  3 files changed, 104 insertions(+), 104 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index d42405bd4cb9..a5fa79c2a075 100644
+index aad7d1050695..71520295bc29 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -308,7 +308,7 @@
- 	status = "okay";
+@@ -307,7 +307,7 @@
+ &i2c2 {
  	clock-frequency = <100000>;
  	pinctrl-names = "default";
 -        pinctrl-0 = <&pinctrl_i2c2_2>;
@@ -22,7 +22,7 @@ index d42405bd4cb9..a5fa79c2a075 100644
  };
  
  &i2c3 {
-@@ -338,17 +338,17 @@
+@@ -337,17 +337,17 @@
  	pinctrl_board: dol63x_grp {
  		pinctrl_hog: hoggrp {
  			fsl,pins = <
@@ -50,7 +50,7 @@ index d42405bd4cb9..a5fa79c2a075 100644
  			>;
  		};
  
-@@ -360,18 +360,18 @@
+@@ -359,18 +359,18 @@
  
  		pinctrl_ecspi1_1: ecspi1grp-1 {
  			fsl,pins = <
@@ -75,7 +75,7 @@ index d42405bd4cb9..a5fa79c2a075 100644
  				MX6QDL_PAD_EIM_RW__GPIO2_IO26		0x100b1		/* mcp2003 CS */
  			>;
  		};
-@@ -379,54 +379,54 @@
+@@ -378,54 +378,54 @@
  		pinctrl_ecspi4_1: ecspi4grp-1 {
  			fsl,pins = <
  				MX6QDL_PAD_EIM_D28__ECSPI4_MOSI 	0x100b1
@@ -152,7 +152,7 @@ index d42405bd4cb9..a5fa79c2a075 100644
  				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x17059		/* WP */
  				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x1b0b0		/* CD */
  			>;
-@@ -434,97 +434,97 @@
+@@ -433,97 +433,97 @@
  
  		pinctrl_usdhc3_100mhz: usdhc3grp100mhz {
  			fsl,pins = <

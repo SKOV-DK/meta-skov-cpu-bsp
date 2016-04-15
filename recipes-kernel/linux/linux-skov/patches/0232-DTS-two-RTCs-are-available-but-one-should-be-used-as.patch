@@ -16,7 +16,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 464e4a68eb01..d62efafaceff 100644
+index 2fd5922074ed..287b215eda7a 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -31,6 +31,8 @@
@@ -28,7 +28,7 @@ index 464e4a68eb01..d62efafaceff 100644
  	};
  
  	leds {
-@@ -319,7 +321,7 @@
+@@ -318,7 +320,7 @@
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_i2c3_2>;
  

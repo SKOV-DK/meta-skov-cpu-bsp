@@ -8,10 +8,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 4c14ef6ff916..eedca0a36550 100644
+index 79a1c5addffb..344d87121dab 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -369,8 +369,8 @@
+@@ -368,8 +368,8 @@
  		pinctrl_ecspi1_1: ecspi1grp-1 {
  			fsl,pins = <
  				MX6QDL_PAD_EIM_D17__ECSPI1_MISO		0x100b1
@@ -22,7 +22,7 @@ index 4c14ef6ff916..eedca0a36550 100644
  				/* *no* external pull up */
  				MX6QDL_PAD_EIM_D24__GPIO3_IO24		0x40000058	/* spi-nor CS */
  			>;
-@@ -379,8 +379,8 @@
+@@ -378,8 +378,8 @@
  		pinctrl_ecspi2_1: ecspi2grp-1 {
  			fsl,pins = <
  				MX6QDL_PAD_EIM_OE__ECSPI2_MISO		0x100b1
@@ -33,7 +33,7 @@ index 4c14ef6ff916..eedca0a36550 100644
  				/* external pull up */
  				MX6QDL_PAD_EIM_RW__GPIO2_IO26		0x40000058	/* mcp2003 CS */
  			>;
-@@ -389,8 +389,8 @@
+@@ -388,8 +388,8 @@
  		pinctrl_ecspi4_1: ecspi4grp-1 {
  			fsl,pins = <
  				MX6QDL_PAD_EIM_D28__ECSPI4_MOSI 	0x100b1

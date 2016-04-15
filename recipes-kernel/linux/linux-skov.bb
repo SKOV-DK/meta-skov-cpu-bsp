@@ -51,6 +51,7 @@ SRC_URI += "\
   file://patches/0224-DTS-move-touchcontroller-define-around-to-reflect-bo.patch \
   file://patches/0225-DTS-since-revision-B-the-backlight-has-an-additional.patch \
   file://patches/0226-DTS-add-some-info.patch \
+  file://patches/0227-DTS-HDMI-only-the-i.MX6Q-based-variants-support-HDMI.patch \
   file://patches/0228-DTS-Skov-add-a-revision-C-devicetree-include.patch \
   file://patches/0229-DTS-fix-layout.patch \
   file://patches/0230-DTS-Skov-GPIO-Re-factor-the-pin-setup-for-the-board-.patch \
@@ -63,15 +64,20 @@ SRC_URI += "\
   file://patches/0237-DTS-handle-input-GPIOs-correctly.patch \
   file://patches/0238-DTS-prevent-the-kernel-from-switching-off-the-SD-car.patch \
   file://patches/0239-DTS-network-describe-the-network-switch-setup.patch \
-  file://patches/0240-DTS-HDMI-only-the-i.MX6Q-based-variants-support-HDMI.patch \
-  file://patches/0241-DTS-I-C-trim-the-I-C-bus-3-pads.patch \
-  file://patches/0242-DTS-I-C-trim-the-I-C-bus-2-pads.patch \
-  file://patches/0243-RTC-PCF85063-setup-the-clock-in-a-customer-specific-.patch \
-  file://patches/0244-Skov-keep-customer-s-specific-drivers.patch \
-  file://patches/0245-DTS-added-skov-dtbs-to-Makefile.patch \
+  file://patches/0240-DTS-I-C-trim-the-I-C-bus-3-pads.patch \
+  file://patches/0241-DTS-I-C-trim-the-I-C-bus-2-pads.patch \
+  file://patches/0242-RTC-PCF85063-setup-the-clock-in-a-customer-specific-.patch \
+  file://patches/0243-Skov-keep-customer-s-specific-drivers.patch \
+  file://patches/0244-DTS-added-skov-dtbs-to-Makefile.patch \
+  file://patches/0245-DTS-Skov-setup-phy-to-use-gpio-mdio.patch \
+  file://patches/0246-DTS-Skov-use-micrel_smi-driver.patch \
   file://patches/0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch \
   file://patches/0302-fuse-cuse-implement-mmap.patch \
-  file://patches/0401-Release-4.4-customers-skov-dol63x-20160331-1.patch \
+  file://patches/0401-mdio-bitbang-add-SMI0-mode-support.patch \
+  file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
+  file://patches/0403-micrel-smi-add-ranges-for-indirect-data-statistics.patch \
+  file://patches/0404-micrel-smi-add-readable-registers.patch \
+  file://patches/0501-Release-4.4-customers-skov-dol63x-20160415-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"

@@ -30,7 +30,7 @@ index afa335b45844..99e091bf573f 100644
  / {
  	model = "Freescale i.MX6 SKOV Solo Board";
 diff --git a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
-index 967ba4409bce..e4a933ff3e01 100644
+index 9c8d0bbef55b..1c7291c3e583 100644
 --- a/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
 +++ b/arch/arm/boot/dts/imx6q-skov-dol63x-revC.dts
 @@ -15,7 +15,7 @@
@@ -43,7 +43,7 @@ index 967ba4409bce..e4a933ff3e01 100644
  / {
  	model = "Freescale i.MX6 SKOV Quad Board";
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 40c000dfc7bf..d42405bd4cb9 100644
+index ae0abbc486f6..aad7d1050695 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -152,16 +152,11 @@
@@ -63,7 +63,7 @@ index 40c000dfc7bf..d42405bd4cb9 100644
  		};
  
  		/* MMC IO voltage select */
-@@ -363,12 +358,6 @@
+@@ -362,12 +357,6 @@
  			>;
  		};
  

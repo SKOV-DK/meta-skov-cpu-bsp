@@ -9,10 +9,10 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 0136161cf77c..4c14ef6ff916 100644
+index 5c377fe4b251..79a1c5addffb 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-@@ -417,13 +417,13 @@
+@@ -416,13 +416,13 @@
  
  		pinctrl_pwm2_2: pwm2grp-2 {
  			fsl,pins = <
