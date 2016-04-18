@@ -75,9 +75,7 @@ SRC_URI += "\
   file://patches/0302-fuse-cuse-implement-mmap.patch \
   file://patches/0401-mdio-bitbang-add-SMI0-mode-support.patch \
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
-  file://patches/0403-micrel-smi-add-ranges-for-indirect-data-statistics.patch \
-  file://patches/0404-micrel-smi-add-readable-registers.patch \
-  file://patches/0501-Release-4.4-customers-skov-dol63x-20160415-1.patch \
+  file://patches/0501-Release-4.4-customers-skov-dol63x-20160418-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"

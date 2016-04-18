@@ -1,21 +1,21 @@
 # umpf-base: v4.4.1
 # umpf-name: 4.4/customers/skov/dol63x
-# umpf-version: 4.4/customers/skov/dol63x/20160415-1
+# umpf-version: 4.4/customers/skov/dol63x/20160418-1
 # umpf-topic: v4.4/topic/pwm-backlight-readback
 # umpf-hashinfo: 7212da90245f37563c9ce6785bc3cf356be5fb8b
-# umpf-topic-range: f1ab5eafa3625b41c74326a1994a820ff805d5b2..20dfae9ea4cb660f1c356f326f88f75ac2e5ae6e
+# umpf-topic-range: f1ab5eafa3625b41c74326a1994a820ff805d5b2..a5ce909d3098b964e40a7056d32d9974942261e9
 0001-backlight-pwm_bl-Avoid-backlight-flicker-when-probed.patch
 0002-backlight-pwm_bl-Fix-broken-PWM-backlight-for-non-dt.patch
 0003-backlight-pwm_bl-add-debug-information-for-initial-s.patch
 # umpf-topic: v4.4/topic/rtc_pcfF85063_fixes
 # umpf-hashinfo: 850560e787f5494ec066dc5d20fc2192d24ce310
-# umpf-topic-range: 20dfae9ea4cb660f1c356f326f88f75ac2e5ae6e..f698839fb3d8ed6a5cca7e3e107569faae539fc4
+# umpf-topic-range: a5ce909d3098b964e40a7056d32d9974942261e9..23b3c3aee2af34517f24b69a82b632776ac08d47
 0101-RTC-PCF85063-fix-time-date-reading-part-1.patch
 0102-RTC-PCF85063-fix-time-date-reading-part-II.patch
 0103-RTC-PCF85063-fix-time-date-setting.patch
 # umpf-topic: v4.4/customers/skov/dol63x
 # umpf-hashinfo: 346cd67e399c7c3618d5d3619d196fddc801576a
-# umpf-topic-range: f698839fb3d8ed6a5cca7e3e107569faae539fc4..d4f10d9a6d2f28f85d7f5c46b723ad92cfc01405
+# umpf-topic-range: 23b3c3aee2af34517f24b69a82b632776ac08d47..ce0ef20c6ff8214318f5989215b1d66f4e7e5ac9
 0201-drm-panel-add-kernel-doc-for-size-attributes-in-pane.patch
 0202-of-Add-vendor-prefix-for-Logic-Technologies-Ltd.patch
 0203-drm-panel-Add-support-for-Logic-Technologies-LTTD800.patch
@@ -64,17 +64,15 @@
 0246-DTS-Skov-use-micrel_smi-driver.patch
 # umpf-topic: v4.4/topic/bgi
 # umpf-hashinfo: 5af949995d3551a4cf56e335f5c7177ba854c4ab
-# umpf-topic-range: d4f10d9a6d2f28f85d7f5c46b723ad92cfc01405..b77c6f5c4d5c41de177c7b680297039f52e15545
+# umpf-topic-range: ce0ef20c6ff8214318f5989215b1d66f4e7e5ac9..a1352b00efe7d58a203ba288d40fb85c8cd6ef3e
 0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch
 0302-fuse-cuse-implement-mmap.patch
 # umpf-topic: v4.4/topic/micrel-smi
-# umpf-hashinfo: 4fe644fc20e674a136310f01a220e581cb6bb3d5
-# umpf-topic-range: b77c6f5c4d5c41de177c7b680297039f52e15545..5240ea677c8d98bdc76b1cdf861eb58d5c323496
+# umpf-hashinfo: 9b632ed3f6b13ec1a53e0db263e579669368e01d
+# umpf-topic-range: a1352b00efe7d58a203ba288d40fb85c8cd6ef3e..df98fe4c20f7c7aab936b86ea804e7b433f77f37
 0401-mdio-bitbang-add-SMI0-mode-support.patch
 0402-micrel-smi-add-driver-for-KSZ8873.patch
-0403-micrel-smi-add-ranges-for-indirect-data-statistics.patch
-0404-micrel-smi-add-readable-registers.patch
-# umpf-release: 4.4/customers/skov/dol63x/20160415-1
-# umpf-topic-range: 5240ea677c8d98bdc76b1cdf861eb58d5c323496..c7d575be40b3a4a0c977d907e27b2d6145544928
-0501-Release-4.4-customers-skov-dol63x-20160415-1.patch
+# umpf-release: 4.4/customers/skov/dol63x/20160418-1
+# umpf-topic-range: df98fe4c20f7c7aab936b86ea804e7b433f77f37..c1760e27f42a7cf669407e89891ace953e014580
+0501-Release-4.4-customers-skov-dol63x-20160418-1.patch
 # umpf-end
