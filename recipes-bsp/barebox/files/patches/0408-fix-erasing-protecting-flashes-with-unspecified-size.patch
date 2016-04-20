@@ -1,0 +1,152 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Mon, 18 Apr 2016 11:56:00 +0200
+Subject: [PATCH] fix erasing/protecting flashes with unspecified size
+
+fixes: 81737c1 mtd: Fix erasing of devices >4GiB
+
+Several places erased a complete flash partition passing ~0 as count to
+erase(). With the above commit count to erase was changed from an unsigned
+type to a signed type, so the (count > f->size - offset) check in
+erase() no longer triggers and the ~0 count is no longer adjusted to the whole
+device size. Among other things this results in saveenv failures on NOR
+flashes.
+This patch fixes this by introducing an explicit macro for erasing the
+whole device which is tested for in erase(). All other negative values
+are rejected.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Reported-by: Giorgio <giorgio.nicole@arcor.de>
+---
+ arch/arm/mach-omap/am33xx_bbu_nand.c    | 2 +-
+ arch/arm/mach-omap/am33xx_bbu_spi_mlo.c | 2 +-
+ commands/flash.c                        | 2 +-
+ common/environment.c                    | 3 ++-
+ drivers/usb/gadget/dfu.c                | 4 ++--
+ drivers/usb/gadget/f_fastboot.c         | 2 +-
+ fs/fs.c                                 | 4 +++-
+ include/fs.h                            | 1 +
+ 8 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-omap/am33xx_bbu_nand.c b/arch/arm/mach-omap/am33xx_bbu_nand.c
+index ee767d32e45b..25f0e79ee6cb 100644
+--- a/arch/arm/mach-omap/am33xx_bbu_nand.c
++++ b/arch/arm/mach-omap/am33xx_bbu_nand.c
+@@ -40,7 +40,7 @@ static int write_image(const char *devfile, const void *image, size_t size)
+ 		return fd;
+ 	}
+ 
+-	ret = erase(fd, ~0, 0);
++	ret = erase(fd, ERASE_SIZE_ALL, 0);
+ 	if (ret < 0) {
+ 		pr_err("could not erase %s: %s\n", devfile,
+ 			errno_str());
+diff --git a/arch/arm/mach-omap/am33xx_bbu_spi_mlo.c b/arch/arm/mach-omap/am33xx_bbu_spi_mlo.c
+index 702bb9af59a2..69a73ffb06f8 100644
+--- a/arch/arm/mach-omap/am33xx_bbu_spi_mlo.c
++++ b/arch/arm/mach-omap/am33xx_bbu_spi_mlo.c
+@@ -70,7 +70,7 @@ static int spi_nor_mlo_handler(struct bbu_handler *handler,
+ 		goto out;
+ 	}
+ 
+-	ret = erase(dstfd, ~0, 0);
++	ret = erase(dstfd, ERASE_SIZE_ALL, 0);
+ 	if (ret < 0) {
+ 		printf("could not erase %s: %s", data->devicefile, errno_str());
+ 		goto out1;
+diff --git a/commands/flash.c b/commands/flash.c
+index 99d3cb7c3feb..d881b4d399ea 100644
+--- a/commands/flash.c
++++ b/commands/flash.c
+@@ -32,7 +32,7 @@ static int do_flerase(int argc, char *argv[])
+ 	int fd;
+ 	char *filename = NULL;
+ 	struct stat s;
+-	loff_t start = 0, size = ~0;
++	loff_t start = 0, size;
+ 	int ret = 0;
+ 
+ 	if (argc == 1)
+diff --git a/common/environment.c b/common/environment.c
+index f6fd781a8ab8..fc5720ba5226 100644
+--- a/common/environment.c
++++ b/common/environment.c
+@@ -89,6 +89,7 @@ static int do_compare_file(const char *filename, const char *base)
+ }
+ 
+ #else
++#define ERASE_SIZE_ALL 0
+ static inline int protect(int fd, size_t count, unsigned long offset, int prot)
+ {
+ 	return 0;
+@@ -330,7 +331,7 @@ int envfs_save(const char *filename, const char *dirname, unsigned flags)
+ 		goto out;
+ 	}
+ 
+-	ret = erase(envfd, ~0, 0);
++	ret = erase(envfd, ERASE_SIZE_ALL, 0);
+ 
+ 	/* ENOSYS is no error here, many devices do not need it */
+ 	if (ret && errno != ENOSYS) {
+diff --git a/drivers/usb/gadget/dfu.c b/drivers/usb/gadget/dfu.c
+index 351b58479651..d7bf92cdffbe 100644
+--- a/drivers/usb/gadget/dfu.c
++++ b/drivers/usb/gadget/dfu.c
+@@ -359,7 +359,7 @@ static int handle_dnload(struct usb_function *f, const struct usb_ctrlrequest *c
+ 				ret = -EINVAL;
+ 				goto err_out;
+ 			}
+-			ret = erase(fd, ~0, 0);
++			ret = erase(fd, ERASE_SIZE_ALL, 0);
+ 			close(fd);
+ 			if (ret && ret != -ENOSYS) {
+ 				perror("erase");
+@@ -479,7 +479,7 @@ static int dfu_setup(struct usb_function *f, const struct usb_ctrlrequest *ctrl)
+ 				goto out;
+ 			}
+ 
+-			ret = erase(dfufd, ~0, 0);
++			ret = erase(dfufd, ERASE_SIZE_ALL, 0);
+ 			if (ret && ret != -ENOSYS) {
+ 				dfu->dfu_status = DFU_STATUS_errERASE;
+ 				perror("erase");
+diff --git a/drivers/usb/gadget/f_fastboot.c b/drivers/usb/gadget/f_fastboot.c
+index bf28f7c22aaa..490301eaa406 100644
+--- a/drivers/usb/gadget/f_fastboot.c
++++ b/drivers/usb/gadget/f_fastboot.c
+@@ -738,7 +738,7 @@ static void cb_erase(struct usb_ep *ep, struct usb_request *req, const char *cmd
+ 	if (fd < 0)
+ 		fastboot_tx_print(f_fb, "FAIL%s", strerror(-fd));
+ 
+-	ret = erase(fd, ~0, 0);
++	ret = erase(fd, ERASE_SIZE_ALL, 0);
+ 
+ 	close(fd);
+ 
+diff --git a/fs/fs.c b/fs/fs.c
+index d5ccadc63070..3590de58fa56 100644
+--- a/fs/fs.c
++++ b/fs/fs.c
+@@ -934,8 +934,10 @@ int erase(int fd, loff_t count, loff_t offset)
+ 	f = &files[fd];
+ 	if (offset >= f->size)
+ 		return 0;
+-	if (count > f->size - offset)
++	if (count == ERASE_SIZE_ALL || count > f->size - offset)
+ 		count = f->size - offset;
++	if (count < 0)
++		return -EINVAL;
+ 
+ 	fsdrv = f->fsdev->driver;
+ 	if (fsdrv->erase)
+diff --git a/include/fs.h b/include/fs.h
+index 73580ee42060..b37e757c8e7d 100644
+--- a/include/fs.h
++++ b/include/fs.h
+@@ -148,6 +148,7 @@ int mount (const char *device, const char *fsname, const char *path,
+ int umount(const char *pathname);
+ 
+ /* not-so-standard functions */
++#define ERASE_SIZE_ALL	((loff_t) - 1)
+ int erase(int fd, loff_t count, loff_t offset);
+ int protect(int fd, size_t count, loff_t offset, int prot);
+ int protect_file(const char *file, int prot);
