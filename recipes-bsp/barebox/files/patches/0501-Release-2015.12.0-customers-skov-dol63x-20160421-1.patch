@@ -1,6 +1,6 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Wed, 20 Apr 2016 12:27:49 +0200
-Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160420-1
+Date: Thu, 21 Apr 2016 11:15:40 +0200
+Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160421-1
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
 ---
@@ -8,7 +8,7 @@ Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index be53d834df4b..f0bb81e905e1 100644
+index be53d834df4b..f5014c464138 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -16,7 +16,7 @@ index be53d834df4b..f0bb81e905e1 100644
  PATCHLEVEL = 12
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20160420-1
++EXTRAVERSION =-20160421-1
  NAME = None
  
  # *DOCUMENTATION*

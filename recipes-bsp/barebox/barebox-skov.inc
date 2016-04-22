@@ -40,7 +40,7 @@ SRC_URI += "\
   file://patches/0406-mtd-Fix-erasing-of-devices-4GiB.patch \
   file://patches/0407-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch \
   file://patches/0408-fix-erasing-protecting-flashes-with-unspecified-size.patch \
-  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160420-1.patch \
+  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160421-1.patch \
   "
 
 SRC_URI += "\

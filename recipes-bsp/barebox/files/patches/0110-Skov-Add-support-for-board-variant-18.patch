@@ -7,7 +7,8 @@ Add support for board variant 18 which is a i.MX6Q+ board.
 Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
  arch/arm/boards/skov-dol63x/lowlevel.c | 68 ++++++++++++++++++++++++++++++++++
- 1 file changed, 68 insertions(+)
+ arch/arm/boards/skov-dol63x/version.c  |  6 +--
+ 2 files changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
 index 6922e0a35dbc..70579cae69d4 100644
@@ -95,3 +96,21 @@ index 6922e0a35dbc..70579cae69d4 100644
  	default:
  		pr_err("Unsupported board revision: 0x%x\n", board_variant);
  		/* FIXME don't continue */
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+index 775a92c90f86..959270158f3d 100644
+--- a/arch/arm/boards/skov-dol63x/version.c
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -109,10 +109,10 @@ static const struct board_description dol63x_variants[] = {
+ 		.dts_compatible = "skov,dol63x-imxq-revC",
+ 	},
+ 	[18] = {
+-		.value = "QuadPlus_R4G_F16G", /* XXX */
+-		.revision = "?", /* XXX */
++		.value = "QuadPlus_R4G_F16G",
++		.revision = "C",
+ 		.soc = "i.MX6Q+",
+-		.dts_compatible = "skov,dol63x-imxdl-revC", /* XXX */
++		.dts_compatible = "skov,dol63x-imxq-revC",
+ 	},
+ };
+ 

@@ -35,18 +35,18 @@ index 70579cae69d4..0faba73a1af6 100644
  		pr_err("Unsupported board revision: 0x%x\n", board_variant);
  		/* FIXME don't continue */
 diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
-index d2c5a497b346..edc74230d7f8 100644
+index 959270158f3d..d90402056321 100644
 --- a/arch/arm/boards/skov-dol63x/version.c
 +++ b/arch/arm/boards/skov-dol63x/version.c
 @@ -114,6 +114,12 @@ static const struct board_description dol63x_variants[] = {
  		.soc = "i.MX6Q+",
- 		.dts_compatible = "skov,dol63x-imxdl-revC", /* XXX */
+ 		.dts_compatible = "skov,dol63x-imxq-revC",
  	},
 +	[19] = {
-+		.value = "Solo_R512M_F2G", /* XXX */
-+		.revision = "C", /* XXX */
++		.value = "Solo_R512M_F2G",
++		.revision = "C",
 +		.soc = "i.MX6S",
-+		.dts_compatible = "skov,dol63x-imxdl-revC", /* XXX */
++		.dts_compatible = "skov,dol63x-imxdl-revC",
 +	},
  };
  
