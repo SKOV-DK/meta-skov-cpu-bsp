@@ -9,16 +9,15 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "4.4.1"
+LINUX_VERSION = "4.4.8"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig"
 
-SRC_URI[md5sum] = "d27b1458acde6369cf9eaf956f402901"
-SRC_URI[sha256sum] = "7ed2198eb451607d8997b52868c8d456b6a04ea12a4015598b5acd76e8c68a57"
+SRC_URI[md5sum] = "d6430ac57c5f1830798095b7147908e4"
+SRC_URI[sha256sum] = "d2a7a7536a5012cc2e6ab1ddf3d31320b4420cc4de3a4c2cda1daed8663bee09"
 
 SRC_URI += "\
-  file://patches/tty_Retry_failed_reopen_if_tty_teardown_in-progress.patch \
   file://patches/0001-backlight-pwm_bl-Avoid-backlight-flicker-when-probed.patch \
   file://patches/0002-backlight-pwm_bl-Fix-broken-PWM-backlight-for-non-dt.patch \
   file://patches/0003-backlight-pwm_bl-add-debug-information-for-initial-s.patch \
@@ -75,7 +74,7 @@ SRC_URI += "\
   file://patches/0302-fuse-cuse-implement-mmap.patch \
   file://patches/0401-mdio-bitbang-add-SMI0-mode-support.patch \
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
-  file://patches/0501-Release-4.4-customers-skov-dol63x-20160418-1.patch \
+  file://patches/0501-Release-4.4-customers-skov-dol63x-20160422-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"

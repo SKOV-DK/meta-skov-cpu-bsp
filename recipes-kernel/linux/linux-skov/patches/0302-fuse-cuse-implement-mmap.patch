@@ -11,7 +11,7 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 28 insertions(+), 1 deletion(-)
 
 diff --git a/fs/fuse/cuse.c b/fs/fuse/cuse.c
-index 8e3ee1936c7e..e1b8f4b2457f 100644
+index c5b6b7165489..f63d2355ffdd 100644
 --- a/fs/fuse/cuse.c
 +++ b/fs/fuse/cuse.c
 @@ -58,6 +58,7 @@ struct cuse_conn {
