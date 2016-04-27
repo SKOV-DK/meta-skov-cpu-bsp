@@ -48,6 +48,7 @@ SRC_URI += "\
   file://env/nv/linux.bootargs.base \
   file://env/nv/linux.bootargs.hdmi \
   file://env/nv/boot.default \
+  file://env/init/bootargs \
   "
 
 COMPATIBLE_MACHINE = "imx6-cpu"
