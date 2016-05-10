@@ -1,0 +1,26 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Mon, 9 May 2016 14:17:46 +0200
+Subject: [PATCH] mtd: nand: Enable subpage reads
+
+Until now we did not support subpage reads for smaller binary sizes.
+Scanning UBI volumes on large page NANDs can be painfully slow,
+subpage reads can speed this up significantly, so enable subpage reads.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ include/linux/mtd/nand.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/mtd/nand.h b/include/linux/mtd/nand.h
+index 5d0c2cf2efa7..047bc93042eb 100644
+--- a/include/linux/mtd/nand.h
++++ b/include/linux/mtd/nand.h
+@@ -163,7 +163,7 @@ typedef enum {
+ 
+ /* Device supports subpage reads */
+ /* Disabled in barebox for smaller binary sizes */
+-#define NAND_SUBPAGE_READ	(__BAREBOX__ ? 0x0 : 0x00001000)
++#define NAND_SUBPAGE_READ	(0x00001000)
+ 
+ /* Options valid for Samsung large page devices */
+ #define NAND_SAMSUNG_LP_OPTIONS NAND_CACHEPRG

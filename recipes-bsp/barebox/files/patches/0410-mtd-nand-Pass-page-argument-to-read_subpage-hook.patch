@@ -1,0 +1,48 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Mon, 9 May 2016 14:14:37 +0200
+Subject: [PATCH] mtd: nand: Pass page argument to read_subpage hook
+
+Similar to what the kernel does in e004debda (mtd: nand: add "page" argument for
+read_subpage hook).
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mtd/nand/nand_base.c | 4 ++--
+ include/linux/mtd/nand.h     | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mtd/nand/nand_base.c b/drivers/mtd/nand/nand_base.c
+index ca48f59de1b1..fb774c3af106 100644
+--- a/drivers/mtd/nand/nand_base.c
++++ b/drivers/mtd/nand/nand_base.c
+@@ -1025,7 +1025,7 @@ static __maybe_unused int nand_read_page_swecc(struct mtd_info *mtd,
+  */
+ static __maybe_unused int nand_read_subpage(struct mtd_info *mtd,
+ 		struct nand_chip *chip, uint32_t data_offs, uint32_t readlen,
+-		uint8_t *bufpoi)
++		uint8_t *bufpoi, int page)
+ {
+ 	int start_step, end_step, num_steps;
+ 	uint32_t *eccpos = chip->ecc.layout->eccpos;
+@@ -1380,7 +1380,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
+ 			else if (!aligned && NAND_HAS_SUBPAGE_READ(chip) &&
+ 				 !oob)
+ 				ret = chip->ecc.read_subpage(mtd, chip,
+-							col, bytes, bufpoi);
++							col, bytes, bufpoi, page);
+ 			else
+ 				ret = chip->ecc.read_page(mtd, chip, bufpoi,
+ 							  oob_required, page);
+diff --git a/include/linux/mtd/nand.h b/include/linux/mtd/nand.h
+index f126cd9fbfbb..5d0c2cf2efa7 100644
+--- a/include/linux/mtd/nand.h
++++ b/include/linux/mtd/nand.h
+@@ -346,7 +346,7 @@ struct nand_ecc_ctrl {
+ 	int (*read_page)(struct mtd_info *mtd, struct nand_chip *chip,
+ 			uint8_t *buf, int oob_required, int page);
+ 	int (*read_subpage)(struct mtd_info *mtd, struct nand_chip *chip,
+-			uint32_t offs, uint32_t len, uint8_t *buf);
++			uint32_t offs, uint32_t len, uint8_t *buf, int page);
+ 	int (*write_subpage)(struct mtd_info *mtd, struct nand_chip *chip,
+ 			uint32_t offset, uint32_t data_len,
+ 			const uint8_t *data_buf, int oob_required);

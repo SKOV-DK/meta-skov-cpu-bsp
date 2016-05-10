@@ -40,7 +40,11 @@ SRC_URI += "\
   file://patches/0406-mtd-Fix-erasing-of-devices-4GiB.patch \
   file://patches/0407-mtd-mtdoob-device-change-name-to-have-the-chip-name-.patch \
   file://patches/0408-fix-erasing-protecting-flashes-with-unspecified-size.patch \
-  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160408-1.patch \
+  file://patches/0409-mtd-nand-nand_mxs-Factor-out-BCH-setup-function.patch \
+  file://patches/0410-mtd-nand-Pass-page-argument-to-read_subpage-hook.patch \
+  file://patches/0411-mtd-nand-Enable-subpage-reads.patch \
+  file://patches/0412-mtd-nand-nand_mxs-Add-subpage-read-support.patch \
+  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160509-1.patch \
   "
 
 SRC_URI += "\
