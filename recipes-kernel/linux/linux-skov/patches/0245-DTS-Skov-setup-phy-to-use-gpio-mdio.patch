@@ -8,7 +8,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 23 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 3607eb680e9b..7535376c7b6e 100644
+index 3607eb680e9b..a1d17f5394d7 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -33,6 +33,7 @@
@@ -32,8 +32,8 @@ index 3607eb680e9b..7535376c7b6e 100644
 +		gpios = <&gpio1 31 0
 +			 &gpio1 22 0>;
 +
-+		ethphy1: ethernet-phy@1 {
-+			reg = <1>;
++		micrelswitch: ethernet-phy@3 {
++			reg = <3>;
 +		};
 +	};
 +
@@ -44,7 +44,7 @@ index 3607eb680e9b..7535376c7b6e 100644
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_enet_4>;
  	phy-mode = "rmii";
-+	phy-handle = <&ethphy1>;
++	phy-handle = <&micrelswitch>;
  	phy-reset-gpios = <&gpio1 5 0>;
  	phy-reset-duration = "100";
  	phy-supply = <&reg_3p3v>;

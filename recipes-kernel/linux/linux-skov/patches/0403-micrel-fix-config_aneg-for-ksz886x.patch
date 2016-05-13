@@ -1,0 +1,39 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Tue, 26 Apr 2016 18:03:52 +0200
+Subject: [PATCH] micrel: fix config_aneg for ksz886x
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/phy/micrel.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
+index e13ad6cdcc22..ba95470e2331 100644
+--- a/drivers/net/phy/micrel.c
++++ b/drivers/net/phy/micrel.c
+@@ -549,6 +549,16 @@ static int ksz8873mll_config_aneg(struct phy_device *phydev)
+ 	return 0;
+ }
+ 
++static int ksz886x_config_aneg(struct phy_device *phydev)
++{
++	if (phydev->addr == 3) {
++		phydev->autoneg = AUTONEG_DISABLE;
++		genphy_read_status(phydev);
++	}
++
++	return genphy_config_aneg(phydev);
++}
++
+ /* This routine returns -1 as an indication to the caller that the
+  * Micrel ksz9021 10/100/1000 PHY does not support standard IEEE
+  * MMD extended PHY registers.
+@@ -827,7 +837,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.features	= (PHY_BASIC_FEATURES | SUPPORTED_Pause),
+ 	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
+ 	.config_init	= kszphy_config_init,
+-	.config_aneg	= genphy_config_aneg,
++	.config_aneg	= ksz886x_config_aneg,
+ 	.read_status	= genphy_read_status,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,

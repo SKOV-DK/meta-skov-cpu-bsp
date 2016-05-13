@@ -8,7 +8,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 6 insertions(+)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
-index 7535376c7b6e..d47a80b2d052 100644
+index a1d17f5394d7..d0ba44b7a983 100644
 --- a/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
 @@ -34,6 +34,7 @@
@@ -25,7 +25,7 @@ index 7535376c7b6e..d47a80b2d052 100644
  
 +	micrel0: micrel_smi0 {
 +		compatible = "micrel,ksz8873";
-+		phy-handle = <&ethphy1>;
++		phy-handle = <&micrelswitch>;
 +	};
 +
  	skov_version {
