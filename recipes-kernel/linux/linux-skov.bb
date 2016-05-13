@@ -9,13 +9,13 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "4.4.9"
+LINUX_VERSION = "4.4.10"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig"
 
-SRC_URI[md5sum] = "ec1e5011cc2ab3f441e39716dcf4730e"
-SRC_URI[sha256sum] = "7605ca7685209bb64c0047e630ba714ca457fe7d84f1c890264bd2d70265f3b9"
+SRC_URI[md5sum] = "f7033cbe05e1359a347815ca52d051ed"
+SRC_URI[sha256sum] = "4ac22e4a619417213cfdab24714413bb9118fbaebe6012c6c89c279cdadef2ce"
 
 SRC_URI += "\
   file://patches/0001-backlight-pwm_bl-Avoid-backlight-flicker-when-probed.patch \
@@ -75,7 +75,7 @@ SRC_URI += "\
   file://patches/0401-mdio-bitbang-add-SMI0-mode-support.patch \
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
   file://patches/0403-micrel-fix-config_aneg-for-ksz886x.patch \
-  file://patches/0501-Release-4.4-customers-skov-imx6-20160513-1.patch \
+  file://patches/0501-Release-4.4-customers-skov-imx6-20160513-2.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
