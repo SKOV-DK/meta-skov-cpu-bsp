@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Fri, 13 May 2016 14:47:31 +0200
-Subject: [PATCH] Release 4.4/customers/skov/imx6/20160513-2
+Date: Tue, 17 May 2016 15:20:25 +0200
+Subject: [PATCH] Release 4.4/customers/skov/imx6/20160517-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 5b5f462f834c..7f1280f4e28d 100644
+index 5b5f462f834c..8ca17296dab9 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -19,7 +19,7 @@ index 5b5f462f834c..7f1280f4e28d 100644
  PATCHLEVEL = 4
  SUBLEVEL = 10
 -EXTRAVERSION =
-+EXTRAVERSION =-20160513-2
++EXTRAVERSION =-20160517-1
  NAME = Blurry Fish Butt
  
  # *DOCUMENTATION*

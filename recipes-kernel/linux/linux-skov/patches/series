@@ -1,21 +1,21 @@
 # umpf-base: v4.4.10
 # umpf-name: 4.4/customers/skov/imx6
-# umpf-version: 4.4/customers/skov/imx6/20160513-2
+# umpf-version: 4.4/customers/skov/imx6/20160517-1
 # umpf-topic: v4.4/topic/pwm-backlight-readback
 # umpf-hashinfo: 7212da90245f37563c9ce6785bc3cf356be5fb8b
-# umpf-topic-range: 4c2795dd50f98fa162cb53190eb557be44f92f58..91a81667f3fdc57c60a30e7481bdde661b890c14
+# umpf-topic-range: 4c2795dd50f98fa162cb53190eb557be44f92f58..cbd9171a93b40cd9da3c352f34b5136acbd3aebd
 0001-backlight-pwm_bl-Avoid-backlight-flicker-when-probed.patch
 0002-backlight-pwm_bl-Fix-broken-PWM-backlight-for-non-dt.patch
 0003-backlight-pwm_bl-add-debug-information-for-initial-s.patch
 # umpf-topic: v4.4/topic/rtc_pcfF85063_fixes
 # umpf-hashinfo: 850560e787f5494ec066dc5d20fc2192d24ce310
-# umpf-topic-range: 91a81667f3fdc57c60a30e7481bdde661b890c14..a89df92ffc2723f5b5def8e04c959b494d97d52d
+# umpf-topic-range: cbd9171a93b40cd9da3c352f34b5136acbd3aebd..fc9844c84d4b5b6159634523a5129f61d786b65b
 0101-RTC-PCF85063-fix-time-date-reading-part-1.patch
 0102-RTC-PCF85063-fix-time-date-reading-part-II.patch
 0103-RTC-PCF85063-fix-time-date-setting.patch
 # umpf-topic: v4.4/customers/skov/imx6
 # umpf-hashinfo: 32238d38b1018c597ca71ae7358a9d2e0fc7e919
-# umpf-topic-range: a89df92ffc2723f5b5def8e04c959b494d97d52d..576ca7739651ea45b80e4617dfa14d915bdd103e
+# umpf-topic-range: fc9844c84d4b5b6159634523a5129f61d786b65b..a82eb8819a617042e5723affe0a0a145a8b47c11
 0201-drm-panel-add-kernel-doc-for-size-attributes-in-pane.patch
 0202-of-Add-vendor-prefix-for-Logic-Technologies-Ltd.patch
 0203-drm-panel-Add-support-for-Logic-Technologies-LTTD800.patch
@@ -64,16 +64,20 @@
 0246-DTS-Skov-use-micrel_smi-driver.patch
 # umpf-topic: v4.4/topic/bgi
 # umpf-hashinfo: 5af949995d3551a4cf56e335f5c7177ba854c4ab
-# umpf-topic-range: 576ca7739651ea45b80e4617dfa14d915bdd103e..1cabd1b7ad53286ef6e62792a66f4864e4de18c9
+# umpf-topic-range: a82eb8819a617042e5723affe0a0a145a8b47c11..ff945c9a0b40a88b87b08ecd90b313b979711626
 0301-HACK-Let-DRM_IOCTL_MODE_MAP_DUMB-also-return-the-phy.patch
 0302-fuse-cuse-implement-mmap.patch
 # umpf-topic: v4.4/topic/micrel-smi
 # umpf-hashinfo: ab76899b3f284fd32b9ac317d697590c3c265bc6
-# umpf-topic-range: 1cabd1b7ad53286ef6e62792a66f4864e4de18c9..092a17e1570c3b30b414b7f63045fb4371813417
+# umpf-topic-range: ff945c9a0b40a88b87b08ecd90b313b979711626..0916c7c5d672b93314b9bf7536a3f2dd1848c160
 0401-mdio-bitbang-add-SMI0-mode-support.patch
 0402-micrel-smi-add-driver-for-KSZ8873.patch
 0403-micrel-fix-config_aneg-for-ksz886x.patch
-# umpf-release: 4.4/customers/skov/imx6/20160513-2
-# umpf-topic-range: 092a17e1570c3b30b414b7f63045fb4371813417..d869105eac81035f82516c13a557ed14698982d2
-0501-Release-4.4-customers-skov-imx6-20160513-2.patch
+# umpf-topic: v4.4.10/topic/imx-drm-fixes
+# umpf-hashinfo: 71addfa99cda72271ece8e144592acd9895dd0c8
+# umpf-topic-range: 0916c7c5d672b93314b9bf7536a3f2dd1848c160..2df5132c30a7224a883bba20b1c9a74cfa40ec9c
+0501-drm-imx-Match-imx-ipuv3-crtc-components-using-device.patch
+# umpf-release: 4.4/customers/skov/imx6/20160517-1
+# umpf-topic-range: 2df5132c30a7224a883bba20b1c9a74cfa40ec9c..59cf64314ab4b0b364dc52d843276269d92c591e
+0601-Release-4.4-customers-skov-imx6-20160517-1.patch
 # umpf-end

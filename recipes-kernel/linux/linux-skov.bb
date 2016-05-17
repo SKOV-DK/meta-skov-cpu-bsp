@@ -75,7 +75,8 @@ SRC_URI += "\
   file://patches/0401-mdio-bitbang-add-SMI0-mode-support.patch \
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
   file://patches/0403-micrel-fix-config_aneg-for-ksz886x.patch \
-  file://patches/0501-Release-4.4-customers-skov-imx6-20160513-2.patch \
+  file://patches/0501-drm-imx-Match-imx-ipuv3-crtc-components-using-device.patch \
+  file://patches/0601-Release-4.4-customers-skov-imx6-20160517-1.patch \
   "
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"

@@ -1,0 +1,105 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 12 May 2016 15:00:44 +0200
+Subject: [PATCH] drm/imx: Match imx-ipuv3-crtc components using device node in
+ platform data
+
+The component master driver imx-drm-core matches component devices using
+their of_node. Since commit 950b410dd1ab ("gpu: ipu-v3: Fix imx-ipuv3-crtc
+module autoloading"), the imx-ipuv3-crtc dev->of_node is not set during
+probing. Before that, of_node was set and caused an of: modalias to be
+used instead of the platform: modalias, which broke module autoloading.
+
+On the other hand, if dev->of_node is not set yet when the imx-ipuv3-crtc
+probe function calls component_add, component matching in imx-drm-core
+fails. While dev->of_node will be set once the next component tries to
+bring up the component master, imx-drm-core component binding will never
+succeed if one of the crtc devices is probed last.
+
+Add of_node to the component platform data and match against the
+pdata->of_node instead of dev->of_node in imx-drm-core to work around
+this problem.
+
+Fixes: 950b410dd1ab ("gpu: ipu-v3: Fix imx-ipuv3-crtc module autoloading")
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/gpu/drm/imx/imx-drm-core.c | 8 ++++++++
+ drivers/gpu/ipu-v3/ipu-common.c    | 5 +++--
+ include/video/imx-ipu-v3.h         | 2 ++
+ 3 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/imx/imx-drm-core.c b/drivers/gpu/drm/imx/imx-drm-core.c
+index 7b990b4e96d2..5378bdc3bbf9 100644
+--- a/drivers/gpu/drm/imx/imx-drm-core.c
++++ b/drivers/gpu/drm/imx/imx-drm-core.c
+@@ -26,6 +26,7 @@
+ #include <drm/drm_fb_cma_helper.h>
+ #include <drm/drm_plane_helper.h>
+ #include <drm/drm_of.h>
++#include <video/imx-ipu-v3.h>
+ 
+ #include "imx-drm.h"
+ 
+@@ -504,6 +505,13 @@ static int compare_of(struct device *dev, void *data)
+ {
+ 	struct device_node *np = data;
+ 
++	/* Special case for DI, dev->of_node may not be set yet */
++	if (strcmp(dev->driver->name, "imx-ipuv3-crtc") == 0) {
++		struct ipu_client_platformdata *pdata = dev->platform_data;
++
++		return pdata->of_node == np;
++	}
++
+ 	/* Special case for LDB, one device for two channels */
+ 	if (of_node_cmp(np->name, "lvds-channel") == 0) {
+ 		np = of_get_parent(np);
+diff --git a/drivers/gpu/ipu-v3/ipu-common.c b/drivers/gpu/ipu-v3/ipu-common.c
+index 0585fd2031dd..5030cba4a581 100644
+--- a/drivers/gpu/ipu-v3/ipu-common.c
++++ b/drivers/gpu/ipu-v3/ipu-common.c
+@@ -997,7 +997,7 @@ struct ipu_platform_reg {
+ };
+ 
+ /* These must be in the order of the corresponding device tree port nodes */
+-static const struct ipu_platform_reg client_reg[] = {
++static struct ipu_platform_reg client_reg[] = {
+ 	{
+ 		.pdata = {
+ 			.csi = 0,
+@@ -1048,7 +1048,7 @@ static int ipu_add_client_devices(struct ipu_soc *ipu, unsigned long ipu_base)
+ 	mutex_unlock(&ipu_client_id_mutex);
+ 
+ 	for (i = 0; i < ARRAY_SIZE(client_reg); i++) {
+-		const struct ipu_platform_reg *reg = &client_reg[i];
++		struct ipu_platform_reg *reg = &client_reg[i];
+ 		struct platform_device *pdev;
+ 		struct device_node *of_node;
+ 
+@@ -1070,6 +1070,7 @@ static int ipu_add_client_devices(struct ipu_soc *ipu, unsigned long ipu_base)
+ 
+ 		pdev->dev.parent = dev;
+ 
++		reg->pdata.of_node = of_node;
+ 		ret = platform_device_add_data(pdev, &reg->pdata,
+ 					       sizeof(reg->pdata));
+ 		if (!ret)
+diff --git a/include/video/imx-ipu-v3.h b/include/video/imx-ipu-v3.h
+index eeba75395f7d..c8529ce28a3f 100644
+--- a/include/video/imx-ipu-v3.h
++++ b/include/video/imx-ipu-v3.h
+@@ -16,6 +16,7 @@
+ #include <linux/videodev2.h>
+ #include <linux/bitmap.h>
+ #include <linux/fb.h>
++#include <linux/of.h>
+ #include <media/v4l2-mediabus.h>
+ #include <video/videomode.h>
+ 
+@@ -344,6 +345,7 @@ struct ipu_client_platformdata {
+ 	int dc;
+ 	int dp;
+ 	int dma[2];
++	struct device_node *of_node;
+ };
+ 
+ #endif /* __DRM_IPU_H__ */
