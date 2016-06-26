@@ -1,6 +1,6 @@
 # umpf-base: v2015.12.0
 # umpf-name: 2015.12.0/customers/skov/dol63x
-# umpf-version: 2015.12.0/customers/skov/dol63x/20160509-1
+# umpf-version: 2015.12.0/customers/skov/dol63x/20160624-1
 # umpf-topic: v2015.12.0/topic/imx6-big-cs0
 # umpf-hashinfo: 62bf45a04c8f525cf115cb4606c2b7da88c23fe5
 # umpf-topic-range: e6b83bd498ce7c5449a65207bdb8f45fbcaeeb54..62bf45a04c8f525cf115cb4606c2b7da88c23fe5
@@ -18,7 +18,7 @@
 0012-ARM-i.MX-xload-esdhc-Find-entry-in-image.patch
 # umpf-topic: v2015.12.0/customers/skov/dol63x
 # umpf-hashinfo: 4ba5c20d2e0ec038e86c6e1dd98ce619468acb14
-# umpf-topic-range: 62bf45a04c8f525cf115cb4606c2b7da88c23fe5..e6786f9fadd8eb053a426abf7d641ff0f6ad684e
+# umpf-topic-range: 62bf45a04c8f525cf115cb4606c2b7da88c23fe5..96a11b307eb7f280a96163c2af37e33f181ea7b7
 0101-nfs-forward-filesystem-options-to-the-kernel-command.patch
 0102-Skov-add-base-platform-support.patch
 0103-blspec-Prepare-for-a-different-compatible-string.patch
@@ -32,7 +32,7 @@
 0111-Skov-add-support-for-board-variant-19.patch
 # umpf-topic: v2015.12.0/topic/state
 # umpf-hashinfo: 9e26841724e0043e3da32f35cd4bb3cba05d4d21
-# umpf-topic-range: e6786f9fadd8eb053a426abf7d641ff0f6ad684e..7ba1f12af2cea0dc49c8500f8e71c2e0e233cd7c
+# umpf-topic-range: 96a11b307eb7f280a96163c2af37e33f181ea7b7..acfb2a3ca7f2d6488b349d3bad7067be692935c3
 0201-of_path-of_find_path-factor-out-device-detection-log.patch
 0202-of_path-add-of_find_path_by_node.patch
 0203-state-make-use-of-of_find_path_by_node-and-add-retur.patch
@@ -40,11 +40,11 @@
 0205-state-disable-load-command.patch
 # umpf-topic: v2015.12.0/topic/bootchooser
 # umpf-hashinfo: 80f2f56be3bf316da00249a807c1899c5ab70ba1
-# umpf-topic-range: 7ba1f12af2cea0dc49c8500f8e71c2e0e233cd7c..9a08ba77542b08c3751b4a791e8466e6b4ab31b0
+# umpf-topic-range: acfb2a3ca7f2d6488b349d3bad7067be692935c3..1384baf36a00eacea538e79c9c155117e58d81c2
 0301-bootstate-add-framework-for-redundant-boot-scenarios.patch
 # umpf-topic: v2015.12.0/topic/mtd
-# umpf-hashinfo: 53cb125b082c92538c12e7d8ded730955c9258d1
-# umpf-topic-range: 9a08ba77542b08c3751b4a791e8466e6b4ab31b0..6bd7cc6f781fa9cc65711b575b1aed5e8cd5a32f
+# umpf-hashinfo: 5990f48eb4aba47221e6a032c9278f63bf377cd3
+# umpf-topic-range: 1384baf36a00eacea538e79c9c155117e58d81c2..cee560b3e356009036ce5d4924aededbe99e3777
 0401-mtd-nand-bb-Fix-8k-page-size-nands.patch
 0402-mtd-Fix-mtdraw-for-Nand-4GiB.patch
 0403-mtd-Make-erase_info-structs-64bit-where-necessary.patch
@@ -57,7 +57,10 @@
 0410-mtd-nand-Pass-page-argument-to-read_subpage-hook.patch
 0411-mtd-nand-Enable-subpage-reads.patch
 0412-mtd-nand-nand_mxs-Add-subpage-read-support.patch
-# umpf-release: 2015.12.0/customers/skov/dol63x/20160509-1
-# umpf-topic-range: 6bd7cc6f781fa9cc65711b575b1aed5e8cd5a32f..fc06f5fba2daa1253ab96d3dd9f0abfe5b71f243
-0501-Release-2015.12.0-customers-skov-dol63x-20160509-1.patch
+0413-mtd-nand-gpmi-Use-subpage-reads-only-on-suitable-NAN.patch
+0414-mtd-nand-Set-ONFI-function-hooks-earlier.patch
+0415-mtd-nand_mxs-Setup-timing.patch
+# umpf-release: 2015.12.0/customers/skov/dol63x/20160624-1
+# umpf-topic-range: cee560b3e356009036ce5d4924aededbe99e3777..831f959503236ea44e4fce353a2b6a3e4219aa15
+0501-Release-2015.12.0-customers-skov-dol63x-20160624-1.patch
 # umpf-end

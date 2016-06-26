@@ -44,7 +44,10 @@ SRC_URI += "\
   file://patches/0410-mtd-nand-Pass-page-argument-to-read_subpage-hook.patch \
   file://patches/0411-mtd-nand-Enable-subpage-reads.patch \
   file://patches/0412-mtd-nand-nand_mxs-Add-subpage-read-support.patch \
-  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160509-1.patch \
+  file://patches/0413-mtd-nand-gpmi-Use-subpage-reads-only-on-suitable-NAN.patch \
+  file://patches/0414-mtd-nand-Set-ONFI-function-hooks-earlier.patch \
+  file://patches/0415-mtd-nand_mxs-Setup-timing.patch \
+  file://patches/0501-Release-2015.12.0-customers-skov-dol63x-20160624-1.patch \
   "
 
 SRC_URI += "\

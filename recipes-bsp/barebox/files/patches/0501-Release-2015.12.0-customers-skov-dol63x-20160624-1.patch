@@ -1,6 +1,6 @@
 From: Sascha Hauer <s.hauer@pengutronix.de>
-Date: Mon, 9 May 2016 14:34:45 +0200
-Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160509-1
+Date: Fri, 24 Jun 2016 13:31:30 +0200
+Subject: [PATCH] Release 2015.12.0/customers/skov/dol63x/20160624-1
 
 Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
@@ -8,7 +8,7 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index be53d834df4b..25a46fbd3706 100644
+index be53d834df4b..0db01fd921d4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -16,7 +16,7 @@ index be53d834df4b..25a46fbd3706 100644
  PATCHLEVEL = 12
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20160509-1
++EXTRAVERSION =-20160624-1
  NAME = None
  
  # *DOCUMENTATION*

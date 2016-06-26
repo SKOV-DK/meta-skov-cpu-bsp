@@ -1,0 +1,39 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 22 Jun 2016 08:42:23 +0200
+Subject: [PATCH] mtd: nand: gpmi: Use subpage reads only on suitable NAND
+ chips
+
+On some NAND chips the driver uses a ECC size that is not dividable by
+the number of chunks per page which means a single chunk cannot be read.
+Disable the subpage feature for these NANDs. This is quite unfortunate
+since the subpage feature really speeds up scanning NAND chips.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mtd/nand/nand_mxs.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mtd/nand/nand_mxs.c b/drivers/mtd/nand/nand_mxs.c
+index 07082ad1df11..64286b7e0f77 100644
+--- a/drivers/mtd/nand/nand_mxs.c
++++ b/drivers/mtd/nand/nand_mxs.c
+@@ -1351,14 +1351,16 @@ static int mxs_nand_probe(struct device_d *dev)
+ 	nand->ecc.size		= 512;
+ 	nand->ecc.strength	= 8;
+ 
+-	nand->ecc.read_subpage = gpmi_ecc_read_subpage;
+-	nand->options |= NAND_SUBPAGE_READ;
+-
+ 	/* first scan to find the device and get the page size */
+ 	err = nand_scan_ident(mtd, 4, NULL);
+ 	if (err)
+ 		goto err2;
+ 
++	if ((13 * mxs_nand_get_ecc_strength(mtd->writesize, mtd->oobsize) % 8) == 0) {
++		nand->ecc.read_subpage = gpmi_ecc_read_subpage;
++		nand->options |= NAND_SUBPAGE_READ;
++	}
++
+ 	nand->options |= NAND_NO_SUBPAGE_WRITE;
+ 
+ 	/* second phase scan */
