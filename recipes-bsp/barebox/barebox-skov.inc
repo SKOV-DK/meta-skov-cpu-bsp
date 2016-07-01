@@ -53,7 +53,6 @@ SRC_URI += "\
 SRC_URI += "\
   file://env/nv/autoboot_timeout \
   file://env/nv/linux.bootargs.base \
-  file://env/nv/linux.bootargs.hdmi \
   file://env/nv/boot.default \
   file://env/init/bootargs \
   "
