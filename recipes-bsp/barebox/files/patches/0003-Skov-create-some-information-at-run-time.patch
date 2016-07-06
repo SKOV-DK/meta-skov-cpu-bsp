@@ -1,0 +1,263 @@
+From: Juergen Borleis <jbe@pengutronix.de>
+Date: Fri, 20 Nov 2015 15:02:24 +0100
+Subject: [PATCH] Skov: create some information at run-time
+
+Some very important information can be detected at run-time via up to 8
+resistors. This information should be used to select the correct devicetree
+when booting from various available bootspec entries.
+
+This enables one Barebox image and one Linux root filesystem to be used
+for all known dol63x variants.
+
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/Makefile  |   2 +-
+ arch/arm/boards/skov-dol63x/version.c | 167 ++++++++++++++++++++++++++++++++++
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi |  27 ++++--
+ common/blspec.c                       |   4 +-
+ 4 files changed, 189 insertions(+), 11 deletions(-)
+ create mode 100644 arch/arm/boards/skov-dol63x/version.c
+
+diff --git a/arch/arm/boards/skov-dol63x/Makefile b/arch/arm/boards/skov-dol63x/Makefile
+index 01c7a259e9a5..206715adce68 100644
+--- a/arch/arm/boards/skov-dol63x/Makefile
++++ b/arch/arm/boards/skov-dol63x/Makefile
+@@ -1,2 +1,2 @@
+-obj-y += board.o
++obj-y += board.o version.o
+ lwl-y += lowlevel.o
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+new file mode 100644
+index 000000000000..166f668a19c4
+--- /dev/null
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -0,0 +1,167 @@
++/*
++ * SPDX-License-Identifier: GPL-2.0
++ */
++
++#include <stdio.h>
++#include <driver.h>
++#include <malloc.h>
++#include <init.h>
++#include <of.h>
++#include <of_gpio.h>
++#include <gpio.h>
++#include <printk.h>
++#include <globalvar.h>
++#include <linux/kernel.h>
++
++#define MAX_V_GPIO 8
++
++struct board_description {
++	const char *value;
++	const char *revision;
++	const char *soc;
++	const char *dts_compatible;
++};
++
++static const struct board_description dol63x_variants[] = {
++	[0] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revA",
++	},
++	[1] = {
++		.value = "low cost",
++		.revision = "A",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revA",
++	},
++	[2] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revA",
++	},
++	[4] = {
++		.value = "low cost",
++		.revision = "A",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revA",
++	},
++	[8] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revA",
++	},
++	[9] = {
++		.value = "minimum cost",
++		.revision = "B",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revB",
++	},
++	[10] = {
++		.value = "low cost",
++		.revision = "B",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revB",
++	},
++	[11] = {
++		.value = "high performance",
++		.revision = "B",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revB",
++	},
++	[12] = {
++		.value = "max performance",
++		.revision = "B",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revB",
++	},
++	[13] = {
++		.value = "low cost",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revC",
++	},
++	[14] = {
++		.value = "high performance",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revC",
++	},
++	[15] = {
++		.value = "middle performance",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,dol63x-imxdl-revC",
++	},
++};
++
++static int skov_version_probe(struct device_d *dev)
++{
++	struct device_node *np = dev->device_node;
++	static char *gpio_name = "skov-dol63x-variant-0"; /* don't change content */
++	char *number;
++	unsigned var = 0;
++	int i, rc, gpios[MAX_V_GPIO];
++
++	/* expected order in device tree is GPIO version bit 0 ... GPIO version bit 'n' */
++	for (i = 0; i < MAX_V_GPIO; i++) {
++		gpios[i] = of_get_named_gpio(np, "version-gpio", i);
++		if (gpios[i] < 0) {
++			dev_err(dev, "Not enough GPIOs defined.\n");
++			dev_err(dev, "Expected 0..%d, but failed at %d.\n", MAX_V_GPIO - 1, i + 1);
++			goto unclaim_on_error;
++		}
++		gpio_name[20] = '0' + i; /* keep in sync with its content */
++		rc = gpio_request(gpios[i], gpio_name);
++		if (rc < 0) {
++			dev_err(dev, "Failed to claim GPIO %d as '%s'\n", gpios[i], gpio_name);
++			goto unclaim_on_error;
++		}
++		gpio_direction_input(gpios[i]);
++	}
++
++	for (i = MAX_V_GPIO - 1; i >= 0; i--) {
++		var <<= 1;
++		var |= !!!gpio_get_value(gpios[i]);
++	}
++
++	if (var >= ARRAY_SIZE(dol63x_variants)) {
++		dev_err(dev, "Invalid 'version' value. Expected up to %u, but got %u\n", ARRAY_SIZE(dol63x_variants) - 1, var);
++		goto unclaim_on_error;
++	}
++
++	number = asprintf("%u", var);
++	globalvar_add_simple("board.no", number);
++	globalvar_add_simple("board.variant", dol63x_variants[var].value == NULL ? "undefined" : dol63x_variants[var].value);
++	globalvar_add_simple("board.revision", dol63x_variants[var].revision == NULL ? "undefined" : dol63x_variants[var].revision);
++	globalvar_add_simple("board.soc", dol63x_variants[var].soc == NULL ? "undefined" : dol63x_variants[var].soc);
++	globalvar_add_simple("board.dts", dol63x_variants[var].dts_compatible == NULL ? "undefined" : dol63x_variants[var].dts_compatible);
++
++	free(number);
++	return 0;
++
++unclaim_on_error:
++	dev_err(dev, "Invalid/incomplete 'version' GPIO declaration in devicetree\n");
++	dev_dbg(dev, "Check 'skov-dol63x,version' node for %d GPIO entries\n", MAX_V_GPIO);
++	i--;
++	while (i >= 0)
++		gpio_free(gpios[i--]);
++	return -ENODEV;
++}
++
++static __maybe_unused struct of_device_id skov_version_ids[] = {
++	{
++		.compatible = "skov-dol63x,version",
++	}, {
++		/* sentinel */
++	}
++};
++
++static struct driver_d skov_version_driver = {
++	.name = "skov-dol63x-variant",
++	.probe = skov_version_probe,
++	.of_compatible = DRV_OF_COMPAT(skov_version_ids),
++};
++device_platform_driver(skov_version_driver);
+diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+index 249121660963..6902e3f18639 100644
+--- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+@@ -39,15 +39,11 @@
+ 	};
+ 
+ 	skov_version {
+-		compatible = "skov-version";
+-		v0-gpio = <&gpio2 10 0>;
+-		v1-gpio = <&gpio2 15 0>;
+-		v2-gpio = <&gpio2 8 0>; 
+-		v3-gpio = <&gpio2 9 0>; 
+-		v4-gpio = <&gpio2 12 0>;
+-		v5-gpio = <&gpio2 14 0>;
+-		v6-gpio = <&gpio2 11 0>;
+-		v7-gpio = <&gpio2 13 0>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_version>;
++		status = "okay";
++		compatible = "skov-dol63x,version";
++		version-gpio = <&gpio2 10 0>, <&gpio2 15 0>, <&gpio2 8 0>, <&gpio2 9 0>, <&gpio2 12 0>, <&gpio2 14 0>, <&gpio2 11 0>, <&gpio2 13 0>;
+ 	};	
+ 
+ 	/* State: immutable part */
+@@ -128,6 +124,19 @@
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 
++	pinctrl_version: versiongrp {
++		fsl,pins = <
++			MX6QDL_PAD_SD4_DAT0__GPIO2_IO08 0x1b0b0
++			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09 0x1b0b0
++			MX6QDL_PAD_SD4_DAT2__GPIO2_IO10 0x1b0b0
++			MX6QDL_PAD_SD4_DAT3__GPIO2_IO11 0x1b0b0
++			MX6QDL_PAD_SD4_DAT4__GPIO2_IO12 0x1b0b0
++			MX6QDL_PAD_SD4_DAT5__GPIO2_IO13 0x1b0b0
++			MX6QDL_PAD_SD4_DAT6__GPIO2_IO14 0x1b0b0
++			MX6QDL_PAD_SD4_DAT7__GPIO2_IO15 0x1b0b0
++		>;
++	};
++
+ 	pinctrl_uart2: uart2grp {
+ 		fsl,pins = <
+ 			MX6QDL_PAD_EIM_D26__UART2_TX_DATA 0x1b0b1
+diff --git a/common/blspec.c b/common/blspec.c
+index 0c3d2252efd5..3f844bdf5569 100644
+--- a/common/blspec.c
++++ b/common/blspec.c
+@@ -255,9 +255,11 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
+ 	void *fdt = NULL;
+ 	int ret;
+ 	struct device_node *root = NULL, *barebox_root;
+-	const char *compat = NULL;
++	const char *compat;
+ 	char *filename;
+ 
++	/* try the shortcut first */
++	compat = getenv("global.board.dts");
+ 	if (compat == NULL) {
+ 		/* If we don't have a root node every entry is compatible */
+ 		barebox_root = of_get_root_node();

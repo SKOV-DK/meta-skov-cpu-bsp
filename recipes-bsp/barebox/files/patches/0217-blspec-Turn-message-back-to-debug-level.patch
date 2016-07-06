@@ -1,0 +1,27 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 22 Jul 2016 14:21:23 +0200
+Subject: [PATCH] blspec: Turn message back to debug level
+
+Normally one should not be interested that the blspec code scans
+a directory. In case blspec is not actively used it might even be
+confusing, so lower priority of the message in blspec_scan_directory()
+to pr_debug.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ common/blspec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/blspec.c b/common/blspec.c
+index 8c2927f7b16e..66decb161ebd 100644
+--- a/common/blspec.c
++++ b/common/blspec.c
+@@ -442,7 +442,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+ 	if (!IS_ERR(nfspath))
+ 		root = nfspath;
+ 
+-	pr_info("%s: %s %s\n", __func__, root, dirname);
++	pr_debug("%s: %s %s\n", __func__, root, dirname);
+ 
+ 	abspath = basprintf("%s/%s", root, dirname);
+ 

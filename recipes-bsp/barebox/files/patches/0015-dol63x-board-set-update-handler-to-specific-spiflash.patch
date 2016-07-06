@@ -1,0 +1,23 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Thu, 1 Sep 2016 12:19:28 +0200
+Subject: [PATCH] dol63x: board: set update handler to specific spiflash
+ partition
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/board.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boards/skov-dol63x/board.c b/arch/arm/boards/skov-dol63x/board.c
+index 051366992708..03c2640298af 100644
+--- a/arch/arm/boards/skov-dol63x/board.c
++++ b/arch/arm/boards/skov-dol63x/board.c
+@@ -22,7 +22,7 @@ static int skov_dol63x_devices_init(void)
+ 	if (!of_machine_is_compatible("skov,dol63x"))
+ 		return 0;
+ 
+-	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0",
++	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0.barebox",
+ 		BBU_HANDLER_FLAG_DEFAULT);
+ 
+ 	return 0;

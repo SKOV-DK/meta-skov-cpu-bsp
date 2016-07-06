@@ -1,0 +1,30 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 22 Jul 2016 14:19:51 +0200
+Subject: [PATCH] boot command: Explicitly complain when boot target list is
+ empty
+
+When no targets to boot are found it can happen that the boot command
+just returns silently. Explicitly print a message in this case to give
+a clue what might went wrong.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index e7570110261b..b774ddcc2a99 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -77,6 +77,11 @@ static int do_boot(int argc, char *argv[])
+ 		free(freep);
+ 	}
+ 
++	if (list_empty(&entries->entries)) {
++		printf("Nothing bootable found\n");
++		return COMMAND_ERROR;
++	}
++
+ 	if (do_list) {
+ 		bootsources_list(entries);
+ 		goto out;

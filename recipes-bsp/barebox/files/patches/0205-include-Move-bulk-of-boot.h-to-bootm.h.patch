@@ -1,0 +1,493 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 08:04:11 +0200
+Subject: [PATCH] include: Move bulk of boot.h to bootm.h
+
+The majority of the stuff currently in include/boot.h is about bootm
+code implemented common/bootm.c. To be more consistent move it to a
+new file include/bootm.h.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/boards/archosg9/archos_features.c |   3 +-
+ arch/arm/lib/bootm.c                       |   1 +
+ arch/arm/mach-omap/omap_generic.c          |   2 +-
+ arch/blackfin/lib/blackfin_linux.c         |   1 +
+ arch/efi/efi/efi-image.c                   |   1 +
+ arch/mips/lib/bootm.c                      |   1 +
+ arch/nios2/lib/bootm.c                     |   1 +
+ arch/ppc/lib/ppclinux.c                    |   1 +
+ commands/boot.c                            |   2 +-
+ commands/bootm.c                           |   2 +-
+ common/blspec.c                            |   2 +-
+ common/bootm.c                             |   3 +-
+ common/image-fit.c                         |   2 +-
+ drivers/usb/gadget/f_fastboot.c            |   2 +-
+ include/boot.h                             | 120 ---------------------------
+ include/bootm.h                            | 125 +++++++++++++++++++++++++++++
+ include/image-fit.h                        |   2 +-
+ 17 files changed, 141 insertions(+), 130 deletions(-)
+ create mode 100644 include/bootm.h
+
+diff --git a/arch/arm/boards/archosg9/archos_features.c b/arch/arm/boards/archosg9/archos_features.c
+index b39673420cd1..0cffac77808f 100644
+--- a/arch/arm/boards/archosg9/archos_features.c
++++ b/arch/arm/boards/archosg9/archos_features.c
+@@ -9,8 +9,7 @@
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  * GNU General Public License for more details.
+  */
+-
+-#include <boot.h>
++#include <common.h>
+ #include <asm/setup.h>
+ #include "archos_features.h"
+ #include "feature_list.h"
+diff --git a/arch/arm/lib/bootm.c b/arch/arm/lib/bootm.c
+index 252946ce5a0b..404a6ae6adac 100644
+--- a/arch/arm/lib/bootm.c
++++ b/arch/arm/lib/bootm.c
+@@ -1,3 +1,4 @@
++#include <bootm.h>
+ #include <boot.h>
+ #include <common.h>
+ #include <command.h>
+diff --git a/arch/arm/mach-omap/omap_generic.c b/arch/arm/mach-omap/omap_generic.c
+index d27c7a867fbb..1d03eac11906 100644
+--- a/arch/arm/mach-omap/omap_generic.c
++++ b/arch/arm/mach-omap/omap_generic.c
+@@ -15,7 +15,7 @@
+ #include <common.h>
+ #include <bootsource.h>
+ #include <envfs.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <init.h>
+ #include <io.h>
+ #include <fs.h>
+diff --git a/arch/blackfin/lib/blackfin_linux.c b/arch/blackfin/lib/blackfin_linux.c
+index da2f78bcb59c..5ebd284d16de 100644
+--- a/arch/blackfin/lib/blackfin_linux.c
++++ b/arch/blackfin/lib/blackfin_linux.c
+@@ -33,6 +33,7 @@
+ #include <errno.h>
+ #include <init.h>
+ #include <boot.h>
++#include <bootm.h>
+ 
+ #define CMD_LINE_ADDR 0xFF900000  /* L1 scratchpad */
+ 
+diff --git a/arch/efi/efi/efi-image.c b/arch/efi/efi/efi-image.c
+index c78043b0de20..32e060886a33 100644
+--- a/arch/efi/efi/efi-image.c
++++ b/arch/efi/efi/efi-image.c
+@@ -31,6 +31,7 @@
+ #include <string.h>
+ #include <linux/err.h>
+ #include <boot.h>
++#include <bootm.h>
+ #include <fs.h>
+ #include <libfile.h>
+ #include <binfmt.h>
+diff --git a/arch/mips/lib/bootm.c b/arch/mips/lib/bootm.c
+index 670237233371..91e7e1c68acd 100644
+--- a/arch/mips/lib/bootm.c
++++ b/arch/mips/lib/bootm.c
+@@ -1,4 +1,5 @@
+ #include <boot.h>
++#include <bootm.h>
+ #include <common.h>
+ #include <libfile.h>
+ #include <malloc.h>
+diff --git a/arch/nios2/lib/bootm.c b/arch/nios2/lib/bootm.c
+index ac70330729fd..34908bde339e 100644
+--- a/arch/nios2/lib/bootm.c
++++ b/arch/nios2/lib/bootm.c
+@@ -27,6 +27,7 @@
+ #include <environment.h>
+ #include <init.h>
+ #include <boot.h>
++#include <bootm.h>
+ #include <errno.h>
+ #include <asm/cache.h>
+ 
+diff --git a/arch/ppc/lib/ppclinux.c b/arch/ppc/lib/ppclinux.c
+index a36682caf24d..3fca6b272053 100644
+--- a/arch/ppc/lib/ppclinux.c
++++ b/arch/ppc/lib/ppclinux.c
+@@ -9,6 +9,7 @@
+ #include <asm/bitops.h>
+ #include <asm/processor.h>
+ #include <boot.h>
++#include <bootm.h>
+ #include <errno.h>
+ #include <restart.h>
+ #include <fs.h>
+diff --git a/commands/boot.c b/commands/boot.c
+index 719ad95bc49e..baf274030f2d 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -23,7 +23,7 @@
+ #include <libgen.h>
+ #include <malloc.h>
+ #include <clock.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <glob.h>
+ #include <init.h>
+ #include <menu.h>
+diff --git a/commands/bootm.c b/commands/bootm.c
+index 6bedb007b55c..61b9086a1545 100644
+--- a/commands/bootm.c
++++ b/commands/bootm.c
+@@ -32,7 +32,7 @@
+ #include <fcntl.h>
+ #include <fs.h>
+ #include <errno.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <of.h>
+ #include <rtc.h>
+ #include <init.h>
+diff --git a/common/blspec.c b/common/blspec.c
+index a11823ae6199..1f102fd4d943 100644
+--- a/common/blspec.c
++++ b/common/blspec.c
+@@ -24,7 +24,7 @@
+ #include <libfile.h>
+ #include <libbb.h>
+ #include <init.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <net.h>
+ #include <fs.h>
+ #include <of.h>
+diff --git a/common/bootm.c b/common/bootm.c
+index 27d20f2c7280..78d04d5806a6 100644
+--- a/common/bootm.c
++++ b/common/bootm.c
+@@ -12,7 +12,7 @@
+  */
+ 
+ #include <common.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <fs.h>
+ #include <malloc.h>
+ #include <memory.h>
+@@ -20,6 +20,7 @@
+ #include <image-fit.h>
+ #include <globalvar.h>
+ #include <init.h>
++#include <environment.h>
+ #include <linux/stat.h>
+ #include <magicvar.h>
+ 
+diff --git a/common/image-fit.c b/common/image-fit.c
+index 9b6c40fbf8c2..6a01c614cc12 100644
+--- a/common/image-fit.c
++++ b/common/image-fit.c
+@@ -20,7 +20,7 @@
+ #define pr_fmt(fmt) "FIT: " fmt
+ #include <common.h>
+ #include <init.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <libfile.h>
+ #include <fdt.h>
+ #include <digest.h>
+diff --git a/drivers/usb/gadget/f_fastboot.c b/drivers/usb/gadget/f_fastboot.c
+index 6db7dafd9be3..a6192b9ebd34 100644
+--- a/drivers/usb/gadget/f_fastboot.c
++++ b/drivers/usb/gadget/f_fastboot.c
+@@ -25,7 +25,7 @@
+ #include <ioctl.h>
+ #include <libbb.h>
+ #include <bbu.h>
+-#include <boot.h>
++#include <bootm.h>
+ #include <dma.h>
+ #include <fs.h>
+ #include <libfile.h>
+diff --git a/include/boot.h b/include/boot.h
+index 8e7a9f11d453..da40ac2ece29 100644
+--- a/include/boot.h
++++ b/include/boot.h
+@@ -1,115 +1,9 @@
+ #ifndef __BOOT_H
+ #define __BOOT_H
+ 
+-#include <image.h>
+-#include <filetype.h>
+ #include <of.h>
+-#include <linux/list.h>
+ #include <environment.h>
+ 
+-enum bootm_verify {
+-	BOOTM_VERIFY_NONE,
+-	BOOTM_VERIFY_HASH,
+-	BOOTM_VERIFY_SIGNATURE,
+-	BOOTM_VERIFY_AVAILABLE,
+-};
+-
+-struct bootm_data {
+-	const char *os_file;
+-	const char *initrd_file;
+-	const char *oftree_file;
+-	int verbose;
+-	enum bootm_verify verify;
+-	bool force;
+-	bool dryrun;
+-	/*
+-	 * appendroot - if true, try to add a suitable root= Kernel option to
+-	 * mount the rootfs from the same device as the Kernel comes from.
+-	 */
+-	bool appendroot;
+-	unsigned long initrd_address;
+-	unsigned long os_address;
+-	unsigned long os_entry;
+-};
+-
+-int bootm_boot(struct bootm_data *data);
+-
+-struct image_data {
+-	/* simplest case. barebox has already loaded the os here */
+-	struct resource *os_res;
+-
+-	/* if os is an uImage this will be provided */
+-	struct uimage_handle *os;
+-
+-	/* if os is a FIT image this will be provided */
+-	struct fit_handle *os_fit;
+-
+-	char *os_part;
+-
+-	/* otherwise only the filename will be provided */
+-	char *os_file;
+-
+-	/*
+-	 * The address the user wants to load the os image to.
+-	 * May be UIMAGE_INVALID_ADDRESS to indicate that the
+-	 * user has not specified any address. In this case the
+-	 * handler may choose a suitable address
+-	 */
+-	unsigned long os_address;
+-
+-	/* entry point to the os. relative to the start of the image */
+-	unsigned long os_entry;
+-
+-	/* if initrd is already loaded this resource will be !NULL */
+-	struct resource *initrd_res;
+-
+-	/* if initrd is an uImage this will be provided */
+-	struct uimage_handle *initrd;
+-	char *initrd_part;
+-
+-	/* otherwise only the filename will be provided */
+-	char *initrd_file;
+-
+-	unsigned long initrd_address;
+-
+-	char *oftree_file;
+-	char *oftree_part;
+-
+-	struct device_node *of_root_node;
+-	struct fdt_header *oftree;
+-	struct resource *oftree_res;
+-
+-	enum bootm_verify verify;
+-	int verbose;
+-	int force;
+-	int dryrun;
+-};
+-
+-struct image_handler {
+-	const char *name;
+-
+-	struct list_head list;
+-
+-	int ih_os;
+-
+-	enum filetype filetype;
+-	int (*bootm)(struct image_data *data);
+-};
+-
+-int register_image_handler(struct image_handler *handle);
+-
+-#ifdef CONFIG_BOOTM_VERBOSE
+-static inline int bootm_verbose(struct image_data *data)
+-{
+-	return data->verbose;
+-}
+-#else
+-static inline int bootm_verbose(struct image_data *data)
+-{
+-	return 0;
+-}
+-#endif
+-
+ #ifdef CONFIG_FLEXIBLE_BOOTARGS
+ const char *linux_bootargs_get(void);
+ int linux_bootargs_overwrite(const char *bootargs);
+@@ -125,18 +19,4 @@ static inline int linux_bootargs_overwrite(const char *bootargs)
+ }
+ #endif
+ 
+-void bootm_data_init_defaults(struct bootm_data *data);
+-
+-int bootm_load_os(struct image_data *data, unsigned long load_address);
+-
+-bool bootm_has_initrd(struct image_data *data);
+-int bootm_load_initrd(struct image_data *data, unsigned long load_address);
+-
+-int bootm_load_devicetree(struct image_data *data, unsigned long load_address);
+-int bootm_get_os_size(struct image_data *data);
+-
+-enum bootm_verify bootm_get_verify_mode(void);
+-
+-#define UIMAGE_SOME_ADDRESS (UIMAGE_INVALID_ADDRESS - 1)
+-
+ #endif /* __BOOT_H */
+diff --git a/include/bootm.h b/include/bootm.h
+new file mode 100644
+index 000000000000..6e9777a9ac62
+--- /dev/null
++++ b/include/bootm.h
+@@ -0,0 +1,125 @@
++#ifndef __BOOTM_H
++#define __BOOTM_H
++
++#include <image.h>
++#include <filetype.h>
++#include <linux/list.h>
++
++enum bootm_verify {
++	BOOTM_VERIFY_NONE,
++	BOOTM_VERIFY_HASH,
++	BOOTM_VERIFY_SIGNATURE,
++	BOOTM_VERIFY_AVAILABLE,
++};
++
++struct bootm_data {
++	const char *os_file;
++	const char *initrd_file;
++	const char *oftree_file;
++	int verbose;
++	enum bootm_verify verify;
++	bool force;
++	bool dryrun;
++	/*
++	 * appendroot - if true, try to add a suitable root= Kernel option to
++	 * mount the rootfs from the same device as the Kernel comes from.
++	 */
++	bool appendroot;
++	unsigned long initrd_address;
++	unsigned long os_address;
++	unsigned long os_entry;
++};
++
++int bootm_boot(struct bootm_data *data);
++
++struct image_data {
++	/* simplest case. barebox has already loaded the os here */
++	struct resource *os_res;
++
++	/* if os is an uImage this will be provided */
++	struct uimage_handle *os;
++
++	/* if os is a FIT image this will be provided */
++	struct fit_handle *os_fit;
++
++	char *os_part;
++
++	/* otherwise only the filename will be provided */
++	char *os_file;
++
++	/*
++	 * The address the user wants to load the os image to.
++	 * May be UIMAGE_INVALID_ADDRESS to indicate that the
++	 * user has not specified any address. In this case the
++	 * handler may choose a suitable address
++	 */
++	unsigned long os_address;
++
++	/* entry point to the os. relative to the start of the image */
++	unsigned long os_entry;
++
++	/* if initrd is already loaded this resource will be !NULL */
++	struct resource *initrd_res;
++
++	/* if initrd is an uImage this will be provided */
++	struct uimage_handle *initrd;
++	char *initrd_part;
++
++	/* otherwise only the filename will be provided */
++	char *initrd_file;
++
++	unsigned long initrd_address;
++
++	char *oftree_file;
++	char *oftree_part;
++
++	struct device_node *of_root_node;
++	struct fdt_header *oftree;
++	struct resource *oftree_res;
++
++	enum bootm_verify verify;
++	int verbose;
++	int force;
++	int dryrun;
++};
++
++struct image_handler {
++	const char *name;
++
++	struct list_head list;
++
++	int ih_os;
++
++	enum filetype filetype;
++	int (*bootm)(struct image_data *data);
++};
++
++int register_image_handler(struct image_handler *handle);
++
++#ifdef CONFIG_BOOTM_VERBOSE
++static inline int bootm_verbose(struct image_data *data)
++{
++	return data->verbose;
++}
++#else
++static inline int bootm_verbose(struct image_data *data)
++{
++	return 0;
++}
++#endif
++
++void bootm_data_init_defaults(struct bootm_data *data);
++
++int bootm_load_os(struct image_data *data, unsigned long load_address);
++
++bool bootm_has_initrd(struct image_data *data);
++int bootm_load_initrd(struct image_data *data, unsigned long load_address);
++
++int bootm_load_devicetree(struct image_data *data, unsigned long load_address);
++int bootm_get_os_size(struct image_data *data);
++
++enum bootm_verify bootm_get_verify_mode(void);
++
++#define UIMAGE_SOME_ADDRESS (UIMAGE_INVALID_ADDRESS - 1)
++
++#endif /* __BOOTM_H */
+diff --git a/include/image-fit.h b/include/image-fit.h
+index c9d6911a97fb..c49f958268e9 100644
+--- a/include/image-fit.h
++++ b/include/image-fit.h
+@@ -19,7 +19,7 @@
+ #define __IMAGE_FIT_H__
+ 
+ #include <linux/types.h>
+-#include <boot.h>
++#include <bootm.h>
+ 
+ struct fit_handle {
+ 	void *fit;

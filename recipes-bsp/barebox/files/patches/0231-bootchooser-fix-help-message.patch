@@ -1,0 +1,26 @@
+From: Jan Luebbe <jlu@pengutronix.de>
+Date: Fri, 9 Sep 2016 17:13:27 +0200
+Subject: [PATCH] bootchooser: fix help message
+
+The descriptions of -a and -p were mismatched.
+
+Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
+---
+ commands/bootchooser.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/commands/bootchooser.c b/commands/bootchooser.c
+index 91938fe55173..ac763a655385 100644
+--- a/commands/bootchooser.c
++++ b/commands/bootchooser.c
+@@ -134,8 +134,8 @@ BAREBOX_CMD_HELP_START(bootchooser)
+ BAREBOX_CMD_HELP_TEXT("Control misc behaviour of the bootchooser")
+ BAREBOX_CMD_HELP_TEXT("")
+ BAREBOX_CMD_HELP_TEXT("Options:")
+-BAREBOX_CMD_HELP_OPT ("-a <n|default> [TARGETS]",  "set priority of given targets to 'n' or the default priority")
+-BAREBOX_CMD_HELP_OPT ("-p <n|default> [TARGETS]",  "set remaining attempts of given targets to 'n' or the default attempts")
++BAREBOX_CMD_HELP_OPT ("-a <n|default> [TARGETS]",  "set remaining attempts of given targets to 'n' or the default attempts")
++BAREBOX_CMD_HELP_OPT ("-p <n|default> [TARGETS]",  "set priority of given targets to 'n' or the default priority")
+ BAREBOX_CMD_HELP_OPT ("-i",  "Show information about the bootchooser")
+ BAREBOX_CMD_HELP_OPT ("-s",  "Mark the last boot successful")
+ BAREBOX_CMD_HELP_END

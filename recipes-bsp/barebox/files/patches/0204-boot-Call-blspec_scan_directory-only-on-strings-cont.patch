@@ -1,0 +1,32 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 15:03:43 +0200
+Subject: [PATCH] boot: Call blspec_scan_directory() only on strings containing
+ an absolute path
+
+Avoids an unnecessary "Nothing bootable found on..." warning.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index 152615f9a1de..719ad95bc49e 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -202,9 +202,12 @@ static int bootentry_parse_one(struct blspec *blspec, const char *name)
+ 		ret = blspec_scan_devicename(blspec, name);
+ 		if (ret > 0)
+ 			found += ret;
+-		ret = blspec_scan_directory(blspec, name);
+-		if (ret > 0)
+-			found += ret;
++
++		if (*name == '/') {
++			ret = blspec_scan_directory(blspec, name);
++			if (ret > 0)
++				found += ret;
++		}
+ 	}
+ 
+ 	if (!found) {

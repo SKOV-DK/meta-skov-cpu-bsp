@@ -1,0 +1,46 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 22 Jul 2016 14:23:57 +0200
+Subject: [PATCH] boot: Print a message when a boot target string does not lead
+ to a boot target
+
+When doing a 'boot friesel net' one expects a message when 'friesel'
+does not give any bootable results and thus 'net' is booted. This patch
+adds this message.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index b774ddcc2a99..8b3b407e127e 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -59,8 +59,11 @@ static int do_boot(int argc, char *argv[])
+ 	entries = bootentries_alloc();
+ 
+ 	if (optind < argc) {
+-		for (i = optind; i < argc; i++)
+-			bootentry_create_from_name(entries, argv[i]);
++		for (i = optind; i < argc; i++) {
++			ret = bootentry_create_from_name(entries, argv[i]);
++			if (ret <= 0)
++				printf("Nothing bootable found on '%s'\n", argv[i]);
++	       }
+ 	} else {
+ 		const char *def;
+ 		char *sep, *name;
+@@ -71,8 +74,11 @@ static int do_boot(int argc, char *argv[])
+ 
+ 		sep = freep = xstrdup(def);
+ 
+-		while ((name = strsep(&sep, " ")) != NULL)
+-			bootentry_create_from_name(entries, name);
++		while ((name = strsep(&sep, " ")) != NULL) {
++			ret = bootentry_create_from_name(entries, name);
++			if (ret <= 0)
++				printf("Nothing bootable found on '%s'\n", name);
++		}
+ 
+ 		free(freep);
+ 	}

@@ -1,0 +1,22 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 15:52:45 +0200
+Subject: [PATCH] blspec: remove unused function prototype
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ include/blspec.h | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/include/blspec.h b/include/blspec.h
+index 4b61ef8be66a..a73dd7250bf7 100644
+--- a/include/blspec.h
++++ b/include/blspec.h
+@@ -25,8 +25,6 @@ int blspec_entry_var_set(struct blspec_entry *entry, const char *name,
+ 		const char *val);
+ const char *blspec_entry_var_get(struct blspec_entry *entry, const char *name);
+ 
+-int blspec_entry_save(struct blspec_entry *entry, const char *path);
+-
+ int blspec_boot(struct blspec_entry *entry, int verbose, int dryrun);
+ 
+ int blspec_scan_devices(struct blspec *blspec);
