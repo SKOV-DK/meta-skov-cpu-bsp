@@ -26,6 +26,7 @@ SRC_URI += "\
   file://patches/0109-Skov-add-support-for-board-variants-16-and-17.patch \
   file://patches/0110-Skov-Add-support-for-board-variant-18.patch \
   file://patches/0111-Skov-add-support-for-board-variant-19.patch \
+  file://patches/0112-Skov-add-support-for-board-variant-20.patch \
   file://patches/0201-of_path-of_find_path-factor-out-device-detection-log.patch \
   file://patches/0202-of_path-add-of_find_path_by_node.patch \
   file://patches/0203-state-make-use-of-of_find_path_by_node-and-add-retur.patch \
