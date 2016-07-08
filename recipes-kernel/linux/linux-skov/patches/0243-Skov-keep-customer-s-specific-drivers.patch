@@ -9,7 +9,7 @@ Acked-by: Juergen Borleis <jbe@pengutronix.de>
  drivers/skov/Kconfig        |  18 +++
  drivers/skov/Makefile       |   2 +
  drivers/skov/mem_peek.c     | 163 +++++++++++++++++++
- drivers/skov/skov_version.c | 377 ++++++++++++++++++++++++++++++++++++++++++++
+ drivers/skov/skov_version.c | 382 ++++++++++++++++++++++++++++++++++++++++++++
  6 files changed, 563 insertions(+)
  create mode 100644 drivers/skov/Kconfig
  create mode 100644 drivers/skov/Makefile
@@ -242,7 +242,7 @@ new file mode 100644
 index 000000000000..02531075aac0
 --- /dev/null
 +++ b/drivers/skov/skov_version.c
-@@ -0,0 +1,377 @@
+@@ -0,0 +1,382 @@
 +/*
 + * Skov version driver
 + *
@@ -267,6 +267,7 @@ index 000000000000..02531075aac0
 + * 00010001	- i.MX6 CPU QuadCore		 C    2048MB -  8192MB
 + * 00010010	- i.MX6 CPU QuadCore+		 C    4192MB - 16384MB
 + * 00010011	- i.MX6 CPU SoloCore		 C    512 MB -  2048MB
++ * 00010100	- i.MX6 CPU QuadCore		 C    1024MB -  4096MB
 + */
 +#include <linux/err.h>
 +#include <linux/clk.h>
@@ -367,6 +368,7 @@ index 000000000000..02531075aac0
 +		case 8:
 +		case 11:
 +		case 14:
++		case 20:
 +			return sprintf(buf, "%u\n", mem[2]);
 +		case 1:
 +		case 4:
@@ -401,6 +403,7 @@ index 000000000000..02531075aac0
 +		case 17:
 +		case 18:
 +		case 19:
++		case 20:
 +			return sprintf(buf, "%s\n", rev[2]);
 +		default:
 +                	return sprintf(buf, "%s\n", "Board type can not be detected");
@@ -410,6 +413,7 @@ index 000000000000..02531075aac0
 +		case 18:
 +			return sprintf(buf, "%s\n", description[7]);
 +		case 17:
++		case 20:
 +			return sprintf(buf, "%s\n", description[6]);
 +		case 16:
 +		case 19:
@@ -442,6 +446,7 @@ index 000000000000..02531075aac0
 +		case 17:
 +			return sprintf(buf, "%u\n", nand[9]);
 +		case 16:
++		case 20:
 +			return sprintf(buf, "%u\n", nand[8]);
 +		case 19:
 +			return sprintf(buf, "%u\n", nand[7]);
