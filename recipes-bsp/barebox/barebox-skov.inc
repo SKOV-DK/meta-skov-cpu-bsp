@@ -59,3 +59,5 @@ SRC_URI += "\
   "
 
 COMPATIBLE_MACHINE = "imx6-cpu"
+
+do_deploy[vardepsexclude] = "DATETIME"
