@@ -1,6 +1,25 @@
---- a/arch/arm/boards/skov-dol63x/lowlevel.c	2016-07-07 14:36:27.133648095 +0200
-+++ b/arch/arm/boards/skov-dol63x/lowlevel.c	2016-07-07 14:43:29.161661998 +0200
-@@ -744,10 +744,12 @@
+From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
+Date: Thu, 7 Jul 2016 17:47:32 +0200
+Subject: [PATCH] Skov: add support for board variant 20
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for board variant 20 (QuadCore, RAM 1G, Flash 4G).
+
+Signed-off-by: Søren Andersen <san@skov.dk>
+[Import of b902ce190919 ("Support for board 20 QuadCore Ram 1G, Flash 4G") from "meta-skov-bsp"]
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/lowlevel.c | 20 ++++++++++++++++----
+ arch/arm/boards/skov-dol63x/version.c  |  6 ++++++
+ 2 files changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
+index 0faba73a1af6..0e0643dfaf22 100644
+--- a/arch/arm/boards/skov-dol63x/lowlevel.c
++++ b/arch/arm/boards/skov-dol63x/lowlevel.c
+@@ -744,10 +744,12 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
   * 00001101       C     256 MiB    256 MiB     i.MX6S
   * 00001110       C    1024 MiB    256 MiB     i.MX6Q
   * 00001111       C     512 MiB    256 MiB     i.MX6S
@@ -17,7 +36,7 @@
   * This routine does not return if starting the image from SD card or NOR
   * was successful. It restarts skov_dol63x_start() instead
   */
-@@ -887,6 +889,16 @@
+@@ -887,6 +889,16 @@ static void skov_dol63x_init(int cpu_type, unsigned board_variant)
  					&skov_dol63x_calib_2x128Mb_800MHz,
  					&skov_dol63x_cfg_2x128Mb_800MHz);
  		break;
@@ -34,9 +53,11 @@
  	default:
  		pr_err("Unsupported board revision: 0x%x\n", board_variant);
  		/* FIXME don't continue */
---- a/arch/arm/boards/skov-dol63x/version.c	2016-07-07 14:36:18.949647825 +0200
-+++ b/arch/arm/boards/skov-dol63x/version.c	2016-07-07 14:24:44.078624933 +0200
-@@ -120,6 +120,12 @@
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+index d90402056321..8e7423a63a9e 100644
+--- a/arch/arm/boards/skov-dol63x/version.c
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -120,6 +120,12 @@ static const struct board_description dol63x_variants[] = {
  		.soc = "i.MX6S",
  		.dts_compatible = "skov,dol63x-imxdl-revC",
  	},
