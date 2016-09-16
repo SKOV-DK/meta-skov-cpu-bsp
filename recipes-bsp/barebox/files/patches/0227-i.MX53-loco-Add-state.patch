@@ -1,0 +1,83 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 15 Jul 2016 11:57:24 +0200
+Subject: [PATCH] i.MX53 loco: Add state
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/dts/imx53-qsb-common.dtsi | 56 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 55 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/imx53-qsb-common.dtsi b/arch/arm/dts/imx53-qsb-common.dtsi
+index f363af975d0e..ba4fbd446cf0 100644
+--- a/arch/arm/dts/imx53-qsb-common.dtsi
++++ b/arch/arm/dts/imx53-qsb-common.dtsi
+@@ -37,6 +37,55 @@
+ 			gpios = <&gpio2 15 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
++
++	state: state {
++		magic = <0x4d433230>;
++		compatible = "barebox,state";
++		backend-type = "raw";
++		backend = <&backend_state>;
++		backend-stridesize = <0x4000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++
++		bootstate {
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			system0 {
++				#address-cells = <1>;
++				#size-cells = <1>;
++
++				remaining_attempts {
++					reg = <0x0 0x4>;
++					type = "uint32";
++				};
++				priority {
++					reg = <0x4 0x4>;
++					type = "uint32";
++					default = <20>;
++				};
++			};
++
++			system1 {
++				#address-cells = <1>;
++				#size-cells = <1>;
++
++				remaining_attempts {
++					reg = <0x10 0x4>;
++					type = "uint32";
++				};
++				priority {
++					reg = <0x14 0x4>;
++					type = "uint32";
++					default = <10>;
++				};
++			};
++			last_chosen {
++				reg = <0x18 0x4>;
++				type = "uint32";
++			};
++		};
++	};
+ };
+ 
+ &esdhc1 {
+@@ -45,7 +94,12 @@
+ 
+ 	bareboxenv: partition@e0000 {
+ 		label = "barebox-environment";
+-		reg = <0xe0000 0x20000>;
++		reg = <0xe0000 0x10000>;
++	};
++
++	backend_state: partition@f0000 {
++		label = "bootchooser";
++		reg = <0xf0000 0x10000>;
+ 	};
+ };
+ 

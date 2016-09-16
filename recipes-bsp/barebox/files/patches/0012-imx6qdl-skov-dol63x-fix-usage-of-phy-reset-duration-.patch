@@ -1,0 +1,25 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Wed, 6 Jul 2016 09:44:31 +0200
+Subject: [PATCH] imx6qdl-skov-dol63x: fix usage of phy-reset-duration of
+ property
+
+It uses an integer, not a string.
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ arch/arm/dts/imx6qdl-skov-dol63x.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+index cc53f9ec6517..532c339ba9db 100644
+--- a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+@@ -254,7 +254,7 @@
+ 	phy-mode = "rmii";
+ 	status = "okay";
+ 	phy-reset-gpios = <&gpio1 5 0>;
+-	phy-reset-duration = "100";
++	phy-reset-duration = <100>;
+ 	#address-cells = <0>;
+ 	#size-cells = <1>;
+ 	fixed-link {

@@ -1,0 +1,23 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 22:02:17 +0200
+Subject: [PATCH] boot: misc print fixes
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index 8b3b407e127e..1ff0e19a3657 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -72,6 +72,9 @@ static int do_boot(int argc, char *argv[])
+ 		if (!def)
+ 			return 0;
+ 
++		if (!*def)
++			def = "/env/boot";
++
+ 		sep = freep = xstrdup(def);
+ 
+ 		while ((name = strsep(&sep, " ")) != NULL) {

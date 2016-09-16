@@ -1,0 +1,71 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Mon, 29 Aug 2016 12:12:05 +0200
+Subject: [PATCH] Add filetype and detection for squashfs images
+
+This adds `filetype_squashfs` to the list of known filetypes and adds a
+detection for squashfs files to file_detect_type(). This currently
+matches on the `hsqs` start sequence of an image file.
+
+Additionally, the newly introduced filetype is registered as the type of
+the squashfs_driver which allows, for example, to mount squashfs without
+the need to specify a type parameter.
+
+This changes enable booting a squashfs with the simple `boot` command
+pointing to the location (device) that holds the squashfs.
+
+Note that booting with blspec is limited as the current squashfs driver
+is not capable of handling symbolic links.
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ common/filetype.c      | 4 ++++
+ fs/squashfs/squashfs.c | 1 +
+ include/filetype.h     | 1 +
+ 3 files changed, 6 insertions(+)
+
+diff --git a/common/filetype.c b/common/filetype.c
+index a8666a1439df..e47ff8198f2c 100644
+--- a/common/filetype.c
++++ b/common/filetype.c
+@@ -40,6 +40,7 @@ static const struct filetype_str filetype_str[] = {
+ 	[filetype_uimage] = { "U-Boot uImage", "u-boot" },
+ 	[filetype_ubi] = { "UBI image", "ubi" },
+ 	[filetype_jffs2] = { "JFFS2 image", "jffs2" },
++	[filetype_squashfs] = { "Squashfs image", "squashfs" },
+ 	[filetype_gzip] = { "GZIP compressed", "gzip" },
+ 	[filetype_bzip2] = { "BZIP2 compressed", "bzip2" },
+ 	[filetype_oftree] = { "open firmware Device Tree flattened Binary", "dtb" },
+@@ -277,6 +278,9 @@ enum filetype file_detect_type(const void *_buf, size_t bufsize)
+ 	if (buf8[0] == 0xfd && buf8[1] == 0x37 && buf8[2] == 0x7a &&
+ 			buf8[3] == 0x58 && buf8[4] == 0x5a && buf8[5] == 0x00)
+ 		return filetype_xz_compressed;
++	if (buf8[0] == 'h' && buf8[1] == 's' && buf8[2] == 'q' &&
++			buf8[3] == 's')
++		return filetype_squashfs;
+ 	if (buf[0] == be32_to_cpu(0xd00dfeed))
+ 		return filetype_oftree;
+ 	if (strncmp(buf8, "ANDROID!", 8) == 0)
+diff --git a/fs/squashfs/squashfs.c b/fs/squashfs/squashfs.c
+index d00dee6caa50..6d046810d9df 100644
+--- a/fs/squashfs/squashfs.c
++++ b/fs/squashfs/squashfs.c
+@@ -353,6 +353,7 @@ static struct fs_driver_d squashfs_driver = {
+ 	.readdir	= squashfs_readdir,
+ 	.closedir	= squashfs_closedir,
+ 	.stat		= squashfs_stat,
++	.type		= filetype_squashfs,
+ 	.drv = {
+ 		.probe = squashfs_probe,
+ 		.remove = squashfs_remove,
+diff --git a/include/filetype.h b/include/filetype.h
+index e87ca174a89d..f6baabf8bc3d 100644
+--- a/include/filetype.h
++++ b/include/filetype.h
+@@ -16,6 +16,7 @@ enum filetype {
+ 	filetype_uimage,
+ 	filetype_ubi,
+ 	filetype_jffs2,
++	filetype_squashfs,
+ 	filetype_gzip,
+ 	filetype_bzip2,
+ 	filetype_oftree,

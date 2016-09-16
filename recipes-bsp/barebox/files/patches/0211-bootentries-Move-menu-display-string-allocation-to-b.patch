@@ -1,0 +1,39 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 13:57:44 +0200
+Subject: [PATCH] bootentries: Move menu display string allocation to
+ bootentries_alloc()
+
+bootentries_alloc() is the place where the struct bootentries container
+is allocated, so allocate the menu entry there aswell.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index 1ae274524735..f193c9367a4f 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -50,8 +50,10 @@ static struct bootentries *bootentries_alloc(void)
+ 	bootentries = xzalloc(sizeof(*bootentries));
+ 	INIT_LIST_HEAD(&bootentries->entries);
+ 
+-	if (IS_ENABLED(CONFIG_MENU))
++	if (IS_ENABLED(CONFIG_MENU)) {
+ 		bootentries->menu = menu_alloc();
++		bootentries->menu->display = basprintf("boot");
++	}
+ 
+ 	return bootentries;
+ }
+@@ -294,9 +296,6 @@ static struct bootentries *bootentries_collect(char *entries[], int num_entries)
+ 
+ 	bootentries = bootentries_alloc();
+ 
+-	if (IS_ENABLED(CONFIG_MENU))
+-		bootentries->menu->display = basprintf("boot");
+-
+ 	if (!num_entries)
+ 		bootscript_scan_path(bootentries, "/env/boot");
+ 

@@ -1,0 +1,24 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Wed, 6 Jul 2016 09:43:37 +0200
+Subject: [PATCH] skov: version: fix usage of asprintf
+
+barebox asprintf declaration was adapted to libc standard.
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/version.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+index d90402056321..965a578af52a 100644
+--- a/arch/arm/boards/skov-dol63x/version.c
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -202,7 +202,7 @@ static int skov_version_probe(struct device_d *dev)
+ 		goto unclaim_on_error;
+ 	}
+ 
+-	number = asprintf("%u", var);
++	asprintf(&number, "%u", var);
+ 	globalvar_add_simple("board.no", number);
+ 	globalvar_add_simple("board.variant", dol63x_variants[var].value == NULL ? "undefined" : dol63x_variants[var].value);
+ 	globalvar_add_simple("board.revision", dol63x_variants[var].revision == NULL ? "undefined" : dol63x_variants[var].revision);

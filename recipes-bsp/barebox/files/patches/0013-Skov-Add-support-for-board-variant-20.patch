@@ -1,0 +1,63 @@
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Fri, 8 Jul 2016 08:49:49 +0200
+Subject: [PATCH] Skov: Add support for board variant 20
+
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+---
+ arch/arm/boards/skov-dol63x/lowlevel.c | 18 +++++++++++++++---
+ arch/arm/boards/skov-dol63x/version.c  |  6 ++++++
+ 2 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
+index 0faba73a1af6..1f4a865c53fd 100644
+--- a/arch/arm/boards/skov-dol63x/lowlevel.c
++++ b/arch/arm/boards/skov-dol63x/lowlevel.c
+@@ -744,9 +744,11 @@ static inline unsigned skov_dol63x_get_version(int cpu_type)
+  * 00001101       C     256 MiB    256 MiB     i.MX6S
+  * 00001110       C    1024 MiB    256 MiB     i.MX6Q
+  * 00001111       C     512 MiB    256 MiB     i.MX6S
+- * 00010000       ?     512 MiB      4 GiB     i.MX6S
+- * 00010001       ?    2048 MiB      8 GiB     i.MX6Q
+- * 00010010       ?    4096 MiB     16 GiB     i.MX6Q+
++ * 00010000       C     512 MiB      4 GiB     i.MX6S
++ * 00010001       C    2048 MiB      8 GiB     i.MX6Q
++ * 00010010       C    4096 MiB     16 GiB     i.MX6Q+
++ * 00010011       C     512 MiB      2 GiB     i.MX6S
++ * 00010100       C    1024 MiB      4 GiB     i.MX6Q
+  *
+  * This routine does not return if starting the image from SD card or NOR
+  * was successful. It restarts skov_dol63x_start() instead
+@@ -887,6 +889,16 @@ static void skov_dol63x_init(int cpu_type, unsigned board_variant)
+ 					&skov_dol63x_calib_2x128Mb_800MHz,
+ 					&skov_dol63x_cfg_2x128Mb_800MHz);
+ 		break;
++	case 20: /* i.MX6Q, "Quad_R1G_F2G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 20\n");
++		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
++					&skov_dol63x_calib_4x128Mb_1066MHz,
++					&skov_dol63x_cfg_4x128Mb_1066MHz);
++		break;
+ 	default:
+ 		pr_err("Unsupported board revision: 0x%x\n", board_variant);
+ 		/* FIXME don't continue */
+diff --git a/arch/arm/boards/skov-dol63x/version.c b/arch/arm/boards/skov-dol63x/version.c
+index 965a578af52a..e30c5f46a34d 100644
+--- a/arch/arm/boards/skov-dol63x/version.c
++++ b/arch/arm/boards/skov-dol63x/version.c
+@@ -120,6 +120,12 @@ static const struct board_description dol63x_variants[] = {
+ 		.soc = "i.MX6S",
+ 		.dts_compatible = "skov,dol63x-imxdl-revC",
+ 	},
++	[20] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,dol63x-imxq-revC",
++	},
+ };
+ 
+ /*

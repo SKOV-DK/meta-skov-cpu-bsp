@@ -1,0 +1,118 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 20 Jul 2016 15:35:22 +0200
+Subject: [PATCH] bootentries: Add title/description
+
+We currently have to special case blspec entries vs. boot scripts
+in the common boot code since we want to print different informations
+about them. This adds a 'title' and 'description' which can be filled
+in with different information by bootscripts and blspec entries and
+so we get rid of the special handling.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/boot.c  | 23 ++++++++++-------------
+ common/blspec.c  |  9 ++++-----
+ include/blspec.h |  4 ++++
+ 3 files changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/commands/boot.c b/commands/boot.c
+index edf9eab60b7e..19f2fb5024a6 100644
+--- a/commands/boot.c
++++ b/commands/boot.c
+@@ -130,7 +130,8 @@ static int bootscript_create_entry(struct bootentries *bootentries, const char *
+ 	be = blspec_entry_alloc(bootentries);
+ 	be->entry.me.type = MENU_ENTRY_NORMAL;
+ 	be->scriptpath = xstrdup(name);
+-	be->entry.me.display = xstrdup(basename(be->scriptpath));
++	be->entry.title = xstrdup(basename(be->scriptpath));
++	be->entry.description = basprintf("script: %s", name);
+ 
+ 	return 0;
+ }
+@@ -273,6 +274,8 @@ static void bootsources_menu(char *entries[], int num_entries)
+ 		return;
+ 
+ 	bootentries_for_each_entry(bootentries, entry) {
++		if (!entry->me.display)
++			entry->me.display = xstrdup(entry->title);
+ 		entry->me.action = bootsource_action;
+ 		menu_add_entry(bootentries->menu, &entry->me);
+ 	}
+@@ -305,17 +308,11 @@ static void bootsources_list(char *entries[], int num_entries)
+ 	if (!bootentries)
+ 		return;
+ 
+-	printf("  %-20s %-20s  %s\n", "device", "hwdevice", "title");
+-	printf("  %-20s %-20s  %s\n", "------", "--------", "-----");
++	printf("%-20s\n", "title");
++	printf("%-20s\n", "------");
+ 
+-	bootentries_for_each_entry(bootentries, entry) {
+-		struct blspec_entry *ble = container_of(entry, struct blspec_entry, entry);
+-
+-		if (ble->scriptpath)
+-			printf("%-40s   %s\n", basename(ble->scriptpath), entry->me.display);
+-		else
+-			printf("%s\n", entry->me.display);
+-	}
++	bootentries_for_each_entry(bootentries, entry)
++		printf("%-20s %s\n", entry->title, entry->description);
+ 
+ 	blspec_free(bootentries);
+ }
+@@ -349,11 +346,11 @@ static int boot(const char *name)
+ 	}
+ 
+ 	bootentries_for_each_entry(bootentries, entry) {
+-		printf("booting %s\n", entry->me.display);
++		printf("booting %s\n", entry->title);
+ 		ret = boot_entry(entry);
+ 		if (!ret)
+ 			break;
+-		printf("booting %s failed: %s\n", entry->me.display, strerror(-ret));
++		printf("booting %s failed: %s\n", entry->title, strerror(-ret));
+ 	}
+ 
+ 	return ret;
+diff --git a/common/blspec.c b/common/blspec.c
+index 480bd92bd6a6..d66c5b964c7b 100644
+--- a/common/blspec.c
++++ b/common/blspec.c
+@@ -413,11 +413,10 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+ 				hwdevname = xstrdup(dev_name(entry->cdev->dev->parent));
+ 		}
+ 
+-		entry->entry.me.display = basprintf("%-20s %-20s  %s",
+-						devname ? devname : "",
+-						hwdevname ? hwdevname : "",
+-						blspec_entry_var_get(entry, "title"));
+-
++		entry->entry.title = xstrdup(blspec_entry_var_get(entry, "title"));
++		entry->entry.description = basprintf("blspec entry, device: %s hwdevice: %s",
++						    devname ? devname : "none",
++						    hwdevname ? hwdevname : "none");
+ 		free(devname);
+ 		free(hwdevname);
+ 
+diff --git a/include/blspec.h b/include/blspec.h
+index aced246e852b..c956f0d940fa 100644
+--- a/include/blspec.h
++++ b/include/blspec.h
+@@ -12,6 +12,8 @@ struct bootentries {
+ struct bootentry {
+ 	struct list_head list;
+ 	struct menu_entry me;
++	char *title;
++	char *description;
+ };
+ 
+ struct blspec_entry {
+@@ -58,6 +60,8 @@ static inline void blspec_entry_free(struct blspec_entry *entry)
+ 	list_del(&entry->entry.list);
+ 	of_delete_node(entry->node);
+ 	free(entry->entry.me.display);
++	free(entry->entry.title);
++	free(entry->entry.description);
+ 	free(entry->scriptpath);
+ 	free(entry->configpath);
+ 	free(entry->rootpath);
