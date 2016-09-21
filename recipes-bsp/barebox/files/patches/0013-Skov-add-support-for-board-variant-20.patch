@@ -1,8 +1,15 @@
-From: Enrico Jorns <ejo@pengutronix.de>
-Date: Fri, 8 Jul 2016 08:49:49 +0200
-Subject: [PATCH] Skov: Add support for board variant 20
+From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
+Date: Thu, 7 Jul 2016 17:47:32 +0200
+Subject: [PATCH] Skov: add support for board variant 20
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Add support for board variant 20 (QuadCore, RAM 1G, Flash 4G).
+
+Signed-off-by: Søren Andersen <san@skov.dk>
+[Import of b902ce190919 ("Support for board 20 QuadCore Ram 1G, Flash 4G") from "meta-skov-bsp"]
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  arch/arm/boards/skov-dol63x/lowlevel.c | 18 +++++++++++++++---
  arch/arm/boards/skov-dol63x/version.c  |  6 ++++++
