@@ -118,7 +118,7 @@ index 0dc0c86c509b..edf9eab60b7e 100644
  		ret = boot_entry(entry);
  		if (!ret)
 diff --git a/common/blspec.c b/common/blspec.c
-index b5b9e5de0f4e..480bd92bd6a6 100644
+index d1ac1e91d4d7..72d48311aadf 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -128,9 +128,11 @@ static struct blspec_entry *blspec_entry_open(struct bootentries *bootentries,
@@ -134,7 +134,7 @@ index b5b9e5de0f4e..480bd92bd6a6 100644
  		if (e->configpath && !strcmp(e->configpath, path))
  			return 1;
  	}
-@@ -411,7 +413,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -412,7 +414,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  				hwdevname = xstrdup(dev_name(entry->cdev->dev->parent));
  		}
  
@@ -143,7 +143,7 @@ index b5b9e5de0f4e..480bd92bd6a6 100644
  						devname ? devname : "",
  						hwdevname ? hwdevname : "",
  						blspec_entry_var_get(entry, "title"));
-@@ -419,7 +421,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -420,7 +422,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  		free(devname);
  		free(hwdevname);
  
@@ -152,7 +152,7 @@ index b5b9e5de0f4e..480bd92bd6a6 100644
  	}
  
  	ret = found;
-@@ -638,8 +640,9 @@ int blspec_scan_devicename(struct bootentries *bootentries, const char *devname)
+@@ -639,8 +641,9 @@ int blspec_scan_devicename(struct bootentries *bootentries, const char *devname)
   * In case of an error the error code is returned. This function may
   * return 0 in case of a succesful dry run.
   */

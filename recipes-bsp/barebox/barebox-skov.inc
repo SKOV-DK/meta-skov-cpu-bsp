@@ -14,12 +14,8 @@ SRC_URI += "\
   file://env/nv/bootchooser.system0.default_priority \
   file://env/nv/bootchooser.last_chosen \
   file://env/nv/bootchooser.state_prefix \
-  file://env/nv/bootchooser.system0.priority \
-  file://env/nv/bootchooser.system0.remaining_attempts \
   file://env/nv/bootchooser.system1.default_attempts \
   file://env/nv/bootchooser.system1.default_priority \
-  file://env/nv/bootchooser.system1.priority \
-  file://env/nv/bootchooser.system1.remaining_attempts \
   file://env/nv/bootchooser.targets \
   file://env/nv/bootchooser.system0.boot \
   file://env/nv/bootchooser.system1.boot \

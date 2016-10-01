@@ -13,10 +13,10 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/common/blspec.c b/common/blspec.c
-index 8c2927f7b16e..66decb161ebd 100644
+index 17013453659b..40d4546d2880 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -442,7 +442,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -443,7 +443,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  	if (!IS_ERR(nfspath))
  		root = nfspath;
  
