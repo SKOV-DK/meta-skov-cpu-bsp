@@ -235,7 +235,7 @@ index baf274030f2d..0dc0c86c509b 100644
  		ret = boot_entry(entry);
  		if (!ret)
 diff --git a/common/blspec.c b/common/blspec.c
-index 1f102fd4d943..b5b9e5de0f4e 100644
+index 5a93c015356e..d1ac1e91d4d7 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -58,7 +58,7 @@ const char *blspec_entry_var_get(struct blspec_entry *entry, const char *name)
@@ -279,7 +279,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  					rand());
  		if (port)
  			options = basprintf("mountport=%s,port=%s", port,
-@@ -321,11 +321,11 @@ out:
+@@ -322,11 +322,11 @@ out:
  /*
   * blspec_scan_directory - scan over a directory
   *
@@ -293,7 +293,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	struct blspec_entry *entry;
  	DIR *dir;
-@@ -383,12 +383,12 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
+@@ -384,12 +384,12 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
  			continue;
  		}
  
@@ -308,7 +308,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (IS_ERR(entry)) {
  			free(configname);
  			continue;
-@@ -436,13 +436,13 @@ err_out:
+@@ -437,13 +437,13 @@ err_out:
  /*
   * blspec_scan_ubi - scan over a cdev containing UBI volumes
   *
@@ -324,7 +324,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	struct device_d *child;
  	int ret, found = 0;
-@@ -454,7 +454,7 @@ static int blspec_scan_ubi(struct blspec *blspec, struct cdev *cdev)
+@@ -455,7 +455,7 @@ static int blspec_scan_ubi(struct blspec *blspec, struct cdev *cdev)
  		return 0;
  
  	device_for_each_child(cdev->dev, child) {
@@ -333,7 +333,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (ret > 0)
  			found += ret;
  	}
-@@ -465,13 +465,13 @@ static int blspec_scan_ubi(struct blspec *blspec, struct cdev *cdev)
+@@ -466,13 +466,13 @@ static int blspec_scan_ubi(struct blspec *blspec, struct cdev *cdev)
  /*
   * blspec_scan_cdev - scan over a cdev
   *
@@ -350,7 +350,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	int ret, found = 0;
  	void *buf = xzalloc(512);
-@@ -494,14 +494,14 @@ static int blspec_scan_cdev(struct blspec *blspec, struct cdev *cdev)
+@@ -495,14 +495,14 @@ static int blspec_scan_cdev(struct blspec *blspec, struct cdev *cdev)
  		return -EINVAL;
  
  	if (filetype == filetype_ubi && IS_ENABLED(CONFIG_MTD_UBI)) {
@@ -367,7 +367,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (ret > 0)
  			found += ret;
  	}
-@@ -516,7 +516,7 @@ static int blspec_scan_cdev(struct blspec *blspec, struct cdev *cdev)
+@@ -517,7 +517,7 @@ static int blspec_scan_cdev(struct blspec *blspec, struct cdev *cdev)
   * Returns the number of entries found or a negative error code if some unexpected
   * error occured.
   */
@@ -376,7 +376,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	struct device_d *dev;
  	struct block_device *bdev;
-@@ -529,7 +529,7 @@ int blspec_scan_devices(struct blspec *blspec)
+@@ -530,7 +530,7 @@ int blspec_scan_devices(struct blspec *blspec)
  		struct cdev *cdev = &bdev->cdev;
  
  		list_for_each_entry(cdev, &bdev->dev->cdevs, devices_list) {
@@ -385,7 +385,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  			if (ret > 0)
  				found += ret;
  		}
-@@ -542,11 +542,11 @@ int blspec_scan_devices(struct blspec *blspec)
+@@ -543,11 +543,11 @@ int blspec_scan_devices(struct blspec *blspec)
   * blspec_scan_device - scan a device for child cdevs
   *
   * Given a device this functions scans over all child cdevs looking
@@ -399,7 +399,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	struct device_d *child;
  	struct cdev *cdev;
-@@ -563,7 +563,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
+@@ -564,7 +564,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
  		 * should be used as $BOOT
  		 */
  		if (cdev->dos_partition_type == 0xea) {
@@ -408,7 +408,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  			if (ret == 0)
  				ret = -ENOENT;
  
-@@ -582,7 +582,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
+@@ -583,7 +583,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
  
  	/* Try child devices */
  	device_for_each_child(dev, child) {
@@ -417,7 +417,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (ret > 0)
  			return ret;
  	}
-@@ -592,7 +592,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
+@@ -593,7 +593,7 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
  	 * by the bootblspec spec).
  	 */
  	list_for_each_entry(cdev, &dev->cdevs, devices_list) {
@@ -426,7 +426,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (ret > 0)
  			found += ret;
  	}
-@@ -604,11 +604,11 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
+@@ -605,11 +605,11 @@ int blspec_scan_device(struct blspec *blspec, struct device_d *dev)
   * blspec_scan_devicename - scan a hardware device for child cdevs
   *
   * Given a name of a hardware device this functions scans over all child
@@ -440,7 +440,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  {
  	struct device_d *dev;
  	struct cdev *cdev;
-@@ -619,7 +619,7 @@ int blspec_scan_devicename(struct blspec *blspec, const char *devname)
+@@ -620,7 +620,7 @@ int blspec_scan_devicename(struct blspec *blspec, const char *devname)
  
  	cdev = cdev_by_name(devname);
  	if (cdev) {
@@ -449,7 +449,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  		if (ret > 0)
  			return ret;
  	}
-@@ -628,7 +628,7 @@ int blspec_scan_devicename(struct blspec *blspec, const char *devname)
+@@ -629,7 +629,7 @@ int blspec_scan_devicename(struct blspec *blspec, const char *devname)
  	if (!dev)
  		return -ENODEV;
  
@@ -458,7 +458,7 @@ index 1f102fd4d943..b5b9e5de0f4e 100644
  }
  
  /*
-@@ -679,7 +679,7 @@ int blspec_boot(struct blspec_entry *entry, int verbose, int dryrun)
+@@ -680,7 +680,7 @@ int blspec_boot(struct blspec_entry *entry, int verbose, int dryrun)
  	if (initrd)
  		data.initrd_file = basprintf("%s/%s", abspath, initrd);
  

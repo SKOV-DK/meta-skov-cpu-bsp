@@ -9,10 +9,10 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  2 files changed, 32 deletions(-)
 
 diff --git a/common/blspec.c b/common/blspec.c
-index 3f844bdf5569..c60091d9c769 100644
+index d6439cfb15f0..6d3b9c3d1891 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -762,33 +762,3 @@ struct blspec_entry *blspec_entry_default(struct blspec *l)
+@@ -763,33 +763,3 @@ struct blspec_entry *blspec_entry_default(struct blspec *l)
  		return entry_default;
  	return entry_first;
  }

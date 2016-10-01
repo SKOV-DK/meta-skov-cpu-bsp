@@ -1,37 +1,27 @@
 # umpf-base: v2016.08.0
 # umpf-name: 2016.08.0/customers/skov/imx6
-# umpf-version: 2016.08.0/customers/skov/imx6/20160921-1
+# umpf-version: 2016.08.0/customers/skov/imx6/20161001-1
 # umpf-topic: v2016.08.0/customers/skov/imx6
-# umpf-hashinfo: 556701a75539fa47ae245c2a577f165c93bcc592
-# umpf-topic-range: 7defdbf78f4c4c412632500c51909f08f99baacf..556701a75539fa47ae245c2a577f165c93bcc592
+# umpf-hashinfo: 8c7fcb47989bb878a2657be570965b2405855885
+# umpf-topic-range: 7defdbf78f4c4c412632500c51909f08f99baacf..88a9245616446f11fb7b8d8258fbf19c65bd7168
 SRC_URI += "\
-  file://patches/0001-Skov-add-base-platform-support.patch \
-  file://patches/0002-blspec-Prepare-for-a-different-compatible-string.patch \
-  file://patches/0003-Skov-create-some-information-at-run-time.patch \
-  file://patches/0004-blspec-define-a-partition-name-in-order-to-use-Bareb.patch \
-  file://patches/0005-Skov-Use-local-environment-variants-to-handle-the-re.patch \
-  file://patches/0006-Skov-some-board-variants-needs-special-tweaks.patch \
-  file://patches/0007-dol63x-set-defaults-for-bootsate-parameters.patch \
-  file://patches/0008-Skov-add-support-for-board-variants-16-and-17.patch \
-  file://patches/0009-Skov-Add-support-for-board-variant-18.patch \
-  file://patches/0010-Skov-add-support-for-board-variant-19.patch \
-  file://patches/0011-skov-version-fix-usage-of-asprintf.patch \
-  file://patches/0012-imx6qdl-skov-dol63x-fix-usage-of-phy-reset-duration-.patch \
-  file://patches/0013-Skov-add-support-for-board-variant-20.patch \
-  file://patches/0014-dol63x-dtsi-prepare-dtb-for-new-state-implementation.patch \
-  file://patches/0015-dol63x-board-set-update-handler-to-specific-spiflash.patch \
-  file://patches/0016-ARM-i.MX6-Enable-parent-propagation-for-clk_gate2.patch \
-  file://patches/0017-xstrdup-don-t-panic-on-xstrdup-NULL.patch \
+  file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
+  file://patches/0002-ARM-i.MX6-Enable-parent-propagation-for-clk_gate2.patch \
+  file://patches/0003-xstrdup-don-t-panic-on-xstrdup-NULL.patch \
+  file://patches/0004-environment-wrong-magic-gives-the-impression-of-an-e.patch \
+  file://patches/0005-blspec-fix-erroneus-free-in-entry_is_of_compatible.patch \
+  file://patches/0006-blspec-fix-return-value-of-entry_is_of_compatible.patch \
+  file://patches/0007-ubi-Only-read-necessary-size-when-reading-the-VID-he.patch \
   "
 # umpf-topic: v2016.08.0/topic/imx-fix
 # umpf-hashinfo: 232d18b6aae72af48225cd14170a818957355279
-# umpf-topic-range: 556701a75539fa47ae245c2a577f165c93bcc592..cff28db6be3956e8e2616d2d1a54b078bc39232d
+# umpf-topic-range: 88a9245616446f11fb7b8d8258fbf19c65bd7168..fe9be47bbe348237d8c8e2f09534d0670d9da732
 SRC_URI += "\
   file://patches/0101-fix-ARMv8-interference-with-ARMv7.patch \
   "
 # umpf-topic: v2016.08.0/topic/bootchooser
 # umpf-hashinfo: 1c956e58346118892faf149c7d56baf68571ffcc
-# umpf-topic-range: cff28db6be3956e8e2616d2d1a54b078bc39232d..8bb07809c83a15036ea609ba2aa5d1b2605e9d81
+# umpf-topic-range: fe9be47bbe348237d8c8e2f09534d0670d9da732..4fc7c27e6624048e9b3ecacdabf2614b11559ad6
 SRC_URI += "\
   file://patches/0201-blspec-remove-unused-blspec_boot_devicename.patch \
   file://patches/0202-blspec-Remove-once-default-handling.patch \
@@ -67,7 +57,7 @@ SRC_URI += "\
   "
 # umpf-topic: v2016.08.0/topic/squashfs
 # umpf-hashinfo: e843248dffc4b7870a06b3f734b4d311161e1e87
-# umpf-topic-range: 8bb07809c83a15036ea609ba2aa5d1b2605e9d81..c1a38ce5961f2073bdc664630fe6a333b00cc85a
+# umpf-topic-range: 4fc7c27e6624048e9b3ecacdabf2614b11559ad6..a123943bfe022233d67eaf2b9588df810e5e3210
 SRC_URI += "\
   file://patches/0301-squashfs-add-lzo-compression-support.patch \
   file://patches/0302-fs-squashfs-add-lz4-compression.patch \
@@ -75,9 +65,9 @@ SRC_URI += "\
   file://patches/0304-Add-filetype-and-detection-for-squashfs-images.patch \
   file://patches/0305-fs-squashfs-append-linux-rootarg-for-ubi-volume.patch \
   "
-# umpf-release: 2016.08.0/customers/skov/imx6/20160921-1
-# umpf-topic-range: c1a38ce5961f2073bdc664630fe6a333b00cc85a..bcd58358fcd16f453b79455c21ff726f0eac2fcb
+# umpf-release: 2016.08.0/customers/skov/imx6/20161001-1
+# umpf-topic-range: a123943bfe022233d67eaf2b9588df810e5e3210..79f86e3cf6f5fa4b37fd9b8b17bbda1fc1bea6f7
 SRC_URI += "\
-  file://patches/0401-Release-2016.08.0-customers-skov-imx6-20160921-1.patch \
+  file://patches/0401-Release-2016.08.0-customers-skov-imx6-20161001-1.patch \
   "
 # umpf-end

@@ -97,10 +97,10 @@ index c091b2e1fa4b..152615f9a1de 100644
  		ret = boot_entry(entry);
  		if (!ret)
 diff --git a/common/blspec.c b/common/blspec.c
-index c60091d9c769..a11823ae6199 100644
+index 6d3b9c3d1891..9ff398fd207c 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -333,7 +333,7 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
+@@ -334,7 +334,7 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
  	char *abspath;
  	int ret, found = 0;
  	const char *dirname = "loader/entries";
@@ -109,7 +109,7 @@ index c60091d9c769..a11823ae6199 100644
  
  	nfspath = parse_nfs_url(root);
  	if (!IS_ERR(nfspath))
-@@ -341,9 +341,6 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
+@@ -342,9 +342,6 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
  
  	pr_info("%s: %s %s\n", __func__, root, dirname);
  
@@ -119,7 +119,7 @@ index c60091d9c769..a11823ae6199 100644
  	abspath = basprintf("%s/%s", root, dirname);
  
  	dir = opendir(abspath);
-@@ -408,13 +405,6 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
+@@ -409,13 +406,6 @@ int blspec_scan_directory(struct blspec *blspec, const char *root)
  
  		found++;
  
@@ -133,7 +133,7 @@ index c60091d9c769..a11823ae6199 100644
  		if (entry->cdev) {
  			devname = xstrdup(dev_name(entry->cdev->dev));
  			if (entry->cdev->dev->parent)
-@@ -439,8 +429,6 @@ err_out:
+@@ -440,8 +430,6 @@ err_out:
  	if (!IS_ERR(nfspath))
  		free(nfspath);
  	free(abspath);
@@ -142,7 +142,7 @@ index c60091d9c769..a11823ae6199 100644
  
  	return ret;
  }
-@@ -709,18 +697,6 @@ int blspec_boot(struct blspec_entry *entry, int verbose, int dryrun)
+@@ -710,18 +698,6 @@ int blspec_boot(struct blspec_entry *entry, int verbose, int dryrun)
  	pr_info("booting %s from %s\n", blspec_entry_var_get(entry, "title"),
  			entry->cdev ? dev_name(entry->cdev->dev) : "none");
  
@@ -161,7 +161,7 @@ index c60091d9c769..a11823ae6199 100644
  	ret = bootm_boot(&data);
  	if (ret)
  		pr_err("Booting failed\n");
-@@ -731,34 +707,3 @@ err_out:
+@@ -732,34 +708,3 @@ err_out:
  
  	return ret;
  }

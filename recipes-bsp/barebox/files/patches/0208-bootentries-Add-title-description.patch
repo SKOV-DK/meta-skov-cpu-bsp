@@ -75,10 +75,10 @@ index edf9eab60b7e..19f2fb5024a6 100644
  
  	return ret;
 diff --git a/common/blspec.c b/common/blspec.c
-index 480bd92bd6a6..d66c5b964c7b 100644
+index 72d48311aadf..3140f28e9895 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -413,11 +413,10 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -414,11 +414,10 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  				hwdevname = xstrdup(dev_name(entry->cdev->dev->parent));
  		}
  

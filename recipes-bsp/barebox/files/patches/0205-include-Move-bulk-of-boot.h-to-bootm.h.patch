@@ -149,7 +149,7 @@ index 6bedb007b55c..61b9086a1545 100644
  #include <rtc.h>
  #include <init.h>
 diff --git a/common/blspec.c b/common/blspec.c
-index a11823ae6199..1f102fd4d943 100644
+index 9ff398fd207c..5a93c015356e 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -24,7 +24,7 @@

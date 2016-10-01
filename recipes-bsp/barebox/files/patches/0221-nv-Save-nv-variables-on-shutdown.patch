@@ -25,7 +25,7 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  3 files changed, 85 insertions(+), 3 deletions(-)
 
 diff --git a/common/environment.c b/common/environment.c
-index c3ad25266a37..db127d71ad5d 100644
+index 4bb103d1ff60..0edf34b661d9 100644
 --- a/common/environment.c
 +++ b/common/environment.c
 @@ -364,6 +364,10 @@ int envfs_save(const char *filename, const char *dirname, unsigned flags)

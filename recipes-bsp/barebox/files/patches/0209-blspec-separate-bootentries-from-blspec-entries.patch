@@ -203,7 +203,7 @@ index 19f2fb5024a6..1ae274524735 100644
  	if (ret < 0)
  		return ret;
 diff --git a/common/blspec.c b/common/blspec.c
-index d66c5b964c7b..a6209f473b19 100644
+index 3140f28e9895..012153eb1b8c 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -55,6 +55,29 @@ const char *blspec_entry_var_get(struct blspec_entry *entry, const char *name)
@@ -236,7 +236,7 @@ index d66c5b964c7b..a6209f473b19 100644
  /*
   * blspec_entry_open - open an entry given a path
   */
-@@ -401,7 +424,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -402,7 +425,7 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  		entry->cdev = get_cdev_by_mountpath(root);
  
  		if (!entry_is_of_compatible(entry)) {
@@ -245,7 +245,7 @@ index d66c5b964c7b..a6209f473b19 100644
  			continue;
  		}
  
-@@ -421,6 +444,9 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
+@@ -422,6 +445,9 @@ int blspec_scan_directory(struct bootentries *bootentries, const char *root)
  		free(hwdevname);
  
  		entry->entry.me.type = MENU_ENTRY_NORMAL;

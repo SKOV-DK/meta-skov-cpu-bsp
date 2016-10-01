@@ -12,7 +12,7 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  2 files changed, 78 insertions(+), 80 deletions(-)
 
 diff --git a/common/blspec.c b/common/blspec.c
-index a6209f473b19..8c2927f7b16e 100644
+index 012153eb1b8c..17013453659b 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -43,6 +43,84 @@ int blspec_entry_var_set(struct blspec_entry *entry, const char *name,
@@ -100,7 +100,7 @@ index a6209f473b19..8c2927f7b16e 100644
   * blspec_entry_var_get - get the value of a variable
   */
  const char *blspec_entry_var_get(struct blspec_entry *entry, const char *name)
-@@ -657,81 +735,3 @@ int blspec_scan_devicename(struct bootentries *bootentries, const char *devname)
+@@ -658,81 +736,3 @@ int blspec_scan_devicename(struct bootentries *bootentries, const char *devname)
  
  	return blspec_scan_device(bootentries, dev);
  }

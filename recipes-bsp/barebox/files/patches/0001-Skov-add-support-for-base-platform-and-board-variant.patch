@@ -1,62 +1,79 @@
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 8 Dec 2015 09:59:19 +0100
-Subject: [PATCH] Skov: add base platform support.
+Subject: [PATCH] Skov: add support for base platform and board variants 19 &
+ 20
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-The Skov platform consists of many variants of CPUs (i.MX6S/DL and i.MX6d/Q),
-NAND memories (size differs from 256 MiB to 8 GiB) and populated SDRAM (256 MiB
-up to 2 GiB).
+The Skov platform potentially consists of many variants of CPUs (i.MX6S/DL and
+i.MX6D/Q), NAND memories (size differs from 256 MiB to 8 GiB) and populated
+SDRAM (256 MiB up to 2 GiB). All these variants share one PCB.
 
-All these variants share one PCB and should also share one single Barebox
-binary. To distinguish the variant at runtime, some bootstrap resitors are
-provided which decodes the variant.
+Some bootstrap resistors are provided which decode the variant and which allow
+for it's detection at runtime. This information is needed to choose the bootspec
+entry with the matching devicetree to boot the system. Based upon this mechanism
+usage of a single Barebox image and Linux root filesystem for all known board
+variants is made possible.
 
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+Signed-off-by: Søren Andersen <san@skov.dk>
+[Note: this commit results of squashing commits v2016.08.0..17bb4fca9a0c]
 ---
  arch/arm/boards/Makefile                           |   1 +
- arch/arm/boards/skov-dol63x/Makefile               |   2 +
- arch/arm/boards/skov-dol63x/board.c                |  30 +
- .../flash-header-mx6-skol-dol63x.imxcfg            |   3 +
- arch/arm/boards/skov-dol63x/lowlevel.c             | 710 +++++++++++++++++++++
+ arch/arm/boards/skov-imx6/Makefile                 |   2 +
+ arch/arm/boards/skov-imx6/board.c                  |  30 +
+ arch/arm/boards/skov-imx6/env/init/automount       |  14 +
+ arch/arm/boards/skov-imx6/env/nv/boot.default      |   1 +
+ .../skov-imx6/flash-header-mx6-skov-imx6.imxcfg    |   3 +
+ arch/arm/boards/skov-imx6/lowlevel.c               | 673 +++++++++++++++++++++
+ arch/arm/boards/skov-imx6/version.c                | 245 ++++++++
  arch/arm/dts/Makefile                              |   1 +
- arch/arm/dts/imx6dl-skov-dol63x.dts                |  24 +
- arch/arm/dts/imx6q-skov-dol63x.dts                 |  24 +
- arch/arm/dts/imx6qdl-skov-dol63x.dtsi              | 280 ++++++++
+ arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
+ arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 318 ++++++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
+ common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 11 files changed, 1085 insertions(+)
- create mode 100644 arch/arm/boards/skov-dol63x/Makefile
- create mode 100644 arch/arm/boards/skov-dol63x/board.c
- create mode 100644 arch/arm/boards/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg
- create mode 100644 arch/arm/boards/skov-dol63x/lowlevel.c
- create mode 100644 arch/arm/dts/imx6dl-skov-dol63x.dts
- create mode 100644 arch/arm/dts/imx6q-skov-dol63x.dts
- create mode 100644 arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+ 15 files changed, 1358 insertions(+), 8 deletions(-)
+ create mode 100644 arch/arm/boards/skov-imx6/Makefile
+ create mode 100644 arch/arm/boards/skov-imx6/board.c
+ create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
+ create mode 100644 arch/arm/boards/skov-imx6/env/nv/boot.default
+ create mode 100644 arch/arm/boards/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
+ create mode 100644 arch/arm/boards/skov-imx6/lowlevel.c
+ create mode 100644 arch/arm/boards/skov-imx6/version.c
+ create mode 100644 arch/arm/dts/imx6dl-skov-imx6.dts
+ create mode 100644 arch/arm/dts/imx6q-skov-imx6.dts
+ create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index e3dcc6a61507..61881e5d6d36 100644
+index e3dcc6a61507..ce8554545602 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
 @@ -100,6 +100,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
-+obj-$(CONFIG_MACH_SKOV_DOL63X)			+= skov-dol63x/
++obj-$(CONFIG_MACH_SKOV_IMX6)			+= skov-imx6/
  obj-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB)	+= freescale-mx6sx-sabresdb/
  obj-$(CONFIG_MACH_SAMA5D3XEK)			+= sama5d3xek/
  obj-$(CONFIG_MACH_SAMA5D3_XPLAINED)		+= sama5d3_xplained/
-diff --git a/arch/arm/boards/skov-dol63x/Makefile b/arch/arm/boards/skov-dol63x/Makefile
+diff --git a/arch/arm/boards/skov-imx6/Makefile b/arch/arm/boards/skov-imx6/Makefile
 new file mode 100644
-index 000000000000..01c7a259e9a5
+index 000000000000..206715adce68
 --- /dev/null
-+++ b/arch/arm/boards/skov-dol63x/Makefile
++++ b/arch/arm/boards/skov-imx6/Makefile
 @@ -0,0 +1,2 @@
-+obj-y += board.o
++obj-y += board.o version.o
 +lwl-y += lowlevel.o
-diff --git a/arch/arm/boards/skov-dol63x/board.c b/arch/arm/boards/skov-dol63x/board.c
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
 new file mode 100644
-index 000000000000..051366992708
+index 000000000000..0362379bb88a
 --- /dev/null
-+++ b/arch/arm/boards/skov-dol63x/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
 @@ -0,0 +1,30 @@
 +/*
 + * This program is free software; you can redistribute it and/or
@@ -77,32 +94,59 @@ index 000000000000..051366992708
 +#include <init.h>
 +#include <mach/bbu.h>
 +
-+static int skov_dol63x_devices_init(void)
++static int skov_imx6_devices_init(void)
 +{
-+	if (!of_machine_is_compatible("skov,dol63x"))
++	if (!of_machine_is_compatible("skov,imx6"))
 +		return 0;
 +
-+	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0",
++	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0.barebox",
 +		BBU_HANDLER_FLAG_DEFAULT);
 +
 +	return 0;
 +}
-+coredevice_initcall(skov_dol63x_devices_init);
-diff --git a/arch/arm/boards/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg b/arch/arm/boards/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg
++coredevice_initcall(skov_imx6_devices_init);
+diff --git a/arch/arm/boards/skov-imx6/env/init/automount b/arch/arm/boards/skov-imx6/env/init/automount
+new file mode 100644
+index 000000000000..bc9ff48a0afb
+--- /dev/null
++++ b/arch/arm/boards/skov-imx6/env/init/automount
+@@ -0,0 +1,14 @@
++#!/bin/sh
++
++if [ "$1" = menu ]; then
++	init-menu-add-entry "$0" "Automountpoints"
++	exit
++fi
++
++# development support
++mkdir -p /mnt/tftp
++automount /mnt/tftp 'ifup eth0 && mount -t tftp $eth0.serverip /mnt/tftp'
++
++# regular SD card based boot procedure
++mkdir -p /mnt/sd
++automount -d /mnt/sd 'mmc2.probe=1 && mount -t ext4 /dev/mmc2.0 /mnt/sd'
+diff --git a/arch/arm/boards/skov-imx6/env/nv/boot.default b/arch/arm/boards/skov-imx6/env/nv/boot.default
+new file mode 100644
+index 000000000000..fe1a363da1e7
+--- /dev/null
++++ b/arch/arm/boards/skov-imx6/env/nv/boot.default
+@@ -0,0 +1 @@
++bootchooser
+diff --git a/arch/arm/boards/skov-imx6/flash-header-mx6-skov-imx6.imxcfg b/arch/arm/boards/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
 new file mode 100644
 index 000000000000..400a87015425
 --- /dev/null
-+++ b/arch/arm/boards/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg
++++ b/arch/arm/boards/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
 @@ -0,0 +1,3 @@
 +soc imx6
 +loadaddr 0x00907000
 +dcdofs 0x400
-diff --git a/arch/arm/boards/skov-dol63x/lowlevel.c b/arch/arm/boards/skov-dol63x/lowlevel.c
+diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..a0eb2891f397
+index 000000000000..de210016e149
 --- /dev/null
-+++ b/arch/arm/boards/skov-dol63x/lowlevel.c
-@@ -0,0 +1,710 @@
++++ b/arch/arm/boards/skov-imx6/lowlevel.c
+@@ -0,0 +1,673 @@
 +/*
 + * This program is free software; you can redistribute it and/or
 + * modify it under the terms of the GNU General Public License as
@@ -119,7 +163,7 @@ index 000000000000..a0eb2891f397
 + *
 + * SPDX-License-Identifier: GPL-2.0
 + */
-+#define pr_fmt(fmt) "skov-dol63x: " fmt
++#define pr_fmt(fmt) "skov-imx6: " fmt
 +
 +#include <common.h>
 +#include <mach/generic.h>
@@ -135,8 +179,8 @@ index 000000000000..a0eb2891f397
 +#include <serial/imx-uart.h>
 +#include <mach/iomux-mx6.h>
 +
-+#define SKOV_DOL63X_SDHC_CHANNEL 2 /* SDHC #3 */
-+#define SKOV_DOL63X_NOR_CHANNEL 0 /* SPI master #1 */
++#define SKOV_IMX6_SDHC_CHANNEL 2 /* SDHC #3 */
++#define SKOV_IMX6_NOR_CHANNEL 0 /* SPI master #1 */
 +
 +static void __udelay(int us)
 +{
@@ -144,64 +188,6 @@ index 000000000000..a0eb2891f397
 +
 +	for (i = 0; i < us * 4; i++);
 +}
-+
-+/* ------------------------------------------------------------------------ */
-+
-+/*
-+ * Micron MT41K256M16HA-125 IT:E ->  4 GBit = 32 Meg x 16 x 8 banks
-+ *
-+ * Speed Grade   Data Rate (MT/s)  tRCD-tRP-CL   tRCD(ns)  tRP(ns)  CL(ns)
-+ *    -125          1600            11-11-11      13.75     13.75   13.75
-+ *               (=800 MHz)
-+ *
-+ * Memory configuration used by variant:
-+ * - "Max Performance", 64 bit data bus, 1066 MHz, 2 GiB memory
-+ */
-+static const struct mx6_ddr3_cfg skov_dol63x_cfg_4x256Mb_1066MHz = {
-+	.mem_speed = 1066,
-+	.density = 4, /* GiBit */
-+	.width = 16, /* 16 bit data per device */
-+	.banks = 8,
-+	.rowaddr = 15, /* 32 k */
-+	.coladdr = 10, /* 1 k */
-+	.pagesz = 2, /* [kiB] */
-+	.trcd = 1375, /* 13.75 ns = 11 clocks @ 1.6 GHz */
-+	.trcmin = 4875, /* 48.75 ns = 39 clocks @ 1.6 GHz */
-+	.trasmin = 3500, /* 35 ns = 28 clocks @ 1.6 GHz */
-+	.SRT = 0,
-+};
-+
-+static const struct mx6_ddr_sysinfo skov_dol63x_sysinfo_4x256Mb_1066MHz = {
-+	.dsize = 2, /* 64 bit wide = 4 devices, 16 bit each */
-+	.cs_density = 16, /* four 4 GBit devices connected */
-+	.ncs = 1, /* one CS line for all devices */
-+	.cs1_mirror = 1, /* TODO */
-+	.bi_on = 1, /* TODO */
-+	.rtt_nom = 1, /* MX6_MMDC_P0_MPODTCTRL -> 0x00022227 */
-+	.rtt_wr = 0, /* is LW_EN is 0 in their code */
-+	.ralat = 5, /* TODO */
-+	.walat = 1, /* TODO */
-+	.mif3_mode = 3, /* TODO */
-+	.rst_to_cke = 0x23, /* used in their code as well */
-+	.sde_to_rst = 0x10, /* used in their code as well */
-+	.pd_fast_exit = 0, /* TODO */
-+};
-+
-+static const struct mx6_mmdc_calibration skov_dol63x_calib_4x256Mb_1066MHz = {
-+	.p0_mpwldectrl0 = 0x001a0017,
-+	.p0_mpwldectrl1 = 0x001F001F,
-+	.p0_mpdgctrl0 = 0x43040319,
-+	.p0_mpdgctrl1 = 0x03040279,
-+	.p0_mprddlctl = 0x4d434248,
-+	.p0_mpwrdlctl = 0x34424543,
-+
-+	.p1_mpwldectrl0 = 0x00170027,
-+	.p1_mpwldectrl1 = 0x000a001f,
-+	.p1_mpdgctrl0 = 0x43040321,
-+	.p1_mpdgctrl1 = 0x03030251,
-+	.p1_mprddlctl = 0x42413c4d,
-+	.p1_mpwrdlctl = 0x49324933,
-+};
 +
 +/* ------------------------------------------------------------------------ */
 +
@@ -218,7 +204,7 @@ index 000000000000..a0eb2891f397
 + * Memory configuration used by variant
 + * - "High Performance", 64 bit data bus, 1066 MHz, 1 GiB memory
 + */
-+static const struct mx6_ddr3_cfg skov_dol63x_cfg_4x128Mb_1066MHz = {
++static const struct mx6_ddr3_cfg skov_imx6_cfg_4x128Mb_1066MHz = {
 +	.mem_speed = 1066,
 +	.density = 2, /* GiBit */
 +	.width = 16, /* 16 bit data per device */
@@ -232,7 +218,7 @@ index 000000000000..a0eb2891f397
 +	.SRT = 0,
 +};
 +
-+static const struct mx6_ddr_sysinfo skov_dol63x_sysinfo_4x128Mb_1066MHz = {
++static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_4x128Mb_1066MHz = {
 +	.dsize = 2, /* 64 bit wide = 4 devices, 16 bit each */
 +	.cs_density = 8, /* four 2 GBit devices connected */
 +	.ncs = 1, /* one CS line for all devices */
@@ -249,7 +235,7 @@ index 000000000000..a0eb2891f397
 +};
 +
 +/* calibration info for the "max performance" and "high performance" */
-+static const struct mx6_mmdc_calibration skov_dol63x_calib_4x128Mb_1066MHz = {
++static const struct mx6_mmdc_calibration skov_imx6_calib_4x128Mb_1066MHz = {
 +	.p0_mpwldectrl0 = 0x0011000E,
 +	.p0_mpwldectrl1 = 0x000E001B,
 +	.p0_mpdgctrl0 = 0x42720306,
@@ -324,57 +310,6 @@ index 000000000000..a0eb2891f397
 +
 +/* ------------------------------------------------------------------------ */
 +/*
-+ * Micron MT41K64M16TW-107 IT:J ->  1 GBit = 8 Meg x 16 x 8 banks
-+ *
-+ * Speed Grade   Data Rate (MT/s)  tRCD-tRP-CL   tRCD(ns)  tRP(ns)  CL(ns)
-+ *    -107          1866            13-13-13      13.91     13.91   13.91
-+ *               (=800 MHz)
-+ *
-+ * Memory configuration used by variant
-+ * - "Low Cost", 32 bit data bus, 800 MHz, 256 MiB memory
-+ */
-+
-+static const struct mx6_ddr3_cfg skov_dol63x_cfg_2x64Mb_800MHz = {
-+	.mem_speed = 800,
-+	.density = 1, /* GiBit */
-+	.width = 16, /* 16 bit data per device */
-+	.banks = 8,
-+	.rowaddr = 13, /* 8 k */
-+	.coladdr = 10, /* 1 k */
-+	.pagesz = 2, /* [kiB] */
-+	.trcd = 1391, /* 13.91 ns */
-+	.trcmin = 4791, /* 47.91 ns */
-+	.trasmin = 3400, /* 34 ns */
-+	.SRT = 0,
-+};
-+
-+static const struct mx6_ddr_sysinfo skov_dol63x_sysinfo_2x64Mb_800MHz = {
-+	.dsize = 1, /* 32 bit wide = 2 devices, 16 bit each */
-+	.cs_density = 4, /* two 1 GBit devices connected */
-+	.ncs = 1, /* one CS line for all devices */
-+	.cs1_mirror = 1, /* TODO */
-+	.bi_on = 1, /* TODO */
-+	.rtt_nom = 1, /* MX6_MMDC_P0_MPODTCTRL -> 0x00022227 */
-+	.rtt_wr = 0, /* is LW_EN is 0 in their code */
-+	.ralat = 5, /* TODO */
-+	.walat = 1, /* TODO */
-+	.mif3_mode = 3, /* TODO */
-+	.rst_to_cke = 0x23, /* used in their code as well */
-+	.sde_to_rst = 0x10, /* used in their code as well */
-+	.pd_fast_exit = 0, /* TODO */
-+};
-+
-+static const struct mx6_mmdc_calibration skov_dol63x_calib_2x64Mb_800MHz = {
-+	.p0_mpwldectrl0 = 0x0040003C,
-+	.p0_mpwldectrl1 = 0x0032003E,
-+	.p0_mpdgctrl0 = 0x42350231,
-+	.p0_mpdgctrl1 = 0x021A0218,
-+	.p0_mprddlctl = 0x4B4B4E49,
-+	.p0_mpwrdlctl = 0x3F3F3035,
-+};
-+
-+/* ------------------------------------------------------------------------ */
-+/*
 + * Device Information: Varies per DDR3 part number and speed grade
 + * Note: this SDRAM type is used on the "Low Cost" variant
 + *
@@ -390,7 +325,7 @@ index 000000000000..a0eb2891f397
 + * Memory configuration used by variant
 + * - "Low Cost", 32 bit data bus, 800 MHz, 512 MiB memory
 + */
-+static const struct mx6_ddr3_cfg skov_dol63x_cfg_2x128Mb_800MHz = {
++static const struct mx6_ddr3_cfg skov_imx6_cfg_2x128Mb_800MHz = {
 +	.mem_speed = 800,
 +	.density = 2, /* GiBit */
 +	.width = 16, /* 16 bit data per device */
@@ -404,7 +339,7 @@ index 000000000000..a0eb2891f397
 +	.SRT = 0,
 +};
 +
-+static const struct mx6_ddr_sysinfo skov_dol63x_sysinfo_2x128Mb_800MHz = {
++static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_2x128Mb_800MHz = {
 +	.dsize = 1, /* 32 bit wide = 2 devices, 16 bit each */
 +	.cs_density = 4, /* two 2 GBit devices connected */
 +	.ncs = 1, /* one CS line for all devices */
@@ -420,7 +355,7 @@ index 000000000000..a0eb2891f397
 +	.pd_fast_exit = 0, /* TODO */
 +};
 +
-+static const struct mx6_mmdc_calibration skov_dol63x_calib_2x128Mb_800MHz = {
++static const struct mx6_mmdc_calibration skov_imx6_calib_2x128Mb_800MHz = {
 +	.p0_mpwldectrl0 = 0x0040003C,
 +	.p0_mpwldectrl1 = 0x0032003E,
 +	.p0_mpdgctrl0 = 0x42350231,
@@ -487,6 +422,144 @@ index 000000000000..a0eb2891f397
 +}
 +
 +/* ------------------------------------------------------------------------ */
++
++#define BKLGT_PWR_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_80ohm | MX6_PAD_CTL_SRE_SLOW
++
++static inline void init_backlight_gpios(int cpu_type, unsigned board_variant)
++{
++	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
++	void __iomem *gpio6base = IOMEM(MX6_GPIO6_BASE_ADDR);
++	void __iomem *gpio1base = IOMEM(MX6_GPIO1_BASE_ADDR);
++	unsigned reg;
++
++	/*
++	 * since revision B a backlight switch is present which can help to
++	 * prevent any kind of flicker when switching on the board. Use it.
++	 * GPIO6/23 controls the backlight. High switches off the backlight.
++	 */
++	switch (board_variant) {
++	case 0 ... 8:
++		break;
++	default:
++		reg = readl(gpio6base + 0x04);
++		reg |= BIT(23);
++		writel(reg, gpio6base + 0x04); /* output */
++		reg = readl(gpio6base + 0x00);
++		reg |= BIT(23);
++		writel(reg, gpio6base + 0x00);
++
++		switch (cpu_type) {
++		case IMX6_CPUTYPE_IMX6S:
++		case IMX6_CPUTYPE_IMX6DL:
++			writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x2D0);
++			writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x6B8);
++			break;
++		case IMX6_CPUTYPE_IMX6D:
++		case IMX6_CPUTYPE_IMX6Q:
++			writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x068);
++			writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x37C);
++			break;
++		}
++	}
++
++	/*
++	 * switch brightness to the lowest available value. This is what we
++	 * can do for revision A boards
++	 * GPIO1/1 controls (via PWM) the brightness. A static low means
++	 * a very dark backlight
++	 */
++	reg = readl(gpio1base + 0x04);
++	reg |= BIT(1);
++	writel(reg, gpio1base + 0x04); /* output */
++	reg = readl(gpio1base + 0x00);
++	reg &= ~BIT(1);
++	writel(reg, gpio1base + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x210);
++		writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x5E0);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x224);
++		writel(BKLGT_PWR_PAD_CTRL, iomuxbase + 0x5F4);
++		break;
++	}
++}
++
++#define MMC_PWR_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_80ohm | MX6_PAD_CTL_SRE_SLOW
++
++/*
++ * Some variants needs special tweaks and they needs them as early as possible
++ * Note: do not call this function in early boot, you may switch off the SD
++ * card you need to boot from...
++ */
++static inline void init_mmc_gpios(int cpu_type, unsigned board_variant)
++{
++	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
++	void __iomem *gpiobase = IOMEM(MX6_GPIO7_BASE_ADDR);
++	unsigned reg;
++
++	/*
++	 * all revisions have an SD card voltage IO selector, to select 1.8 V or
++	 * 3.3 V to be used for the IO signals from/to the SD card.
++	 * GPIO7/13 selects the voltage: high means 1.8 V, low means 3.3 V
++	 */
++	/* Select 3.3 V IO supply */
++	reg = readl(gpiobase + 0x04);
++	reg |= BIT(13);
++	writel(reg, gpiobase + 0x04); /* output */
++	reg = readl(gpiobase + 0x00);
++	reg &= ~BIT(13);
++	writel(reg, gpiobase + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x21C);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x5ec);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x250);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x620);
++		break;
++	}
++
++	if (board_variant < 13)
++		return; /* no way to switch the SD card's power supply */
++
++	/*
++	 * Turn off SD cards power in order to reset it.
++	 * Revision C has an additional MMC power supply switch. It seems
++	 * we need to reset the card by power cycling, else we get
++	 * read errors when we accessing it. This happens after warm starts
++	 * or by external triggered reset (and I guess when the watchdog resets
++	 * the system as well).
++	 * GPIO7/8 is used for this purpose and must be high to enable the power
++	 */
++	reg = readl(gpiobase + 0x04);
++	reg |= BIT(8);
++	writel(reg, gpiobase + 0x04); /* output */
++	reg = readl(gpiobase + 0x00);
++	reg &= ~BIT(8);
++	writel(reg, gpiobase + 0x00);
++
++	switch (cpu_type) {
++	case IMX6_CPUTYPE_IMX6S:
++	case IMX6_CPUTYPE_IMX6DL:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x334);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x71C);
++		break;
++	case IMX6_CPUTYPE_IMX6D:
++	case IMX6_CPUTYPE_IMX6Q:
++		writel(IOMUX_CONFIG_SION | 0x05, iomuxbase + 0x2D0);
++		writel(MMC_PWR_PAD_CTRL, iomuxbase + 0x6B8);
++		break;
++	}
++}
 +
 +#define LED_PAD_CTRL MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_240ohm | MX6_PAD_CTL_SRE_SLOW
 +
@@ -555,7 +628,7 @@ index 000000000000..a0eb2891f397
 +
 +#define V_PAD_CTRL MX6_PAD_CTL_PUS_100K_UP | MX6_PAD_CTL_PUE | MX6_PAD_CTL_SPEED_LOW | MX6_PAD_CTL_DSE_DISABLE | MX6_PAD_CTL_SRE_SLOW
 +
-+static inline unsigned skov_dol63x_get_version(int cpu_type)
++static inline unsigned skov_imx6_get_version(int cpu_type)
 +{
 +	void __iomem *iomuxbase = IOMEM(MX6_IOMUXC_BASE_ADDR);
 +	void __iomem *gpiobase = IOMEM(MX6_GPIO2_BASE_ADDR);
@@ -653,157 +726,91 @@ index 000000000000..a0eb2891f397
 + * 00001101       C     256 MiB    256 MiB     i.MX6S
 + * 00001110       C    1024 MiB    256 MiB     i.MX6Q
 + * 00001111       C     512 MiB    256 MiB     i.MX6S
++ * 00010000       C     512 MiB      4 GiB     i.MX6S
++ * 00010001       C    2048 MiB      8 GiB     i.MX6Q
++ * 00010010       C    4096 MiB     16 GiB     i.MX6Q+
++ * 00010011       C     512 MiB      2 GiB     i.MX6S
++ * 00010100       C    1024 MiB      4 GiB     i.MX6Q
 + *
 + * This routine does not return if starting the image from SD card or NOR
-+ * was successful. It restarts skov_dol63x_start() instead
++ * was successful. It restarts skov_imx6_start() instead
 + */
-+static void skov_dol63x_init(int cpu_type)
++static void skov_imx6_init(int cpu_type, unsigned board_variant)
 +{
-+	unsigned board_rev;
-+
-+	board_rev = skov_dol63x_get_version(cpu_type);
-+	switch (board_rev) {
-+	case 1: /* P1 i.MX6S, low cost, old count */
-+	case 4: /* P1 i.MX6S, low cost, new count */
++	switch (board_variant) {
++	case 19: /* i.MX6S "Solo_R512M_F2G" */
 +		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
 +			pr_err("Invalid SoC! i.MX6S expected\n");
 +			return;
 +		}
-+		pr_debug("Initializing a P1 low cost system...\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x128Mb_800MHz,
-+					&skov_dol63x_calib_2x128Mb_800MHz,
-+					&skov_dol63x_cfg_2x128Mb_800MHz);
++		pr_debug("Initializing board variant 19\n");
++		spl_imx6sdl_dram_init(&skov_imx6_sysinfo_2x128Mb_800MHz,
++					&skov_imx6_calib_2x128Mb_800MHz,
++					&skov_imx6_cfg_2x128Mb_800MHz);
 +		break;
-+	case 0: /* P1 i.MX6Q, high performance */
-+	case 2: /* P1 i.MX6Q, high performance, old count */
-+	case 8: /* P1 i.MX6Q, high performance, new count */
++	case 20: /* i.MX6Q, "Quad_R1G_F2G" */
 +		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
 +			pr_err("Invalid SoC! i.MX6Q expected\n");
 +			return;
 +		}
-+		pr_debug("Initializing a P1 high performance system...\n");
-+		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
-+					&skov_dol63x_calib_4x128Mb_1066MHz,
-+					&skov_dol63x_cfg_4x128Mb_1066MHz);
-+		break;
-+	case 9: /* P2 i.MX6S, minimum cost */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
-+			pr_err("Invalid SoC! i.MX6S expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P2 minimum cost system...\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x64Mb_800MHz,
-+					&skov_dol63x_calib_2x64Mb_800MHz,
-+					&skov_dol63x_cfg_2x64Mb_800MHz);
-+		break;
-+	case 10: /* P2 i.MX6S, low cost */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
-+			pr_err("Invalid SoC! i.MX6S expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P2 low cost system...\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x64Mb_800MHz,
-+					&skov_dol63x_calib_2x64Mb_800MHz,
-+					&skov_dol63x_cfg_2x64Mb_800MHz);
-+		break;
-+	case 11: /* P1 i.MX6S, high performance */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
-+			pr_err("Invalid SoC! i.MX6Q expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P2 high performance system...\n");
-+		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
-+					&skov_dol63x_calib_4x128Mb_1066MHz,
-+					&skov_dol63x_cfg_4x128Mb_1066MHz);
-+		break;
-+	case 12: /* P2 i.MX6Q, max performance */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
-+			pr_err("Invalid SoC! i.MX6Q expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P2 max performance system...\n");
-+		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x256Mb_1066MHz,
-+					&skov_dol63x_calib_4x256Mb_1066MHz,
-+					&skov_dol63x_cfg_4x256Mb_1066MHz);
-+		break;
-+	case 13: /* P3 i.MX6S, low cost  */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
-+			pr_err("Invalid SoC! i.MX6S expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P3 low cost system...\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x64Mb_800MHz,
-+					&skov_dol63x_calib_2x64Mb_800MHz,
-+					&skov_dol63x_cfg_2x64Mb_800MHz);
-+		break;
-+	case 14: /* P3 i.MX6Q, high performance */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
-+			pr_err("Invalid SoC! i.MX6Q expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P3 high performance system...\n");
-+		spl_imx6q_dram_init(&skov_dol63x_sysinfo_4x128Mb_1066MHz,
-+					&skov_dol63x_calib_4x128Mb_1066MHz,
-+					&skov_dol63x_cfg_4x128Mb_1066MHz);
-+		break;
-+	case 15: /* P3 i.MX6S, middle performance */
-+		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
-+			pr_err("Invalid SoC! i.MX6S expected\n");
-+			return;
-+		}
-+		pr_debug("Initializing a P3 middle performance system...\n");
-+		spl_imx6sdl_dram_init(&skov_dol63x_sysinfo_2x128Mb_800MHz,
-+					&skov_dol63x_calib_2x128Mb_800MHz,
-+					&skov_dol63x_cfg_2x128Mb_800MHz);
++		pr_debug("Initializing board variant 20\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
++					&skov_imx6_calib_4x128Mb_1066MHz,
++					&skov_imx6_cfg_4x128Mb_1066MHz);
 +		break;
 +	default:
-+		pr_err("Unsupported board revision: 0x%x\n", board_rev);
-+		/* FIXME don't continue */
++		pr_err("Unsupported board revision: 0x%x\n", board_variant);
++		/* don't continue */
++		while(1);
 +		break;
 +	}
 +
 +	pr_info("Loading bootloader image from SD card...");
-+	imx6_esdhc_start_image(SKOV_DOL63X_SDHC_CHANNEL);
++	imx6_esdhc_start_image(SKOV_IMX6_SDHC_CHANNEL);
 +	pr_info("failed\nLoading bootloader image from SPI flash...");
-+	imx6_spi_start_image(SKOV_DOL63X_NOR_CHANNEL);
++	imx6_spi_start_image(SKOV_IMX6_NOR_CHANNEL);
 +	pr_info("failed. No valid boot source found. Giving up\n");
 +}
 +
-+extern char __dtb_z_imx6q_skov_dol63x_start[];
-+extern char __dtb_z_imx6dl_skov_dol63x_start[];
++extern char __dtb_z_imx6q_skov_imx6_start[];
++extern char __dtb_z_imx6dl_skov_imx6_start[];
 +
 +/* called twice: once for SDRAM setup only, second for devicetree setup */
-+static noinline void skov_dol63x_start(void)
++static noinline void skov_imx6_start(void)
 +{
 +	int cpu_type = __imx6_cpu_type();
++	unsigned board_variant = skov_imx6_get_version(cpu_type);
 +
 +	if (get_pc() <= MX6_MMDC_PORT0_BASE_ADDR) {
 +		/* first call: do the lowlevel things first */
++		init_backlight_gpios(cpu_type, board_variant);
 +		setup_leds(cpu_type);
 +		setup_uart(cpu_type);
-+		pr_info("Starting to init DOL63x system...\n");
-+		skov_dol63x_init(cpu_type);
++		pr_info("Starting to init IMX6 system...\n");
++		skov_imx6_init(cpu_type, board_variant);
 +		pr_err("Unable to start bootloader\n");
 +		while(1)
 +			;
 +	}
++
++	init_mmc_gpios(cpu_type, board_variant);
 +
 +	/* boot this platform (second call) */
 +	switch (cpu_type) {
 +	case IMX6_CPUTYPE_IMX6S:
 +	case IMX6_CPUTYPE_IMX6DL:
 +		pr_debug("Startup i.MX6S/DL based system...\n");
-+		imx6q_barebox_entry(__dtb_z_imx6dl_skov_dol63x_start);
++		imx6q_barebox_entry(__dtb_z_imx6dl_skov_imx6_start);
 +		break;
 +	case IMX6_CPUTYPE_IMX6D:
 +	case IMX6_CPUTYPE_IMX6Q:
 +		pr_debug("Startup i.MX6Q based system...\n");
-+		imx6q_barebox_entry(__dtb_z_imx6q_skov_dol63x_start);
++		imx6q_barebox_entry(__dtb_z_imx6q_skov_imx6_start);
 +		break;
 +	}
 +}
 +
-+ENTRY_FUNCTION(start_imx6_skov_dol63x, r0, r1, r2)
++ENTRY_FUNCTION(start_imx6_skov_imx6, r0, r1, r2)
 +{
 +	arm_cpu_lowlevel_init();
 +
@@ -811,25 +818,276 @@ index 000000000000..a0eb2891f397
 +	setup_c();
 +	barrier();
 +
-+	skov_dol63x_start();
++	skov_imx6_start();
 +}
+diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
+new file mode 100644
+index 000000000000..f2e1f024513f
+--- /dev/null
++++ b/arch/arm/boards/skov-imx6/version.c
+@@ -0,0 +1,245 @@
++/*
++ * SPDX-License-Identifier: GPL-2.0
++ */
++
++#include <stdio.h>
++#include <driver.h>
++#include <malloc.h>
++#include <init.h>
++#include <of.h>
++#include <of_gpio.h>
++#include <gpio.h>
++#include <printk.h>
++#include <globalvar.h>
++#include <linux/kernel.h>
++
++#define MAX_V_GPIO 8
++
++struct board_description {
++	const char *value;
++	const char *revision;
++	const char *soc;
++	const char *dts_compatible;
++};
++
++static const struct board_description imx6_variants[] = {
++	[0] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revA",
++	},
++	[1] = {
++		.value = "low cost",
++		.revision = "A",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revA",
++	},
++	[2] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revA",
++	},
++	[4] = {
++		.value = "low cost",
++		.revision = "A",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revA",
++	},
++	[8] = {
++		.value = "high performance",
++		.revision = "A",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revA",
++	},
++	[9] = {
++		.value = "minimum cost",
++		.revision = "B",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revB",
++	},
++	[10] = {
++		.value = "low cost",
++		.revision = "B",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revB",
++	},
++	[11] = {
++		.value = "high performance",
++		.revision = "B",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revB",
++	},
++	[12] = {
++		/* FIXME this one is a revision 'C' according to the schematics */
++		.value = "max performance",
++		.revision = "B",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revB",
++	},
++	[13] = {
++		.value = "low cost",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revC",
++	},
++	[14] = {
++		.value = "high performance",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revC",
++	},
++	[15] = {
++		.value = "middle performance",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revC",
++	},
++	[16] = {
++		.value = "Solo_R512M_F4G",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revC",
++	},
++	[17] = {
++		.value = "Quad_R2G_F8G",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revC",
++	},
++	[18] = {
++		.value = "QuadPlus_R4G_F16G",
++		.revision = "C",
++		.soc = "i.MX6Q+",
++		.dts_compatible = "skov,imx6-imxq-revC",
++	},
++	[19] = {
++		.value = "Solo_R512M_F2G",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6-imxdl-revC",
++	},
++	[20] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6-imxq-revC",
++	},
++};
++
++/*
++ * Some variants need tweaks to make them work
++ *
++ * Revision A has no backlight control, since revision B it is present (GPIO6/23)
++ * Revision A needs GPIO1/24 to be low to make network working
++ * Revision C can control the SD main power supply
++ */
++static void tweak_board(unsigned var)
++{
++	switch (var) {
++	case 0 ... 8:
++		/*
++		 * MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 is a gpio which must be
++		 * low to enable the RMII from the switch point of view
++		 */
++		gpio_request(24, "must_be_low");
++		gpio_direction_output(24, 0);
++		break;
++	}
++
++	/* backlight handling */
++	switch (var) {
++	case 0 ... 8:
++		break;
++	default:
++		gpio_request(183, "backlight switch");
++		gpio_direction_output(183, 1); /* switch it off as early as possible */
++		gpio_request(1, "backlight brightness");
++		gpio_direction_output(1, 0); /* dark */
++	}
++
++	/* SD card handling */
++	gpio_request(205, "mmc io supply");
++	gpio_direction_output(205, 0); /* select 3.3 V IO voltage */
++
++	switch (var) {
++	case 0 ... 12:
++		break;
++	default:
++		/* keep in sync with devicetree's 'regulator-boot-on' setting for this regulator */
++		gpio_request(200, "mmc power supply");
++		gpio_direction_output(200, 1); /* switch on */
++	}
++}
++
++static int skov_version_probe(struct device_d *dev)
++{
++	struct device_node *np = dev->device_node;
++	static char *gpio_name = "skov-imx6-variant-0"; /* don't change content */
++	char *number;
++	unsigned var = 0;
++	int i, rc, gpios[MAX_V_GPIO];
++
++	/* expected order in device tree is GPIO version bit 0 ... GPIO version bit 'n' */
++	for (i = 0; i < MAX_V_GPIO; i++) {
++		gpios[i] = of_get_named_gpio(np, "version-gpio", i);
++		if (gpios[i] < 0) {
++			dev_err(dev, "Not enough GPIOs defined.\n");
++			dev_err(dev, "Expected 0..%d, but failed at %d.\n", MAX_V_GPIO - 1, i + 1);
++			goto unclaim_on_error;
++		}
++		gpio_name[18] = '0' + i; /* keep in sync with its content */
++		rc = gpio_request(gpios[i], gpio_name);
++		if (rc < 0) {
++			dev_err(dev, "Failed to claim GPIO %d as '%s'\n", gpios[i], gpio_name);
++			goto unclaim_on_error;
++		}
++		gpio_direction_input(gpios[i]);
++	}
++
++	for (i = MAX_V_GPIO - 1; i >= 0; i--) {
++		var <<= 1;
++		var |= !!!gpio_get_value(gpios[i]);
++	}
++
++	if (var >= ARRAY_SIZE(imx6_variants)) {
++		dev_err(dev, "Invalid 'version' value. Expected up to %u, but got %u\n", ARRAY_SIZE(imx6_variants) - 1, var);
++		goto unclaim_on_error;
++	}
++
++	asprintf(&number, "%u", var);
++	globalvar_add_simple("board.no", number);
++	globalvar_add_simple("board.variant", imx6_variants[var].value == NULL ? "undefined" : imx6_variants[var].value);
++	globalvar_add_simple("board.revision", imx6_variants[var].revision == NULL ? "undefined" : imx6_variants[var].revision);
++	globalvar_add_simple("board.soc", imx6_variants[var].soc == NULL ? "undefined" : imx6_variants[var].soc);
++	globalvar_add_simple("board.dts", imx6_variants[var].dts_compatible == NULL ? "undefined" : imx6_variants[var].dts_compatible);
++
++	tweak_board(var);
++
++	free(number);
++	return 0;
++
++unclaim_on_error:
++	dev_err(dev, "Invalid/incomplete 'version' GPIO declaration in devicetree\n");
++	dev_dbg(dev, "Check 'skov-imx6,version' node for %d GPIO entries\n", MAX_V_GPIO);
++	i--;
++	while (i >= 0)
++		gpio_free(gpios[i--]);
++	return -ENODEV;
++}
++
++static __maybe_unused struct of_device_id skov_version_ids[] = {
++	{
++		.compatible = "skov-imx6,version",
++	}, {
++		/* sentinel */
++	}
++};
++
++static struct driver_d skov_version_driver = {
++	.name = "skov-imx6-variant",
++	.probe = skov_version_probe,
++	.of_compatible = DRV_OF_COMPAT(skov_version_ids),
++};
++device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 813e09814546..929ad116bcdc 100644
+index 813e09814546..8c332568e789 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
 @@ -57,6 +57,7 @@ pbl-dtb-$(CONFIG_MACH_RADXA_ROCK) += rk3188-radxarock.dtb.o
  pbl-dtb-$(CONFIG_MACH_REALQ7) += imx6q-dmo-edmqmx6.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
-+pbl-dtb-$(CONFIG_MACH_SKOV_DOL63X) += imx6dl-skov-dol63x.dtb.o imx6q-skov-dol63x.dtb.o
++pbl-dtb-$(CONFIG_MACH_SKOV_IMX6) += imx6dl-skov-imx6.dtb.o imx6q-skov-imx6.dtb.o
  pbl-dtb-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB) += imx6sx-sdb.dtb.o
  pbl-dtb-$(CONFIG_MACH_SOCFPGA_ALTERA_SOCDK) += socfpga_cyclone5_socdk.dtb.o
  pbl-dtb-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES) += socfpga_cyclone5_socrates.dtb.o
-diff --git a/arch/arm/dts/imx6dl-skov-dol63x.dts b/arch/arm/dts/imx6dl-skov-dol63x.dts
+diff --git a/arch/arm/dts/imx6dl-skov-imx6.dts b/arch/arm/dts/imx6dl-skov-imx6.dts
 new file mode 100644
-index 000000000000..c3944efb3d25
+index 000000000000..e7e4310ebf47
 --- /dev/null
-+++ b/arch/arm/dts/imx6dl-skov-dol63x.dts
++++ b/arch/arm/dts/imx6dl-skov-imx6.dts
 @@ -0,0 +1,24 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
@@ -845,21 +1103,21 @@ index 000000000000..c3944efb3d25
 +/dts-v1/;
 +#include "imx6dl.dtsi"
 +#include <arm/imx6dl.dtsi>
-+#include "imx6qdl-skov-dol63x.dtsi"
++#include "imx6qdl-skov-imx6.dtsi"
 +
 +/ {
-+	model = "Skov DOL63x";
-+	compatible = "skov,dol63x", "fsl,imx6dl";
++	model = "Skov IMX6";
++	compatible = "skov,imx6", "fsl,imx6dl";
 +
 +	chosen {
 +		stdout-path = &uart2;
 +	};
 +};
-diff --git a/arch/arm/dts/imx6q-skov-dol63x.dts b/arch/arm/dts/imx6q-skov-dol63x.dts
+diff --git a/arch/arm/dts/imx6q-skov-imx6.dts b/arch/arm/dts/imx6q-skov-imx6.dts
 new file mode 100644
-index 000000000000..d0c72b70e290
+index 000000000000..33b2ebe41c22
 --- /dev/null
-+++ b/arch/arm/dts/imx6q-skov-dol63x.dts
++++ b/arch/arm/dts/imx6q-skov-imx6.dts
 @@ -0,0 +1,24 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
@@ -875,22 +1133,22 @@ index 000000000000..d0c72b70e290
 +/dts-v1/;
 +#include "imx6q.dtsi"
 +#include <arm/imx6q.dtsi>
-+#include "imx6qdl-skov-dol63x.dtsi"
++#include "imx6qdl-skov-imx6.dtsi"
 +
 +/ {
-+	model = "Skov DOL63x";
-+	compatible = "skov,dol63x", "fsl,imx6q";
++	model = "Skov IMX6";
++	compatible = "skov,imx6", "fsl,imx6q";
 +
 +	chosen {
 +		stdout-path = &uart2;
 +	};
 +};
-diff --git a/arch/arm/dts/imx6qdl-skov-dol63x.dtsi b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
+diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 new file mode 100644
-index 000000000000..249121660963
+index 000000000000..3ddc58c55d51
 --- /dev/null
-+++ b/arch/arm/dts/imx6qdl-skov-dol63x.dtsi
-@@ -0,0 +1,280 @@
++++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
+@@ -0,0 +1,318 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
 + *
@@ -932,40 +1190,20 @@ index 000000000000..249121660963
 +	};
 +
 +	skov_version {
-+		compatible = "skov-version";
-+		v0-gpio = <&gpio2 10 0>;
-+		v1-gpio = <&gpio2 15 0>;
-+		v2-gpio = <&gpio2 8 0>; 
-+		v3-gpio = <&gpio2 9 0>; 
-+		v4-gpio = <&gpio2 12 0>;
-+		v5-gpio = <&gpio2 14 0>;
-+		v6-gpio = <&gpio2 11 0>;
-+		v7-gpio = <&gpio2 13 0>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_version>;
++		status = "okay";
++		compatible = "skov-imx6,version";
++		version-gpio = <&gpio2 10 0>, <&gpio2 15 0>, <&gpio2 8 0>, <&gpio2 9 0>, <&gpio2 12 0>, <&gpio2 14 0>, <&gpio2 11 0>, <&gpio2 13 0>;
 +	};	
-+
-+	/* State: immutable part */
-+	bootstate: bootstate {
-+		compatible = "barebox,bootstate";
-+		backend-type = "state";
-+		backend = <&state>;
-+
-+		system0 { /* the node's name here must match the subnode's name in the 'state' node */
-+			default_attempts = <3>;
-+			boot = "/dev/nand0.ubi.system0"; /* must be in conjunction with the runtime path */
-+		};
-+
-+		system1 { /* the node's name here must match the subnode's name in the 'state' node */
-+			default_attempts = <3>;
-+			boot = "/dev/nand0.ubi.system1"; /* must be in conjunction with the runtime path */
-+		};
-+	};
 +
 +	/* State: mutable part */
 +	state: state {
-+		magic = <0x4d433230>;
++		magic = <0x34a0fc27>;
 +		compatible = "barebox,state";
 +		backend-type = "raw";
 +		backend = <&state_storage>;
++		backend-stridesize = <0x40>;
 +		#address-cells = <1>;
 +		#size-cells = <1>;
 +
@@ -980,14 +1218,12 @@ index 000000000000..249121660963
 +				remaining_attempts {
 +					reg = <0x0 0x4>;
 +					type = "uint32";
++					default = <3>;
 +				};
 +				priority {
 +					reg = <0x4 0x4>;
 +					type = "uint32";
-+				};
-+				ok {
-+					reg = <0x8 0x4>;
-+					type = "uint32";
++					default = <30>;
 +				};
 +			};
 +
@@ -996,23 +1232,48 @@ index 000000000000..249121660963
 +				#size-cells = <1>;
 +
 +				remaining_attempts {
-+					reg = <0x10 0x4>;
++					reg = <0x8 0x4>;
 +					type = "uint32";
++					default = <3>;
 +				};
 +				priority {
-+					reg = <0x14 0x4>;
++					reg = <0xC 0x4>;
 +					type = "uint32";
-+				};
-+				ok {
-+					reg = <0x18 0x4>;
-+					type = "uint32";
++					default = <20>;
 +				};
 +			};
 +
-+			watchdog_timeout {
-+				reg = <0x20 0x4>;
++			last_chosen {
++				reg = <0x10 0x4>;
 +				type = "uint32";
-+				default = <60>;
++			};
++		};
++
++		kmsfb-manage-conf {
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			xres {
++				reg = <0x14 0x4>;
++				type = "uint32";
++				default = <800>;
++			};
++
++			yres {
++				reg = <0x18 0x4>;
++				type = "uint32";
++				default = <480>;
++			};
++		};
++
++		display {
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			brightness {
++				reg = <0x1C 0x1>;
++				type = "uint8";
++				default = <8>;
 +			};
 +		};
 +	};
@@ -1020,6 +1281,36 @@ index 000000000000..249121660963
 +
 +&iomuxc {
 +	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hog>;
++
++	pinctrl_hog: hoggrp {
++		/* we need a few pins as GPIOs */
++		fsl,pins = <
++			/* MMC IO voltage select */
++			MX6QDL_PAD_GPIO_18__GPIO7_IO13 0x40000058
++			/* MMC Power Supply Switch (since revision C)
++			MX6QDL_PAD_SD3_RST__GPIO7_IO08 0x40000058
++			/* Backlight Power Supply Switch (since revision B)
++			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23 0x40000058
++			/* Backlight Brightness */
++			MX6QDL_PAD_GPIO_1__GPIO1_IO01 0x40000058
++			/* must be high */
++			MX6QDL_PAD_ENET_RX_ER__GPIO1_IO24 0x40000058
++		>;
++	};
++
++	pinctrl_version: versiongrp {
++		fsl,pins = <
++			MX6QDL_PAD_SD4_DAT0__GPIO2_IO08 0x1b040
++			MX6QDL_PAD_SD4_DAT1__GPIO2_IO09 0x1b040
++			MX6QDL_PAD_SD4_DAT2__GPIO2_IO10 0x1b040
++			MX6QDL_PAD_SD4_DAT3__GPIO2_IO11 0x1b040
++			MX6QDL_PAD_SD4_DAT4__GPIO2_IO12 0x1b040
++			MX6QDL_PAD_SD4_DAT5__GPIO2_IO13 0x1b040
++			MX6QDL_PAD_SD4_DAT6__GPIO2_IO14 0x1b040
++			MX6QDL_PAD_SD4_DAT7__GPIO2_IO15 0x1b040
++		>;
++	};
 +
 +	pinctrl_uart2: uart2grp {
 +		fsl,pins = <
@@ -1033,7 +1324,7 @@ index 000000000000..249121660963
 +			MX6QDL_PAD_EIM_D17__ECSPI1_MISO 0x100b1
 +			MX6QDL_PAD_EIM_D18__ECSPI1_MOSI 0x100b1
 +			MX6QDL_PAD_EIM_D16__ECSPI1_SCLK 0x100b1
-+			MX6QDL_PAD_EIM_D24__GPIO3_IO24 0x100b1 /* CS# signal */
++			MX6QDL_PAD_EIM_D24__GPIO3_IO24 0x40000058 /* CS# signal */
 +		>;
 +	};
 +
@@ -1060,8 +1351,8 @@ index 000000000000..249121660963
 +			MX6QDL_PAD_SD3_DAT1__SD3_DATA1 0x17059
 +			MX6QDL_PAD_SD3_DAT2__SD3_DATA2 0x17059
 +			MX6QDL_PAD_SD3_DAT3__SD3_DATA3 0x17059
-+			MX6QDL_PAD_SD3_DAT4__GPIO7_IO01 0x17059 /* WP */
-+			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00 0x1b0b0 /* CD */
++			MX6QDL_PAD_SD3_DAT4__GPIO7_IO01 0x1b040 /* WP */
++			MX6QDL_PAD_SD3_DAT5__GPIO7_IO00 0x1b040 /* CD */
 +		>;
 +	};
 +
@@ -1117,7 +1408,7 @@ index 000000000000..249121660963
 +	phy-mode = "rmii";
 +	status = "okay";
 +	phy-reset-gpios = <&gpio1 5 0>;
-+	phy-reset-duration = "100";
++	phy-reset-duration = <100>;
 +	#address-cells = <0>;
 +	#size-cells = <1>;
 +	fixed-link {
@@ -1144,6 +1435,11 @@ index 000000000000..249121660963
 +	pinctrl-0 = <&pinctrl_gpmi_nand>;
 +	nand-on-flash-bbt;
 +	status = "okay";
++
++	partition@0 {
++		label = "firmware";
++		reg = <0x00000000 0x000000000>; /* keep zero sized to enable autodetection */
++	};
 +};
 +
 +/* define the SPI based 8 MiB NOR flash layout */
@@ -1172,33 +1468,64 @@ index 000000000000..249121660963
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index 80f8fd80aecc..b4631cb32b6a 100644
+index 80f8fd80aecc..c336e4ecd8a8 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
 @@ -316,6 +316,11 @@ config MACH_CM_FX6
  	bool "CM FX6"
  	select ARCH_IMX6
  
-+config MACH_SKOV_DOL63X
-+	bool "Skov DOL63x"
++config MACH_SKOV_IMX6
++	bool "Skov IMX6"
 +	select ARCH_IMX6
 +	select ARM_USE_COMPRESSED_DTB
 +
  endif
  
  # ----------------------------------------------------------
+diff --git a/common/blspec.c b/common/blspec.c
+index bf98e6b29acd..3f844bdf5569 100644
+--- a/common/blspec.c
++++ b/common/blspec.c
+@@ -258,14 +258,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
+ 	const char *compat;
+ 	char *filename;
+ 
+-	/* If we don't have a root node every entry is compatible */
+-	barebox_root = of_get_root_node();
+-	if (!barebox_root)
+-		return true;
+-
+-	ret = of_property_read_string(barebox_root, "compatible", &compat);
+-	if (ret)
+-		return false;
++	/* try the shortcut first */
++	compat = getenv("global.board.dts");
++	if (compat == NULL) {
++		/* If we don't have a root node every entry is compatible */
++		barebox_root = of_get_root_node();
++		if (!barebox_root)
++			return true;
++
++		ret = of_property_read_string(barebox_root, "compatible", &compat);
++		if (ret)
++			return false;
++	}
+ 
+ 	if (entry->rootpath)
+ 		abspath = entry->rootpath;
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index effa5edc0f6e..c5bf0b1f515c 100644
+index effa5edc0f6e..5e3c58260b6d 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
 @@ -378,6 +378,11 @@ CFG_start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg = $(board)/phytec-som-
  FILE_barebox-phytec-phycore-imx6dl-som-emmc-1gib.img = start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg
  image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6dl-som-emmc-1gib.img
  
-+pblx-$(CONFIG_MACH_SKOV_DOL63X) += start_imx6_skov_dol63x
-+CFG_start_imx6_skov_dol63x.imx-sram-img = $(board)/skov-dol63x/flash-header-mx6-skol-dol63x.imxcfg
-+FILE_barebox-skov-dol63x.img = start_imx6_skov_dol63x.imx-sram-img
-+image-$(CONFIG_MACH_SKOV_DOL63X) += barebox-skov-dol63x.img
++pblx-$(CONFIG_MACH_SKOV_IMX6) += start_imx6_skov_imx6
++CFG_start_imx6_skov_imx6.imx-sram-img = $(board)/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
++FILE_barebox-skov-imx6.img = start_imx6_skov_imx6.imx-sram-img
++image-$(CONFIG_MACH_SKOV_IMX6) += barebox-skov-imx6.img
 +
  pblx-$(CONFIG_MACH_GW_VENTANA) += start_imx6q_gw54xx_1gx64
  CFG_start_imx6q_gw54xx_1gx64.pblx.imximg = $(board)/gateworks-ventana/flash-header-ventana-quad-1gx64.imxcfg
