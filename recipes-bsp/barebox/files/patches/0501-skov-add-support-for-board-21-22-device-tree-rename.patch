@@ -1,0 +1,133 @@
+From bcae8518c980fe027e1b7aeee0793957ad1b2941 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 12 Oct 2016 20:28:00 +0200
+Subject: [PATCH] skov: add support for board 21 + 22, device tree rename
+
+Board 21 + 22 is similar to 19 + 20 but with different display.
+On the kernel side this required two extra device trees.
+When addign support for the extra two boards the devicetree
+files was renamed and likewise the "compatible" property.
+
+Update barebox to include these changes.
+---
+ arch/arm/boards/skov-imx6/lowlevel.c | 22 ++++++++++++++++++++++
+ arch/arm/boards/skov-imx6/version.c  | 28 ++++++++++++++++++++--------
+ 2 files changed, 42 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
+index de21001..d1b3d0d 100644
+--- a/arch/arm/boards/skov-imx6/lowlevel.c
++++ b/arch/arm/boards/skov-imx6/lowlevel.c
+@@ -582,6 +582,8 @@ static inline unsigned skov_imx6_get_version(int cpu_type)
+  * 00010010       C    4096 MiB     16 GiB     i.MX6Q+
+  * 00010011       C     512 MiB      2 GiB     i.MX6S
+  * 00010100       C    1024 MiB      4 GiB     i.MX6Q
++ * 00010101       C     512 MiB      2 GIB     i.MX6S
++ * 00010110       C    1024 MiB      4 GIB     i.MX6Q
+  *
+  * This routine does not return if starting the image from SD card or NOR
+  * was successful. It restarts skov_imx6_start() instead
+@@ -609,6 +611,26 @@ static void skov_imx6_init(int cpu_type, unsigned board_variant)
+ 					&skov_imx6_calib_4x128Mb_1066MHz,
+ 					&skov_imx6_cfg_4x128Mb_1066MHz);
+ 		break;
++	case 21: /* i.MX6S "Solo_R512M_F2G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
++			pr_err("Invalid SoC! i.MX6S expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 21\n");
++		spl_imx6sdl_dram_init(&skov_imx6_sysinfo_2x128Mb_800MHz,
++					&skov_imx6_calib_2x128Mb_800MHz,
++					&skov_imx6_cfg_2x128Mb_800MHz);
++		break;
++	case 22: /* i.MX6Q, "Quad_R1G_F4G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 22\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
++					&skov_imx6_calib_4x128Mb_1066MHz,
++					&skov_imx6_cfg_4x128Mb_1066MHz);
++		break;
+ 	default:
+ 		pr_err("Unsupported board revision: 0x%x\n", board_variant);
+ 		/* don't continue */
+diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
+index f2e1f02..7f66510 100644
+--- a/arch/arm/boards/skov-imx6/version.c
++++ b/arch/arm/boards/skov-imx6/version.c
+@@ -82,49 +82,61 @@ static const struct board_description imx6_variants[] = {
+ 		.value = "low cost",
+ 		.revision = "C",
+ 		.soc = "i.MX6S",
+-		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
+ 	},
+ 	[14] = {
+ 		.value = "high performance",
+ 		.revision = "C",
+ 		.soc = "i.MX6Q",
+-		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
+ 	},
+ 	[15] = {
+ 		.value = "middle performance",
+ 		.revision = "C",
+ 		.soc = "i.MX6S",
+-		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
+ 	},
+ 	[16] = {
+ 		.value = "Solo_R512M_F4G",
+ 		.revision = "C",
+ 		.soc = "i.MX6S",
+-		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
+ 	},
+ 	[17] = {
+ 		.value = "Quad_R2G_F8G",
+ 		.revision = "C",
+ 		.soc = "i.MX6Q",
+-		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
+ 	},
+ 	[18] = {
+ 		.value = "QuadPlus_R4G_F16G",
+ 		.revision = "C",
+ 		.soc = "i.MX6Q+",
+-		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
+ 	},
+ 	[19] = {
+ 		.value = "Solo_R512M_F2G",
+ 		.revision = "C",
+ 		.soc = "i.MX6S",
+-		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
+ 	},
+ 	[20] = {
+ 		.value = "Quad_R1G_F4G",
+ 		.revision = "C",
+ 		.soc = "i.MX6Q",
+-		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
++	},
++	[21] = {
++		.value = "Solo_R512M_F2G",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt6",
++	},
++	[22] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6q-skov-revc-lt6",
+ 	},
+ };
+ 
+-- 
+1.8.3.1
+

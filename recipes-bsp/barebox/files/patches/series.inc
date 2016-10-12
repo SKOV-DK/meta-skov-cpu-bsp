@@ -71,3 +71,7 @@ SRC_URI += "\
   file://patches/0401-Release-2016.08.0-customers-skov-imx6-20161001-1.patch \
   "
 # umpf-end
+
+SRC_URI += "\
+  file://patches/0501-skov-add-support-for-board-21-22-device-tree-rename.patch \
+  "

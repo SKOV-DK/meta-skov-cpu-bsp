@@ -51,3 +51,10 @@ SRC_URI += "\
   file://patches/0601-Release-4.4-customers-skov-imx6-20160930-1.patch \
   "
 # umpf-end
+
+# Support for board 20 + 21
+SRC_URI += "\
+  file://patches/0701-skov_version-add-support-for-board-21-22.patch \
+  file://patches/0702-devicetree-restructure-skov-files-and-add-support-fo.patch \
+  file://patches/0703-panel-simple-add-support-for-Logic-Technologies-lttd.patch \
+  "
