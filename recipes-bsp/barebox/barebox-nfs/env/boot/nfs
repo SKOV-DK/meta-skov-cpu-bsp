@@ -1,0 +1,4 @@
+#!/bin/sh
+global linux.bootargs.base="ip=dhcp"
+ifup eth0
+boot nfs://10.252.12.10//tftpboot/${eth0.ipaddr}
