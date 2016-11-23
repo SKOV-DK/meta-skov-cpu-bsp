@@ -1,0 +1,40 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 21 Oct 2016 08:48:33 +0200
+Subject: [PATCH] fs: squashfs: Enable squashfs XZ support when XZ is enabled
+
+XZ support itself is much more expensive than the squashfs XZ wrapper,
+so it makes sense to just compile XZ support into barebox when XZ
+support is available. No need to ask the user for it.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ fs/squashfs/Kconfig | 17 +++++++----------
+ 1 file changed, 7 insertions(+), 10 deletions(-)
+
+diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
+index 085bfb644874..2362ba14cbeb 100644
+--- a/fs/squashfs/Kconfig
++++ b/fs/squashfs/Kconfig
+@@ -48,15 +48,12 @@ if !SQUASHFS_LZO
+ endif
+ 
+ config SQUASHFS_XZ
+-	bool "Include support for XZ compressed file systems"
+-	default y
++	bool
+ 	depends on FS_SQUASHFS
+-	select XZ_DECOMPRESS
+-	help
+-	  Saying Y here includes support for reading Squashfs file systems
+-	  compressed with XZ compression.  XZ gives better compression than
+-	  the default zlib compression, at the expense of greater CPU and
+-	  memory overhead.
++	depends on XZ_DECOMPRESS
++	default y
++
++if !SQUASHFS_XZ
++	comment "XZ support disabled"
++endif
+ 
+-	  XZ is not the standard compression used in Squashfs and so most
+-	  file systems will be readable without selecting this option.

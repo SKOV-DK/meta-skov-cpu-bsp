@@ -1,5 +1,5 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Wed, 31 Aug 2016 10:47:30 +0200
+Date: Tue, 4 Oct 2016 12:10:48 +0200
 Subject: [PATCH] fs: squashfs: append linux rootarg for ubi volume
 
 If squashfs runs from an ubi volume, append appropriate root kernel
@@ -8,6 +8,7 @@ options.
 Note that ubiblock support is required in the kernel for that.
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
  fs/squashfs/squashfs.c | 31 +++++++++++++++++++++++++++++++
  1 file changed, 31 insertions(+)

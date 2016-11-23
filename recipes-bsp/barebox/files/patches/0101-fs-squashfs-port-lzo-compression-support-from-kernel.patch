@@ -1,41 +1,37 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Fri, 26 Aug 2016 15:58:00 +0200
-Subject: [PATCH] squashfs: add lzo compression support
+Date: Tue, 4 Oct 2016 12:10:44 +0200
+Subject: [PATCH] fs: squashfs: port lzo compression support from kernel
 
 This ports lzo_wrapper from kernel code and adds some minimal adaptions
 to make squashfs lzo compression work in barebox.
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Tested-by: Yegor Yefremov <yegorslists@googlemail.com>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- fs/squashfs/Kconfig       |  14 +++++
+ fs/squashfs/Kconfig       |  10 ++++
  fs/squashfs/Makefile      |   1 +
- fs/squashfs/lzo_wrapper.c | 128 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/lzo.h       |  47 +++++++++++++++++
- 4 files changed, 190 insertions(+)
+ fs/squashfs/lzo_wrapper.c | 129 ++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 140 insertions(+)
  create mode 100644 fs/squashfs/lzo_wrapper.c
- create mode 100644 include/linux/lzo.h
 
 diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
-index dc25d93403a5..d8ee554a4bfb 100644
+index dc25d93403a5..239682d3702d 100644
 --- a/fs/squashfs/Kconfig
 +++ b/fs/squashfs/Kconfig
-@@ -17,6 +17,20 @@ menuconfig FS_SQUASHFS
+@@ -17,6 +17,16 @@ menuconfig FS_SQUASHFS
  	  embedded systems where low overhead is needed.  Further information
  	  and tools are available from http://squashfs.sourceforge.net.
  
 +config SQUASHFS_LZO
-+	bool "Include support for LZO compressed file systems"
-+	default y
++	bool
 +	depends on FS_SQUASHFS
-+	select LZO_DECOMPRESS
-+	help
-+	  Saying Y here includes support for reading Squashfs file systems
-+	  compressed with LZO compression.  LZO compression is mainly
-+	  aimed at embedded systems with slower CPUs where the overheads
-+	  of zlib are too high.
++	depends on LZO_DECOMPRESS
++	default y
 +
-+	  LZO is not the standard compression used in Squashfs and so most
-+	  file systems will be readable without selecting this option.
++if !SQUASHFS_LZO
++	comment "LZO support disabled"
++endif
 +
  config SQUASHFS_XZ
  	bool "Include support for XZ compressed file systems"
@@ -51,10 +47,10 @@ index c0d024c3a866..447e15eed170 100644
 +obj-$(CONFIG_SQUASHFS_LZO) += lzo_wrapper.o
 diff --git a/fs/squashfs/lzo_wrapper.c b/fs/squashfs/lzo_wrapper.c
 new file mode 100644
-index 000000000000..b457955e5c1e
+index 000000000000..834ee2934137
 --- /dev/null
 +++ b/fs/squashfs/lzo_wrapper.c
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,129 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
 + *
@@ -78,8 +74,9 @@ index 000000000000..b457955e5c1e
 + * lzo_wrapper.c
 + */
 +
++#include <common.h>
 +#include <linux/mutex.h>
-+#include <linux/lzo.h>
++#include <lzo.h>
 +#include <types.h>
 +
 +#include "squashfs_fs.h"
@@ -183,56 +180,3 @@ index 000000000000..b457955e5c1e
 +	.name = "lzo",
 +	.supported = 1
 +};
-diff --git a/include/linux/lzo.h b/include/linux/lzo.h
-new file mode 100644
-index 000000000000..ae52d79f0e7d
---- /dev/null
-+++ b/include/linux/lzo.h
-@@ -0,0 +1,47 @@
-+#ifndef __LZO_H__
-+#define __LZO_H__
-+/*
-+ *  LZO Public Kernel Interface
-+ *  A mini subset of the LZO real-time data compression library
-+ *
-+ *  Copyright (C) 1996-2012 Markus F.X.J. Oberhumer <markus@oberhumer.com>
-+ *
-+ *  The full LZO package can be found at:
-+ *  http://www.oberhumer.com/opensource/lzo/
-+ *
-+ *  Changed for Linux kernel use by:
-+ *  Nitin Gupta <nitingupta910@gmail.com>
-+ *  Richard Purdie <rpurdie@openedhand.com>
-+ */
-+
-+#include <types.h>
-+
-+#define LZO1X_1_MEM_COMPRESS	(8192 * sizeof(unsigned short))
-+#define LZO1X_MEM_COMPRESS	LZO1X_1_MEM_COMPRESS
-+
-+#define lzo1x_worst_compress(x) ((x) + ((x) / 16) + 64 + 3)
-+
-+/* This requires 'wrkmem' of size LZO1X_1_MEM_COMPRESS */
-+int lzo1x_1_compress(const unsigned char *src, size_t src_len,
-+		     unsigned char *dst, size_t *dst_len, void *wrkmem);
-+
-+/* safe decompression with overrun testing */
-+int lzo1x_decompress_safe(const unsigned char *src, size_t src_len,
-+			  unsigned char *dst, size_t *dst_len);
-+
-+/*
-+ * Return values (< 0 = Error)
-+ */
-+#define LZO_E_OK			0
-+#define LZO_E_ERROR			(-1)
-+#define LZO_E_OUT_OF_MEMORY		(-2)
-+#define LZO_E_NOT_COMPRESSIBLE		(-3)
-+#define LZO_E_INPUT_OVERRUN		(-4)
-+#define LZO_E_OUTPUT_OVERRUN		(-5)
-+#define LZO_E_LOOKBEHIND_OVERRUN	(-6)
-+#define LZO_E_EOF_NOT_FOUND		(-7)
-+#define LZO_E_INPUT_NOT_CONSUMED	(-8)
-+#define LZO_E_NOT_YET_IMPLEMENTED	(-9)
-+#define LZO_E_INVALID_ARGUMENT		(-10)
-+
-+#endif

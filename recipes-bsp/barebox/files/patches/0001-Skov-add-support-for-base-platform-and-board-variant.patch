@@ -50,10 +50,10 @@ Signed-off-by: Søren Andersen <san@skov.dk>
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index e3dcc6a61507..ce8554545602 100644
+index 1a0f63fbfc4c..ff1132785b28 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -100,6 +100,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
+@@ -102,6 +102,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
@@ -1072,10 +1072,10 @@ index 000000000000..f2e1f024513f
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 813e09814546..8c332568e789 100644
+index 8d8d1fb86216..ab38074b33f6 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -57,6 +57,7 @@ pbl-dtb-$(CONFIG_MACH_RADXA_ROCK) += rk3188-radxarock.dtb.o
+@@ -59,6 +59,7 @@ pbl-dtb-$(CONFIG_MACH_PHYTEC_SOM_RK3288) += rk3288-phycore-som.dtb.o
  pbl-dtb-$(CONFIG_MACH_REALQ7) += imx6q-dmo-edmqmx6.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
@@ -1468,10 +1468,10 @@ index 000000000000..3ddc58c55d51
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index 80f8fd80aecc..c336e4ecd8a8 100644
+index f23af99c11d3..63119107e0ac 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -316,6 +316,11 @@ config MACH_CM_FX6
+@@ -327,6 +327,11 @@ config MACH_CM_FX6
  	bool "CM FX6"
  	select ARCH_IMX6
  
@@ -1484,10 +1484,10 @@ index 80f8fd80aecc..c336e4ecd8a8 100644
  
  # ----------------------------------------------------------
 diff --git a/common/blspec.c b/common/blspec.c
-index bf98e6b29acd..3f844bdf5569 100644
+index ec63ddb40730..1818f285746b 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -258,14 +258,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
+@@ -361,14 +361,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
  	const char *compat;
  	char *filename;
  
@@ -1515,10 +1515,10 @@ index bf98e6b29acd..3f844bdf5569 100644
  	if (entry->rootpath)
  		abspath = entry->rootpath;
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index effa5edc0f6e..5e3c58260b6d 100644
+index 8db9c754f212..4fc38e47fc26 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -378,6 +378,11 @@ CFG_start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg = $(board)/phytec-som-
+@@ -394,6 +394,11 @@ CFG_start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg = $(board)/phytec-som-
  FILE_barebox-phytec-phycore-imx6dl-som-emmc-1gib.img = start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg
  image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6dl-som-emmc-1gib.img
  

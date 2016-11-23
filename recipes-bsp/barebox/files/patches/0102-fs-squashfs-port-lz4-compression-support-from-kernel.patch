@@ -1,39 +1,37 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Fri, 26 Aug 2016 16:16:20 +0200
-Subject: [PATCH] fs/squashfs: add lz4 compression
+Date: Tue, 4 Oct 2016 12:10:45 +0200
+Subject: [PATCH] fs: squashfs: port lz4 compression support from kernel
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- fs/squashfs/Kconfig       |  13 +++++
+ fs/squashfs/Kconfig       |  10 ++++
  fs/squashfs/Makefile      |   1 +
  fs/squashfs/lz4_wrapper.c | 140 ++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 154 insertions(+)
+ 3 files changed, 151 insertions(+)
  create mode 100644 fs/squashfs/lz4_wrapper.c
 
 diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
-index d8ee554a4bfb..d2de168c0a09 100644
+index 239682d3702d..928e3bb54681 100644
 --- a/fs/squashfs/Kconfig
 +++ b/fs/squashfs/Kconfig
-@@ -17,6 +17,19 @@ menuconfig FS_SQUASHFS
+@@ -17,6 +17,16 @@ menuconfig FS_SQUASHFS
  	  embedded systems where low overhead is needed.  Further information
  	  and tools are available from http://squashfs.sourceforge.net.
  
 +config SQUASHFS_LZ4
-+	bool "Include support for LZ4 compressed file systems"
++	bool
 +	depends on FS_SQUASHFS
-+	select LZ4_DECOMPRESS
-+	help
-+	  Saying Y here includes support for reading Squashfs file systems
-+	  compressed with LZ4 compression.  LZ4 compression is mainly
-+	  aimed at embedded systems with slower CPUs where the overheads
-+	  of zlib are too high.
++	depends on LZ4_DECOMPRESS
++	default y
 +
-+	  LZ4 is not the standard compression used in Squashfs and so most
-+	  file systems will be readable without selecting this option.
++if !SQUASHFS_LZ4
++	comment "LZ4 support disabled"
++endif
 +
  config SQUASHFS_LZO
- 	bool "Include support for LZO compressed file systems"
- 	default y
+ 	bool
+ 	depends on FS_SQUASHFS
 diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
 index 447e15eed170..8590b09ce6ac 100644
 --- a/fs/squashfs/Makefile

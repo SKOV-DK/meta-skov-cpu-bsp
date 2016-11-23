@@ -1,5 +1,5 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Mon, 29 Aug 2016 12:12:05 +0200
+Date: Tue, 4 Oct 2016 12:10:47 +0200
 Subject: [PATCH] Add filetype and detection for squashfs images
 
 This adds `filetype_squashfs` to the list of known filetypes and adds a
@@ -17,6 +17,7 @@ Note that booting with blspec is limited as the current squashfs driver
 is not capable of handling symbolic links.
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
  common/filetype.c      | 4 ++++
  fs/squashfs/squashfs.c | 1 +
@@ -24,7 +25,7 @@ Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
  3 files changed, 6 insertions(+)
 
 diff --git a/common/filetype.c b/common/filetype.c
-index a8666a1439df..e47ff8198f2c 100644
+index 4728f877c975..8d7293347a15 100644
 --- a/common/filetype.c
 +++ b/common/filetype.c
 @@ -40,6 +40,7 @@ static const struct filetype_str filetype_str[] = {
@@ -35,7 +36,7 @@ index a8666a1439df..e47ff8198f2c 100644
  	[filetype_gzip] = { "GZIP compressed", "gzip" },
  	[filetype_bzip2] = { "BZIP2 compressed", "bzip2" },
  	[filetype_oftree] = { "open firmware Device Tree flattened Binary", "dtb" },
-@@ -277,6 +278,9 @@ enum filetype file_detect_type(const void *_buf, size_t bufsize)
+@@ -278,6 +279,9 @@ enum filetype file_detect_type(const void *_buf, size_t bufsize)
  	if (buf8[0] == 0xfd && buf8[1] == 0x37 && buf8[2] == 0x7a &&
  			buf8[3] == 0x58 && buf8[4] == 0x5a && buf8[5] == 0x00)
  		return filetype_xz_compressed;
@@ -58,7 +59,7 @@ index d00dee6caa50..6d046810d9df 100644
  		.probe = squashfs_probe,
  		.remove = squashfs_remove,
 diff --git a/include/filetype.h b/include/filetype.h
-index e87ca174a89d..f6baabf8bc3d 100644
+index cde73c1170c6..65bd6efb7bf9 100644
 --- a/include/filetype.h
 +++ b/include/filetype.h
 @@ -16,6 +16,7 @@ enum filetype {

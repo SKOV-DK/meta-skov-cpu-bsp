@@ -1,69 +1,40 @@
 From: Enrico Jorns <ejo@pengutronix.de>
-Date: Fri, 26 Aug 2016 16:31:58 +0200
-Subject: [PATCH] fs/squashfs: add zlib compression support
+Date: Tue, 4 Oct 2016 12:10:46 +0200
+Subject: [PATCH] fs: squashfs: port zlib compression support from kernel
 
 As this is the default compression method for squashfs, make this the
 default in kconfig selection, too
 
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- fs/squashfs/Kconfig        |  20 ++++++-
+ fs/squashfs/Kconfig        |  10 ++++
  fs/squashfs/Makefile       |   1 +
  fs/squashfs/zlib_wrapper.c | 132 +++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 152 insertions(+), 1 deletion(-)
+ 3 files changed, 143 insertions(+)
  create mode 100644 fs/squashfs/zlib_wrapper.c
 
 diff --git a/fs/squashfs/Kconfig b/fs/squashfs/Kconfig
-index d2de168c0a09..1cb1ac5b3060 100644
+index 928e3bb54681..085bfb644874 100644
 --- a/fs/squashfs/Kconfig
 +++ b/fs/squashfs/Kconfig
-@@ -17,6 +17,19 @@ menuconfig FS_SQUASHFS
+@@ -17,6 +17,16 @@ menuconfig FS_SQUASHFS
  	  embedded systems where low overhead is needed.  Further information
  	  and tools are available from http://squashfs.sourceforge.net.
  
 +config SQUASHFS_ZLIB
-+	bool "Include support for ZLIB compressed file systems"
++	bool
 +	depends on FS_SQUASHFS
-+	select ZLIB
++	depends on ZLIB
 +	default y
-+	help
-+	  ZLIB compression is the standard compression used by Squashfs
-+	  file systems.  It offers a good trade-off between compression
-+	  achieved and the amount of CPU time and memory necessary to
-+	  compress and decompress.
 +
-+	  If unsure, say Y.
++if !SQUASHFS_ZLIB
++	comment "ZLIB support disabled"
++endif
 +
  config SQUASHFS_LZ4
- 	bool "Include support for LZ4 compressed file systems"
+ 	bool
  	depends on FS_SQUASHFS
-@@ -30,9 +43,10 @@ config SQUASHFS_LZ4
- 	  LZ4 is not the standard compression used in Squashfs and so most
- 	  file systems will be readable without selecting this option.
- 
-+	  If unsure, say N.
-+
- config SQUASHFS_LZO
- 	bool "Include support for LZO compressed file systems"
--	default y
- 	depends on FS_SQUASHFS
- 	select LZO_DECOMPRESS
- 	help
-@@ -44,6 +58,8 @@ config SQUASHFS_LZO
- 	  LZO is not the standard compression used in Squashfs and so most
- 	  file systems will be readable without selecting this option.
- 
-+	  If unsure, say N.
-+
- config SQUASHFS_XZ
- 	bool "Include support for XZ compressed file systems"
- 	default y
-@@ -57,3 +73,5 @@ config SQUASHFS_XZ
- 
- 	  XZ is not the standard compression used in Squashfs and so most
- 	  file systems will be readable without selecting this option.
-+
-+	  If unsure, say N.
 diff --git a/fs/squashfs/Makefile b/fs/squashfs/Makefile
 index 8590b09ce6ac..7976e3fe5c0c 100644
 --- a/fs/squashfs/Makefile

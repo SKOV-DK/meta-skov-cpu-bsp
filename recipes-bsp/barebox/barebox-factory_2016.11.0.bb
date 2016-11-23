@@ -1,9 +1,13 @@
 require barebox-skov.inc
 
+SRC_URI += "\
+  file://env/bin/init \
+  "
+
 PROVIDES_remove = "virtual/bootloader"
 
-SRC_URI[md5sum] = "66b8f79d337fa4a7bb8744b1a7867474"
-SRC_URI[sha256sum] = "610d3422137f0e6e9a72f51caad17d1b2c46314ee03b2ae35799a1c5425478ab"
+SRC_URI[md5sum] = "53a04c58562e2aba874b5a1079146eba"
+SRC_URI[sha256sum] = "9a670ab785738ce4ef7a15bcac2522564dc3af1c49064440f3fd31d0e7a342db"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}
@@ -11,3 +15,4 @@ do_deploy () {
 	install -m 644 -T ${S}/images/barebox-skov-imx6.img ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}-${DATETIME}.img
 	ln -sf ${BAREBOX_IMG_BASENAME}-${DATETIME}.img ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}.img
 }
+

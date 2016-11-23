@@ -1,22 +1,22 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Date: Tue, 28 Jun 2016 13:51:07 +0200
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 22 Nov 2016 16:18:13 +0100
 Subject: [PATCH] ubi: Only read necessary size when reading the VID header
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-When reading the vid hdr from the device UBI always reads a whole
-page. Instead, read only the data we actually need and speed up
-attachment of UBI devices by potentially making use of reading
-subpages if the NAND driver supports it.
+Based on kernel commit 8a8e8d2fdbab ("ubi: Only read necessary size when reading
+the VID header") by Sascha Hauer <s.hauer@pengutronix.de>:
 
-Since the VID header may be at offset vid_hdr_shift in the page and
-we can only read from the beginning of a page we have to add that
-offset to the read size.
+    When reading the vid hdr from the device UBI always reads a whole
+    page. Instead, read only the data we actually need and speed up
+    attachment of UBI devices by potentially making use of reading
+    subpages if the NAND driver supports it.
 
-Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-Signed-off-by: Richard Weinberger <richard@nod.at>
-[port of 8a8e8d2fdbab from the linux kernel]
+    Since the VID header may be at offset vid_hdr_shift in the page and
+    we can only read from the beginning of a page we have to add that
+    offset to the read size.
+
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  drivers/mtd/ubi/io.c | 2 +-
