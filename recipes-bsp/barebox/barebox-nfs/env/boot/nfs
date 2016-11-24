@@ -1,4 +1,4 @@
 #!/bin/sh
 global linux.bootargs.base="systemd.mask=systemd-networkd.service ubi.mtd=0"
 ifup eth0
-boot nfs://10.252.12.10//tftpboot/${eth0.ipaddr}
+boot nfs://10.252.50.134//tftpboot/${eth0.ipaddr}
