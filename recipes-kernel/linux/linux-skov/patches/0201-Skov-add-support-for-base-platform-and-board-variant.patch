@@ -934,7 +934,7 @@ index 795d0ca714bf..d3efe14ea9a7 100644
  obj-$(CONFIG_FPGA)		+= fpga/
 +obj-y				+= skov/
 diff --git a/drivers/gpu/drm/imx/ipuv3-crtc.c b/drivers/gpu/drm/imx/ipuv3-crtc.c
-index 4ab841eebee1..21b99eb78271 100644
+index 9b0abd44b751..1a32b47bce63 100644
 --- a/drivers/gpu/drm/imx/ipuv3-crtc.c
 +++ b/drivers/gpu/drm/imx/ipuv3-crtc.c
 @@ -173,7 +173,7 @@ static int ipu_crtc_mode_set(struct drm_crtc *crtc,
@@ -1010,14 +1010,15 @@ index f97b73ec4713..c1bf9f33860b 100644
  		.data = &nec_nl4827hc19_05b,
  	}, {
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index 0150e93043c1..ce9055a5ae8f 100644
+index 0150e93043c1..2f9efe1840f6 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
-@@ -20,7 +20,10 @@
+@@ -19,8 +19,11 @@
+ #define DRV_VERSION "0.0.1"
  
  #define PCF85063_REG_CTRL1		0x00 /* status */
- #define PCF85063_REG_CTRL1_STOP		BIT(5)
 +#define PCF85063_REG_CTRL1_CAP_SEL	BIT(0)
+ #define PCF85063_REG_CTRL1_STOP		BIT(5)
  #define PCF85063_REG_CTRL2		0x01
 +#define PCF85063_REG_CTRL2_COF_OFF	0x07
 +#define PCF85063_REG_OFFSET		0x02

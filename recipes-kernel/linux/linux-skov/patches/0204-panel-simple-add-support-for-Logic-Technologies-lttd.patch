@@ -1,7 +1,6 @@
-From 8ff106c39ce895602c5031008f6f5045b6b4176d Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Tue, 11 Oct 2016 22:19:30 +0200
-Subject: [PATCH 3/3] panel-simple: add support for Logic Technologies
+Subject: [PATCH] panel-simple: add support for Logic Technologies
  lttd800480070 l6
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -17,7 +16,7 @@ Signed-off-by: Sam Ravnborg <srn@skov.dk>
 
 diff --git a/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt
 new file mode 100644
-index 0000000..c65b715
+index 000000000000..c65b715faed0
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt
 @@ -0,0 +1,7 @@
@@ -29,7 +28,7 @@ index 0000000..c65b715
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index c1bf9f3..54d2bd9 100644
+index c1bf9f33860b..54d2bd99c3da 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
 @@ -984,6 +984,37 @@ static const struct panel_desc logic_techno_lttd800480070_l2rt = {
@@ -80,6 +79,3 @@ index c1bf9f3..54d2bd9 100644
  		.compatible = "nec,nl4827hc19-05b",
  		.data = &nec_nl4827hc19_05b,
  	}, {
--- 
-1.8.3.1
-
