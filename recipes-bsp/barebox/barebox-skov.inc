@@ -23,6 +23,9 @@ SRC_URI += "\
   file://env/nv/bootchooser.system0.boot \
   file://env/nv/bootchooser.system1.boot \
   file://env/init/bootargs \
+  file://env/init/display \
+  file://env/init/splash \
+  file://env/splash.png \
   "
 
 COMPATIBLE_MACHINE = "imx6-cpu"

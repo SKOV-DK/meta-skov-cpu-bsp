@@ -33,11 +33,11 @@ Signed-off-by: Søren Andersen <san@skov.dk>
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
- arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 318 ++++++++++
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 319 ++++++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
  common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1358 insertions(+), 8 deletions(-)
+ 15 files changed, 1359 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -1145,10 +1145,10 @@ index 000000000000..33b2ebe41c22
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 new file mode 100644
-index 000000000000..3ddc58c55d51
+index 000000000000..54651c894ad5
 --- /dev/null
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-@@ -0,0 +1,318 @@
+@@ -0,0 +1,319 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
 + *
@@ -1249,31 +1249,32 @@ index 000000000000..3ddc58c55d51
 +			};
 +		};
 +
-+		kmsfb-manage-conf {
++		display {
 +			#address-cells = <1>;
 +			#size-cells = <1>;
 +
 +			xres {
 +				reg = <0x14 0x4>;
 +				type = "uint32";
-+				default = <800>;
++				default = <0>;
 +			};
 +
 +			yres {
 +				reg = <0x18 0x4>;
 +				type = "uint32";
-+				default = <480>;
++				default = <0>;
 +			};
-+		};
-+
-+		display {
-+			#address-cells = <1>;
-+			#size-cells = <1>;
 +
 +			brightness {
 +				reg = <0x1C 0x1>;
 +				type = "uint8";
 +				default = <8>;
++			};
++
++			external {
++				reg = <0x1D 0x1>;
++				type = "uint8";
++				default = <0>;
 +			};
 +		};
 +	};

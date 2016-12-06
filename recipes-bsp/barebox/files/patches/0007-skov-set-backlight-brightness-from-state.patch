@@ -1,0 +1,58 @@
+From: Jan Luebbe <jlu@pengutronix.de>
+Date: Wed, 7 Dec 2016 12:14:36 +0100
+Subject: [PATCH] skov: set backlight brightness from state
+
+To avoid a backlight change during early boot, the brightness configured
+by the user is stored in state.display.brightness and applied to the
+kernel's DT via a fixup.
+
+Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
+---
+ arch/arm/boards/skov-imx6/board.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
+index 8bb2c525e42b..6bdd14cc7c5d 100644
+--- a/arch/arm/boards/skov-imx6/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
+@@ -18,6 +18,31 @@
+ #include <mach/bbu.h>
+ #include <environment.h>
+ 
++static int skov_imx6_fixup(struct device_node *root, void *unused)
++{
++	int ret;
++	const char *val;
++	uint32_t brightness;
++	struct device_node *node;
++
++	val = getenv("state.display.brightness");
++	if (!val) {
++		pr_err("could not get default display brightness\n");
++		return 0;
++	}
++
++	brightness = simple_strtoul(val, NULL, 0);
++
++	for_each_compatible_node_from(node, root, NULL, "pwm-backlight") {
++		ret = of_property_write_u32(node, "default-brightness-level", brightness);
++		if (ret)
++			pr_err("error %d while setting default-brightness-level property on node %s to %d\n",
++				ret, node->name, brightness);
++	}
++
++	return 0;
++}
++
+ static int skov_imx6_devices_init(void)
+ {
+ 	if (!of_machine_is_compatible("skov,imx6"))
+@@ -26,6 +51,8 @@ static int skov_imx6_devices_init(void)
+ 	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0.barebox",
+ 		BBU_HANDLER_FLAG_DEFAULT);
+ 
++	of_register_fixup(skov_imx6_fixup, NULL);
++
+ 	return 0;
+ }
+ coredevice_initcall(skov_imx6_devices_init);
