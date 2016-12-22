@@ -32,9 +32,9 @@ SRC_URI += "\
   file://patches/0202-video-IPU-framebuffer-honor-clock-and-enable-polarit.patch \
   file://patches/0203-PWM-update-enable-status-when-using-the-internal-API.patch \
   "
-# umpf-release: 2016.11.0/customers/skov/imx6/20161208-1
-# umpf-topic-range: 886ef5458227342c541b6ac6b794248f2b43bb0a..48f1ec5096b2b78197deea4ed842243fe314db21
+# SKOV patches
 SRC_URI += "\
-  file://patches/0301-Release-2016.11.0-customers-skov-imx6-20161208-1.patch \
+  file://patches/0302-mtd-nand_mxs-fix-NAND-error-when-change-clk-rate.patch
+  file://patches/0303-Release-2016.11.0-2.patch
   "
 # umpf-end
