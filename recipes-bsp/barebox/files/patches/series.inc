@@ -34,7 +34,7 @@ SRC_URI += "\
   "
 # SKOV patches
 SRC_URI += "\
-  file://patches/0302-mtd-nand_mxs-fix-NAND-error-when-change-clk-rate.patch
-  file://patches/0303-Release-2016.11.0-2.patch
+  file://patches/0302-mtd-nand_mxs-fix-NAND-error-when-change-clk-rate.patch \
+  file://patches/0303-Release-2016.11.0-2.patch \
   "
 # umpf-end
