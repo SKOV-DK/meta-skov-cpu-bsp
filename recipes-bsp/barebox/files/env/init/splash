@@ -5,6 +5,8 @@ fi
 if [ -e /env/splash.png ]; then
   fb0.mode_name="${global.board.display}"
   splash -b 0 /env/splash.png
-  fb0.enable=1
+  if [ ${state.display.external} -eq 0 ]; then
+	fb0.enable=1
+  fi
   backlight0.brightness="${state.display.brightness}"
 fi
