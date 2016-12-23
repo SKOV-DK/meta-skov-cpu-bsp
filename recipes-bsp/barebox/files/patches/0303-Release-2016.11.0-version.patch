@@ -1,7 +1,7 @@
 From e2a10ceb750eeb5a53a316189796030e1afe8cf8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Thu, 22 Dec 2016 06:53:24 +0100
-Subject: [PATCH 3/3] Release 2016.11.0-2
+Subject: [PATCH 3/3] Release 2016.11.0-version
 
 ---
  Makefile | 2 +-
@@ -16,7 +16,7 @@ index 7110bab..5e0c11e 100644
  PATCHLEVEL = 11
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-2
++EXTRAVERSION =-3
  NAME = None
  
  # *DOCUMENTATION*
