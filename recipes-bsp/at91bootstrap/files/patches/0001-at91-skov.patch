@@ -1,0 +1,472 @@
+diff --git a/Makefile b/Makefile
+index 3f82f14..79837e0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -182,7 +182,7 @@ include	driver/driver_cpp.mk
+ #  -lc 	   : 	tells the linker to tie in newlib
+ #  -lgcc   : 	tells the linker to tie in newlib
+ LDFLAGS+=-nostartfiles -Map=$(BINDIR)/$(BOOT_NAME).map --cref
+-LDFLAGS+=-T elf32-littlearm.lds $(GC_SECTIONS) -Ttext $(LINK_ADDR)
++LDFLAGS+=-T elf32-littlearm.lds $(GC_SECTIONS) -Ttext $(LINK_ADDR) -Tdata 0x00310000
+ 
+ ifneq ($(DATA_SECTION_ADDR),)
+ LDFLAGS+=-Tdata $(DATA_SECTION_ADDR)
+diff --git a/crt0_gnu.S b/crt0_gnu.S
+index 87b5ea0..e42086e 100644
+--- a/crt0_gnu.S
++++ b/crt0_gnu.S
+@@ -49,7 +49,7 @@ _exception_vectors:
+ 	b 	swi_vector   	/* Software Interrupt */
+ 	b 	pabt_vector  	/* Prefetch Abort */
+ 	b 	dabt_vector  	/* Data Abort */
+-.word		_edata		/* Size of the binary for ROMCode loading */
++.word		0x6000		/* Size of the binary for ROMCode loading */
+ 	b 	irq_vector	/* IRQ : read the AIC */
+ 	b 	fiq_vector      /* FIQ */
+ 
+@@ -74,81 +74,68 @@ _init_stack:
+ 	ldr     sp,=TOP_OF_MEMORY
+ 
+ #ifdef CONFIG_FLASH
++	/* First: enable icache and dcache, otherwise we are too slow */
++        mrc     p15, 0, r0, c1, c0, 0 
++        orr     r0, r0, #0x1000
++        orr     r0, r0, #0x0004
++        mcr     p15, 0, r0, c1, c0, 0	
+ /*
+  * When running from NOR, we must relocate to SRAM prior to resetting
+  * the clocks and SMC timings.
+  */
+ _relocate_to_sram:
++/* relocation is skipped. */
++/* Par. NOR user XIP, ser.flash + SD uses remapped SRAM. */
+ 
+-#if 0
+-	/* relocation is slow, disable the watchdog or it will trigger */
+-	ldr	r1, =0xFFFFFD44
+-	mov	r2, #0x00008000
+-	str	r2, [r1]
+-#endif
+-
+-	mov	r1, #0
+-	ldr	r3, =_stext
+-	ldr	r4, =_edata
+-1:
+-	cmp     r3, r4
+-	ldrcc   r2, [r1], #4
+-	strcc   r2, [r3], #4
+-	bcc     1b
+-	ldr	pc, =_setup_clocks
++_setup_clocks:
++#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_CPU_CLK_200MHZ 
++_setup_norflash:
++/**
++ * @author Søren Andersen
++ * Set Mode: 
++ * Set to 16Bit bus width, enable read and write
++ * Enable pagemode, 32 byte pages
++ *
++ */ 
++       ldr     r0,=0xFFFFE40C //AT91C_SMC0_CTRL0
++//       ldr     r1,=0x31111103 //San Rose this dont work at the 29GL512P flash
++	ldr     r1,=0x00111103		
++       str     r1, [r0]
++/**
++ * @autor Søren Andersen
++ * Set cycle long enougth:
++ * at least 12 Cycles->120ns plus a little extra 
++ */   
++        ldr     r0,=0xFFFFE408 //AT91C_SMC0_CYCLE0
++        ldr     r1,=0x000D000D
++        str     r1, [r0]
++
++/**
++ * @author Søren Andersen
++ * Set pulse long enougth:
++ * Pulse should be a bit shorter than the cycle
++ */ 
++        ldr     r0,=0xFFFFE404 //AT91C_SMC0_PULSE0
++        ldr     r1,=0x0C0A0C0A
++        str     r1, [r0]
++  
++/**
++ * @author Søren Andersen
++ * SMC setup:
++ * Setup time is 2 cycles after the CS signal
++ */
++        ldr     r0,=0xFFFFE400 //AT91C_SMC0_SETUP0
++        ldr     r1,=0x00020002
++        str     r1, [r0] 
++#endif /* CONFIG_CPU_CLK_200MHZ */
++#endif /* CONFIG_SKOV_MODULE */
+ #endif /* CONFIG_FLASH */
+ 
+ 	ldr     r4, = lowlevel_clock_init
+ 	mov     lr, pc
+ 	bx      r4
+ 
+-#if 0
+-_setup_clocks:
+-/* Test if main oscillator is enabled */
+-	ldr 	r0,=AT91C_PMC_SR
+-	ldr 	r1, [r0]
+-	ldr 	r2,=AT91C_PMC_MOSCS
+-	ands 	r1, r1, r2
+-	bne     _switch_to_mosc
+-
+-
+-/* Enable the main oscillator */
+-_enable_mosc:
+-	ldr 	r0,=AT91C_PMC_MOR
+-	mov 	r1, #(0x40 << 8)
+-	ldr 	r2,=AT91C_CKGR_MOSCEN
+-	orr 	r1, r1, r2
+-	str	r1, [r0]
+-	ldr 	r0,=AT91C_PMC_SR
+-1:
+-	ldr 	r1, [r0]
+-	ldr 	r2,=AT91C_PMC_MOSCS
+-	ands 	r1, r1, r2
+-	beq     1b
+-	
+-/* Test if MCK == SLOW CLOCK */
+-_switch_to_mosc:
+-	ldr 	r0,=AT91C_PMC_MCKR
+-	ldr 	r1,=AT91C_PMC_CSS
+-	ldr 	r2, [r0]
+-	and 	r2, r2, r1
+-	mov	r1, #0
+-	cmp    	r1, r2
+-/* No => Do nothing */
+-	bne	_init_data
+-/* Yes => Switch to the main oscillator */
+-	ldr 	r1,=AT91C_PMC_CSS_MAIN_CLK
+-	ldr 	r2,=AT91C_PMC_PRES_CLK
+-	orr	r1, r1, r2
+-	str 	r1, [r0]
+-	ldr 	r0,=AT91C_PMC_SR
+-1:
+-	ldr     r1, [r0]
+-	ldr	r2,=AT91C_PMC_MCKRDY
+-	ands    r1, r1, r2
+-	beq     1b
+-#endif
+-
+ /* Copy the data section in RAM at .data link address */
+ _init_data:
+         ldr      r2, =_lp_data
+diff --git a/driver/flash.c b/driver/flash.c
+index 11615c7..3b48bbf 100644
+--- a/driver/flash.c
++++ b/driver/flash.c
+@@ -23,18 +23,31 @@
+  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+-#include "../include/part.h"
+-#include "../include/main.h"
+-#include "../include/flash.h"
+-#include <stdlib.h>
++#include "board.h"
++#include "arch/at91_pio.h"
++#include "gpio.h"
++#include "string.h"
++#include "common.h"
++#include "debug.h"
+ 
+-
+-int load_norflash(unsigned int img_addr,
+-		unsigned int img_size,
+-		unsigned int img_dest)
++int load_norflash(struct image_info *img_info)
+ {
+-    norflash_hw_init();
++        unsigned int offset = img_info->offset;
++        unsigned int size = img_info->length;
++        unsigned char *dest = img_info->dest;
++
++
++        norflash_hw_init();
++        /**
++         * It should only be possible to load data from Nor flash if BMS pin = 0
++         */
++
++        if ((pio_get_value(CONFIG_SYS_BMS_PIN)) == 0) {
++            memcpy(dest, (char *)(AT91_NORFLASH_BASE + offset), size);
++            return 0;
++        } else {
++            return -3;
++        }    
++        
+ 
+-    memcpy((char *)img_dest, (char *)(AT91_NORFLASH_BASE + img_addr), img_size);
+-    return 0;
+-}
++}	
+diff --git a/driver/nandflash.c b/driver/nandflash.c
+index 3054408..8dc3715 100644
+--- a/driver/nandflash.c
++++ b/driver/nandflash.c
+@@ -352,7 +352,7 @@ static int nandflash_detect_onfi(struct nand_chip *chip)
+ 	return 0;
+ }
+ 
+-static int nandflash_detect_non_onfi(struct nand_chip *chip)
++int nandflash_detect_non_onfi(struct nand_chip *chip)
+ {
+ 	int manf_id, dev_id, cellinfo, extid, tmp_manf, tmp_dev;
+ 	struct nandflash_dev *type;
+@@ -408,7 +408,7 @@ static int nandflash_detect_non_onfi(struct nand_chip *chip)
+ 		return -1;
+ 	}
+ 	
+-	dbg_log(1, "NAND device: %s, Manufacturer ID: %d Chip ID: %d\n\r",
++	dbg_log(3, "NAND device: %s, Manufacturer ID: %d Chip ID: %d\n\r",
+ 			type->name, manf_id, dev_id);
+ 
+ 	/* Newer devices have all the information in additional id bytes */
+diff --git a/driver/pmc.c b/driver/pmc.c
+index aa358b1..c16d74d 100644
+--- a/driver/pmc.c
++++ b/driver/pmc.c
+@@ -80,17 +80,22 @@ void lowlevel_clock_init()
+ 	}
+ 	
+ 	/* After stablization, switch to Main Oscillator */
+-	if ((read_pmc(PMC_MCKR) & AT91C_PMC_CSS) == AT91C_PMC_CSS_SLOW_CLK) {
++//	if ((read_pmc(PMC_MCKR) & AT91C_PMC_CSS) == AT91C_PMC_CSS_SLOW_CLK) {
++//  PMC register changed. This line fites at91sam9263 cpu:
++	if ((read_pmc(PMC_MCKR) & 3) != 2) {
+ 		unsigned long tmp;
+ 
+ 		tmp = read_pmc(PMC_MCKR);
+-		tmp &= ~AT91C_PMC_CSS;
++//		tmp &= ~AT91C_PMC_CSS;
++		tmp &= ~0x03;
+ 		tmp |= AT91C_PMC_CSS_MAIN_CLK;
+ 		write_pmc(PMC_MCKR, tmp);
+ 		while (!(read_pmc(PMC_SR) & AT91C_PMC_MCKRDY)) ;
+ 
+-		tmp &= ~AT91C_PMC_PRES;
+-		tmp |= AT91C_PMC_PRES_CLK;
++//		tmp &= ~AT91C_PMC_PRES;
++		tmp &= ~0x1c;
++//		tmp |= AT91C_PMC_PRES_CLK;
++		tmp |= 0;
+ 		write_pmc(PMC_MCKR, tmp);
+ 		while (!(read_pmc(PMC_SR) & AT91C_PMC_MCKRDY)) ;
+ 	}
+diff --git a/driver/serial_flash.c b/driver/serial_flash.c
+index 30fb9c5..669b281 100644
+--- a/driver/serial_flash.c
++++ b/driver/serial_flash.c
+@@ -292,10 +292,10 @@ static int sf_cmd_read_id(unsigned char *idcode, unsigned int idcode_len)
+ 	unsigned int i;
+ 	unsigned char *p = idcode;
+ 
+-	dbg_log(1, "SF: Got idcodes:");
++	dbg_log(3, "SF: Got idcodes:");
+ 	for (i = 0; i < idcode_len; i++)
+-		dbg_log(1, "%d ", *p++);
+-	dbg_log(1, "\n\r");
++		dbg_log(3, "%d ", *p++);
++	dbg_log(3, "\n\r");
+ #endif
+ 	return 0;
+ }
+@@ -309,7 +309,7 @@ static int sf_cmd_read_status_at45(unsigned char *page_256)
+ 	if (ret)
+ 		return -1;
+ 
+-	dbg_log(1, "SF: AT45 status register: %d\n\r", status);
++	dbg_log(3, "SF: AT45 status register: %d\n\r", status);
+ 
+ 	if ((status & AT45_STATUS_P2_PAGE_SIZE))
+ 		*page_256 = 1;
+@@ -394,7 +394,7 @@ static int dataflash_erase_p2(unsigned int offset, unsigned int len)
+ 		offset += page_size;
+ 	}
+ 
+-	dbg_log(1, "SF: AT45: Successfully erased %d bytes @ %d\n\r", len, offset);
++	dbg_log(3, "SF: AT45: Successfully erased %d bytes @ %d\n\r", len, offset);
+ 
+ 	return 0;
+ }
+@@ -785,7 +785,7 @@ int load_dataflash(struct image_info *img_info)
+ 		return -2;
+ #endif
+ 
+-	dbg_log(1, "SF: Copy %d bytes from %d to %d\n\r", size, offset, dest);
++	dbg_log(3, "SF: Copy %d bytes from %d to %d\n\r", size, offset, dest);
+ 
+ 	ret = (*sf_read)(offset, size, dest);
+ 	if (ret) {
+diff --git a/include/board.h b/include/board.h
+index ce75aa1..20cfa91 100644
+--- a/include/board.h
++++ b/include/board.h
+@@ -72,4 +72,8 @@
+ #include "at91sama5d3xek.h"
+ #endif
+ 
++#ifdef CONFIG_SKOV_CPU_MODULE
++#include "skov_cpu_module.h" 
++#endif
++
+ #endif /* #ifndef __BOARD_H__ */
+diff --git a/include/flash.h b/include/flash.h
+index d9e5dc4..82ab3c8 100644
+--- a/include/flash.h
++++ b/include/flash.h
+@@ -44,7 +44,6 @@
+ 
+ void norflash_hw_init(void);
+ 
+-int load_norflash(unsigned int img_addr, unsigned int img_size,
+-                  unsigned int img_dest);
++int load_norflash(struct image_info *img_info);
+ 
+ #endif	/* #ifndef __NORFLASH_H__ */
+diff --git a/include/nandflash.h b/include/nandflash.h
+index 2a16f95..c5afaf4 100644
+--- a/include/nandflash.h
++++ b/include/nandflash.h
+@@ -28,6 +28,13 @@
+ #ifndef __NANDFLASH_H__
+ #define __NANDFLASH_H__
+ 
++#include "nand.h"
+ extern int load_nandflash(struct image_info *img_info);
++/**
++ * @author Søren Andersen <san@rosetechnology.dk>
++ * Find out if we have a nand flash From skov_cpu_module.c
++ */
++extern int nandflash_detect_non_onfi(struct nand_info *nand);
++   
+ 
+ #endif /* #ifndef __NANDFLASH_H__ */
+diff --git a/main.c b/main.c
+index d69de79..f5bfc55 100644
+--- a/main.c
++++ b/main.c
+@@ -34,6 +34,8 @@
+ #include "nandflash.h"
+ #include "sdcard.h"
+ #include "flash.h"
++#include "arch/at91_pio.h"
++#include "gpio.h"
+ 
+ extern int load_kernel(struct image_info *img_info);
+ 
+@@ -46,22 +48,18 @@ static int init_loadfunction(void)
+ #if defined(CONFIG_LOAD_LINUX)
+ 	load_image = &load_kernel;
+ #else
+-#if defined (CONFIG_DATAFLASH)
+-	load_image = &load_dataflash;
+-#elif defined(CONFIG_NANDFLASH)
+-	load_image = &load_nandflash;
+-#elif defined(CONFIG_SDCARD)
+-	load_image = &load_sdcard;
+-#else
++/*
+ #error "No booting media specified!"
+ #endif
++*/
+ #endif
+ 	return 0;
+ }
+ 
+ static void display_banner (void)
+ {
+-	dbg_log(1, "\n\nAT91Bootstrap %s\n\n\r",
++	dbg_log(1, "\n\r");
++	dbg_log(1, "AT91Bootstrap %s\n\n\r",
+ 			AT91BOOTSTRAP_VERSION" ( "COMPILE_TIME" )");
+ }
+ 
+@@ -71,7 +69,11 @@ int main(void)
+ 	int ret;
+ 
+ 	image_info.dest = (unsigned char *)JUMP_ADDR;
+-#if defined (CONFIG_DATAFLASH) || defined(CONFIG_NANDFLASH)
++/**
++ * @author Søren Andersen <san@rosetechnology.dk>
++ */
++        
++#if defined (CONFIG_DATAFLASH) || defined(CONFIG_NANDFLASH) || defined(CONFIG_FLASH) 
+ 	image_info.offset = IMG_ADDRESS;
+ 	image_info.length = IMG_SIZE;
+ #endif
+@@ -88,19 +90,45 @@ int main(void)
+ 	init_loadfunction();
+ 
+ 	dbg_log(1, "Downloading image...\n\r");
++#if defined(CONFIG_FLASH)
++        load_image = &load_norflash;
++        ret = (*load_image)(&image_info);
++        if (ret == 0){
++                dbg_log(1, "Jump to NOR flash!\n\r");
++                return JUMP_ADDR;
++        }
++        if (ret == -1) {
++                dbg_log(1, "Failed to load NOR flash image\n\r");
++        }
++#endif
+ 
+-	ret = (*load_image)(&image_info);
+-	if (ret == 0){
+-		dbg_log(1, "Done!\n\r");
+-	}
+-	if (ret == -1) {
+-		dbg_log(1, "Failed to load image\n\r");
+-		while(1);
++#if defined(CONFIG_SDCARD)	
++		/* Only boot SD if "card detect" is low */
++        if (pio_get_value(CONFIG_SYS_SD_CD_PIN) == 0) {
++            load_image = &load_sdcard;
++    	    ret = (*load_image)(&image_info);
++    	    if (ret == 0){
++	                dbg_log(1, "Jump to SD-Card!\n\r");
++    	            return JUMP_ADDR;
++    	    }
++    	    if (ret == -1) {
++    	            dbg_log(1, "Failed to load SD-Card image\n\r");
++    	    }
+ 	}
+-	if (ret == -2) {
+-		dbg_log(1, "Success to recovery\n\r");
+-		while (1);
++#endif
++
++
++#if defined(CONFIG_DATAFLASH)
++        load_image = &load_dataflash;
++        ret = (*load_image)(&image_info);
++        if (ret == 0){
++		dbg_log(1, "Jump to Dataflash!\n\r");
++                return JUMP_ADDR;
+ 	}
++        if (ret == -1) {
++                dbg_log(1, "Failed to load Dataflash image\n\r");
++        }
++#endif
+ 
+ #ifdef CONFIG_SCLK
+ 	slowclk_switch_osc32();
+diff --git a/toplevel_cpp.mk b/toplevel_cpp.mk
+index f5e3477..9c7e98f 100644
+--- a/toplevel_cpp.mk
++++ b/toplevel_cpp.mk
+@@ -29,3 +29,10 @@ ifeq ($(CONFIG_USER_HW_INIT),y)
+ CPPFLAGS += -DCONFIG_USER_HW_INIT
+ endif
+ 
++ifeq ($(CONFIG_FLASH),y)
++ASFLAGS += -DCONFIG_FLASH
++endif
++
++ifeq ($(CONFIG_CPU_CLK_200MHZ),y)
++ASFLAGS += -DCONFIG_CPU_CLK_200MHZ
++endif
