@@ -14,7 +14,7 @@ LICENSE = "ATMEL"
 LIC_FILES_CHKSUM = "file://main.c;endline=27;md5=42f86d2f6fd17d1221c5c651b487a07f"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "at91sam9m10g45ek"
+#COMPATIBLE_MACHINE = "arm9-cpuat91sam9m10g45ek"
 
 inherit cml1 deploy
 
@@ -32,16 +32,18 @@ SRC_URI += "file://defconfig"
 
 do_configure() {
 	if [ -e ${WORKDIR}/defconfig ]; then
-		cp ${WORKDIR}/defconfig ${S}/.config
+		cp ${WORKDIR}/defconfig ${WORKDIR}/.config
 	else
-		bbwarn "No defconfig given"
+		
+		bbfatal "No defconfig given - not found in ${WORKDIR}"
 	fi
+
 
 	cml1_do_configure
 }
 
 do_compile() {
-	#unset CFLAGS CPPFLAGS LDFLAGS
+	unset CFLAGS CPPFLAGS LDFLAGS
 	oe_runmake
 }
 
