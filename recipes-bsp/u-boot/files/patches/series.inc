@@ -1,0 +1,5 @@
+SRC_URI += "file://patches/0001-at91-skov-v1.3.patch"
+SRC_URI += "file://patches/0002-boot-fix-from-sdk-arm.patch"
+SRC_URI += "file://patches/0003-renamed-board-from-skov_cpu_module-to-arm9-cpu.patch"
+SRC_URI += "file://patches/0004-backport-gcc5-support-from-latest-u-boot.patch"
+SRC_URI += "file://patches/0005-fix-gcc5-build-errors.patch"

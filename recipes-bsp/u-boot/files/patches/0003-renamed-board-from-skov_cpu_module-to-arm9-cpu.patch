@@ -1,0 +1,3996 @@
+From e0fa6670fa789a35ecb2b1d0b53327256dfbabbd Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 30 Dec 2016 13:36:45 +0100
+Subject: [PATCH 3/5] renamed board from skov_cpu_module to arm9-cpu
+
+---
+ arch/arm/lib/board.c                         |   8 +-
+ board/skov/arm9-cpu/Makefile                 |  52 ++
+ board/skov/arm9-cpu/arm9-cpu.c               | 741 +++++++++++++++++++++++++++
+ board/skov/arm9-cpu/cmd_lcd.c                | 159 ++++++
+ board/skov/arm9-cpu/lc7981.c                 | 279 ++++++++++
+ board/skov/arm9-cpu/led.c                    |  46 ++
+ board/skov/arm9-cpu/partition.c              |  36 ++
+ board/skov/skov_cpu_module/Makefile          |  52 --
+ board/skov/skov_cpu_module/cmd_lcd.c         | 159 ------
+ board/skov/skov_cpu_module/lc7981.c          | 279 ----------
+ board/skov/skov_cpu_module/led.c             |  46 --
+ board/skov/skov_cpu_module/partition.c       |  36 --
+ board/skov/skov_cpu_module/skov_cpu_module.c | 741 ---------------------------
+ boards.cfg                                   |   2 +-
+ common/Makefile                              |   2 +-
+ common/cmd_nand.c                            |   4 +-
+ common/env_dataflash.c                       |  14 +-
+ common/env_flash.c                           | 118 ++---
+ common/main.c                                |   4 +-
+ drivers/bootcount/Makefile                   |   2 +-
+ drivers/mtd/cfi_flash.c                      |   2 +-
+ drivers/mtd/dataflash.c                      |   4 +-
+ include/configs/arm9-cpu.h                   | 304 +++++++++++
+ include/configs/skov_cpu_module.h            | 304 -----------
+ include/environment.h                        |   6 +-
+ tools/envcrc.c                               |   4 +-
+ 26 files changed, 1702 insertions(+), 1702 deletions(-)
+ create mode 100644 board/skov/arm9-cpu/Makefile
+ create mode 100644 board/skov/arm9-cpu/arm9-cpu.c
+ create mode 100644 board/skov/arm9-cpu/cmd_lcd.c
+ create mode 100644 board/skov/arm9-cpu/lc7981.c
+ create mode 100644 board/skov/arm9-cpu/led.c
+ create mode 100644 board/skov/arm9-cpu/partition.c
+ delete mode 100644 board/skov/skov_cpu_module/Makefile
+ delete mode 100644 board/skov/skov_cpu_module/cmd_lcd.c
+ delete mode 100644 board/skov/skov_cpu_module/lc7981.c
+ delete mode 100644 board/skov/skov_cpu_module/led.c
+ delete mode 100644 board/skov/skov_cpu_module/partition.c
+ delete mode 100644 board/skov/skov_cpu_module/skov_cpu_module.c
+ create mode 100644 include/configs/arm9-cpu.h
+ delete mode 100644 include/configs/skov_cpu_module.h
+
+diff --git a/arch/arm/lib/board.c b/arch/arm/lib/board.c
+index 48cc4af..7f6a8ca 100644
+--- a/arch/arm/lib/board.c
++++ b/arch/arm/lib/board.c
+@@ -71,7 +71,7 @@ ulong monitor_flash_len;
+ #ifdef CONFIG_HAS_DATAFLASH
+ extern int  AT91F_DataflashInit(void);
+ extern void dataflash_print_info(void);
+-#ifdef CONFIG_SKOV_CPU_MODULE 
++#ifdef CONFIG_ARM9_CPU 
+ extern void check_240(void);
+ #endif
+ #endif
+@@ -543,10 +543,10 @@ void board_init_r(gd_t *id, ulong dest_addr)
+ # endif /* CONFIG_SYS_FLASH_CHECKSUM */
+ 	} else {
+ 	//
+-#if !defined(CONFIG_SKOV_CPU_MODULE)
++#if !defined(CONFIG_ARM9_CPU)
+ 		puts(failed);
+ 		hang();
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	}
+ #endif
+ 
+@@ -567,7 +567,7 @@ void board_init_r(gd_t *id, ulong dest_addr)
+ #ifdef CONFIG_HAS_DATAFLASH
+ 	AT91F_DataflashInit();
+ 	dataflash_print_info();
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 	check_240(); /**< Martin Bjærre Is the board running 240Mhz? */
+ #endif
+ #endif
+diff --git a/board/skov/arm9-cpu/Makefile b/board/skov/arm9-cpu/Makefile
+new file mode 100644
+index 0000000..25058c4
+--- /dev/null
++++ b/board/skov/arm9-cpu/Makefile
+@@ -0,0 +1,52 @@
++#
++# (C) Copyright 2003-2008
++# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++#
++# (C) Copyright 2008
++# Stelian Pop <stelian@popies.net>
++# Lead Tech Design <www.leadtechdesign.com>
++#
++# See file CREDITS for list of people who contributed to this
++# project.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation; either version 2 of
++# the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++# MA 02111-1307 USA
++#
++
++include $(TOPDIR)/config.mk
++
++LIB	= $(obj)lib$(BOARD).o
++
++COBJS-y += arm9-cpu.o
++COBJS-y += lc7981.o
++COBJS-y += cmd_lcd.o
++COBJS-y += led.o
++COBJS-$(CONFIG_HAS_DATAFLASH) += partition.o
++
++SRCS	:= $(SOBJS-y:.o=.S) $(COBJS-y:.o=.c)
++OBJS	:= $(addprefix $(obj),$(COBJS-y))
++SOBJS	:= $(addprefix $(obj),$(SOBJS-y))
++
++$(LIB):	$(obj).depend $(OBJS) $(SOBJS)
++	$(call cmd_link_o_target, $(OBJS) $(SOBJS))
++
++#########################################################################
++
++# defines $(obj).depend target
++include $(SRCTREE)/rules.mk
++
++sinclude $(obj).depend
++
++#########################################################################
+diff --git a/board/skov/arm9-cpu/arm9-cpu.c b/board/skov/arm9-cpu/arm9-cpu.c
+new file mode 100644
+index 0000000..bc55a77
+--- /dev/null
++++ b/board/skov/arm9-cpu/arm9-cpu.c
+@@ -0,0 +1,741 @@
++/*
++ * (C) Copyright 2007-2008
++ * Stelian Pop <stelian@popies.net>
++ * Lead Tech Design <www.leadtechdesign.com>
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <common.h>
++#include <asm/sizes.h>
++#include <asm/arch/at91sam9263.h>
++#include <asm/arch/at91sam9_smc.h>
++#include <asm/arch/at91sam9_pwm.h> /**< Rose: Add pwm support*/
++#include <asm/arch/at91_common.h>
++#include <asm/arch/at91_pmc.h>
++#include <asm/arch/at91_rstc.h>
++#include <asm/arch/at91_matrix.h>
++#include <asm/arch/at91_pio.h>
++#include <asm/arch/gpio.h> /**< Rose: Add gpio support */
++#include <asm/arch/clk.h>
++#include <asm/io.h>
++#include <asm/arch/gpio.h>
++#include <asm/arch/hardware.h>
++#include <lcd.h>
++#include <atmel_lcdc.h>
++#if defined(CONFIG_RESET_PHY_R) && defined(CONFIG_MACB)
++#include <net.h>
++#endif
++#include <netdev.h>
++#ifdef CONFIG_GENERIC_ATMEL_MCI
++#include <mmc.h>          /**< Rose: We ned to add mmc support in this file */
++#include <atmel_mci.h>
++#endif
++/** 
++ * @author Soren Andersen <san@rosetechnology.dk> 
++ * 
++ * Revition I boards got an external I2C watchdog, because of the atmel
++ * CPU reset bug. 
++ */
++#include <asm/arch/at91_wdt.h>
++#include <i2c.h>
++#include <ds1374.h>
++#include <m41t80.h>
++int skov_with_ds1374 = 0;
++int skov_with_m41t82 = 0;
++int wd_init = 0;
++/* End san */
++
++DECLARE_GLOBAL_DATA_PTR;
++
++/* ------------------------------------------------------------------------- */
++/*
++ * Miscelaneous platform dependent initialisations
++ */
++#ifdef CONFIG_LTTD800480070
++/**
++ * Write to a PWM register.
++ */
++static inline void at91_pwm_write( unsigned int reg, unsigned long value )
++{
++    void *addr = (void *)AT91_BASE_PWMC;
++    __raw_writel( value, addr + reg );
++}
++  		          
++/**
++ * Read from a PWM register.
++ */
++static inline unsigned long at91_pwm_read( unsigned int reg )
++{
++    void *addr = (void *)AT91_BASE_PWMC;	
++    return __raw_readl( addr + reg );
++}
++#endif /*CONFIG_LTTD800480070*/
++
++/**
++ * @author Søren Andersen <san@rosetechnology.dk> 
++ * Add MMC support
++ */
++#ifdef CONFIG_GENERIC_ATMEL_MCI
++/* this is a weak define that we are overriding */
++int board_mmc_init(bd_t *bd)
++{
++        at91_pmc_t    *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
++        /* Enable clock */
++        writel(1 << ATMEL_ID_MCI0, &pmc->pcer); // enable MCI clock
++        writel(1 << ATMEL_ID_MCI1, &pmc->pcer);
++        writel(1 << ATMEL_ID_PIOA, &pmc->pcer);
++                  
++        at91_mci_hw_init();
++
++        /* This calls the atmel_mci_init in gen_atmel_mci.c */
++        return atmel_mci_init((void *)ATMEL_BASE_MCI1);
++}
++
++/* this is a weak define that we are overriding */
++int board_mmc_getcd(struct mmc *mmc)
++{
++        return !at91_get_gpio_value(CONFIG_SYS_MMC_CD_PIN);        
++}
++#endif
++
++#ifdef CONFIG_CMD_NAND
++static void at91sam9263ek_nand_hw_init(void)
++{
++	unsigned long csa;
++	at91_smc_t    *smc    = (at91_smc_t *) ATMEL_BASE_SMC0;
++	at91_matrix_t *matrix = (at91_matrix_t *) ATMEL_BASE_MATRIX;
++	at91_pmc_t    *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
++
++	/* Enable CS3 */
++	csa = readl(&matrix->csa[0]) | AT91_MATRIX_CSA_EBI_CS3A;
++	writel(csa, &matrix->csa[0]);
++
++	/* Enable CS3 */
++
++	/* Configure SMC CS3 for NAND/SmartMedia */
++	writel(AT91_SMC_SETUP_NWE(1) | AT91_SMC_SETUP_NCS_WR(0) |
++		AT91_SMC_SETUP_NRD(1) | AT91_SMC_SETUP_NCS_RD(0),
++		&smc->cs[3].setup);
++
++	writel(AT91_SMC_PULSE_NWE(3) | AT91_SMC_PULSE_NCS_WR(3) |
++		AT91_SMC_PULSE_NRD(3) | AT91_SMC_PULSE_NCS_RD(3),
++		&smc->cs[3].pulse);
++
++	writel(AT91_SMC_CYCLE_NWE(5) | AT91_SMC_CYCLE_NRD(5),
++		&smc->cs[3].cycle);
++	writel(AT91_SMC_MODE_RM_NRD | AT91_SMC_MODE_WM_NWE |
++		AT91_SMC_MODE_EXNW_DISABLE |
++#ifdef CONFIG_SYS_NAND_DBW_16
++		       AT91_SMC_MODE_DBW_16 |
++#else /* CONFIG_SYS_NAND_DBW_8 */
++		       AT91_SMC_MODE_DBW_8 |
++#endif
++		       AT91_SMC_MODE_TDF_CYCLE(2),
++		&smc->cs[3].mode);
++
++	writel(1 << ATMEL_ID_PIOA | 1 << ATMEL_ID_PIOCDE,
++		&pmc->pcer);
++	
++	/* Rose/HBS: We have R/B on pioB */
++	writel(1 << ATMEL_ID_PIOA | 1 << ATMEL_ID_PIOB | 1 << ATMEL_ID_PIOCDE,
++			&pmc->pcer);		
++
++	/* Configure RDY/BSY */
++	at91_set_gpio_input(CONFIG_SYS_NAND_READY_PIN, 1);
++
++	/* Enable NandFlash */
++	//at91_set_gpio_output(CONFIG_SYS_NAND_ENABLE_PIN, 1);
++	at91_set_gpio_output(CONFIG_SYS_NAND_ENABLE_PIN, 0); /**< Rose/HBS: stygt hack */
++}
++#endif
++
++#ifdef CONFIG_MACB
++static void at91sam9263ek_macb_hw_init(void)
++{
++	unsigned long 	erstl;
++	at91_pmc_t	*pmc	= (at91_pmc_t *) ATMEL_BASE_PMC;
++	at91_pio_t	*pio	= (at91_pio_t *) ATMEL_BASE_PIO;
++	at91_rstc_t	*rstc	= (at91_rstc_t *) ATMEL_BASE_RSTC;
++	/* Enable clock */
++	writel(1 << ATMEL_ID_EMAC, &pmc->pcer);
++
++	/*
++	 * Disable pull-up on:
++	 *	RXDV (PC25) => PHY normal mode (not Test mode)
++	 * 	ERX0 (PE25) => PHY ADDR0
++	 *	ERX1 (PE26) => PHY ADDR1 => PHYADDR = 0x0
++	 *
++	 * PHY has internal pull-down
++	 */
++
++	writel(1 << 25, &pio->pioc.pudr);
++	writel((1 << 25) | (1 <<26), &pio->pioe.pudr);
++
++	//erstl = readl(&rstc->mr) & AT91_RSTC_MR_ERSTL_MASK;
++	erstl = 0x1; /**< Rose: erstl need be be 1, otherwise Reset/power on reset dont work */
++	
++	/**
++	 * @author Soren Andersen <san@rosetechnology.dk>
++	 * We only do the reset of the PHY operation if there are a power good 
++	 */
++	at91_set_GPIO_periph(AT91_PIN_PE14,1);
++	at91_set_gpio_input(AT91_PIN_PE14,1);	
++	at91_set_gpio_deglitch(AT91_PIN_PE14,1);
++	udelay(100000); //make dure the pin is set up correctly before reading it
++	if(at91_get_gpio_value(AT91_PIN_PE14) == 1) {
++	
++		/* Need to reset PHY -> 500ms reset */
++		writel(AT91_RSTC_KEY | AT91_RSTC_MR_ERSTL(0x0D) |
++			AT91_RSTC_MR_URSTEN, &rstc->mr);
++
++		writel(AT91_RSTC_KEY | AT91_RSTC_CR_EXTRST, &rstc->cr);
++		/* Wait for end hardware reset */
++		while (!(readl(&rstc->sr) & AT91_RSTC_SR_NRSTL))
++			;
++
++		/* Restore NRST value */
++		writel(AT91_RSTC_KEY | erstl | AT91_RSTC_MR_URSTEN, &rstc->mr);
++	} else {
++		printf("POWER FAIL doing PHY initialization\n"); 
++	}
++
++	/* Re-enable pull-up */
++	writel(1 << 25, &pio->pioc.puer);
++	writel((1 << 25) | (1 <<26), &pio->pioe.puer);
++
++	at91_macb_hw_init();
++}
++#endif
++
++#ifdef CONFIG_LCD
++#if defined(CONFIG_70WVW2AZ0) /**< Old Seiko display */
++vidinfo_t panel_info = {
++        vl_col:         800,
++        vl_row:         480,
++        vl_clk:         30000000,
++
++        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
++                        ATMEL_LCDC_INVFRAME_INVERTED,
++
++        vl_bpix:        LCD_COLOR16,  
++        vl_tft:         1,  
++        vl_hsync_len:   3,  
++        vl_left_margin: 1,  
++        vl_right_margin:200,
++        vl_vsync_len:   3, 
++        vl_upper_margin:0, 
++        vl_lower_margin:10,
++        mmio:           ATMEL_BASE_LCDC,
++};
++#elif defined(CONFIG_TTFT1280120) /**< Truely horizontal display */ 
++vidinfo_t panel_info = {
++        vl_col:         1280,
++        vl_row:         120,
++        vl_clk:         11000000,
++        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED  |
++                        ATMEL_LCDC_INVFRAME_INVERTED |
++                        ATMEL_LCDC_INVDVAL_INVERTED  |
++                        ATMEL_LCDC_INVCLK_INVERTED,
++        vl_bpix:        3, 
++        vl_tft:         1, 
++        vl_hsync_len:   3, 
++        vl_left_margin: 54,
++        vl_right_margin:54,
++        vl_vsync_len:   3,
++        vl_upper_margin:6,
++        vl_lower_margin:2,
++        mmio:           ATMEL_BASE_LCDC,
++};
++#elif defined(CONFIG_TX18D16VM1CBA) /**< TFT display */
++vidinfo_t panel_info = {
++	vl_col:         800,
++	vl_row:         480,
++	vl_clk:         30000000,
++	                        
++	vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
++	                ATMEL_LCDC_INVFRAME_INVERTED,
++	vl_bpix:        LCD_COLOR16,
++	vl_tft:         1,  
++	vl_hsync_len:   20,  
++	vl_left_margin: 7,  
++	vl_right_margin:40,
++	vl_vsync_len:   2, 
++	vl_upper_margin:4, 
++	vl_lower_margin:11,
++	mmio:           ATMEL_BASE_LCDC,
++};
++#else 
++vidinfo_t panel_info = {
++	vl_col:		240,
++	vl_row:		320,
++	vl_clk:		4965000,
++	vl_sync:	ATMEL_LCDC_INVLINE_INVERTED |
++			ATMEL_LCDC_INVFRAME_INVERTED,
++	vl_bpix:	3,
++	vl_tft:		1,
++	vl_hsync_len:	5,
++	vl_left_margin:	1,
++	vl_right_margin:33,
++	vl_vsync_len:	1,
++	vl_upper_margin:1,
++	vl_lower_margin:0,
++	mmio:		ATMEL_BASE_LCDC,
++};
++#endif
++
++#ifdef CONFIG_LTTD800480070
++vidinfo_t panel_info_logic = {
++        vl_col:         800,
++        vl_row:         480,
++        vl_clk:         30000000,
++
++        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
++                        ATMEL_LCDC_INVFRAME_INVERTED,
++
++        vl_bpix:        LCD_COLOR16,  
++        vl_tft:         1,  
++        vl_hsync_len:   3,  //Atmel calculates: Total Length = Hsync + left marging + picture + right_margin+1 (3+85+800+0+1=889)
++        vl_left_margin: 85,  
++        vl_right_margin:1, 
++        vl_vsync_len:   3, //Atmel calculates: Total Length = upper marging + picture + lower_margin (32+480+1=513) (25MHz / ( 889 * 513 ) = 54,8Hz
++        vl_upper_margin:32, 
++        vl_lower_margin:1,
++        mmio:           ATMEL_BASE_LCDC,
++};
++
++vidinfo_t panel_info_logic_240 = {
++        vl_col:         800,
++        vl_row:         480,
++        vl_clk:         30000000,
++
++        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
++                        ATMEL_LCDC_INVFRAME_INVERTED,
++
++        vl_bpix:        LCD_COLOR16,  
++        vl_tft:         1,  
++        vl_hsync_len:   3,  //Atmel calculates: Total Length = Hsync + left marging + picture + right_margin+1 (3+85+800+20+1=909)
++        vl_left_margin: 85,  
++        vl_right_margin:20, 
++        vl_vsync_len:   3, //Atmel calculates: Total Length = upper marging + picture + lower_margin (32+480+38=550) (30MHz / ( 909 * 550 ) = 60Hz
++        vl_upper_margin:32, 
++        vl_lower_margin:38,
++        mmio:           ATMEL_BASE_LCDC,
++};
++
++#endif
++/*
++#ifdef CONFIG_LC7981  
++vidinfo_t lc7981_panel_info = {
++	vl_col:         240,
++        vl_row:         128,
++        };
++#endif
++*/
++
++void lcd_enable(void)
++{
++	at91_set_pio_value(AT91_PIO_PORTA, 30, 1);  /* power up */
++}
++
++void lcd_disable(void)
++{
++	at91_set_pio_value(AT91_PIO_PORTA, 30, 0);  /* power down */
++}
++
++static void at91sam9263_lcd_hw_init(void)
++{
++	at91_pmc_t	*pmc	= (at91_pmc_t *) ATMEL_BASE_PMC;
++	
++	at91_set_a_periph(AT91_PIO_PORTC, 0, 0);     	/* LCDVSYNC */
++	at91_set_a_periph(AT91_PIO_PORTC, 1, 0);	/* LCDHSYNC */
++	at91_set_a_periph(AT91_PIO_PORTC, 2, 0);	/* LCDDOTCK */
++	at91_set_a_periph(AT91_PIO_PORTC, 3, 0);	/* LCDDEN */
++	at91_set_b_periph(AT91_PIO_PORTB, 9, 0);	/* LCDCC */
++	at91_set_a_periph(AT91_PIO_PORTC, 6, 0);	/* LCDD2 */
++	at91_set_a_periph(AT91_PIO_PORTC, 7, 0);	/* LCDD3 */
++	at91_set_a_periph(AT91_PIO_PORTC, 8, 0);	/* LCDD4 */
++	at91_set_a_periph(AT91_PIO_PORTC, 9, 0);	/* LCDD5 */
++	at91_set_a_periph(AT91_PIO_PORTC, 10, 0);	/* LCDD6 */
++	at91_set_a_periph(AT91_PIO_PORTC, 11, 0);	/* LCDD7 */
++	at91_set_a_periph(AT91_PIO_PORTC, 14, 0);	/* LCDD10 */
++	at91_set_a_periph(AT91_PIO_PORTC, 15, 0);	/* LCDD11 */
++	at91_set_a_periph(AT91_PIO_PORTC, 16, 0);	/* LCDD12 */
++	at91_set_b_periph(AT91_PIO_PORTC, 12, 0);	/* LCDD13 */
++	at91_set_a_periph(AT91_PIO_PORTC, 18, 0);	/* LCDD14 */
++	at91_set_a_periph(AT91_PIO_PORTC, 19, 0);	/* LCDD15 */
++	at91_set_a_periph(AT91_PIO_PORTC, 22, 0);	/* LCDD18 */
++	at91_set_a_periph(AT91_PIO_PORTC, 23, 0);	/* LCDD19 */
++	at91_set_a_periph(AT91_PIO_PORTC, 24, 0);	/* LCDD20 */
++	at91_set_b_periph(AT91_PIO_PORTC, 17, 0);	/* LCDD21 */
++	at91_set_a_periph(AT91_PIO_PORTC, 26, 0);	/* LCDD22 */
++	at91_set_a_periph(AT91_PIO_PORTC, 27, 0);	/* LCDD23 */
++
++	writel(1 << ATMEL_ID_LCDC, &pmc->pcer);
++	//gd->fb_base = ATMEL_BASE_SRAM0; /**< Søren Andersen : Too little space */
++        gd->fb_base = 0x23000000;	
++	/**
++	 * @author Martin Bjærre <mab@rosetechnology.dk>	
++         * Added check to see if rev 2 of interface board is used, thus using the Logic Technology display
++         */	
++#ifdef CONFIG_LTTD800480070	
++	at91_set_gpio_input( AT91_PIN_PD2, 1 );
++	udelay(100000); //make dure the pin is set up correctly before reading it
++	if (at91_get_gpio_value(AT91_PIN_PD2)) {
++		/**
++		 * This is the old interface board, as the pin is NC (using Seiko display)
++		 * Do nothing
++		 */
++	}
++	else {
++		/**
++		 * This is the new interface board, as the pin is pulled down (using Logic display)
++		 */
++		panel_info = panel_info_logic;
++		/* enable contrast PWM(1) */
++		writel(1<<AT91_ID_PWM, &pmc->pcer); 
++		at91_set_B_periph(AT91_PIN_PB8, 0);	
++		
++		/** 
++		 * 4.5V = 100% = (4.5-3.0)/ (5.3-3.0) = 65.2% dutycycle
++		 * 3,6V = 0% = (3.6-3.0)/(5.3-3.0) = 26.1% dutycycle
++		 * 65.2%-26.1%=39.1%
++		 * 100 / 0.391 = 256
++		 * 3.6V = 0.261 * 256 = 67
++		 * 4.5V = 0.652 * 256 = 167
++		 * Formula = 67 + contrast%
++		 * Frequency: 100MHz/(32*256)=12.2KHz 
++		 */
++		at91_pwm_write( AT91_PWM_CMR(1), AT91_PWM_CMR_MCK32 | AT91_PWM_CPOL);
++		at91_pwm_write( AT91_PWM_CPRDR(1),  256);
++		
++		if(getenv("tft_contrast") != NULL){
++			at91_pwm_write( AT91_PWM_CDTYR(1), 67 + simple_strtoul(getenv("tft_contrast"), NULL, 10) );	
++		}
++		else {
++			/* Default 3.7V = (3.7-3.0)/(5.3-3.0) = 30.4% = 256 * 0.304 = 78 */
++			at91_pwm_write( AT91_PWM_CDTYR(1), 78 );
++		}
++
++		at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID1 );
++		
++	}
++#endif
++}
++
++#if defined(CONFIG_ARM9_CPU)
++void check_240(void)
++{
++	if (do_we_have_dataflash())	{
++#ifdef CONFIG_LTTD800480070	
++		if (!at91_get_gpio_value(AT91_PIN_PD2)) {
++			panel_info = panel_info_logic_240;
++		}
++#endif
++	}
++}
++#endif
++
++
++#ifdef CONFIG_LCD_INFO
++#include <nand.h>
++#include <version.h>
++
++#ifndef CONFIG_SYS_NO_FLASH
++extern flash_info_t flash_info[];
++#endif
++
++void lcd_show_board_info(void)
++{
++	ulong dram_size, nand_size;
++#ifndef CONFIG_SYS_NO_FLASH
++	ulong flash_size;
++#endif
++	int i;
++	char temp[32];
++
++	lcd_printf ("%s\n", U_BOOT_VERSION);
++	lcd_printf ("ARM9 CPU\n");
++	lcd_printf ("%s CPU at %s MHz\n",
++		ATMEL_CPU_NAME,
++		strmhz(temp, get_cpu_clk_rate()));
++
++	dram_size = 0;
++	for (i = 0; i < CONFIG_NR_DRAM_BANKS; i++)
++		dram_size += gd->bd->bi_dram[i].size;
++	nand_size = 0;
++#ifdef CONFIG_CMD_NAND
++	for (i = 0; i < CONFIG_SYS_MAX_NAND_DEVICE; i++)
++		nand_size += nand_info[i].size;
++#endif
++#ifndef CONFIG_SYS_NO_FLASH
++	flash_size = 0;
++	for (i = 0; i < CONFIG_SYS_MAX_FLASH_BANKS; i++)
++		flash_size += flash_info[i].size;
++#endif
++	lcd_printf ("  %ld MB SDRAM, %ld MB NAND",
++		dram_size >> 20,
++		nand_size >> 20 );
++#ifndef CONFIG_SYS_NO_FLASH
++	lcd_printf (",\n  %ld MB NOR",
++		flash_size >> 20);
++#endif
++	lcd_puts ("\n");
++}
++#endif /* CONFIG_LCD_INFO */
++#endif
++
++int board_early_init_f(void)
++{
++	struct at91_pmc *pmc = (struct at91_pmc *)ATMEL_BASE_PMC;
++
++	/* Enable clocks for all PIOs */
++	writel((1 << ATMEL_ID_PIOA) | (1 << ATMEL_ID_PIOB) |
++		(1 << ATMEL_ID_PIOCDE),
++		&pmc->pcer);
++
++	at91_seriald_hw_init();
++	return 0;
++}
++
++int board_init(void)
++{ 
++	unsigned char i2c_tmp1 = 0, i2c_tmp2 = 0; /**< San Rose */
++	/* arch number of AT91SAM9263EK-Board */
++	gd->bd->bi_arch_number = MACH_TYPE_AT91SAM9263EK;
++	/* adress of boot parameters */
++	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
++
++#ifdef CONFIG_CMD_NAND
++	at91sam9263ek_nand_hw_init();
++#endif
++#ifdef CONFIG_HAS_DATAFLASH
++	at91_set_pio_output(AT91_PIO_PORTE, 20, 1);	/* select spi0 clock */
++	at91_spi0_hw_init(1 << 0);
++#endif
++#ifdef CONFIG_MACB
++	at91sam9263ek_macb_hw_init();
++#endif
++#ifdef CONFIG_USB_OHCI_NEW
++	at91_uhp_hw_init();
++#endif
++#ifdef CONFIG_LCD
++	at91sam9263_lcd_hw_init();
++#endif
++	/**
++	 * @author Søren Andersen <san@rosetechnology.dk>
++	 * Since the reads are being performed one byte at a time,
++	 * there is a chance that a carry will occur during the read.
++	 * To detect this, 2 reads are performed and compared.
++	 */                                            
++	at91sam9263_i2c_init();
++
++	/* find out if we hade a m41t82 or ds1374 rtc */
++	i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
++	i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
++	
++	if(i2c_tmp1 == 1 && i2c_tmp2 == 1) { //We dont have an m41t82
++		
++		i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
++		i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
++		
++		if(i2c_tmp1 == 0 || i2c_tmp2 == 0) // We have a ds1374
++		{
++			printf("WD: DS1374\n");
++			at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
++			skov_with_ds1374 = 1;	
++			timer_init();
++			//4096 for one secound
++			ds1374_wdt_settimeout(1228800); //->5 minuts
++			writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
++			wd_init = 1;
++		} else {
++			//No external watchdog
++			skov_with_ds1374 = 0;
++		}
++	} else  {
++		printf("WD: M41T82\n");
++		at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
++		skov_with_m41t82 = 1;
++		timer_init();
++		m41t82_wdt_settimeout(32); //32 sek
++		writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
++		wd_init = 1;
++	}
++    	if(wd_init == 0) {
++    	    printf("WD: AT91WDT\n");
++    	}
++    	/* End San */
++	return 0;
++}
++
++int dram_init(void)
++{
++	/* ROSE: We will configure the memory size accourding the two values written by the bootstrap */ 
++	volatile unsigned int *test_adr1=(unsigned int*)0x20000000, *test_adr2=(unsigned int*)0x21000000;
++	unsigned int test_val1=(unsigned int)0x534B4F56, test_val2=(unsigned int)0x564F4B53;
++		
++	if((*(test_adr1) == test_val1) && (*(test_adr2) == test_val2))
++	{  	
++		gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, 0x08000000); /**< 128MB */
++	}
++	else if((*(test_adr1) == test_val2) && (*(test_adr2) == test_val1))
++	{
++	        gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, 0x04000000); /**< 64MB */ 
++	}
++	else 
++	{
++		gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, CONFIG_SYS_SDRAM_SIZE); /**< default */
++	}
++
++	return 0;
++}
++
++#ifdef CONFIG_RESET_PHY_R
++void reset_phy(void)
++{
++}
++#endif
++
++/**
++ * @author Søren Andersen
++ * Bitbang I2C pins 
++ */
++#define GPIO_I2C_SCL   AT91_PIN_PB5
++#define GPIO_I2C_SDA   AT91_PIN_PB4
++
++void at91sam9263_i2c_init(void)
++{
++        /*
++        at91_pmc_t      *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
++        writel(1 << ATMEL_ID_PIOB, &pmc->pcer);
++        */                
++        at91_set_GPIO_periph(GPIO_I2C_SDA, 1); //use pull up
++        at91_set_gpio_multi_drive(GPIO_I2C_SDA, 1);
++                
++        at91_set_gpio_output( GPIO_I2C_SCL, 0 );
++        at91_set_gpio_multi_drive(GPIO_I2C_SCL, 1);
++        at91_set_GPIO_periph(GPIO_I2C_SCL, 1);
++}
++
++void at91sam9263_i2c_scl(unsigned long bit)
++{
++        if(bit) {
++        	at91_set_gpio_value(GPIO_I2C_SCL, 1);
++        }
++        else {
++        	at91_set_gpio_value(GPIO_I2C_SCL, 0);
++        }	
++}
++                                        
++void at91sam9263_i2c_sda(unsigned long bit)
++{
++        if(bit) {
++        	at91_set_gpio_value(GPIO_I2C_SDA, 1);
++        } 
++        else {
++  		at91_set_gpio_value(GPIO_I2C_SDA, 0);      		
++  	}	
++}
++
++int at91sam9263_i2c_read(void)
++{
++        return at91_get_gpio_value(GPIO_I2C_SDA);
++}
++
++void at91sam9263_i2c_active(void)
++{
++	at91_set_gpio_output( GPIO_I2C_SDA, 0 ); //gpio outout with value zero
++	at91_set_gpio_multi_drive( GPIO_I2C_SDA, 1 ); //enable multidrive
++	at91_set_GPIO_periph( GPIO_I2C_SDA, 1 ); //use pull up
++}
++                                                                
++void at91sam9263_i2c_tristate(void)
++{
++	at91_set_gpio_input( GPIO_I2C_SDA, 0 ); // set pin as input without pullup
++	at91_set_gpio_deglitch( GPIO_I2C_SDA, 1 ); // enable glitch filter
++}
++
++
++int board_eth_init(bd_t *bis)
++{
++	int rc = 0;
++#ifdef CONFIG_MACB
++	rc = macb_eth_initialize(0, (void *) ATMEL_BASE_EMAC, 0x00);
++#endif
++	return rc;
++}
++
++/** 
++ * @author Søren Andersen <san@rosetechnology.dk> 
++ * Find the I2c chip which is mounted on the board
++ */
++void hw_watchdog_reset(void)
++{
++    //If we have an i2c watchdog -> Use this one
++    if(skov_with_ds1374 == 1 && wd_init == 1)
++    {
++        ds1374_hw_watchdog_reset();    	
++    }
++    else if(skov_with_m41t82 == 1 && wd_init == 1)
++    {
++        m41t82_hw_watchdog_reset();
++    }
++    else
++    {
++        at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
++        writel(AT91_WDT_CR_WDRSTT | AT91_WDT_CR_KEY, &wd->cr);   
++    }
++} 
++/* End San */  
++
++/** 
++ * @author Henrik Steffesen <hbs@rosetechnology.dk>
++ * SPI chip select control 
++ */
++#ifdef CONFIG_ATMEL_SPI
++#include <spi.h>
++
++int spi_cs_is_valid(unsigned int bus, unsigned int cs)
++{
++	return bus == 0 && cs < 1;
++}
++
++void spi_cs_activate(struct spi_slave *slave)
++{
++	switch(slave->cs) {
++		case 0:
++		default:
++			at91_set_gpio_output(AT91_PIN_PA5, 0);
++			break;
++	}
++}
++
++void spi_cs_deactivate(struct spi_slave *slave)
++{
++	switch(slave->cs) {
++		case 0:
++		default:
++			at91_set_gpio_output(AT91_PIN_PA5, 1);
++		break;
++	}
++}
++
++#endif /* CONFIG_ATMEL_SPI */
++
+diff --git a/board/skov/arm9-cpu/cmd_lcd.c b/board/skov/arm9-cpu/cmd_lcd.c
+new file mode 100644
+index 0000000..9ab86b4
+--- /dev/null
++++ b/board/skov/arm9-cpu/cmd_lcd.c
+@@ -0,0 +1,159 @@
++/*
++ * 2008
++ * Rose Technology <www.rosetechnology.dk>
++ * Martin Bjaerre <mab@rosetechnology.dk>
++ *
++ * Command file for new LCD commands, written for lc7981,
++ * but applicable for other drivers if implemented.
++ */
++
++/*
++ * BMP handling routines
++ */
++
++#include <common.h>
++#include <command.h>
++#include <asm/byteorder.h>
++#include <malloc.h>
++
++static int lcd_size(char * width, char * height);
++static int lcd_contrast(char * contrast);
++static int lcd_bglight(char * bglight);
++static void lcd_get(void);
++
++#ifdef CONFIG_LC7981
++extern void lc7981_update_bglight(uint bglight);
++extern void lc7981_update_contrast(uint contrast);
++#endif
++
++
++/*
++ * Subroutine:  do_lcd
++ *
++ * Description: Handler for 'lcd' command..
++ *
++ * Inputs:	argv[1] contains the subcommand
++ *
++ * Return:      None
++ *
++ */
++int do_lcd(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++{
++	char *x, *y;
++	x = y = "";
++
++	switch (argc) {
++	case 3:		/* bglight/contrast */
++		x = argv[2];
++		break;
++	case 4:		/* size */
++	        x = argv[2];
++	        y = argv[3];
++	        break;
++	default:
++		break;
++	}
++
++	/* Allow for short names
++	 * Adjust length if more sub-commands get added
++	 */
++	if (strncmp(argv[1],"size",1) == 0) {
++		return (lcd_size(x,y));
++	} else if (strncmp(argv[1],"contrast",1) == 0) {
++	    return (lcd_contrast(x));
++	} else if (strncmp(argv[1],"bglight",1) == 0) {
++	    return (lcd_bglight(x));
++	} else if (strncmp(argv[1],"help",1) == 0) {
++		printf("Help:\n%s\n", cmdtp->help);
++		return 1;
++	} else if (strncmp(argv[1],"get",1) == 0) {
++		lcd_get();
++		return 1;
++	} else {
++		printf ("Usage:\n%s\n", cmdtp->usage);
++		return 1;
++	}
++}
++
++U_BOOT_CMD(
++	lcd,	4,	1,	do_lcd,
++	"Set properties of display",
++	    "size [x y]         - Set size of display to x times y pixels\n"
++	"lcd contrast [x]       - Set contrast of display, values 0 - 100 accepted\n"
++	"lcd bglight [x]        - Set background light of display, value 0 - 100 accepted\n"
++	"lcd get                - Show lcd properties"
++);
++
++/*
++ * Subroutine:  lcd_size
++ *
++ * Description: Set the size of the LCD screen
++ *
++ * Inputs:	pixel width and height
++ *
++ * Return:      None
++ *
++ */
++static int lcd_size(char * width, char * height)
++{
++	if(simple_strtoul(width, NULL, 10) > 0 && simple_strtoul(height, NULL, 10) > 0){
++		setenv("lcd_width", width);
++		setenv("lcd_height", height);
++		return 1;
++	}
++	return 0;
++}
++
++/*
++ * Subroutine:  lcd_contrast
++ *
++ * Description: Set the contrast of the LCD screen
++ *
++ * Inputs:	Contrast between 0 and 100
++ *
++ * Return:      None
++ *
++ */
++static int lcd_contrast(char * contrast)
++{
++	if(simple_strtoul(contrast, NULL, 10) >= 0 && simple_strtoul(contrast, NULL, 10) <= 100){
++		setenv("lcd_contrast", contrast);
++#ifdef CONFIG_LC7981
++		lc7981_update_contrast((uint)simple_strtoul(contrast, NULL, 10));
++#endif
++		return 1;
++	}
++	return 0;
++}
++
++/*
++ * Subroutine:  lcd_bglight
++ *
++ * Description: Set the background light of the LCD screen
++ *
++ * Inputs:	background light between 0 and 100
++ *
++ * Return:      None
++ *
++ */
++static int lcd_bglight(char * bglight)
++{
++	if(simple_strtoul(bglight, NULL, 10) >= 0 && simple_strtoul(bglight, NULL, 10) <= 100){
++		setenv("lcd_bglight", bglight);
++#ifdef CONFIG_LC7981
++		lc7981_update_bglight((uint)simple_strtoul(bglight, NULL, 10));
++#endif
++		return 1;
++	}
++	return 0;
++}
++static void lcd_get(void)
++{
++	char *width, *height, *contrast, *bglight;
++	width = getenv("lcd_width");
++	height = getenv("lcd_height");
++	contrast = getenv("lcd_contrast");
++	bglight = getenv("lcd_bglight");
++	printf("width: %s\nheight: %s\ncontrast: %s\n"
++		"background light: %s\n", width, height, contrast, bglight);
++}
+diff --git a/board/skov/arm9-cpu/lc7981.c b/board/skov/arm9-cpu/lc7981.c
+new file mode 100644
+index 0000000..b5ee052
+--- /dev/null
++++ b/board/skov/arm9-cpu/lc7981.c
+@@ -0,0 +1,279 @@
++/**
++ * @file
++ * 2008
++ * Rose Technology <www.rosetechnology.dk>
++ * Martin Bjaerre <mab@rosetechnology.dk>
++ *
++ * Display driver for lcd displays on SKOV board.
++ * For displaying a startup image.
++ * 2010
++ * san@rosetechnology
++ * Ported driver to new uboot API
++ */
++ 
++#include <config.h>
++#include <common.h>
++#include <lcd.h>
++#include <lc7981.h>
++#include <asm/arch/at91sam9263.h>
++#include <asm/arch/at91_pmc.h>
++#include <asm/arch/at91sam9_pwm.h>
++#include <asm/arch/gpio.h>
++#include <asm/io.h>
++
++#ifdef CONFIG_LC7981
++
++#define EN      AT91_PIN_PE8
++#define RW      AT91_PIN_PE11
++#define RS      AT91_PIN_PE12
++#define CS      AT91_PIN_PE9
++#define RST     AT91_PIN_PE13
++#define B0      AT91_PIN_PE0
++#define B1      AT91_PIN_PE1
++#define B2      AT91_PIN_PE2
++#define B3      AT91_PIN_PE3
++#define B4      AT91_PIN_PE4
++#define B5      AT91_PIN_PE5
++#define B6      AT91_PIN_PE6
++#define B7      AT91_PIN_PE7
++
++
++#define MODE_REG	0
++#define PITCH_REG	0x01
++#define WIDTH_REG	0x02
++#define DUTY_REG	0x03
++#define CSIZE_REG	0x04
++#define ADDRSL_REG	0x08
++#define ADDRSH_REG	0x09
++#define ADDRL_REG	0x0A
++#define ADDRH_REG	0x0B
++#define WRITE_REG	0x0C
++#define READ_REG	0x0D
++
++#define WRITE(d)	lcd_write_bus(d)
++
++/*
++ * Write to a PWM register.
++ */
++static inline void at91_pwm_write( unsigned int reg, unsigned long value )
++{
++	void *addr = (void *)AT91_BASE_PWMC;
++	__raw_writel( value, addr + reg );
++}
++          
++/*
++ * Read from a PWM register.
++ */
++static inline unsigned long at91_pwm_read( unsigned int reg )
++{
++	void *addr = (void *)AT91_BASE_PWMC;	
++	return __raw_readl( addr + reg );
++} 
++
++//void *lcd_base;			/* Start of framebuffer memory	*/
++//void *lcd_console_address;		/* Start of console buffer	*/
++
++//static unsigned char lcd_read_bus(void);
++static void lcd_write_bus(unsigned char data);
++
++/*
++ulong calc_fbsize (void)
++{
++	return 0;
++}
++*/
++static void my_delay(unsigned int time)
++{
++	unsigned int i;
++	for( i = 0; i < (time*9); i++);
++}
++
++void lcd_write_reg(unsigned char reg, unsigned char data)
++{
++	at91_set_gpio_value( RS,1 ); at91_set_gpio_value( CS,0 ); at91_set_gpio_value( RW,0 ); 
++	my_delay(1);
++	WRITE(reg);
++	my_delay(1);
++	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
++	at91_set_gpio_value( RS,0 );
++	my_delay(1);
++	WRITE(data);
++	my_delay(1);
++	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
++	at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RW,1 );	        
++	my_delay(1);	 
++}
++
++void lcd_set_addr(unsigned short addr)
++{
++	lcd_write_reg(ADDRL_REG, addr & 0xFF);
++	lcd_write_reg(ADDRH_REG, addr >> 8);
++}
++
++void lcd_write_data(unsigned char data )
++{
++	at91_set_gpio_value( RS,1 );
++	at91_set_gpio_value( CS,0 ); at91_set_gpio_value( RW,0 );
++	my_delay(1);
++	WRITE(WRITE_REG);
++	my_delay(1);
++	at91_set_gpio_value( EN,1 );
++	at91_set_gpio_value( EN,0 );
++	at91_set_gpio_value( RS,0 );
++	my_delay(1);
++	WRITE(data);
++	my_delay(1);
++	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
++	at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RW,1 );
++	my_delay(1);
++		
++}	
++
++void lc7981_ctrl_init(void)
++{
++	at91_pmc_t      *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
++	
++	at91_set_gpio_output( EN,0 ); at91_set_gpio_output( RW,0 ); at91_set_gpio_output( RS,0 );at91_set_gpio_output( RST,0 );
++	at91_set_gpio_output( CS,0 );
++	at91_set_gpio_output( B0,0 ); at91_set_gpio_output( B1,0 ); at91_set_gpio_output( B2,0 ); at91_set_gpio_output( B3,0 );
++	at91_set_gpio_output( B4,0 ); at91_set_gpio_output( B5,0 ); at91_set_gpio_output( B6,0 ); at91_set_gpio_output( B7,0 );
++	
++	at91_set_gpio_value( EN,0 ); at91_set_gpio_value( RW,0 );
++	at91_set_gpio_value( RS,1 ); at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RST,1 );
++	at91_set_gpio_value( B0,0 ); at91_set_gpio_value( B1,0 ); at91_set_gpio_value( B2,0 ); at91_set_gpio_value( B3,0 ); 
++	at91_set_gpio_value( B4,0 ); at91_set_gpio_value( B5,0 ); at91_set_gpio_value( B6,0 ); at91_set_gpio_value( B7,0 );
++	at91_set_gpio_value( RST,0 ); 
++	my_delay(1);
++	at91_set_gpio_value( RST,1 );
++	
++	/* Set Display in Graphic mode , Master)*/
++	lcd_write_reg(MODE_REG, 0x32);
++	lcd_write_reg(PITCH_REG, 0x07);
++	lcd_write_reg(WIDTH_REG, (panel_info.vl_col/8)-1);
++	lcd_write_reg(DUTY_REG, panel_info.vl_row-1);
++	//lcd_write_reg(CSIZE_REG, 8);
++	
++	lcd_write_reg(ADDRSL_REG, 0);
++	lcd_write_reg(ADDRSH_REG, 0);
++
++	/* enable PWM */
++	writel(1<<AT91_ID_PWM, &pmc->pcer);
++	//at91_sys_write(AT91_PMC_PCER, 1<<AT91_ID_PWM );
++	at91_set_B_periph(AT91_PIN_PC29, 0);	
++	at91_set_B_periph(AT91_PIN_PE10, 0);
++
++	at91_pwm_write( AT91_PWM_CMR(2), AT91_PWM_CMR_MCK512 | AT91_PWM_CPOL );
++	
++	at91_pwm_write( AT91_PWM_CPRDR(2), 500 );
++
++	if(getenv("lcd_contrast") != NULL){
++		at91_pwm_write( AT91_PWM_CDTYR(2), 60+simple_strtoul(getenv("lcd_contrast"), NULL, 10) );	
++	}
++	else {
++		at91_pwm_write( AT91_PWM_CDTYR(2), 110 ); /* 50% */
++	}
++	at91_pwm_write( AT91_PWM_CUPDR(2), 110 );
++
++	at91_pwm_write( AT91_PWM_CMR(3), AT91_PWM_CMR_MCK64 | AT91_PWM_CPOL );
++
++	at91_pwm_write( AT91_PWM_CPRDR(3), 100 );
++
++	if(getenv("lcd_bglight") != NULL){
++		at91_pwm_write( AT91_PWM_CDTYR(3), simple_strtoul(getenv("lcd_bglight"), NULL, 10) );
++	}
++	else {
++		at91_pwm_write( AT91_PWM_CDTYR(3), 80 ); /* 80% */
++	}
++	at91_pwm_write( AT91_PWM_CUPDR(3), 80 );
++	at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID3 );
++}
++
++void lc7981_update_contrast(uint contrast)
++{
++	at91_pwm_write( AT91_PWM_CUPDR(2), 60 + contrast );
++	at91_pwm_write( AT91_PWM_CMR(2), at91_pwm_read( AT91_PWM_CMR(2) ) | AT91_PWM_CUPD );
++}
++
++void lc7981_update_bglight(uint bglight)
++{
++	at91_pwm_write( AT91_PWM_CUPDR(3), 60 + bglight );
++	at91_pwm_write( AT91_PWM_CMR(3), at91_pwm_read( AT91_PWM_CMR(3) ) | AT91_PWM_CUPD );
++}
++
++void lc7981_clear(void)
++{
++	int row, col;
++	lcd_set_addr(0);
++	for(row = 0; row < 128; row++)
++	{
++		for(col = 0; col < 30; col++)
++		{
++			lcd_write_data(0x00);
++		}
++	}
++	lcd_set_addr(0);
++}
++void lc7981_enable(void)
++{
++	at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID2 );
++}
++void lc7981_disable(void)
++{
++	at91_pwm_write( AT91_PWM_DIS, AT91_PWM_CHID2 );
++}
++
++/*
++static unsigned char lcd_read_bus(void)
++{
++	return 	AT91C_BASE_PIOE->PIO_PDSR & 0xFF;
++}
++*/
++/*
++static void lcd_write_bus(unsigned char data)
++{
++	AT91C_BASE_PIOE->PIO_CODR = (unsigned char)~data;
++	AT91C_BASE_PIOE->PIO_SODR = (unsigned char) data;
++}
++*/
++static void lcd_write_bus(unsigned char data)
++{
++	at91_set_gpio_value(B0, (unsigned char)data & 0x01);
++	
++	if (((unsigned char)data & 0x02) == 0x02 ) {
++		at91_set_gpio_value(B1, 1);
++	} else {
++		at91_set_gpio_value(B1, 0);
++	}
++	if (((unsigned char)data & 0x04) == 0x04 ) {
++		at91_set_gpio_value(B2, 1);
++	} else {
++		at91_set_gpio_value(B2, 0);
++	}
++	if (((unsigned char)data & 0x08) == 0x08 ) {
++		at91_set_gpio_value(B3, 1);	
++	} else {
++		at91_set_gpio_value(B3, 0);
++	}
++	if (((unsigned char)data & 0x10) == 0x10 ) {
++		at91_set_gpio_value(B4, 1);
++	} else {
++		at91_set_gpio_value(B4, 0);
++	}
++	if (((unsigned char)data & 0x20) == 0x20 ) {
++		at91_set_gpio_value(B5, 1);
++	} else {
++		at91_set_gpio_value(B5, 0);
++	}
++	if (((unsigned char)data & 0x40) == 0x40 ) {
++		at91_set_gpio_value(B6, 1);
++	} else {
++		at91_set_gpio_value(B6, 0);
++	}
++	if (((unsigned char)data & 0x80) == 0x80 ) {
++		at91_set_gpio_value(B7, 1);
++	} else {
++		at91_set_gpio_value(B7, 0);
++	}	
++}	
++
++#endif /* CONFIG_LC7981 */
+diff --git a/board/skov/arm9-cpu/led.c b/board/skov/arm9-cpu/led.c
+new file mode 100644
+index 0000000..ce3cf09
+--- /dev/null
++++ b/board/skov/arm9-cpu/led.c
+@@ -0,0 +1,46 @@
++/*
++ * (C) Copyright 2007-2008
++ * Stelian Pop <stelian@popies.net>
++ * Lead Tech Design <www.leadtechdesign.com>
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <common.h>
++#include <asm/io.h>
++#include <asm/arch/gpio.h>
++#include <asm/arch/at91_pmc.h>
++#include <asm/arch/at91sam9263.h>
++
++void coloured_LED_init(void)
++{
++	/* Enable clock */
++	at91_pmc_t *pmc = (at91_pmc_t *) ATMEL_BASE_PMC;
++
++	writel(1 << ATMEL_ID_PIOB | 1 << ATMEL_ID_PIOCDE,
++		&pmc->pcer);
++
++	at91_set_gpio_output(CONFIG_RED_LED, 1);
++	at91_set_gpio_output(CONFIG_GREEN_LED, 1);
++	at91_set_gpio_output(CONFIG_YELLOW_LED, 1);
++
++	at91_set_gpio_value(CONFIG_RED_LED, 0);
++	at91_set_gpio_value(CONFIG_GREEN_LED, 1);
++	at91_set_gpio_value(CONFIG_YELLOW_LED, 1);
++}
+diff --git a/board/skov/arm9-cpu/partition.c b/board/skov/arm9-cpu/partition.c
+new file mode 100644
+index 0000000..7742d73
+--- /dev/null
++++ b/board/skov/arm9-cpu/partition.c
+@@ -0,0 +1,36 @@
++/*
++ * (C) Copyright 2008
++ * Ulf Samuelsson <ulf@atmel.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ *
++ */
++#include <common.h>
++#include <config.h>
++#include <asm/hardware.h>
++#include <dataflash.h>
++
++AT91S_DATAFLASH_INFO dataflash_info[CONFIG_SYS_MAX_DATAFLASH_BANKS];
++
++struct dataflash_addr cs[CONFIG_SYS_MAX_DATAFLASH_BANKS] = {
++	{CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0, 0},	/* Logical adress, CS */
++};
++
++/*define the area offsets*/
++dataflash_protect_t area_list[NB_DATAFLASH_AREA] = {
++	{0x00000000, 0x0007FDFF, FLAG_PROTECT_CLEAR, 0, "Bootstrap + U-Boot"},
++	{0x0007FE00, 0x00083FFF, FLAG_PROTECT_CLEAR, 0, "Environment"},
++};
+diff --git a/board/skov/skov_cpu_module/Makefile b/board/skov/skov_cpu_module/Makefile
+deleted file mode 100644
+index 753441c..0000000
+--- a/board/skov/skov_cpu_module/Makefile
++++ /dev/null
+@@ -1,52 +0,0 @@
+-#
+-# (C) Copyright 2003-2008
+-# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+-#
+-# (C) Copyright 2008
+-# Stelian Pop <stelian@popies.net>
+-# Lead Tech Design <www.leadtechdesign.com>
+-#
+-# See file CREDITS for list of people who contributed to this
+-# project.
+-#
+-# This program is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License as
+-# published by the Free Software Foundation; either version 2 of
+-# the License, or (at your option) any later version.
+-#
+-# This program is distributed in the hope that it will be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write to the Free Software
+-# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+-# MA 02111-1307 USA
+-#
+-
+-include $(TOPDIR)/config.mk
+-
+-LIB	= $(obj)lib$(BOARD).o
+-
+-COBJS-y += skov_cpu_module.o
+-COBJS-y += lc7981.o
+-COBJS-y += cmd_lcd.o
+-COBJS-y += led.o
+-COBJS-$(CONFIG_HAS_DATAFLASH) += partition.o
+-
+-SRCS	:= $(SOBJS-y:.o=.S) $(COBJS-y:.o=.c)
+-OBJS	:= $(addprefix $(obj),$(COBJS-y))
+-SOBJS	:= $(addprefix $(obj),$(SOBJS-y))
+-
+-$(LIB):	$(obj).depend $(OBJS) $(SOBJS)
+-	$(call cmd_link_o_target, $(OBJS) $(SOBJS))
+-
+-#########################################################################
+-
+-# defines $(obj).depend target
+-include $(SRCTREE)/rules.mk
+-
+-sinclude $(obj).depend
+-
+-#########################################################################
+diff --git a/board/skov/skov_cpu_module/cmd_lcd.c b/board/skov/skov_cpu_module/cmd_lcd.c
+deleted file mode 100644
+index 9ab86b4..0000000
+--- a/board/skov/skov_cpu_module/cmd_lcd.c
++++ /dev/null
+@@ -1,159 +0,0 @@
+-/*
+- * 2008
+- * Rose Technology <www.rosetechnology.dk>
+- * Martin Bjaerre <mab@rosetechnology.dk>
+- *
+- * Command file for new LCD commands, written for lc7981,
+- * but applicable for other drivers if implemented.
+- */
+-
+-/*
+- * BMP handling routines
+- */
+-
+-#include <common.h>
+-#include <command.h>
+-#include <asm/byteorder.h>
+-#include <malloc.h>
+-
+-static int lcd_size(char * width, char * height);
+-static int lcd_contrast(char * contrast);
+-static int lcd_bglight(char * bglight);
+-static void lcd_get(void);
+-
+-#ifdef CONFIG_LC7981
+-extern void lc7981_update_bglight(uint bglight);
+-extern void lc7981_update_contrast(uint contrast);
+-#endif
+-
+-
+-/*
+- * Subroutine:  do_lcd
+- *
+- * Description: Handler for 'lcd' command..
+- *
+- * Inputs:	argv[1] contains the subcommand
+- *
+- * Return:      None
+- *
+- */
+-int do_lcd(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+-{
+-	char *x, *y;
+-	x = y = "";
+-
+-	switch (argc) {
+-	case 3:		/* bglight/contrast */
+-		x = argv[2];
+-		break;
+-	case 4:		/* size */
+-	        x = argv[2];
+-	        y = argv[3];
+-	        break;
+-	default:
+-		break;
+-	}
+-
+-	/* Allow for short names
+-	 * Adjust length if more sub-commands get added
+-	 */
+-	if (strncmp(argv[1],"size",1) == 0) {
+-		return (lcd_size(x,y));
+-	} else if (strncmp(argv[1],"contrast",1) == 0) {
+-	    return (lcd_contrast(x));
+-	} else if (strncmp(argv[1],"bglight",1) == 0) {
+-	    return (lcd_bglight(x));
+-	} else if (strncmp(argv[1],"help",1) == 0) {
+-		printf("Help:\n%s\n", cmdtp->help);
+-		return 1;
+-	} else if (strncmp(argv[1],"get",1) == 0) {
+-		lcd_get();
+-		return 1;
+-	} else {
+-		printf ("Usage:\n%s\n", cmdtp->usage);
+-		return 1;
+-	}
+-}
+-
+-U_BOOT_CMD(
+-	lcd,	4,	1,	do_lcd,
+-	"Set properties of display",
+-	    "size [x y]         - Set size of display to x times y pixels\n"
+-	"lcd contrast [x]       - Set contrast of display, values 0 - 100 accepted\n"
+-	"lcd bglight [x]        - Set background light of display, value 0 - 100 accepted\n"
+-	"lcd get                - Show lcd properties"
+-);
+-
+-/*
+- * Subroutine:  lcd_size
+- *
+- * Description: Set the size of the LCD screen
+- *
+- * Inputs:	pixel width and height
+- *
+- * Return:      None
+- *
+- */
+-static int lcd_size(char * width, char * height)
+-{
+-	if(simple_strtoul(width, NULL, 10) > 0 && simple_strtoul(height, NULL, 10) > 0){
+-		setenv("lcd_width", width);
+-		setenv("lcd_height", height);
+-		return 1;
+-	}
+-	return 0;
+-}
+-
+-/*
+- * Subroutine:  lcd_contrast
+- *
+- * Description: Set the contrast of the LCD screen
+- *
+- * Inputs:	Contrast between 0 and 100
+- *
+- * Return:      None
+- *
+- */
+-static int lcd_contrast(char * contrast)
+-{
+-	if(simple_strtoul(contrast, NULL, 10) >= 0 && simple_strtoul(contrast, NULL, 10) <= 100){
+-		setenv("lcd_contrast", contrast);
+-#ifdef CONFIG_LC7981
+-		lc7981_update_contrast((uint)simple_strtoul(contrast, NULL, 10));
+-#endif
+-		return 1;
+-	}
+-	return 0;
+-}
+-
+-/*
+- * Subroutine:  lcd_bglight
+- *
+- * Description: Set the background light of the LCD screen
+- *
+- * Inputs:	background light between 0 and 100
+- *
+- * Return:      None
+- *
+- */
+-static int lcd_bglight(char * bglight)
+-{
+-	if(simple_strtoul(bglight, NULL, 10) >= 0 && simple_strtoul(bglight, NULL, 10) <= 100){
+-		setenv("lcd_bglight", bglight);
+-#ifdef CONFIG_LC7981
+-		lc7981_update_bglight((uint)simple_strtoul(bglight, NULL, 10));
+-#endif
+-		return 1;
+-	}
+-	return 0;
+-}
+-static void lcd_get(void)
+-{
+-	char *width, *height, *contrast, *bglight;
+-	width = getenv("lcd_width");
+-	height = getenv("lcd_height");
+-	contrast = getenv("lcd_contrast");
+-	bglight = getenv("lcd_bglight");
+-	printf("width: %s\nheight: %s\ncontrast: %s\n"
+-		"background light: %s\n", width, height, contrast, bglight);
+-}
+diff --git a/board/skov/skov_cpu_module/lc7981.c b/board/skov/skov_cpu_module/lc7981.c
+deleted file mode 100644
+index b5ee052..0000000
+--- a/board/skov/skov_cpu_module/lc7981.c
++++ /dev/null
+@@ -1,279 +0,0 @@
+-/**
+- * @file
+- * 2008
+- * Rose Technology <www.rosetechnology.dk>
+- * Martin Bjaerre <mab@rosetechnology.dk>
+- *
+- * Display driver for lcd displays on SKOV board.
+- * For displaying a startup image.
+- * 2010
+- * san@rosetechnology
+- * Ported driver to new uboot API
+- */
+- 
+-#include <config.h>
+-#include <common.h>
+-#include <lcd.h>
+-#include <lc7981.h>
+-#include <asm/arch/at91sam9263.h>
+-#include <asm/arch/at91_pmc.h>
+-#include <asm/arch/at91sam9_pwm.h>
+-#include <asm/arch/gpio.h>
+-#include <asm/io.h>
+-
+-#ifdef CONFIG_LC7981
+-
+-#define EN      AT91_PIN_PE8
+-#define RW      AT91_PIN_PE11
+-#define RS      AT91_PIN_PE12
+-#define CS      AT91_PIN_PE9
+-#define RST     AT91_PIN_PE13
+-#define B0      AT91_PIN_PE0
+-#define B1      AT91_PIN_PE1
+-#define B2      AT91_PIN_PE2
+-#define B3      AT91_PIN_PE3
+-#define B4      AT91_PIN_PE4
+-#define B5      AT91_PIN_PE5
+-#define B6      AT91_PIN_PE6
+-#define B7      AT91_PIN_PE7
+-
+-
+-#define MODE_REG	0
+-#define PITCH_REG	0x01
+-#define WIDTH_REG	0x02
+-#define DUTY_REG	0x03
+-#define CSIZE_REG	0x04
+-#define ADDRSL_REG	0x08
+-#define ADDRSH_REG	0x09
+-#define ADDRL_REG	0x0A
+-#define ADDRH_REG	0x0B
+-#define WRITE_REG	0x0C
+-#define READ_REG	0x0D
+-
+-#define WRITE(d)	lcd_write_bus(d)
+-
+-/*
+- * Write to a PWM register.
+- */
+-static inline void at91_pwm_write( unsigned int reg, unsigned long value )
+-{
+-	void *addr = (void *)AT91_BASE_PWMC;
+-	__raw_writel( value, addr + reg );
+-}
+-          
+-/*
+- * Read from a PWM register.
+- */
+-static inline unsigned long at91_pwm_read( unsigned int reg )
+-{
+-	void *addr = (void *)AT91_BASE_PWMC;	
+-	return __raw_readl( addr + reg );
+-} 
+-
+-//void *lcd_base;			/* Start of framebuffer memory	*/
+-//void *lcd_console_address;		/* Start of console buffer	*/
+-
+-//static unsigned char lcd_read_bus(void);
+-static void lcd_write_bus(unsigned char data);
+-
+-/*
+-ulong calc_fbsize (void)
+-{
+-	return 0;
+-}
+-*/
+-static void my_delay(unsigned int time)
+-{
+-	unsigned int i;
+-	for( i = 0; i < (time*9); i++);
+-}
+-
+-void lcd_write_reg(unsigned char reg, unsigned char data)
+-{
+-	at91_set_gpio_value( RS,1 ); at91_set_gpio_value( CS,0 ); at91_set_gpio_value( RW,0 ); 
+-	my_delay(1);
+-	WRITE(reg);
+-	my_delay(1);
+-	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
+-	at91_set_gpio_value( RS,0 );
+-	my_delay(1);
+-	WRITE(data);
+-	my_delay(1);
+-	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
+-	at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RW,1 );	        
+-	my_delay(1);	 
+-}
+-
+-void lcd_set_addr(unsigned short addr)
+-{
+-	lcd_write_reg(ADDRL_REG, addr & 0xFF);
+-	lcd_write_reg(ADDRH_REG, addr >> 8);
+-}
+-
+-void lcd_write_data(unsigned char data )
+-{
+-	at91_set_gpio_value( RS,1 );
+-	at91_set_gpio_value( CS,0 ); at91_set_gpio_value( RW,0 );
+-	my_delay(1);
+-	WRITE(WRITE_REG);
+-	my_delay(1);
+-	at91_set_gpio_value( EN,1 );
+-	at91_set_gpio_value( EN,0 );
+-	at91_set_gpio_value( RS,0 );
+-	my_delay(1);
+-	WRITE(data);
+-	my_delay(1);
+-	at91_set_gpio_value( EN,1 ); at91_set_gpio_value( EN,0 );
+-	at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RW,1 );
+-	my_delay(1);
+-		
+-}	
+-
+-void lc7981_ctrl_init(void)
+-{
+-	at91_pmc_t      *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
+-	
+-	at91_set_gpio_output( EN,0 ); at91_set_gpio_output( RW,0 ); at91_set_gpio_output( RS,0 );at91_set_gpio_output( RST,0 );
+-	at91_set_gpio_output( CS,0 );
+-	at91_set_gpio_output( B0,0 ); at91_set_gpio_output( B1,0 ); at91_set_gpio_output( B2,0 ); at91_set_gpio_output( B3,0 );
+-	at91_set_gpio_output( B4,0 ); at91_set_gpio_output( B5,0 ); at91_set_gpio_output( B6,0 ); at91_set_gpio_output( B7,0 );
+-	
+-	at91_set_gpio_value( EN,0 ); at91_set_gpio_value( RW,0 );
+-	at91_set_gpio_value( RS,1 ); at91_set_gpio_value( CS,1 ); at91_set_gpio_value( RST,1 );
+-	at91_set_gpio_value( B0,0 ); at91_set_gpio_value( B1,0 ); at91_set_gpio_value( B2,0 ); at91_set_gpio_value( B3,0 ); 
+-	at91_set_gpio_value( B4,0 ); at91_set_gpio_value( B5,0 ); at91_set_gpio_value( B6,0 ); at91_set_gpio_value( B7,0 );
+-	at91_set_gpio_value( RST,0 ); 
+-	my_delay(1);
+-	at91_set_gpio_value( RST,1 );
+-	
+-	/* Set Display in Graphic mode , Master)*/
+-	lcd_write_reg(MODE_REG, 0x32);
+-	lcd_write_reg(PITCH_REG, 0x07);
+-	lcd_write_reg(WIDTH_REG, (panel_info.vl_col/8)-1);
+-	lcd_write_reg(DUTY_REG, panel_info.vl_row-1);
+-	//lcd_write_reg(CSIZE_REG, 8);
+-	
+-	lcd_write_reg(ADDRSL_REG, 0);
+-	lcd_write_reg(ADDRSH_REG, 0);
+-
+-	/* enable PWM */
+-	writel(1<<AT91_ID_PWM, &pmc->pcer);
+-	//at91_sys_write(AT91_PMC_PCER, 1<<AT91_ID_PWM );
+-	at91_set_B_periph(AT91_PIN_PC29, 0);	
+-	at91_set_B_periph(AT91_PIN_PE10, 0);
+-
+-	at91_pwm_write( AT91_PWM_CMR(2), AT91_PWM_CMR_MCK512 | AT91_PWM_CPOL );
+-	
+-	at91_pwm_write( AT91_PWM_CPRDR(2), 500 );
+-
+-	if(getenv("lcd_contrast") != NULL){
+-		at91_pwm_write( AT91_PWM_CDTYR(2), 60+simple_strtoul(getenv("lcd_contrast"), NULL, 10) );	
+-	}
+-	else {
+-		at91_pwm_write( AT91_PWM_CDTYR(2), 110 ); /* 50% */
+-	}
+-	at91_pwm_write( AT91_PWM_CUPDR(2), 110 );
+-
+-	at91_pwm_write( AT91_PWM_CMR(3), AT91_PWM_CMR_MCK64 | AT91_PWM_CPOL );
+-
+-	at91_pwm_write( AT91_PWM_CPRDR(3), 100 );
+-
+-	if(getenv("lcd_bglight") != NULL){
+-		at91_pwm_write( AT91_PWM_CDTYR(3), simple_strtoul(getenv("lcd_bglight"), NULL, 10) );
+-	}
+-	else {
+-		at91_pwm_write( AT91_PWM_CDTYR(3), 80 ); /* 80% */
+-	}
+-	at91_pwm_write( AT91_PWM_CUPDR(3), 80 );
+-	at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID3 );
+-}
+-
+-void lc7981_update_contrast(uint contrast)
+-{
+-	at91_pwm_write( AT91_PWM_CUPDR(2), 60 + contrast );
+-	at91_pwm_write( AT91_PWM_CMR(2), at91_pwm_read( AT91_PWM_CMR(2) ) | AT91_PWM_CUPD );
+-}
+-
+-void lc7981_update_bglight(uint bglight)
+-{
+-	at91_pwm_write( AT91_PWM_CUPDR(3), 60 + bglight );
+-	at91_pwm_write( AT91_PWM_CMR(3), at91_pwm_read( AT91_PWM_CMR(3) ) | AT91_PWM_CUPD );
+-}
+-
+-void lc7981_clear(void)
+-{
+-	int row, col;
+-	lcd_set_addr(0);
+-	for(row = 0; row < 128; row++)
+-	{
+-		for(col = 0; col < 30; col++)
+-		{
+-			lcd_write_data(0x00);
+-		}
+-	}
+-	lcd_set_addr(0);
+-}
+-void lc7981_enable(void)
+-{
+-	at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID2 );
+-}
+-void lc7981_disable(void)
+-{
+-	at91_pwm_write( AT91_PWM_DIS, AT91_PWM_CHID2 );
+-}
+-
+-/*
+-static unsigned char lcd_read_bus(void)
+-{
+-	return 	AT91C_BASE_PIOE->PIO_PDSR & 0xFF;
+-}
+-*/
+-/*
+-static void lcd_write_bus(unsigned char data)
+-{
+-	AT91C_BASE_PIOE->PIO_CODR = (unsigned char)~data;
+-	AT91C_BASE_PIOE->PIO_SODR = (unsigned char) data;
+-}
+-*/
+-static void lcd_write_bus(unsigned char data)
+-{
+-	at91_set_gpio_value(B0, (unsigned char)data & 0x01);
+-	
+-	if (((unsigned char)data & 0x02) == 0x02 ) {
+-		at91_set_gpio_value(B1, 1);
+-	} else {
+-		at91_set_gpio_value(B1, 0);
+-	}
+-	if (((unsigned char)data & 0x04) == 0x04 ) {
+-		at91_set_gpio_value(B2, 1);
+-	} else {
+-		at91_set_gpio_value(B2, 0);
+-	}
+-	if (((unsigned char)data & 0x08) == 0x08 ) {
+-		at91_set_gpio_value(B3, 1);	
+-	} else {
+-		at91_set_gpio_value(B3, 0);
+-	}
+-	if (((unsigned char)data & 0x10) == 0x10 ) {
+-		at91_set_gpio_value(B4, 1);
+-	} else {
+-		at91_set_gpio_value(B4, 0);
+-	}
+-	if (((unsigned char)data & 0x20) == 0x20 ) {
+-		at91_set_gpio_value(B5, 1);
+-	} else {
+-		at91_set_gpio_value(B5, 0);
+-	}
+-	if (((unsigned char)data & 0x40) == 0x40 ) {
+-		at91_set_gpio_value(B6, 1);
+-	} else {
+-		at91_set_gpio_value(B6, 0);
+-	}
+-	if (((unsigned char)data & 0x80) == 0x80 ) {
+-		at91_set_gpio_value(B7, 1);
+-	} else {
+-		at91_set_gpio_value(B7, 0);
+-	}	
+-}	
+-
+-#endif /* CONFIG_LC7981 */
+diff --git a/board/skov/skov_cpu_module/led.c b/board/skov/skov_cpu_module/led.c
+deleted file mode 100644
+index ce3cf09..0000000
+--- a/board/skov/skov_cpu_module/led.c
++++ /dev/null
+@@ -1,46 +0,0 @@
+-/*
+- * (C) Copyright 2007-2008
+- * Stelian Pop <stelian@popies.net>
+- * Lead Tech Design <www.leadtechdesign.com>
+- *
+- * See file CREDITS for list of people who contributed to this
+- * project.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- */
+-
+-#include <common.h>
+-#include <asm/io.h>
+-#include <asm/arch/gpio.h>
+-#include <asm/arch/at91_pmc.h>
+-#include <asm/arch/at91sam9263.h>
+-
+-void coloured_LED_init(void)
+-{
+-	/* Enable clock */
+-	at91_pmc_t *pmc = (at91_pmc_t *) ATMEL_BASE_PMC;
+-
+-	writel(1 << ATMEL_ID_PIOB | 1 << ATMEL_ID_PIOCDE,
+-		&pmc->pcer);
+-
+-	at91_set_gpio_output(CONFIG_RED_LED, 1);
+-	at91_set_gpio_output(CONFIG_GREEN_LED, 1);
+-	at91_set_gpio_output(CONFIG_YELLOW_LED, 1);
+-
+-	at91_set_gpio_value(CONFIG_RED_LED, 0);
+-	at91_set_gpio_value(CONFIG_GREEN_LED, 1);
+-	at91_set_gpio_value(CONFIG_YELLOW_LED, 1);
+-}
+diff --git a/board/skov/skov_cpu_module/partition.c b/board/skov/skov_cpu_module/partition.c
+deleted file mode 100644
+index 7742d73..0000000
+--- a/board/skov/skov_cpu_module/partition.c
++++ /dev/null
+@@ -1,36 +0,0 @@
+-/*
+- * (C) Copyright 2008
+- * Ulf Samuelsson <ulf@atmel.com>
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- *
+- */
+-#include <common.h>
+-#include <config.h>
+-#include <asm/hardware.h>
+-#include <dataflash.h>
+-
+-AT91S_DATAFLASH_INFO dataflash_info[CONFIG_SYS_MAX_DATAFLASH_BANKS];
+-
+-struct dataflash_addr cs[CONFIG_SYS_MAX_DATAFLASH_BANKS] = {
+-	{CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0, 0},	/* Logical adress, CS */
+-};
+-
+-/*define the area offsets*/
+-dataflash_protect_t area_list[NB_DATAFLASH_AREA] = {
+-	{0x00000000, 0x0007FDFF, FLAG_PROTECT_CLEAR, 0, "Bootstrap + U-Boot"},
+-	{0x0007FE00, 0x00083FFF, FLAG_PROTECT_CLEAR, 0, "Environment"},
+-};
+diff --git a/board/skov/skov_cpu_module/skov_cpu_module.c b/board/skov/skov_cpu_module/skov_cpu_module.c
+deleted file mode 100644
+index 0ef4abf..0000000
+--- a/board/skov/skov_cpu_module/skov_cpu_module.c
++++ /dev/null
+@@ -1,741 +0,0 @@
+-/*
+- * (C) Copyright 2007-2008
+- * Stelian Pop <stelian@popies.net>
+- * Lead Tech Design <www.leadtechdesign.com>
+- *
+- * See file CREDITS for list of people who contributed to this
+- * project.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- */
+-
+-#include <common.h>
+-#include <asm/sizes.h>
+-#include <asm/arch/at91sam9263.h>
+-#include <asm/arch/at91sam9_smc.h>
+-#include <asm/arch/at91sam9_pwm.h> /**< Rose: Add pwm support*/
+-#include <asm/arch/at91_common.h>
+-#include <asm/arch/at91_pmc.h>
+-#include <asm/arch/at91_rstc.h>
+-#include <asm/arch/at91_matrix.h>
+-#include <asm/arch/at91_pio.h>
+-#include <asm/arch/gpio.h> /**< Rose: Add gpio support */
+-#include <asm/arch/clk.h>
+-#include <asm/io.h>
+-#include <asm/arch/gpio.h>
+-#include <asm/arch/hardware.h>
+-#include <lcd.h>
+-#include <atmel_lcdc.h>
+-#if defined(CONFIG_RESET_PHY_R) && defined(CONFIG_MACB)
+-#include <net.h>
+-#endif
+-#include <netdev.h>
+-#ifdef CONFIG_GENERIC_ATMEL_MCI
+-#include <mmc.h>          /**< Rose: We ned to add mmc support in this file */
+-#include <atmel_mci.h>
+-#endif
+-/** 
+- * @author Soren Andersen <san@rosetechnology.dk> 
+- * 
+- * Revition I boards got an external I2C watchdog, because of the atmel
+- * CPU reset bug. 
+- */
+-#include <asm/arch/at91_wdt.h>
+-#include <i2c.h>
+-#include <ds1374.h>
+-#include <m41t80.h>
+-int skov_with_ds1374 = 0;
+-int skov_with_m41t82 = 0;
+-int wd_init = 0;
+-/* End san */
+-
+-DECLARE_GLOBAL_DATA_PTR;
+-
+-/* ------------------------------------------------------------------------- */
+-/*
+- * Miscelaneous platform dependent initialisations
+- */
+-#ifdef CONFIG_LTTD800480070
+-/**
+- * Write to a PWM register.
+- */
+-static inline void at91_pwm_write( unsigned int reg, unsigned long value )
+-{
+-    void *addr = (void *)AT91_BASE_PWMC;
+-    __raw_writel( value, addr + reg );
+-}
+-  		          
+-/**
+- * Read from a PWM register.
+- */
+-static inline unsigned long at91_pwm_read( unsigned int reg )
+-{
+-    void *addr = (void *)AT91_BASE_PWMC;	
+-    return __raw_readl( addr + reg );
+-}
+-#endif /*CONFIG_LTTD800480070*/
+-
+-/**
+- * @author Søren Andersen <san@rosetechnology.dk> 
+- * Add MMC support
+- */
+-#ifdef CONFIG_GENERIC_ATMEL_MCI
+-/* this is a weak define that we are overriding */
+-int board_mmc_init(bd_t *bd)
+-{
+-        at91_pmc_t    *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
+-        /* Enable clock */
+-        writel(1 << ATMEL_ID_MCI0, &pmc->pcer); // enable MCI clock
+-        writel(1 << ATMEL_ID_MCI1, &pmc->pcer);
+-        writel(1 << ATMEL_ID_PIOA, &pmc->pcer);
+-                  
+-        at91_mci_hw_init();
+-
+-        /* This calls the atmel_mci_init in gen_atmel_mci.c */
+-        return atmel_mci_init((void *)ATMEL_BASE_MCI1);
+-}
+-
+-/* this is a weak define that we are overriding */
+-int board_mmc_getcd(struct mmc *mmc)
+-{
+-        return !at91_get_gpio_value(CONFIG_SYS_MMC_CD_PIN);        
+-}
+-#endif
+-
+-#ifdef CONFIG_CMD_NAND
+-static void at91sam9263ek_nand_hw_init(void)
+-{
+-	unsigned long csa;
+-	at91_smc_t    *smc    = (at91_smc_t *) ATMEL_BASE_SMC0;
+-	at91_matrix_t *matrix = (at91_matrix_t *) ATMEL_BASE_MATRIX;
+-	at91_pmc_t    *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
+-
+-	/* Enable CS3 */
+-	csa = readl(&matrix->csa[0]) | AT91_MATRIX_CSA_EBI_CS3A;
+-	writel(csa, &matrix->csa[0]);
+-
+-	/* Enable CS3 */
+-
+-	/* Configure SMC CS3 for NAND/SmartMedia */
+-	writel(AT91_SMC_SETUP_NWE(1) | AT91_SMC_SETUP_NCS_WR(0) |
+-		AT91_SMC_SETUP_NRD(1) | AT91_SMC_SETUP_NCS_RD(0),
+-		&smc->cs[3].setup);
+-
+-	writel(AT91_SMC_PULSE_NWE(3) | AT91_SMC_PULSE_NCS_WR(3) |
+-		AT91_SMC_PULSE_NRD(3) | AT91_SMC_PULSE_NCS_RD(3),
+-		&smc->cs[3].pulse);
+-
+-	writel(AT91_SMC_CYCLE_NWE(5) | AT91_SMC_CYCLE_NRD(5),
+-		&smc->cs[3].cycle);
+-	writel(AT91_SMC_MODE_RM_NRD | AT91_SMC_MODE_WM_NWE |
+-		AT91_SMC_MODE_EXNW_DISABLE |
+-#ifdef CONFIG_SYS_NAND_DBW_16
+-		       AT91_SMC_MODE_DBW_16 |
+-#else /* CONFIG_SYS_NAND_DBW_8 */
+-		       AT91_SMC_MODE_DBW_8 |
+-#endif
+-		       AT91_SMC_MODE_TDF_CYCLE(2),
+-		&smc->cs[3].mode);
+-
+-	writel(1 << ATMEL_ID_PIOA | 1 << ATMEL_ID_PIOCDE,
+-		&pmc->pcer);
+-	
+-	/* Rose/HBS: We have R/B on pioB */
+-	writel(1 << ATMEL_ID_PIOA | 1 << ATMEL_ID_PIOB | 1 << ATMEL_ID_PIOCDE,
+-			&pmc->pcer);		
+-
+-	/* Configure RDY/BSY */
+-	at91_set_gpio_input(CONFIG_SYS_NAND_READY_PIN, 1);
+-
+-	/* Enable NandFlash */
+-	//at91_set_gpio_output(CONFIG_SYS_NAND_ENABLE_PIN, 1);
+-	at91_set_gpio_output(CONFIG_SYS_NAND_ENABLE_PIN, 0); /**< Rose/HBS: stygt hack */
+-}
+-#endif
+-
+-#ifdef CONFIG_MACB
+-static void at91sam9263ek_macb_hw_init(void)
+-{
+-	unsigned long 	erstl;
+-	at91_pmc_t	*pmc	= (at91_pmc_t *) ATMEL_BASE_PMC;
+-	at91_pio_t	*pio	= (at91_pio_t *) ATMEL_BASE_PIO;
+-	at91_rstc_t	*rstc	= (at91_rstc_t *) ATMEL_BASE_RSTC;
+-	/* Enable clock */
+-	writel(1 << ATMEL_ID_EMAC, &pmc->pcer);
+-
+-	/*
+-	 * Disable pull-up on:
+-	 *	RXDV (PC25) => PHY normal mode (not Test mode)
+-	 * 	ERX0 (PE25) => PHY ADDR0
+-	 *	ERX1 (PE26) => PHY ADDR1 => PHYADDR = 0x0
+-	 *
+-	 * PHY has internal pull-down
+-	 */
+-
+-	writel(1 << 25, &pio->pioc.pudr);
+-	writel((1 << 25) | (1 <<26), &pio->pioe.pudr);
+-
+-	//erstl = readl(&rstc->mr) & AT91_RSTC_MR_ERSTL_MASK;
+-	erstl = 0x1; /**< Rose: erstl need be be 1, otherwise Reset/power on reset dont work */
+-	
+-	/**
+-	 * @author Soren Andersen <san@rosetechnology.dk>
+-	 * We only do the reset of the PHY operation if there are a power good 
+-	 */
+-	at91_set_GPIO_periph(AT91_PIN_PE14,1);
+-	at91_set_gpio_input(AT91_PIN_PE14,1);	
+-	at91_set_gpio_deglitch(AT91_PIN_PE14,1);
+-	udelay(100000); //make dure the pin is set up correctly before reading it
+-	if(at91_get_gpio_value(AT91_PIN_PE14) == 1) {
+-	
+-		/* Need to reset PHY -> 500ms reset */
+-		writel(AT91_RSTC_KEY | AT91_RSTC_MR_ERSTL(0x0D) |
+-			AT91_RSTC_MR_URSTEN, &rstc->mr);
+-
+-		writel(AT91_RSTC_KEY | AT91_RSTC_CR_EXTRST, &rstc->cr);
+-		/* Wait for end hardware reset */
+-		while (!(readl(&rstc->sr) & AT91_RSTC_SR_NRSTL))
+-			;
+-
+-		/* Restore NRST value */
+-		writel(AT91_RSTC_KEY | erstl | AT91_RSTC_MR_URSTEN, &rstc->mr);
+-	} else {
+-		printf("POWER FAIL doing PHY initialization\n"); 
+-	}
+-
+-	/* Re-enable pull-up */
+-	writel(1 << 25, &pio->pioc.puer);
+-	writel((1 << 25) | (1 <<26), &pio->pioe.puer);
+-
+-	at91_macb_hw_init();
+-}
+-#endif
+-
+-#ifdef CONFIG_LCD
+-#if defined(CONFIG_70WVW2AZ0) /**< Old Seiko display */
+-vidinfo_t panel_info = {
+-        vl_col:         800,
+-        vl_row:         480,
+-        vl_clk:         30000000,
+-
+-        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
+-                        ATMEL_LCDC_INVFRAME_INVERTED,
+-
+-        vl_bpix:        LCD_COLOR16,  
+-        vl_tft:         1,  
+-        vl_hsync_len:   3,  
+-        vl_left_margin: 1,  
+-        vl_right_margin:200,
+-        vl_vsync_len:   3, 
+-        vl_upper_margin:0, 
+-        vl_lower_margin:10,
+-        mmio:           ATMEL_BASE_LCDC,
+-};
+-#elif defined(CONFIG_TTFT1280120) /**< Truely horizontal display */ 
+-vidinfo_t panel_info = {
+-        vl_col:         1280,
+-        vl_row:         120,
+-        vl_clk:         11000000,
+-        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED  |
+-                        ATMEL_LCDC_INVFRAME_INVERTED |
+-                        ATMEL_LCDC_INVDVAL_INVERTED  |
+-                        ATMEL_LCDC_INVCLK_INVERTED,
+-        vl_bpix:        3, 
+-        vl_tft:         1, 
+-        vl_hsync_len:   3, 
+-        vl_left_margin: 54,
+-        vl_right_margin:54,
+-        vl_vsync_len:   3,
+-        vl_upper_margin:6,
+-        vl_lower_margin:2,
+-        mmio:           ATMEL_BASE_LCDC,
+-};
+-#elif defined(CONFIG_TX18D16VM1CBA) /**< TFT display */
+-vidinfo_t panel_info = {
+-	vl_col:         800,
+-	vl_row:         480,
+-	vl_clk:         30000000,
+-	                        
+-	vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
+-	                ATMEL_LCDC_INVFRAME_INVERTED,
+-	vl_bpix:        LCD_COLOR16,
+-	vl_tft:         1,  
+-	vl_hsync_len:   20,  
+-	vl_left_margin: 7,  
+-	vl_right_margin:40,
+-	vl_vsync_len:   2, 
+-	vl_upper_margin:4, 
+-	vl_lower_margin:11,
+-	mmio:           ATMEL_BASE_LCDC,
+-};
+-#else 
+-vidinfo_t panel_info = {
+-	vl_col:		240,
+-	vl_row:		320,
+-	vl_clk:		4965000,
+-	vl_sync:	ATMEL_LCDC_INVLINE_INVERTED |
+-			ATMEL_LCDC_INVFRAME_INVERTED,
+-	vl_bpix:	3,
+-	vl_tft:		1,
+-	vl_hsync_len:	5,
+-	vl_left_margin:	1,
+-	vl_right_margin:33,
+-	vl_vsync_len:	1,
+-	vl_upper_margin:1,
+-	vl_lower_margin:0,
+-	mmio:		ATMEL_BASE_LCDC,
+-};
+-#endif
+-
+-#ifdef CONFIG_LTTD800480070
+-vidinfo_t panel_info_logic = {
+-        vl_col:         800,
+-        vl_row:         480,
+-        vl_clk:         30000000,
+-
+-        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
+-                        ATMEL_LCDC_INVFRAME_INVERTED,
+-
+-        vl_bpix:        LCD_COLOR16,  
+-        vl_tft:         1,  
+-        vl_hsync_len:   3,  //Atmel calculates: Total Length = Hsync + left marging + picture + right_margin+1 (3+85+800+0+1=889)
+-        vl_left_margin: 85,  
+-        vl_right_margin:1, 
+-        vl_vsync_len:   3, //Atmel calculates: Total Length = upper marging + picture + lower_margin (32+480+1=513) (25MHz / ( 889 * 513 ) = 54,8Hz
+-        vl_upper_margin:32, 
+-        vl_lower_margin:1,
+-        mmio:           ATMEL_BASE_LCDC,
+-};
+-
+-vidinfo_t panel_info_logic_240 = {
+-        vl_col:         800,
+-        vl_row:         480,
+-        vl_clk:         30000000,
+-
+-        vl_sync:        ATMEL_LCDC_INVLINE_INVERTED |
+-                        ATMEL_LCDC_INVFRAME_INVERTED,
+-
+-        vl_bpix:        LCD_COLOR16,  
+-        vl_tft:         1,  
+-        vl_hsync_len:   3,  //Atmel calculates: Total Length = Hsync + left marging + picture + right_margin+1 (3+85+800+20+1=909)
+-        vl_left_margin: 85,  
+-        vl_right_margin:20, 
+-        vl_vsync_len:   3, //Atmel calculates: Total Length = upper marging + picture + lower_margin (32+480+38=550) (30MHz / ( 909 * 550 ) = 60Hz
+-        vl_upper_margin:32, 
+-        vl_lower_margin:38,
+-        mmio:           ATMEL_BASE_LCDC,
+-};
+-
+-#endif
+-/*
+-#ifdef CONFIG_LC7981  
+-vidinfo_t lc7981_panel_info = {
+-	vl_col:         240,
+-        vl_row:         128,
+-        };
+-#endif
+-*/
+-
+-void lcd_enable(void)
+-{
+-	at91_set_pio_value(AT91_PIO_PORTA, 30, 1);  /* power up */
+-}
+-
+-void lcd_disable(void)
+-{
+-	at91_set_pio_value(AT91_PIO_PORTA, 30, 0);  /* power down */
+-}
+-
+-static void at91sam9263_lcd_hw_init(void)
+-{
+-	at91_pmc_t	*pmc	= (at91_pmc_t *) ATMEL_BASE_PMC;
+-	
+-	at91_set_a_periph(AT91_PIO_PORTC, 0, 0);     	/* LCDVSYNC */
+-	at91_set_a_periph(AT91_PIO_PORTC, 1, 0);	/* LCDHSYNC */
+-	at91_set_a_periph(AT91_PIO_PORTC, 2, 0);	/* LCDDOTCK */
+-	at91_set_a_periph(AT91_PIO_PORTC, 3, 0);	/* LCDDEN */
+-	at91_set_b_periph(AT91_PIO_PORTB, 9, 0);	/* LCDCC */
+-	at91_set_a_periph(AT91_PIO_PORTC, 6, 0);	/* LCDD2 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 7, 0);	/* LCDD3 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 8, 0);	/* LCDD4 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 9, 0);	/* LCDD5 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 10, 0);	/* LCDD6 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 11, 0);	/* LCDD7 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 14, 0);	/* LCDD10 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 15, 0);	/* LCDD11 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 16, 0);	/* LCDD12 */
+-	at91_set_b_periph(AT91_PIO_PORTC, 12, 0);	/* LCDD13 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 18, 0);	/* LCDD14 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 19, 0);	/* LCDD15 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 22, 0);	/* LCDD18 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 23, 0);	/* LCDD19 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 24, 0);	/* LCDD20 */
+-	at91_set_b_periph(AT91_PIO_PORTC, 17, 0);	/* LCDD21 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 26, 0);	/* LCDD22 */
+-	at91_set_a_periph(AT91_PIO_PORTC, 27, 0);	/* LCDD23 */
+-
+-	writel(1 << ATMEL_ID_LCDC, &pmc->pcer);
+-	//gd->fb_base = ATMEL_BASE_SRAM0; /**< Søren Andersen : Too little space */
+-        gd->fb_base = 0x23000000;	
+-	/**
+-	 * @author Martin Bjærre <mab@rosetechnology.dk>	
+-         * Added check to see if rev 2 of interface board is used, thus using the Logic Technology display
+-         */	
+-#ifdef CONFIG_LTTD800480070	
+-	at91_set_gpio_input( AT91_PIN_PD2, 1 );
+-	udelay(100000); //make dure the pin is set up correctly before reading it
+-	if (at91_get_gpio_value(AT91_PIN_PD2)) {
+-		/**
+-		 * This is the old interface board, as the pin is NC (using Seiko display)
+-		 * Do nothing
+-		 */
+-	}
+-	else {
+-		/**
+-		 * This is the new interface board, as the pin is pulled down (using Logic display)
+-		 */
+-		panel_info = panel_info_logic;
+-		/* enable contrast PWM(1) */
+-		writel(1<<AT91_ID_PWM, &pmc->pcer); 
+-		at91_set_B_periph(AT91_PIN_PB8, 0);	
+-		
+-		/** 
+-		 * 4.5V = 100% = (4.5-3.0)/ (5.3-3.0) = 65.2% dutycycle
+-		 * 3,6V = 0% = (3.6-3.0)/(5.3-3.0) = 26.1% dutycycle
+-		 * 65.2%-26.1%=39.1%
+-		 * 100 / 0.391 = 256
+-		 * 3.6V = 0.261 * 256 = 67
+-		 * 4.5V = 0.652 * 256 = 167
+-		 * Formula = 67 + contrast%
+-		 * Frequency: 100MHz/(32*256)=12.2KHz 
+-		 */
+-		at91_pwm_write( AT91_PWM_CMR(1), AT91_PWM_CMR_MCK32 | AT91_PWM_CPOL);
+-		at91_pwm_write( AT91_PWM_CPRDR(1),  256);
+-		
+-		if(getenv("tft_contrast") != NULL){
+-			at91_pwm_write( AT91_PWM_CDTYR(1), 67 + simple_strtoul(getenv("tft_contrast"), NULL, 10) );	
+-		}
+-		else {
+-			/* Default 3.7V = (3.7-3.0)/(5.3-3.0) = 30.4% = 256 * 0.304 = 78 */
+-			at91_pwm_write( AT91_PWM_CDTYR(1), 78 );
+-		}
+-
+-		at91_pwm_write( AT91_PWM_ENA, AT91_PWM_CHID1 );
+-		
+-	}
+-#endif
+-}
+-
+-#if defined(CONFIG_SKOV_CPU_MODULE)
+-void check_240(void)
+-{
+-	if (do_we_have_dataflash())	{
+-#ifdef CONFIG_LTTD800480070	
+-		if (!at91_get_gpio_value(AT91_PIN_PD2)) {
+-			panel_info = panel_info_logic_240;
+-		}
+-#endif
+-	}
+-}
+-#endif
+-
+-
+-#ifdef CONFIG_LCD_INFO
+-#include <nand.h>
+-#include <version.h>
+-
+-#ifndef CONFIG_SYS_NO_FLASH
+-extern flash_info_t flash_info[];
+-#endif
+-
+-void lcd_show_board_info(void)
+-{
+-	ulong dram_size, nand_size;
+-#ifndef CONFIG_SYS_NO_FLASH
+-	ulong flash_size;
+-#endif
+-	int i;
+-	char temp[32];
+-
+-	lcd_printf ("%s\n", U_BOOT_VERSION);
+-	lcd_printf ("SKOV CPU MODULE\n");
+-	lcd_printf ("%s CPU at %s MHz\n",
+-		ATMEL_CPU_NAME,
+-		strmhz(temp, get_cpu_clk_rate()));
+-
+-	dram_size = 0;
+-	for (i = 0; i < CONFIG_NR_DRAM_BANKS; i++)
+-		dram_size += gd->bd->bi_dram[i].size;
+-	nand_size = 0;
+-#ifdef CONFIG_CMD_NAND
+-	for (i = 0; i < CONFIG_SYS_MAX_NAND_DEVICE; i++)
+-		nand_size += nand_info[i].size;
+-#endif
+-#ifndef CONFIG_SYS_NO_FLASH
+-	flash_size = 0;
+-	for (i = 0; i < CONFIG_SYS_MAX_FLASH_BANKS; i++)
+-		flash_size += flash_info[i].size;
+-#endif
+-	lcd_printf ("  %ld MB SDRAM, %ld MB NAND",
+-		dram_size >> 20,
+-		nand_size >> 20 );
+-#ifndef CONFIG_SYS_NO_FLASH
+-	lcd_printf (",\n  %ld MB NOR",
+-		flash_size >> 20);
+-#endif
+-	lcd_puts ("\n");
+-}
+-#endif /* CONFIG_LCD_INFO */
+-#endif
+-
+-int board_early_init_f(void)
+-{
+-	struct at91_pmc *pmc = (struct at91_pmc *)ATMEL_BASE_PMC;
+-
+-	/* Enable clocks for all PIOs */
+-	writel((1 << ATMEL_ID_PIOA) | (1 << ATMEL_ID_PIOB) |
+-		(1 << ATMEL_ID_PIOCDE),
+-		&pmc->pcer);
+-
+-	at91_seriald_hw_init();
+-	return 0;
+-}
+-
+-int board_init(void)
+-{ 
+-	unsigned char i2c_tmp1 = 0, i2c_tmp2 = 0; /**< San Rose */
+-	/* arch number of AT91SAM9263EK-Board */
+-	gd->bd->bi_arch_number = MACH_TYPE_AT91SAM9263EK;
+-	/* adress of boot parameters */
+-	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
+-
+-#ifdef CONFIG_CMD_NAND
+-	at91sam9263ek_nand_hw_init();
+-#endif
+-#ifdef CONFIG_HAS_DATAFLASH
+-	at91_set_pio_output(AT91_PIO_PORTE, 20, 1);	/* select spi0 clock */
+-	at91_spi0_hw_init(1 << 0);
+-#endif
+-#ifdef CONFIG_MACB
+-	at91sam9263ek_macb_hw_init();
+-#endif
+-#ifdef CONFIG_USB_OHCI_NEW
+-	at91_uhp_hw_init();
+-#endif
+-#ifdef CONFIG_LCD
+-	at91sam9263_lcd_hw_init();
+-#endif
+-	/**
+-	 * @author Søren Andersen <san@rosetechnology.dk>
+-	 * Since the reads are being performed one byte at a time,
+-	 * there is a chance that a carry will occur during the read.
+-	 * To detect this, 2 reads are performed and compared.
+-	 */                                            
+-	at91sam9263_i2c_init();
+-
+-	/* find out if we hade a m41t82 or ds1374 rtc */
+-	i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
+-	i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
+-	
+-	if(i2c_tmp1 == 1 && i2c_tmp2 == 1) { //We dont have an m41t82
+-		
+-		i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
+-		i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
+-		
+-		if(i2c_tmp1 == 0 || i2c_tmp2 == 0) // We have a ds1374
+-		{
+-			printf("WD: DS1374\n");
+-			at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-			skov_with_ds1374 = 1;	
+-			timer_init();
+-			//4096 for one secound
+-			ds1374_wdt_settimeout(1228800); //->5 minuts
+-			writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
+-			wd_init = 1;
+-		} else {
+-			//No external watchdog
+-			skov_with_ds1374 = 0;
+-		}
+-	} else  {
+-		printf("WD: M41T82\n");
+-		at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-		skov_with_m41t82 = 1;
+-		timer_init();
+-		m41t82_wdt_settimeout(32); //32 sek
+-		writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
+-		wd_init = 1;
+-	}
+-    	if(wd_init == 0) {
+-    	    printf("WD: AT91WDT\n");
+-    	}
+-    	/* End San */
+-	return 0;
+-}
+-
+-int dram_init(void)
+-{
+-	/* ROSE: We will configure the memory size accourding the two values written by the bootstrap */ 
+-	volatile unsigned int *test_adr1=(unsigned int*)0x20000000, *test_adr2=(unsigned int*)0x21000000;
+-	unsigned int test_val1=(unsigned int)0x534B4F56, test_val2=(unsigned int)0x564F4B53;
+-		
+-	if((*(test_adr1) == test_val1) && (*(test_adr2) == test_val2))
+-	{  	
+-		gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, 0x08000000); /**< 128MB */
+-	}
+-	else if((*(test_adr1) == test_val2) && (*(test_adr2) == test_val1))
+-	{
+-	        gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, 0x04000000); /**< 64MB */ 
+-	}
+-	else 
+-	{
+-		gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE, CONFIG_SYS_SDRAM_SIZE); /**< default */
+-	}
+-
+-	return 0;
+-}
+-
+-#ifdef CONFIG_RESET_PHY_R
+-void reset_phy(void)
+-{
+-}
+-#endif
+-
+-/**
+- * @author Søren Andersen
+- * Bitbang I2C pins 
+- */
+-#define GPIO_I2C_SCL   AT91_PIN_PB5
+-#define GPIO_I2C_SDA   AT91_PIN_PB4
+-
+-void at91sam9263_i2c_init(void)
+-{
+-        /*
+-        at91_pmc_t      *pmc    = (at91_pmc_t *) ATMEL_BASE_PMC;
+-        writel(1 << ATMEL_ID_PIOB, &pmc->pcer);
+-        */                
+-        at91_set_GPIO_periph(GPIO_I2C_SDA, 1); //use pull up
+-        at91_set_gpio_multi_drive(GPIO_I2C_SDA, 1);
+-                
+-        at91_set_gpio_output( GPIO_I2C_SCL, 0 );
+-        at91_set_gpio_multi_drive(GPIO_I2C_SCL, 1);
+-        at91_set_GPIO_periph(GPIO_I2C_SCL, 1);
+-}
+-
+-void at91sam9263_i2c_scl(unsigned long bit)
+-{
+-        if(bit) {
+-        	at91_set_gpio_value(GPIO_I2C_SCL, 1);
+-        }
+-        else {
+-        	at91_set_gpio_value(GPIO_I2C_SCL, 0);
+-        }	
+-}
+-                                        
+-void at91sam9263_i2c_sda(unsigned long bit)
+-{
+-        if(bit) {
+-        	at91_set_gpio_value(GPIO_I2C_SDA, 1);
+-        } 
+-        else {
+-  		at91_set_gpio_value(GPIO_I2C_SDA, 0);      		
+-  	}	
+-}
+-
+-int at91sam9263_i2c_read(void)
+-{
+-        return at91_get_gpio_value(GPIO_I2C_SDA);
+-}
+-
+-void at91sam9263_i2c_active(void)
+-{
+-	at91_set_gpio_output( GPIO_I2C_SDA, 0 ); //gpio outout with value zero
+-	at91_set_gpio_multi_drive( GPIO_I2C_SDA, 1 ); //enable multidrive
+-	at91_set_GPIO_periph( GPIO_I2C_SDA, 1 ); //use pull up
+-}
+-                                                                
+-void at91sam9263_i2c_tristate(void)
+-{
+-	at91_set_gpio_input( GPIO_I2C_SDA, 0 ); // set pin as input without pullup
+-	at91_set_gpio_deglitch( GPIO_I2C_SDA, 1 ); // enable glitch filter
+-}
+-
+-
+-int board_eth_init(bd_t *bis)
+-{
+-	int rc = 0;
+-#ifdef CONFIG_MACB
+-	rc = macb_eth_initialize(0, (void *) ATMEL_BASE_EMAC, 0x00);
+-#endif
+-	return rc;
+-}
+-
+-/** 
+- * @author Søren Andersen <san@rosetechnology.dk> 
+- * Find the I2c chip which is mounted on the board
+- */
+-void hw_watchdog_reset(void)
+-{
+-    //If we have an i2c watchdog -> Use this one
+-    if(skov_with_ds1374 == 1 && wd_init == 1)
+-    {
+-        ds1374_hw_watchdog_reset();    	
+-    }
+-    else if(skov_with_m41t82 == 1 && wd_init == 1)
+-    {
+-        m41t82_hw_watchdog_reset();
+-    }
+-    else
+-    {
+-        at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-        writel(AT91_WDT_CR_WDRSTT | AT91_WDT_CR_KEY, &wd->cr);   
+-    }
+-} 
+-/* End San */  
+-
+-/** 
+- * @author Henrik Steffesen <hbs@rosetechnology.dk>
+- * SPI chip select control 
+- */
+-#ifdef CONFIG_ATMEL_SPI
+-#include <spi.h>
+-
+-int spi_cs_is_valid(unsigned int bus, unsigned int cs)
+-{
+-	return bus == 0 && cs < 1;
+-}
+-
+-void spi_cs_activate(struct spi_slave *slave)
+-{
+-	switch(slave->cs) {
+-		case 0:
+-		default:
+-			at91_set_gpio_output(AT91_PIN_PA5, 0);
+-			break;
+-	}
+-}
+-
+-void spi_cs_deactivate(struct spi_slave *slave)
+-{
+-	switch(slave->cs) {
+-		case 0:
+-		default:
+-			at91_set_gpio_output(AT91_PIN_PA5, 1);
+-		break;
+-	}
+-}
+-
+-#endif /* CONFIG_ATMEL_SPI */
+-
+diff --git a/boards.cfg b/boards.cfg
+index eaa71a1..024794f 100644
+--- a/boards.cfg
++++ b/boards.cfg
+@@ -101,7 +101,7 @@ at91sam9x5ek_spiflash        arm         arm926ejs   at91sam9x5ek        atmel
+ at91sam9xeek_dataflash_cs0   arm         arm926ejs   at91sam9260ek       atmel          at91        at91sam9260ek:AT91SAM9XE,SYS_USE_DATAFLASH_CS0
+ at91sam9xeek_dataflash_cs1   arm         arm926ejs   at91sam9260ek       atmel          at91        at91sam9260ek:AT91SAM9XE,SYS_USE_DATAFLASH_CS1
+ at91sam9xeek_nandflash       arm         arm926ejs   at91sam9260ek       atmel          at91        at91sam9260ek:AT91SAM9XE,SYS_USE_NANDFLASH
+-skov_cpu_module		     arm         arm926ejs   skov_cpu_module	 skov           at91        skov_cpu_module:AT91SAM9263
++arm9-cpu		     arm         arm926ejs   arm9-cpu		 skov           at91        arm9-cpu:AT91SAM9263
+ snapper9260                  arm         arm926ejs   -                   bluewater      at91        snapper9260:AT91SAM9260
+ snapper9g20                  arm         arm926ejs   snapper9260         bluewater      at91        snapper9260:AT91SAM9G20
+ vl_ma2sc                     arm         arm926ejs   vl_ma2sc            BuS            at91
+diff --git a/common/Makefile b/common/Makefile
+index d87e83c..61fe837 100644
+--- a/common/Makefile
++++ b/common/Makefile
+@@ -62,7 +62,7 @@ COBJS-$(CONFIG_ENV_IS_IN_REMOTE) += env_remote.o
+ COBJS-$(CONFIG_ENV_IS_NOWHERE) += env_nowhere.o
+ 
+ # Skov environment
+-COBJS-$(CONFIG_SKOV_CPU_MODULE) += env_skov_compat.o
++COBJS-$(CONFIG_ARM9_CPU) += env_skov_compat.o
+ 
+ # command
+ COBJS-$(CONFIG_CMD_AMBAPP) += cmd_ambapp.o
+diff --git a/common/cmd_nand.c b/common/cmd_nand.c
+index d107691..c0826a3 100644
+--- a/common/cmd_nand.c
++++ b/common/cmd_nand.c
+@@ -584,7 +584,7 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char * const argv[])
+ 					 * This functionality is removed as it endangers bad block information
+ 					 *
+ 					 */
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 					printf("\n nand scrub functionality has been removed to protect bad block information on skov cpu__module\n");
+ #else
+ 					opts.scrub = 1;
+@@ -702,7 +702,7 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char * const argv[])
+                                  * This functionality is removed as it endangers bad block information
+                                  *
+                                  */
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 				printf("\n nand write.oob functionality has been removed to protect bad block information.");
+ 				ret = -1;
+ 				size = 0;
+diff --git a/common/env_dataflash.c b/common/env_dataflash.c
+index a4ae9fd..3a7105c 100644
+--- a/common/env_dataflash.c
++++ b/common/env_dataflash.c
+@@ -27,19 +27,19 @@
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ extern env_t *env_ptr;
+ #else
+ env_t *env_ptr;
+ #endif
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ char * env_name_spec_dataflash = "dataflash";
+ #else
+ char *env_name_spec = "dataflash";
+ #endif
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ uchar env_get_char_spec_dataflash (int index)
+ #else
+ uchar env_get_char_spec(int index)
+@@ -51,7 +51,7 @@ uchar env_get_char_spec(int index)
+ 			1, (char *)&c);
+ 	return c;
+ }
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ void env_relocate_spec_dataflash (void)
+ #else
+ void env_relocate_spec(void)
+@@ -68,7 +68,7 @@ void env_relocate_spec(void)
+ #error No support for redundant environment on dataflash yet!
+ #endif
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int saveenv_dataflash(void)
+ #else
+ int saveenv(void)
+@@ -97,7 +97,7 @@ int saveenv(void)
+  * We are still running from ROM, so data use is limited.
+  * Use a (moderately small) buffer on the stack
+  */
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int env_init_dataflash(void)
+ #else
+ int env_init(void)
+@@ -113,7 +113,7 @@ int env_init(void)
+  * @autor Søren Andersen
+  * The Bootstrap had already initialized the flash
+  */
+-#if !defined(CONFIG_SKOV_CPU_MODULE)		
++#if !defined(CONFIG_ARM9_CPU)		
+ 	AT91F_DataflashInit();	/* prepare for DATAFLASH read/write */
+ #endif
+ 	/* read old CRC */
+diff --git a/common/env_flash.c b/common/env_flash.c
+index 00c6844..f62225f 100644
+--- a/common/env_flash.c
++++ b/common/env_flash.c
+@@ -47,45 +47,45 @@ DECLARE_GLOBAL_DATA_PTR;
+ #error CONFIG_ENV_SIZE_REDUND should not be less then CONFIG_ENV_SIZE
+ #endif /* CONFIG_ENV_SIZE_REDUND */
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ char *env_name_spec_flash = "Flash";
+ #else
+ char *env_name_spec = "Flash";
+-#endif  /* CONFIG_SKOV_CPU_MODULE */
++#endif  /* CONFIG_ARM9_CPU */
+ 
+ #ifdef ENV_IS_EMBEDDED
+ env_t *env_ptr = &environment;
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ static env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR_FLASH; /**< Martin Bjærre: Changed CONFIG_ENV_ADDR to CONFIG_ENV_ADDR_FLASH */
+ #else
+ static env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR;
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+ #else /* ! ENV_IS_EMBEDDED */
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ extern env_t *env_ptr; /**< Martin Bjærre: env_t is now located in env_skov_compat. */
+ #else
+ env_t *env_ptr = (env_t *)CONFIG_ENV_ADDR;
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ static env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR_FLASH;
+ #else
+ static env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR;
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+ #endif /* ENV_IS_EMBEDDED */
+ 
+ #if defined(CMD_SAVEENV) || defined(CONFIG_ENV_ADDR_REDUND)
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ //Rose/Mab: Changed CONFIG_ENV_ADDR to CONFIG_ENV_ADDR_FLASH
+ static ulong end_addr = CONFIG_ENV_ADDR_FLASH + CONFIG_ENV_SECT_SIZE_FLASH - 1;
+ #else
+ /* CONFIG_ENV_ADDR is supposed to be on sector boundary */
+ static ulong end_addr = CONFIG_ENV_ADDR + CONFIG_ENV_SECT_SIZE - 1;
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ #endif /* CMD_SAVEENV || CONFIG_ENV_ADDR_REDUND */
+ 
+ #ifdef CONFIG_ENV_ADDR_REDUND
+@@ -97,11 +97,11 @@ static ulong end_addr_new = CONFIG_ENV_ADDR_REDUND + CONFIG_ENV_SECT_SIZE - 1;
+ 
+ 
+ #ifdef CONFIG_ENV_ADDR_REDUND
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int env_init_flash(void)
+ #else
+ int env_init(void)
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ {
+ 	int crc1_ok = 0, crc2_ok = 0;
+ 
+@@ -112,14 +112,14 @@ int env_init(void)
+ 	ulong addr1 = (ulong)&(flash_addr->data);
+ 	ulong addr2 = (ulong)&(flash_addr_new->data);
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 	crc1_ok = (crc32(0, flash_addr->data, ENV_SIZE_FLASH) == flash_addr->crc);
+ 	crc2_ok = (crc32(0, flash_addr_new->data, ENV_SIZE_FLASH) == flash_addr_new->crc);
+ #else
+ 	crc1_ok = crc32(0, flash_addr->data, ENV_SIZE) == flash_addr->crc;
+ 	crc2_ok =
+ 		crc32(0, flash_addr_new->data, ENV_SIZE) == flash_addr_new->crc;
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	if (crc1_ok && !crc2_ok) {
+ 		gd->env_addr	= addr1;
+ 		gd->env_valid	= 1;
+@@ -150,18 +150,18 @@ int env_init(void)
+ }
+ 
+ #ifdef CMD_SAVEENV
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int saveenv_flash(void)
+ #else
+ int saveenv(void)
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ {
+ 	env_t	env_new;
+ 	ssize_t	len;
+ 	char	*res, *saved_data = NULL;
+ 	char	flag = OBSOLETE_FLAG, new_flag = ACTIVE_FLAG;
+ 	int	rc = 1;
+-#if defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
++#if defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
+         ulong   up_data = 0;
+ #endif /* (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) */
+ 	debug("Protect off %08lX ... %08lX\n", (ulong)flash_addr, end_addr);
+@@ -176,28 +176,28 @@ int saveenv(void)
+ 		goto done;
+ 
+ 	res = (char *)&env_new.data;
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+         len = hexport_r(&env_htab, '\0', &res, ENV_SIZE_FLASH, 0, NULL);
+ #else
+ 	len = hexport_r(&env_htab, '\0', &res, ENV_SIZE, 0, NULL);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	if (len < 0) {
+ 		error("Cannot export environment: errno = %d\n", errno);
+ 		goto done;
+ 	}
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 	env_new.crc	= crc32(0, env_new.data, ENV_SIZE_FLASH);
+ #else
+         env_new.crc     = crc32(0, env_new.data, ENV_SIZE);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	env_new.flags	= new_flag;
+ 
+-#if defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#if defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
++#ifdef CONFIG_ARM9_CPU
+         up_data = end_addr_new + 1 - ((long)flash_addr_new + CONFIG_ENV_SIZE_FLASH);
+ #else
+ 	up_data = end_addr_new + 1 - ((long)flash_addr_new + CONFIG_ENV_SIZE);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	debug("Data to save 0x%lX\n", up_data);
+ 	if (up_data) {
+ 		saved_data = malloc(up_data);
+@@ -207,20 +207,20 @@ int saveenv(void)
+ 			goto done;
+ 		}
+ 		memcpy(saved_data,
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 			(void *)((long)flash_addr_new + CONFIG_ENV_SIZE_FLASH), up_data);
+ #else
+ 			(void *)((long)flash_addr_new + CONFIG_ENV_SIZE),
+ 			up_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */			
++#endif /* CONFIG_ARM9_CPU */			
+ 		debug("Data (start 0x%lX, len 0x%lX) saved at 0x%p\n",
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                         (long)flash_addr_new + CONFIG_ENV_SIZE_FLASH,
+                                                 up_data, saved_data);
+ #else
+ 			(long)flash_addr_new + CONFIG_ENV_SIZE,
+ 			up_data, saved_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	}
+ #endif /* (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) */
+ 	puts("Erasing Flash...");
+@@ -243,21 +243,21 @@ int saveenv(void)
+ 	if (rc)
+ 		goto perror;
+ 
+-#if defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
++#if defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
+ 	if (up_data) { /* restore the rest of sector */
+ 		debug("Restoring the rest of data to 0x%lX len 0x%lX\n",
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                         (long)flash_addr_new + CONFIG_ENV_SIZE_FLASH, up_data);
+ #else
+ 			(long)flash_addr_new + CONFIG_ENV_SIZE, up_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 		if (flash_write(saved_data,
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                                 (long)flash_addr_new + CONFIG_ENV_SIZE_FLASH, up_data))
+ #else				
+                                 (long)flash_addr_new + CONFIG_ENV_SIZE,
+                                 up_data))
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 			goto perror;
+ 	}
+ #endif /* (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) */
+@@ -291,11 +291,11 @@ done:
+ 
+ #else /* ! CONFIG_ENV_ADDR_REDUND */
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int env_init_flash(void)
+ #else
+ int env_init(void)
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ {
+ 	if (crc32(0, env_ptr->data, ENV_SIZE) == env_ptr->crc) {
+ 		gd->env_addr	= (ulong)&(env_ptr->data);
+@@ -309,23 +309,23 @@ int env_init(void)
+ }
+ 
+ #ifdef CMD_SAVEENV
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ int saveenv_flash(void)
+ #else
+ int saveenv(void)
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ {
+ 	env_t	env_new;
+ 	ssize_t	len;
+ 	int	rc = 1;
+ 	char	*res, *saved_data = NULL;
+-#if defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
++#if defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
+ 	ulong	up_data = 0;
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+         up_data = end_addr + 1 - ((long)flash_addr + CONFIG_ENV_SIZE_FLASH);
+ #else
+ 	up_data = end_addr + 1 - ((long)flash_addr + CONFIG_ENV_SIZE);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	debug("Data to save 0x%lx\n", up_data);
+ 	if (up_data) {
+ 		saved_data = malloc(up_data);
+@@ -335,17 +335,17 @@ int saveenv(void)
+ 			goto done;
+ 		}
+ 		memcpy(saved_data,
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                         (void *)((long)flash_addr + CONFIG_ENV_SIZE_FLASH), up_data); 
+ #else
+ 			(void *)((long)flash_addr + CONFIG_ENV_SIZE), up_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 		debug("Data (start 0x%lx, len 0x%lx) saved at 0x%lx\n",
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                         (ulong)flash_addr + CONFIG_ENV_SIZE_FLASH, up_data, (ulong)saved_data);
+ #else
+ 			(ulong)flash_addr + CONFIG_ENV_SIZE, up_data, (ulong)saved_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	}
+ #endif	/* (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) */
+ 	debug("Protect off %08lX ... %08lX\n", (ulong)flash_addr, end_addr);
+@@ -354,20 +354,20 @@ int saveenv(void)
+ 		goto done;
+ 	}	
+ 	res = (char *)&env_new.data;
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+         len = hexport_r(&env_htab, '\0', &res, ENV_SIZE_FLASH, 0, NULL);
+ #else
+ 	len = hexport_r(&env_htab, '\0', &res, ENV_SIZE, 0, NULL);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	if (len < 0) {
+ 		error("Cannot export environment: errno = %d\n", errno);
+ 		goto done;
+ 	}
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+         env_new.crc = crc32(0, env_new.data, ENV_SIZE_FLASH);
+ #else
+ 	env_new.crc = crc32(0, env_new.data, ENV_SIZE);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 	puts("Erasing Flash...");
+ 
+ 	if (flash_sect_erase((long)flash_addr, end_addr))
+@@ -375,25 +375,25 @@ int saveenv(void)
+ 
+ 	puts("Writing to Flash... ");
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+         rc = flash_write((char *)&env_new, (long)flash_addr, CONFIG_ENV_SIZE_FLASH);
+ #else
+ 	rc = flash_write((char *)&env_new, (long)flash_addr, CONFIG_ENV_SIZE);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+ 	if (rc != 0)
+ 		goto perror;
+-#if defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_SKOV_CPU_MODULE) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
++#if defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) || !defined(CONFIG_ARM9_CPU) && (CONFIG_ENV_SECT_SIZE > CONFIG_ENV_SIZE_FLASH)
+ 	if (up_data) {	/* restore the rest of sector */
+ 		debug("Restoring the rest of data to 0x%lx len 0x%lx\n",
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                         (ulong)flash_addr + CONFIG_ENV_SIZE_FLASH, up_data);
+ #else
+ 			(ulong)flash_addr + CONFIG_ENV_SIZE, up_data);
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+ 
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+                 if (flash_write(saved_data, (long)flash_addr + CONFIG_ENV_SIZE_FLASH, up_data)) {
+                         goto perror;
+                 }
+@@ -401,7 +401,7 @@ int saveenv(void)
+ 		if (flash_write(saved_data, (long)flash_addr + CONFIG_ENV_SIZE, up_data)) {
+ 		        goto perror;
+ 		}
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 
+     	}
+ #endif /* (CONFIG_ENV_SECT_SIZE_FLASH > CONFIG_ENV_SIZE_FLASH) */
+@@ -420,11 +420,11 @@ done:
+ #endif /* CMD_SAVEENV */
+ 
+ #endif /* CONFIG_ENV_ADDR_REDUND */
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ void env_relocate_spec_flash(void)
+ #else
+ void env_relocate_spec(void)
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ {
+ #ifdef CONFIG_ENV_ADDR_REDUND
+ 	if (gd->env_addr != (ulong)&(flash_addr->data)) {
+@@ -439,11 +439,11 @@ void env_relocate_spec(void)
+ 	}
+ 
+ 	if (flash_addr_new->flags != OBSOLETE_FLAG &&
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+             crc32(0, flash_addr_new->data, ENV_SIZE_FLASH) == flash_addr_new->crc) {
+ #else
+ 	    crc32(0, flash_addr_new->data, ENV_SIZE) == flash_addr_new->crc) {
+-#endif /* CONFIG_SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ 		char flag = OBSOLETE_FLAG;
+ 
+ 		gd->env_valid = 2;
+diff --git a/common/main.c b/common/main.c
+index e204e09..4dd79fb 100644
+--- a/common/main.c
++++ b/common/main.c
+@@ -44,7 +44,7 @@
+  * @author Martin Bjærre <mab@rosetechnology.dk>
+  * Rose add:
+  */
+-#ifdef SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ extern int do_we_have_dataflash(void);
+ #endif
+ 
+@@ -230,7 +230,7 @@ int abortboot(int bootdelay)
+  * @author Martin Bjærre <mab@rosetechnology.dk>
+  * Set env variable if we have nand
+  */
+-#ifdef CONFIG_SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ 	if (do_we_have_dataflash() == 1)
+ 	{
+ 		setenv("hasnand", "true");
+diff --git a/drivers/bootcount/Makefile b/drivers/bootcount/Makefile
+index 8dc3037..b958d02 100644
+--- a/drivers/bootcount/Makefile
++++ b/drivers/bootcount/Makefile
+@@ -27,7 +27,7 @@ COBJS-$(CONFIG_AT91SAM9XE)	+= bootcount_at91.o
+ COBJS-$(CONFIG_BLACKFIN)	+= bootcount_blackfin.o
+ COBJS-$(CONFIG_SOC_DA8XX)	+= bootcount_davinci.o
+ COBJS-$(CONFIG_BOOTCOUNT_RAM)	+= bootcount_ram.o
+-COBJS-$(CONFIG_SKOV_CPU_MODULE)	+= bootcount_at91.o
++COBJS-$(CONFIG_ARM9_CPU)	+= bootcount_at91.o
+ 
+ COBJS	:= $(COBJS-y)
+ SRCS 	:= $(COBJS:.o=.c)
+diff --git a/drivers/mtd/cfi_flash.c b/drivers/mtd/cfi_flash.c
+index 714a148..b8edf37 100644
+--- a/drivers/mtd/cfi_flash.c
++++ b/drivers/mtd/cfi_flash.c
+@@ -2247,7 +2247,7 @@ void flash_protect_default(void)
+ 	/* Environment protection ON by default */
+ #ifdef CONFIG_ENV_IS_IN_FLASH
+ 	flash_protect(FLAG_PROTECT_SET,
+-#if CONFIG_SKOV_CPU_MODULE
++#if CONFIG_ARM9_CPU
+                        CONFIG_ENV_ADDR_FLASH,
+                        CONFIG_ENV_ADDR_FLASH + CONFIG_ENV_SECT_SIZE_FLASH - 1,
+                        flash_get_info(CONFIG_ENV_ADDR_FLASH));
+diff --git a/drivers/mtd/dataflash.c b/drivers/mtd/dataflash.c
+index c29e6d0..7f4446e 100644
+--- a/drivers/mtd/dataflash.c
++++ b/drivers/mtd/dataflash.c
+@@ -76,7 +76,7 @@ int AT91F_DataflashInit (void)
+ 			dataflash_info[i].logical_address = cs[i].addr;
+ 			dataflash_info[i].id = dfcode;
+ 			found[i] += dfcode;;
+-			#if defined(CONFIG_SKOV_CPU_MODULE)
++			#if defined(CONFIG_ARM9_CPU)
+ 			set_has_dataflash(1); /**< Martin Bjærre: used to determine if env is in nor or dataflash */
+ 			#endif
+ 			break;	
+@@ -144,7 +144,7 @@ int AT91F_DataflashInit (void)
+ 		default:
+ 			printf("Dataflash not recon... (dfcode=%xh)\n",dfcode);
+ 			dfcode = 0;
+-			#if defined(CONFIG_SKOV_CPU_MODULE)
++			#if defined(CONFIG_ARM9_CPU)
+ 			set_has_dataflash(0); /**< Martin Bjærre: used to determine if env is in nor or dataflash */
+ 			#endif
+ 			break;
+diff --git a/include/configs/arm9-cpu.h b/include/configs/arm9-cpu.h
+new file mode 100644
+index 0000000..1809414
+--- /dev/null
++++ b/include/configs/arm9-cpu.h
+@@ -0,0 +1,304 @@
++/**
++ * @file
++ * @author Søren Andersen <san@rosetechnology.dk>
++ */
++#ifndef __CONFIG_H
++#define __CONFIG_H
++
++#define CONFIG_AT91_LEGACY
++/*
++ * SoC must be defined first, before hardware.h is included.
++ * In this case SoC is defined in boards.cfg.
++ */
++#include <asm/hardware.h>
++
++#ifndef CONFIG_SYS_USE_BOOT_NORFLASH
++#define CONFIG_SYS_TEXT_BASE		0x23800000 /*San Rose: start up at 48MB memory level */
++#else
++#define CONFIG_SYS_TEXT_BASE		0x0000000
++#endif
++
++/* SD/MMC card */
++#define CONFIG_MMC                      1
++#define CONFIG_GENERIC_MMC              1
++#define CONFIG_GENERIC_ATMEL_MCI        1
++#define CONFIG_SYS_MMC_CD_PIN           AT91_PIN_PE18
++#define CONFIG_CMD_MMC                  1
++//#define CONFIG_SYS_MMC_MAX_BLK_COUNT 	1 // Use single transfers, as multi-transfers hang
++//#define CONFIG_MMC_TRACE		1
++//#define CONFIG_SYS_MMC_CLK_SKOV		1 /**< Søren Andersen try to set a lower mmc clock */
++
++/* ARM asynchronous clock */
++#define CONFIG_SYS_AT91_MAIN_CLOCK	16000000 /* 16.000 MHz crystal */
++#define CONFIG_SYS_AT91_SLOW_CLOCK	32768
++#define CONFIG_SYS_HZ			1000
++
++#define CONFIG_ARM9_CPU	1	/* It's a Skov CPU Board */
++
++#define CONFIG_ARCH_CPU_INIT
++
++#define CONFIG_CMDLINE_TAG	1	/* enable passing of ATAGs	*/
++#define CONFIG_SETUP_MEMORY_TAGS 1
++#define CONFIG_INITRD_TAG	1
++
++#define CONFIG_SKIP_LOWLEVEL_INIT
++#define CONFIG_BOARD_EARLY_INIT_F
++
++#define CONFIG_DISPLAY_CPUINFO
++
++/*
++ * Hardware drivers
++ */
++#define CONFIG_ATMEL_LEGACY
++#define CONFIG_AT91_GPIO		1
++#define CONFIG_AT91_GPIO_PULLUP		1
++
++/* serial console */
++#define CONFIG_ATMEL_USART
++#define CONFIG_USART_BASE		ATMEL_BASE_DBGU
++#define CONFIG_USART_ID			ATMEL_ID_SYS
++#define CONFIG_BAUDRATE			115200
++
++/* LCD */
++#define CONFIG_LCD			1
++#define CONFIG_CMD_LCD			1
++#define CONFIG_CMD_BMP      		1
++/* Verical Display */
++//#define CONFIG_TTFT1280120		1 //Treco vertical
++/* Skov Current Displays */
++#define CONFIG_70WVW2AZ0                1 //Old display on skov boards
++#define CONFIG_LTTD800480070            1 //New display on skov boards
++/* Skov old Display */
++//#define CONFIG_TX18D16VM1CBA		1 //Demo display on skov boards
++#define CONFIG_LC7981			1
++#define LCD_BPP				LCD_COLOR16
++#define CONFIG_BMP_16BPP            	1
++#define CONFIG_LCD_LOGO			1
++#undef LCD_TEST_PATTERN
++#define CONFIG_LCD_INFO			1
++#define CONFIG_LCD_INFO_BELOW_LOGO	1
++#define CONFIG_SYS_WHITE_ON_BLACK	1
++#define CONFIG_ATMEL_LCD		1
++//#define CONFIG_SYS_INVERT_COLORS        1
++#define CONFIG_ATMEL_LCD_BGR555		1
++#define CONFIG_SYS_CONSOLE_IS_IN_ENV	1
++
++/* LED */
++#define CONFIG_AT91_LED
++#define	CONFIG_RED_LED		AT91_PIN_PD0	/* the user0 led */
++#define	CONFIG_GREEN_LED	AT91_PIN_PD1	/* the user1 led */
++#define	CONFIG_YELLOW_LED	AT91_PIN_PD7	/* the user2 led */
++
++#define CONFIG_BOOTDELAY	3
++
++/*
++ * BOOTP options
++ */
++#define CONFIG_BOOTP_BOOTFILESIZE	1
++#define CONFIG_BOOTP_BOOTPATH		1
++#define CONFIG_BOOTP_GATEWAY		1
++#define CONFIG_BOOTP_HOSTNAME		1
++#define CONFIG_BOOTP_MAY_FAIL		1
++
++/*
++ * Command line configuration.
++ */
++#include <config_cmd_default.h>
++#undef CONFIG_CMD_BDI
++#undef CONFIG_CMD_FPGA
++#undef CONFIG_CMD_IMI
++#undef CONFIG_CMD_IMLS
++#undef CONFIG_CMD_LOADS
++#undef CONFIG_CMD_SOURCE
++
++#define CONFIG_CMD_PING		1
++#define CONFIG_CMD_DHCP		1
++#define CONFIG_CMD_NAND		1
++#define CONFIG_CMD_USB		1
++
++/** 
++ * @author Søren Andersen <san@rosetechnology.dk>
++ * I2C 
++ */
++   
++#define CONFIG_CMD_I2C          1
++#define CONFIG_SYS_I2C_SPEED    100000
++#define CONFIG_SOFT_I2C         1
++#define I2C_DELAY               udelay(2)
++#define CONFIG_I2C_SLAVE        0   
++#define I2C_ACTIVE              at91sam9263_i2c_active()
++#define I2C_TRISTATE            at91sam9263_i2c_tristate()
++#define I2C_INIT                at91sam9263_i2c_init()
++#define I2C_SCL(bit)            at91sam9263_i2c_scl(bit)
++#define I2C_SDA(bit)            at91sam9263_i2c_sda(bit)
++#define I2C_READ                at91sam9263_i2c_read()
++/* Watchdog */
++#define CONFIG_RTC_M41T82_WATCHDOG      1
++#define CONFIG_RTC_DS1374_WATCHDOG      1
++#define CONFIG_SYS_I2C_RTC_ADDR         0x68
++#define CONFIG_HW_WATCHDOG              1
++/* End San */
++
++
++/* SDRAM */
++#define CONFIG_NR_DRAM_BANKS		1
++#define CONFIG_SYS_SDRAM_BASE		ATMEL_BASE_CS1
++#define CONFIG_SYS_SDRAM_SIZE		0x04000000
++
++#define CONFIG_SYS_INIT_SP_ADDR \
++	(ATMEL_BASE_SRAM1 + 0x1000 - GENERATED_GBL_DATA_SIZE)
++
++/* DataFlash */
++#define CONFIG_ATMEL_DATAFLASH_SPI
++#define CONFIG_HAS_DATAFLASH		1
++#define CONFIG_SYS_SPI_WRITE_TOUT		(5*CONFIG_SYS_HZ)
++#define CONFIG_SYS_MAX_DATAFLASH_BANKS		1
++#define CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0	0xC0000000	/* CS0 */
++
++#define AT91_SPI_CLK			15000000
++#define DATAFLASH_TCSS			(0x1a << 16)
++#define DATAFLASH_TCHS			(0x1 << 24)
++
++/* NOR flash, if populated */
++#define CONFIG_SYS_FLASH_CFI			1
++#define CONFIG_FLASH_CFI_DRIVER			1
++#define CONFIG_FLASH_CFI_MTD			1
++#define PHYS_FLASH_1				0x10000000
++#define CONFIG_SYS_FLASH_BASE			PHYS_FLASH_1
++#define CONFIG_SYS_MAX_FLASH_SECT		512
++#define CONFIG_SYS_MAX_FLASH_BANKS		1
++
++#define CONFIG_SYS_MONITOR_SEC	1:0-3
++#define CONFIG_SYS_MONITOR_BASE	CONFIG_SYS_FLASH_BASE
++#define CONFIG_SYS_MONITOR_LEN	(256 << 10)
++
++#define CONFIG_ENV_IS_IN_DATAFLASH
++
++#define CONFIG_ENV_IS_IN_FLASH
++#define CONFIG_ENV_SIZE                         (16 * 1024)
++#define CONFIG_ENV_ADDR                         (CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0 + 0x0007FE00)
++/* Address and size of Primary Environment Sector */
++#define CONFIG_ENV_SIZE_FLASH			0x000004000 /**< Must be smaller that 64KB otherwise h_export fails*/
++#define CONFIG_ENV_ADDR_FLASH                   (CONFIG_SYS_FLASH_BASE + 0x00080000)
++#define CONFIG_ENV_SECT_SIZE_FLASH		0x00020000 /**< One sector is 128KB in Nor flash*/
++#define CONFIG_ENV_OVERWRITE			1 /**< San Rose It Shall be possible to change eth addr */
++
++#define MTDIDS_DEFAULT                  "nor0=physmap-flash.0"
++
++#define xstr(s)   str(s)
++#define str(s)	#s
++
++/*
++KJP: layout_nor added 13 spaces to compensate for binary replacement by old layoutstring: physmap-flash.0:384k(u-boot),128k(Env),2048k(Linux),768k(Bmp_Image),-(User)
++*/
++#define CONFIG_BOOTCOUNT_LIMIT  		1 /**< San Rose do something else if it is not possible to boot default partiton */ 
++#define CONFIG_EXTRA_ENV_SETTINGS	\
++	"monitor_base=" xstr(CONFIG_SYS_MONITOR_BASE) "\0" \
++    "rescue=Y\0" \
++    "ethaddr=MM:MM:MM:MM:MM:MM\0" \
++    "ipaddr=iii.iii.iii.iii\0" \
++    "netmask=mmm.mmm.mmm.mmm\0" \
++    "gatewayip=ggg.ggg.ggg.ggg\0" \
++    "serverip=sss.sss.sss.sss\0" \
++    "bootfile=BBBBBBBBBBBBBBBBBBBBBBBBB\0" \
++    "boot_xxxxx=if test \"${rescue}x\" = \"Yx\"; then echo \"RESCUE BOOT\"; run flash_env; setenv sdk_cmd \"19FaR\"; run flash_bootargs; run flash_exec; else run boot_xxxxx; fi\0" \
++    "bootcmd=run boot_xxxxx\0" \
++    "altbootcmd=run bootcmd\0" \
++    "bootargs_common=console=ttyS0,115200 init=/bin/init.skov\0" \
++    "bootlimit=3\0" \
++    "layout=\"physmap-flash.0:512k(u-boot),128k(Env),2688k(Linux),-(Rootfs1)\"\0" \
++    "boot_flash=run flash_env; run flash_bootargs; run flash_exec\0" \
++    "flash_env=echo \"NOR BOOT\"; setenv sdk_cmd \"19Fa\"; set rootfs Rootfs1; run flash_bootargs; set mtdids nor0=physmap-flash.0; set mtdparts mtdparts=$layout\0" \
++    "flash_bootargs=set bootargs $bootargs_common quiet mtdparts=$layout rw ubi.mtd=3 root=ubi0:Rootfs1 rootfstype=ubifs sdk_cmd=${sdk_cmd}\0" \
++    "flash_exec=bootm 100A0000\0" \
++    "flash_test=set bootcmd \"run boot_usb\"; save; run boot_flash;\0" \
++    "boot_net=run setrootpath; setenv sdk_cmd \"19Td\"; setenv filesize 0; tftp SKOV/arm_kernel; if test $filesize -eq 0; then tftp SKOV/arm_kernel; fi; echo \"TFTP/NFS BOOT\"; run net_bootargs; bootm $loadaddr\0" \
++    "boot_dhcp=setenv sdk_cmd \"19Td\"; run setrootpath; dhcp; echo \"TFTP/NFS BOOT\"; run net_bootargs; bootm $loadaddr\0" \
++    "net_bootargs=set bootargs \"$bootargs_common mtdparts=$layout root=/dev/nfs rw nfsroot=$rootpath,nfsvers=3 ip=$ipaddr:$serverip:$gatewayip:$netmask sdk_cmd=${sdk_cmd}\"\0" \
++    "net_exec=tftp 21000000 SKOV/arm_kernel; bootm 21000000\0" \
++    "setrootpath=setenv rootpath \"/tftpboot/$ipaddr\"\0" \
++    "boot_usb=echo \"USB BOOT\"; setenv sdk_cmd \"19Uc\"; run usb_bootargs; run usb_exec\0" \
++    "usb_bootargs=set bootargs \"$bootargs_common mtdparts=$layout root=/dev/ram0 rw ramdisk_size=30720 sdk_cmd=${sdk_cmd}\"\0" \
++    "usb_exec=usb start; fatload usb 0:1 21000000 packk; fatload usb 0:1 21800000 packd; bootm 0x21000000 0x21800000\0" \
++    "exec_flash=run boot_flash\0" \
++    "exec_usb=run boot_usb\0" \
++    "lcd_width=160\0" \
++    "lcd_height=160\0" \
++    "lcd_contrast=60\0" \
++    "lcd_size=160 160\0" \
++    "lcdtype=matrix\0" \
++    "lcd_bglight=80\0"
++/* NAND flash */
++#ifdef CONFIG_CMD_NAND
++#define CONFIG_CMD_UBI
++#define CONFIG_CMD_UBIFS
++#define CONFIG_CMD_MTDPARTS
++#define CONFIG_RBTREE
++#define CONFIG_LZO
++#define CONFIG_MTD_DEVICE
++#define CONFIG_MTD_PARTITIONS
++#define CONFIG_NAND_ATMEL
++#define CONFIG_SYS_MAX_NAND_DEVICE		1
++#define CONFIG_SYS_NAND_BASE			ATMEL_BASE_CS3
++#define CONFIG_SYS_NAND_DBW_8			1
++/* our ALE is AD21 */
++#define CONFIG_SYS_NAND_MASK_ALE		(1 << 21)
++/* our CLE is AD22 */
++#define CONFIG_SYS_NAND_MASK_CLE		(1 << 22)
++#define CONFIG_SYS_NAND_ENABLE_PIN		AT91_PIN_PD15
++#define CONFIG_SYS_NAND_READY_PIN		AT91_PIN_PB10
++#define CONFIG_MTD_NAND_VERIFY_WRITE 		1		/* MAB: Extra safety */
++#define CONFIG_SYS_NAND_USE_FLASH_BBT 		1		/* MAB: added to save bbt to flash, and also ensure that 2 pages are scanned for bad block marker */
++#define CONFIG_SYS_64BIT_VSPRINTF		1		/* needed for nand_util.c */
++#endif
++
++/* Ethernet */
++#define CONFIG_MACB			1
++#define CONFIG_RMII			1
++#define CONFIG_NET_MULTI                1
++#define CONFIG_NET_RETRY_COUNT		20
++#define CONFIG_RESET_PHY_R		1
++#define CONFIG_MACB_SEARCH_PHY          1
++#define CONFIG_PHY_RESET_DELAY          1000
++
++/* Real time clock */
++#define CONFIG_CMD_DATE
++#define CONFIG_RTC_DS1374
++#define CONFIG_RTC_M41T80
++
++/* USB */
++#define CONFIG_USB_ATMEL
++#define CONFIG_USB_OHCI_NEW		1
++#define CONFIG_DOS_PARTITION		1
++#define CONFIG_SYS_USB_OHCI_CPU_INIT		1
++#define CONFIG_SYS_USB_OHCI_REGS_BASE		0x00a00000	/* AT91SAM9263_UHP_BASE */
++#define CONFIG_SYS_USB_OHCI_SLOT_NAME		"at91sam9263"
++#define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS	2
++#define CONFIG_USB_STORAGE		1
++#define CONFIG_CMD_FAT			1
++#define CONFIG_CMD_EXT2                 1
++#define CONFIG_CMD_EXT4                 1
++
++#define CONFIG_SYS_LOAD_ADDR			0x22000000	/* load address */
++
++#define CONFIG_SYS_MEMTEST_START		CONFIG_SYS_SDRAM_BASE
++#define CONFIG_SYS_MEMTEST_END			0x23800000
++
++
++#define CONFIG_SYS_PROMPT		"SKOV A/S> "
++#define CONFIG_SYS_CBSIZE		256
++#define CONFIG_SYS_MAXARGS		16
++#define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
++#define CONFIG_SYS_LONGHELP		1
++#define CONFIG_CMDLINE_EDITING		1
++#define CONFIG_AUTO_COMPLETE
++#define CONFIG_SYS_HUSH_PARSER
++#define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
++#define CONFIG_CRC32_VERIFY		1
++
++/*
++ * Size of malloc() pool
++ */
++#define CONFIG_SYS_MALLOC_LEN		0x800000  /**< Søren Andersen: Increase thise, because of UBI support and journal handling by startup*/
++
++#endif
+diff --git a/include/configs/skov_cpu_module.h b/include/configs/skov_cpu_module.h
+deleted file mode 100644
+index 117563d..0000000
+--- a/include/configs/skov_cpu_module.h
++++ /dev/null
+@@ -1,304 +0,0 @@
+-/**
+- * @file
+- * @author Søren Andersen <san@rosetechnology.dk>
+- */
+-#ifndef __CONFIG_H
+-#define __CONFIG_H
+-
+-#define CONFIG_AT91_LEGACY
+-/*
+- * SoC must be defined first, before hardware.h is included.
+- * In this case SoC is defined in boards.cfg.
+- */
+-#include <asm/hardware.h>
+-
+-#ifndef CONFIG_SYS_USE_BOOT_NORFLASH
+-#define CONFIG_SYS_TEXT_BASE		0x23800000 /*San Rose: start up at 48MB memory level */
+-#else
+-#define CONFIG_SYS_TEXT_BASE		0x0000000
+-#endif
+-
+-/* SD/MMC card */
+-#define CONFIG_MMC                      1
+-#define CONFIG_GENERIC_MMC              1
+-#define CONFIG_GENERIC_ATMEL_MCI        1
+-#define CONFIG_SYS_MMC_CD_PIN           AT91_PIN_PE18
+-#define CONFIG_CMD_MMC                  1
+-//#define CONFIG_SYS_MMC_MAX_BLK_COUNT 	1 // Use single transfers, as multi-transfers hang
+-//#define CONFIG_MMC_TRACE		1
+-//#define CONFIG_SYS_MMC_CLK_SKOV		1 /**< Søren Andersen try to set a lower mmc clock */
+-
+-/* ARM asynchronous clock */
+-#define CONFIG_SYS_AT91_MAIN_CLOCK	16000000 /* 16.000 MHz crystal */
+-#define CONFIG_SYS_AT91_SLOW_CLOCK	32768
+-#define CONFIG_SYS_HZ			1000
+-
+-#define CONFIG_SKOV_CPU_MODULE	1	/* It's a Skov CPU Board */
+-
+-#define CONFIG_ARCH_CPU_INIT
+-
+-#define CONFIG_CMDLINE_TAG	1	/* enable passing of ATAGs	*/
+-#define CONFIG_SETUP_MEMORY_TAGS 1
+-#define CONFIG_INITRD_TAG	1
+-
+-#define CONFIG_SKIP_LOWLEVEL_INIT
+-#define CONFIG_BOARD_EARLY_INIT_F
+-
+-#define CONFIG_DISPLAY_CPUINFO
+-
+-/*
+- * Hardware drivers
+- */
+-#define CONFIG_ATMEL_LEGACY
+-#define CONFIG_AT91_GPIO		1
+-#define CONFIG_AT91_GPIO_PULLUP		1
+-
+-/* serial console */
+-#define CONFIG_ATMEL_USART
+-#define CONFIG_USART_BASE		ATMEL_BASE_DBGU
+-#define CONFIG_USART_ID			ATMEL_ID_SYS
+-#define CONFIG_BAUDRATE			115200
+-
+-/* LCD */
+-#define CONFIG_LCD			1
+-#define CONFIG_CMD_LCD			1
+-#define CONFIG_CMD_BMP      		1
+-/* Verical Display */
+-//#define CONFIG_TTFT1280120		1 //Treco vertical
+-/* Skov Current Displays */
+-#define CONFIG_70WVW2AZ0                1 //Old display on skov boards
+-#define CONFIG_LTTD800480070            1 //New display on skov boards
+-/* Skov old Display */
+-//#define CONFIG_TX18D16VM1CBA		1 //Demo display on skov boards
+-#define CONFIG_LC7981			1
+-#define LCD_BPP				LCD_COLOR16
+-#define CONFIG_BMP_16BPP            	1
+-#define CONFIG_LCD_LOGO			1
+-#undef LCD_TEST_PATTERN
+-#define CONFIG_LCD_INFO			1
+-#define CONFIG_LCD_INFO_BELOW_LOGO	1
+-#define CONFIG_SYS_WHITE_ON_BLACK	1
+-#define CONFIG_ATMEL_LCD		1
+-//#define CONFIG_SYS_INVERT_COLORS        1
+-#define CONFIG_ATMEL_LCD_BGR555		1
+-#define CONFIG_SYS_CONSOLE_IS_IN_ENV	1
+-
+-/* LED */
+-#define CONFIG_AT91_LED
+-#define	CONFIG_RED_LED		AT91_PIN_PD0	/* the user0 led */
+-#define	CONFIG_GREEN_LED	AT91_PIN_PD1	/* the user1 led */
+-#define	CONFIG_YELLOW_LED	AT91_PIN_PD7	/* the user2 led */
+-
+-#define CONFIG_BOOTDELAY	3
+-
+-/*
+- * BOOTP options
+- */
+-#define CONFIG_BOOTP_BOOTFILESIZE	1
+-#define CONFIG_BOOTP_BOOTPATH		1
+-#define CONFIG_BOOTP_GATEWAY		1
+-#define CONFIG_BOOTP_HOSTNAME		1
+-#define CONFIG_BOOTP_MAY_FAIL		1
+-
+-/*
+- * Command line configuration.
+- */
+-#include <config_cmd_default.h>
+-#undef CONFIG_CMD_BDI
+-#undef CONFIG_CMD_FPGA
+-#undef CONFIG_CMD_IMI
+-#undef CONFIG_CMD_IMLS
+-#undef CONFIG_CMD_LOADS
+-#undef CONFIG_CMD_SOURCE
+-
+-#define CONFIG_CMD_PING		1
+-#define CONFIG_CMD_DHCP		1
+-#define CONFIG_CMD_NAND		1
+-#define CONFIG_CMD_USB		1
+-
+-/** 
+- * @author Søren Andersen <san@rosetechnology.dk>
+- * I2C 
+- */
+-   
+-#define CONFIG_CMD_I2C          1
+-#define CONFIG_SYS_I2C_SPEED    100000
+-#define CONFIG_SOFT_I2C         1
+-#define I2C_DELAY               udelay(2)
+-#define CONFIG_I2C_SLAVE        0   
+-#define I2C_ACTIVE              at91sam9263_i2c_active()
+-#define I2C_TRISTATE            at91sam9263_i2c_tristate()
+-#define I2C_INIT                at91sam9263_i2c_init()
+-#define I2C_SCL(bit)            at91sam9263_i2c_scl(bit)
+-#define I2C_SDA(bit)            at91sam9263_i2c_sda(bit)
+-#define I2C_READ                at91sam9263_i2c_read()
+-/* Watchdog */
+-#define CONFIG_RTC_M41T82_WATCHDOG      1
+-#define CONFIG_RTC_DS1374_WATCHDOG      1
+-#define CONFIG_SYS_I2C_RTC_ADDR         0x68
+-#define CONFIG_HW_WATCHDOG              1
+-/* End San */
+-
+-
+-/* SDRAM */
+-#define CONFIG_NR_DRAM_BANKS		1
+-#define CONFIG_SYS_SDRAM_BASE		ATMEL_BASE_CS1
+-#define CONFIG_SYS_SDRAM_SIZE		0x04000000
+-
+-#define CONFIG_SYS_INIT_SP_ADDR \
+-	(ATMEL_BASE_SRAM1 + 0x1000 - GENERATED_GBL_DATA_SIZE)
+-
+-/* DataFlash */
+-#define CONFIG_ATMEL_DATAFLASH_SPI
+-#define CONFIG_HAS_DATAFLASH		1
+-#define CONFIG_SYS_SPI_WRITE_TOUT		(5*CONFIG_SYS_HZ)
+-#define CONFIG_SYS_MAX_DATAFLASH_BANKS		1
+-#define CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0	0xC0000000	/* CS0 */
+-
+-#define AT91_SPI_CLK			15000000
+-#define DATAFLASH_TCSS			(0x1a << 16)
+-#define DATAFLASH_TCHS			(0x1 << 24)
+-
+-/* NOR flash, if populated */
+-#define CONFIG_SYS_FLASH_CFI			1
+-#define CONFIG_FLASH_CFI_DRIVER			1
+-#define CONFIG_FLASH_CFI_MTD			1
+-#define PHYS_FLASH_1				0x10000000
+-#define CONFIG_SYS_FLASH_BASE			PHYS_FLASH_1
+-#define CONFIG_SYS_MAX_FLASH_SECT		512
+-#define CONFIG_SYS_MAX_FLASH_BANKS		1
+-
+-#define CONFIG_SYS_MONITOR_SEC	1:0-3
+-#define CONFIG_SYS_MONITOR_BASE	CONFIG_SYS_FLASH_BASE
+-#define CONFIG_SYS_MONITOR_LEN	(256 << 10)
+-
+-#define CONFIG_ENV_IS_IN_DATAFLASH
+-
+-#define CONFIG_ENV_IS_IN_FLASH
+-#define CONFIG_ENV_SIZE                         (16 * 1024)
+-#define CONFIG_ENV_ADDR                         (CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0 + 0x0007FE00)
+-/* Address and size of Primary Environment Sector */
+-#define CONFIG_ENV_SIZE_FLASH			0x000004000 /**< Must be smaller that 64KB otherwise h_export fails*/
+-#define CONFIG_ENV_ADDR_FLASH                   (CONFIG_SYS_FLASH_BASE + 0x00080000)
+-#define CONFIG_ENV_SECT_SIZE_FLASH		0x00020000 /**< One sector is 128KB in Nor flash*/
+-#define CONFIG_ENV_OVERWRITE			1 /**< San Rose It Shall be possible to change eth addr */
+-
+-#define MTDIDS_DEFAULT                  "nor0=physmap-flash.0"
+-
+-#define xstr(s)   str(s)
+-#define str(s)	#s
+-
+-/*
+-KJP: layout_nor added 13 spaces to compensate for binary replacement by old layoutstring: physmap-flash.0:384k(u-boot),128k(Env),2048k(Linux),768k(Bmp_Image),-(User)
+-*/
+-#define CONFIG_BOOTCOUNT_LIMIT  		1 /**< San Rose do something else if it is not possible to boot default partiton */ 
+-#define CONFIG_EXTRA_ENV_SETTINGS	\
+-	"monitor_base=" xstr(CONFIG_SYS_MONITOR_BASE) "\0" \
+-    "rescue=Y\0" \
+-    "ethaddr=MM:MM:MM:MM:MM:MM\0" \
+-    "ipaddr=iii.iii.iii.iii\0" \
+-    "netmask=mmm.mmm.mmm.mmm\0" \
+-    "gatewayip=ggg.ggg.ggg.ggg\0" \
+-    "serverip=sss.sss.sss.sss\0" \
+-    "bootfile=BBBBBBBBBBBBBBBBBBBBBBBBB\0" \
+-    "boot_xxxxx=if test \"${rescue}x\" = \"Yx\"; then echo \"RESCUE BOOT\"; run flash_env; setenv sdk_cmd \"19FaR\"; run flash_bootargs; run flash_exec; else run boot_xxxxx; fi\0" \
+-    "bootcmd=run boot_xxxxx\0" \
+-    "altbootcmd=run bootcmd\0" \
+-    "bootargs_common=console=ttyS0,115200 init=/bin/init.skov\0" \
+-    "bootlimit=3\0" \
+-    "layout=\"physmap-flash.0:512k(u-boot),128k(Env),2688k(Linux),-(Rootfs1)\"\0" \
+-    "boot_flash=run flash_env; run flash_bootargs; run flash_exec\0" \
+-    "flash_env=echo \"NOR BOOT\"; setenv sdk_cmd \"19Fa\"; set rootfs Rootfs1; run flash_bootargs; set mtdids nor0=physmap-flash.0; set mtdparts mtdparts=$layout\0" \
+-    "flash_bootargs=set bootargs $bootargs_common quiet mtdparts=$layout rw ubi.mtd=3 root=ubi0:Rootfs1 rootfstype=ubifs sdk_cmd=${sdk_cmd}\0" \
+-    "flash_exec=bootm 100A0000\0" \
+-    "flash_test=set bootcmd \"run boot_usb\"; save; run boot_flash;\0" \
+-    "boot_net=run setrootpath; setenv sdk_cmd \"19Td\"; setenv filesize 0; tftp SKOV/arm_kernel; if test $filesize -eq 0; then tftp SKOV/arm_kernel; fi; echo \"TFTP/NFS BOOT\"; run net_bootargs; bootm $loadaddr\0" \
+-    "boot_dhcp=setenv sdk_cmd \"19Td\"; run setrootpath; dhcp; echo \"TFTP/NFS BOOT\"; run net_bootargs; bootm $loadaddr\0" \
+-    "net_bootargs=set bootargs \"$bootargs_common mtdparts=$layout root=/dev/nfs rw nfsroot=$rootpath,nfsvers=3 ip=$ipaddr:$serverip:$gatewayip:$netmask sdk_cmd=${sdk_cmd}\"\0" \
+-    "net_exec=tftp 21000000 SKOV/arm_kernel; bootm 21000000\0" \
+-    "setrootpath=setenv rootpath \"/tftpboot/$ipaddr\"\0" \
+-    "boot_usb=echo \"USB BOOT\"; setenv sdk_cmd \"19Uc\"; run usb_bootargs; run usb_exec\0" \
+-    "usb_bootargs=set bootargs \"$bootargs_common mtdparts=$layout root=/dev/ram0 rw ramdisk_size=30720 sdk_cmd=${sdk_cmd}\"\0" \
+-    "usb_exec=usb start; fatload usb 0:1 21000000 packk; fatload usb 0:1 21800000 packd; bootm 0x21000000 0x21800000\0" \
+-    "exec_flash=run boot_flash\0" \
+-    "exec_usb=run boot_usb\0" \
+-    "lcd_width=160\0" \
+-    "lcd_height=160\0" \
+-    "lcd_contrast=60\0" \
+-    "lcd_size=160 160\0" \
+-    "lcdtype=matrix\0" \
+-    "lcd_bglight=80\0"
+-/* NAND flash */
+-#ifdef CONFIG_CMD_NAND
+-#define CONFIG_CMD_UBI
+-#define CONFIG_CMD_UBIFS
+-#define CONFIG_CMD_MTDPARTS
+-#define CONFIG_RBTREE
+-#define CONFIG_LZO
+-#define CONFIG_MTD_DEVICE
+-#define CONFIG_MTD_PARTITIONS
+-#define CONFIG_NAND_ATMEL
+-#define CONFIG_SYS_MAX_NAND_DEVICE		1
+-#define CONFIG_SYS_NAND_BASE			ATMEL_BASE_CS3
+-#define CONFIG_SYS_NAND_DBW_8			1
+-/* our ALE is AD21 */
+-#define CONFIG_SYS_NAND_MASK_ALE		(1 << 21)
+-/* our CLE is AD22 */
+-#define CONFIG_SYS_NAND_MASK_CLE		(1 << 22)
+-#define CONFIG_SYS_NAND_ENABLE_PIN		AT91_PIN_PD15
+-#define CONFIG_SYS_NAND_READY_PIN		AT91_PIN_PB10
+-#define CONFIG_MTD_NAND_VERIFY_WRITE 		1		/* MAB: Extra safety */
+-#define CONFIG_SYS_NAND_USE_FLASH_BBT 		1		/* MAB: added to save bbt to flash, and also ensure that 2 pages are scanned for bad block marker */
+-#define CONFIG_SYS_64BIT_VSPRINTF		1		/* needed for nand_util.c */
+-#endif
+-
+-/* Ethernet */
+-#define CONFIG_MACB			1
+-#define CONFIG_RMII			1
+-#define CONFIG_NET_MULTI                1
+-#define CONFIG_NET_RETRY_COUNT		20
+-#define CONFIG_RESET_PHY_R		1
+-#define CONFIG_MACB_SEARCH_PHY          1
+-#define CONFIG_PHY_RESET_DELAY          1000
+-
+-/* Real time clock */
+-#define CONFIG_CMD_DATE
+-#define CONFIG_RTC_DS1374
+-#define CONFIG_RTC_M41T80
+-
+-/* USB */
+-#define CONFIG_USB_ATMEL
+-#define CONFIG_USB_OHCI_NEW		1
+-#define CONFIG_DOS_PARTITION		1
+-#define CONFIG_SYS_USB_OHCI_CPU_INIT		1
+-#define CONFIG_SYS_USB_OHCI_REGS_BASE		0x00a00000	/* AT91SAM9263_UHP_BASE */
+-#define CONFIG_SYS_USB_OHCI_SLOT_NAME		"at91sam9263"
+-#define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS	2
+-#define CONFIG_USB_STORAGE		1
+-#define CONFIG_CMD_FAT			1
+-#define CONFIG_CMD_EXT2                 1
+-#define CONFIG_CMD_EXT4                 1
+-
+-#define CONFIG_SYS_LOAD_ADDR			0x22000000	/* load address */
+-
+-#define CONFIG_SYS_MEMTEST_START		CONFIG_SYS_SDRAM_BASE
+-#define CONFIG_SYS_MEMTEST_END			0x23800000
+-
+-
+-#define CONFIG_SYS_PROMPT		"SKOV A/S> "
+-#define CONFIG_SYS_CBSIZE		256
+-#define CONFIG_SYS_MAXARGS		16
+-#define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
+-#define CONFIG_SYS_LONGHELP		1
+-#define CONFIG_CMDLINE_EDITING		1
+-#define CONFIG_AUTO_COMPLETE
+-#define CONFIG_SYS_HUSH_PARSER
+-#define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
+-#define CONFIG_CRC32_VERIFY		1
+-
+-/*
+- * Size of malloc() pool
+- */
+-#define CONFIG_SYS_MALLOC_LEN		0x800000  /**< Søren Andersen: Increase thise, because of UBI support and journal handling by startup*/
+-
+-#endif
+diff --git a/include/environment.h b/include/environment.h
+index 19e0727..da20161 100644
+--- a/include/environment.h
++++ b/include/environment.h
+@@ -38,21 +38,21 @@
+  */
+ 
+ #if defined(CONFIG_ENV_IS_IN_FLASH)
+-#if CONFIG_SKOV_MODULE
++#if CONFIG_ARM9_CPU
+ # ifndef	CONFIG_ENV_ADDR_FLASH
+ #  define	CONFIG_ENV_ADDR_FLASH	(CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET_FLASH)
+ # endif
+ # ifndef	CONFIG_ENV_OFFSET_FLASH
+ #  define	CONFIG_ENV_OFFSET_FLASH (CONFIG_ENV_ADDR_FLASH - CONFIG_SYS_FLASH_BASE_FLASH)
+ # endif
+-#else /* CONFIG_SKOV_MODULE */
++#else /* CONFIG_ARM9_CPU */
+ # ifndef        CONFIG_ENV_ADDR
+ #  define       CONFIG_ENV_ADDR (CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET)
+ # endif
+ # ifndef        CONFIG_ENV_OFFSET
+ #  define       CONFIG_ENV_OFFSET (CONFIG_ENV_ADDR - CONFIG_SYS_FLASH_BASE)
+ # endif
+-#endif /* CONFIG_SKOV_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ # if !defined(CONFIG_ENV_ADDR_REDUND) && defined(CONFIG_ENV_OFFSET_REDUND)
+ #  define	CONFIG_ENV_ADDR_REDUND	\
+ 		(CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET_REDUND)
+diff --git a/tools/envcrc.c b/tools/envcrc.c
+index 22e47f1..cf33149 100644
+--- a/tools/envcrc.c
++++ b/tools/envcrc.c
+@@ -36,7 +36,7 @@
+ #undef	__ASSEMBLY__
+ 
+ #if defined(CONFIG_ENV_IS_IN_FLASH)
+-#ifdef SKOV_CPU_MODULE
++#ifdef CONFIG_ARM9_CPU
+ # ifndef  CONFIG_ENV_ADDR_FLASH
+ #  define CONFIG_ENV_ADDR_FLASH       (CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET)
+ # endif
+@@ -50,7 +50,7 @@
+ # ifndef  CONFIG_ENV_OFFSET
+ #  define CONFIG_ENV_OFFSET (CONFIG_ENV_ADDR - CONFIG_SYS_FLASH_BASE)
+ # endif
+-#endif /* SKOV_CPU_MODULE */
++#endif /* CONFIG_ARM9_CPU */
+ # if !defined(CONFIG_ENV_ADDR_REDUND) && defined(CONFIG_ENV_OFFSET_REDUND)
+ #  define CONFIG_ENV_ADDR_REDUND	(CONFIG_SYS_FLASH_BASE + CONFIG_ENV_OFFSET_REDUND)
+ # endif
+-- 
+1.8.3.1
+
