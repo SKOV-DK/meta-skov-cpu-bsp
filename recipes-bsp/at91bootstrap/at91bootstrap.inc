@@ -47,6 +47,11 @@ do_compile() {
 	oe_runmake
 }
 
+AT91BOOTSTRAP_BINARY = "arm9-cpu-dataflashcardboot-uboot-${PV}-1.bin"
+
 do_deploy () {
-	#TODO
+	install -d ${DEPLOYDIR}
+	install ${S}/binaries/${AT91BOOTSTRAP_BINARY} ${DEPLOYDIR}/BOOT.BIN
 }
+
+addtask deploy after do_compile

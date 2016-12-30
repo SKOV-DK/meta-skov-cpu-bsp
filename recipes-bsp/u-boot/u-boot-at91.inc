@@ -3,7 +3,7 @@ HOMEPAGE = "http://www.denx.de/wiki/U-Boot/WebHome"
 SECTION = "bootloaders"
 PROVIDES = "virtual/bootloader"
 
-#inherit cml1
+inherit deploy
 
 EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHAIN_OPTIONS}"'
 
@@ -25,3 +25,10 @@ do_compile () {
         unset CFLAGS CPPFLAGS LDFLAGS
 	oe_runmake arm9-cpu
 }
+
+do_deploy() {
+	install -d ${DEPLOYDIR}
+        install ${S}/u-boot.bin ${DEPLOYDIR}/u-boot.bin
+}
+
+addtask deploy after do_compile
