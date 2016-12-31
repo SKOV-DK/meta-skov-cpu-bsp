@@ -24,20 +24,20 @@ EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHA
 SRC_URI = "https://github.com/linux4sam/at91bootstrap/archive/v${PV}.tar.gz;name=tarball"
 
 # patches for at9bootstrap
-SRC_URI += "file://patches/0001-at91-skov.patch"
-SRC_URI += "file://patches/skov-version.patch"
+require files/patches/series.inc
 
 # configuration
 SRC_URI += "file://defconfig"
 
+S = "${WORKDIR}/at91bootstrap-${PV}"
+
 do_configure() {
 	if [ -e ${WORKDIR}/defconfig ]; then
-		cp ${WORKDIR}/defconfig ${WORKDIR}/.config
+		cp ${WORKDIR}/defconfig ${S}/.config
 	else
 		
 		bbfatal "No defconfig given - not found in ${WORKDIR}"
 	fi
-
 
 	cml1_do_configure
 }
