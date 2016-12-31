@@ -13,9 +13,6 @@ SECTION = "bootloaders"
 LICENSE = "ATMEL"
 LIC_FILES_CHKSUM = "file://main.c;endline=27;md5=42f86d2f6fd17d1221c5c651b487a07f"
 
-PACKAGE_ARCH = "${MACHINE_ARCH}"
-#COMPATIBLE_MACHINE = "arm9-cpuat91sam9m10g45ek"
-
 inherit cml1 deploy
 
 EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHAIN_OPTIONS}"'
@@ -47,7 +44,7 @@ do_compile() {
 	oe_runmake
 }
 
-AT91BOOTSTRAP_BINARY = "arm9-cpu-dataflashcardboot-uboot-${PV}-1.bin"
+AT91BOOTSTRAP_BINARY = "arm9-cpu-sdcardboot-uboot-${PV}-1.bin"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}
