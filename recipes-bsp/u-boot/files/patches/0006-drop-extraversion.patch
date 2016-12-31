@@ -1,0 +1,26 @@
+From 86cda96469e9ecfe76e2cc56fcab807462446a6b Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sat, 31 Dec 2016 14:39:33 +0100
+Subject: [PATCH 6/6] drop extraversion
+
+Let the build tool provide extra versions as required
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 35c138d..09456e0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@
+ VERSION = 2012
+ PATCHLEVEL = 10
+ SUBLEVEL =
+-EXTRAVERSION = "Skov-Version-1.3"
++EXTRAVERSION =
+ ifneq "$(SUBLEVEL)" ""
+ U_BOOT_VERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+ else
+-- 
+1.8.3.1
+

@@ -1,7 +1,7 @@
 From 07a8402da0fa21b52633abed0c9a2362239cccf2 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Fri, 30 Dec 2016 13:22:16 +0100
-Subject: [PATCH 2/5] boot fix - from sdk-arm
+Subject: [PATCH 2/6] boot fix - from sdk-arm
 
 ---
  board/skov/skov_cpu_module/skov_cpu_module.c |  2 +-

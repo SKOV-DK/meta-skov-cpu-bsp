@@ -1,7 +1,7 @@
 From b860d8f161e2bceb23e2c9b05e04a4a47dbae08b Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Fri, 30 Dec 2016 14:41:03 +0100
-Subject: [PATCH 4/5] backport gcc5 support from latest u-boot
+Subject: [PATCH 4/6] backport gcc5 support from latest u-boot
 
 ---
  include/linux/compiler-gcc.h  | 260 ++++++++++++++++++++++++++++++++++++------
