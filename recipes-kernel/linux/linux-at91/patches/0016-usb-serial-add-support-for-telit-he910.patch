@@ -1,0 +1,32 @@
+From b73c89107ddd052cf4b6fdf05c4e912edb029dbd Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Tue, 15 Sep 2015 22:23:24 +0200
+Subject: [PATCH] usb: serial add support for telit he910
+
+---
+ drivers/usb/serial/option.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
+index 10e79b7..c49b66b 100644
+--- a/drivers/usb/serial/option.c
++++ b/drivers/usb/serial/option.c
+@@ -274,6 +274,7 @@ static void option_instat_callback(struct urb *urb);
+ #define TELIT_PRODUCT_LE920			0x1200
+ #define TELIT_PRODUCT_LE910			0x1201
+ #define TELIT_PRODUCT_LE910_USBCFG4		0x1206
++#define TELIT_PRODUCT_HE910			0x0021
+ 
+ /* ZTE PRODUCTS */
+ #define ZTE_VENDOR_ID				0x19d2
+@@ -1204,6 +1205,7 @@ static const struct usb_device_id option_ids[] = {
+ 		.driver_info = (kernel_ulong_t)&telit_le922_blacklist_usbcfg3 },
+ 	{ USB_DEVICE(TELIT_VENDOR_ID, TELIT_PRODUCT_LE920),
+ 		.driver_info = (kernel_ulong_t)&telit_le920_blacklist },
++	{ USB_DEVICE(TELIT_VENDOR_ID, TELIT_PRODUCT_HE910) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, ZTE_PRODUCT_MF622, 0xff, 0xff, 0xff) }, /* ZTE WCDMA products */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x0002, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t)&net_intf1_blacklist },
+-- 
+1.8.3.1
+

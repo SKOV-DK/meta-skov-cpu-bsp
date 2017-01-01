@@ -1,0 +1,83 @@
+From 555fa522fefda0fac79f3349b189ae18d9757e9c Mon Sep 17 00:00:00 2001
+From: David Jander <david@protonic.nl>
+Date: Fri, 10 Oct 2014 17:30:10 +0200
+Subject: [PATCH] can: rx-fifo: Add support for simple irq offloading
+
+Some CAN controllers have a usable FIFO already but can still benefit from
+off-loading the CAN controller FIFO in the interrupt into an extra ring-
+buffer. Add support for these simpler cases also.
+
+Signed-off-by: David Jander <david@protonic.nl>
+Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+---
+ drivers/net/can/rx-fifo.c   | 32 ++++++++++++++++++++++++++++++++
+ include/linux/can/rx-fifo.h |  2 ++
+ 2 files changed, 34 insertions(+)
+
+diff --git a/drivers/net/can/rx-fifo.c b/drivers/net/can/rx-fifo.c
+index 818632d..919eac1 100644
+--- a/drivers/net/can/rx-fifo.c
++++ b/drivers/net/can/rx-fifo.c
+@@ -216,6 +216,23 @@ int can_rx_fifo_irq_offload(struct can_rx_fifo *fifo)
+ }
+ EXPORT_SYMBOL_GPL(can_rx_fifo_irq_offload);
+ 
++int can_rx_fifo_irq_offload_simple(struct can_rx_fifo *fifo)
++{
++	unsigned int received = 0;
++	unsigned int ret;
++
++	do {
++		ret = can_rx_fifo_offload_one(fifo, 0);
++		received += ret;
++	} while (ret);
++
++	if (received)
++		can_rx_fifo_schedule(fifo);
++
++	return received;
++}
++EXPORT_SYMBOL_GPL(can_rx_fifo_irq_offload_simple);
++
+ static int can_rx_fifo_init_ring(struct net_device *dev,
+ 				 struct can_rx_fifo *fifo, unsigned int weight)
+ {
+@@ -295,6 +312,21 @@ int can_rx_fifo_add(struct net_device *dev, struct can_rx_fifo *fifo)
+ }
+ EXPORT_SYMBOL_GPL(can_rx_fifo_add);
+ 
++int can_rx_fifo_add_simple(struct net_device *dev, struct can_rx_fifo *fifo, unsigned int weight)
++{
++	int ret;
++
++	if (!fifo->mailbox_read)
++		return -EINVAL;
++
++	ret = can_rx_fifo_init_ring(dev, fifo, weight);
++	if (ret)
++		return ret;
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(can_rx_fifo_add_simple);
++
+ void can_rx_fifo_enable(struct can_rx_fifo *fifo)
+ {
+ 	can_rx_fifo_reset(fifo);
+diff --git a/include/linux/can/rx-fifo.h b/include/linux/can/rx-fifo.h
+index 4412e87..cd16141 100644
+--- a/include/linux/can/rx-fifo.h
++++ b/include/linux/can/rx-fifo.h
+@@ -51,7 +51,9 @@ struct can_rx_fifo {
+ };
+ 
+ int can_rx_fifo_add(struct net_device *dev, struct can_rx_fifo *fifo);
++int can_rx_fifo_add_simple(struct net_device *dev, struct can_rx_fifo *fifo, unsigned int weight);
+ int can_rx_fifo_irq_offload(struct can_rx_fifo *fifo);
++int can_rx_fifo_irq_offload_simple(struct can_rx_fifo *fifo);
+ void can_rx_fifo_irq_error(struct can_rx_fifo *fifo);
+ void can_rx_fifo_reset(struct can_rx_fifo *fifo);
+ void can_rx_fifo_del(struct can_rx_fifo *fifo);
+-- 
+1.8.3.1
+
