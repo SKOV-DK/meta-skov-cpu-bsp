@@ -1,0 +1,60 @@
+From faa9cf016bc0d7b6968a85fb6b44850ef008ff30 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 1 Jan 2017 18:31:28 +0100
+Subject: [PATCH] arm9-cpu: use 1203 as machine type
+
+This is aigned with the kernel
+---
+ arch/arm/include/asm/mach-types.h | 13 +++++++++++++
+ board/skov/arm9-cpu/arm9-cpu.c    |  4 ++--
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/include/asm/mach-types.h b/arch/arm/include/asm/mach-types.h
+index a676b6d..0a9f5a0 100644
+--- a/arch/arm/include/asm/mach-types.h
++++ b/arch/arm/include/asm/mach-types.h
+@@ -215,6 +215,7 @@ extern unsigned int __machine_arch_type;
+ #define MACH_TYPE_MICRO9M              1169
+ #define MACH_TYPE_BUG                  1179
+ #define MACH_TYPE_AT91SAM9263EK        1202
++#define MACH_TYPE_SKOVARM9CPU          1203
+ #define MACH_TYPE_EM7210               1212
+ #define MACH_TYPE_VPAC270              1227
+ #define MACH_TYPE_TREO680              1230
+@@ -3544,6 +3545,18 @@ extern unsigned int __machine_arch_type;
+ # define machine_is_at91sam9263ek()	(0)
+ #endif
+ 
++#ifdef CONFIG_MACH_SKOVARM9CPU
++# ifdef machine_arch_type
++#  undef machine_arch_type
++#  define machine_arch_type	__machine_arch_type
++# else
++#  define machine_arch_type	MACH_TYPE_SKOVARM9CPU
++# endif
++# define machine_is_skovarm9cpu()	(machine_arch_type == MACH_TYPE_SKOVARM9CPU)
++#else
++# define machine_is_skovarm9cpu()	(0)
++#endif
++
+ #ifdef CONFIG_MACH_EM7210
+ # ifdef machine_arch_type
+ #  undef machine_arch_type
+diff --git a/board/skov/arm9-cpu/arm9-cpu.c b/board/skov/arm9-cpu/arm9-cpu.c
+index bc55a77..2a1dc15 100644
+--- a/board/skov/arm9-cpu/arm9-cpu.c
++++ b/board/skov/arm9-cpu/arm9-cpu.c
+@@ -517,8 +517,8 @@ int board_early_init_f(void)
+ int board_init(void)
+ { 
+ 	unsigned char i2c_tmp1 = 0, i2c_tmp2 = 0; /**< San Rose */
+-	/* arch number of AT91SAM9263EK-Board */
+-	gd->bd->bi_arch_number = MACH_TYPE_AT91SAM9263EK;
++	/* arch number of SKOV ARM9 CPU (from kernel arch/arm/tools/mach-types) */
++	gd->bd->bi_arch_number = MACH_TYPE_SKOVARM9CPU;
+ 	/* adress of boot parameters */
+ 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
+ 
+-- 
+1.8.3.1
+

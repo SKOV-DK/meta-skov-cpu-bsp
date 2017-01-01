@@ -1,7 +1,7 @@
 From 86cda96469e9ecfe76e2cc56fcab807462446a6b Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sat, 31 Dec 2016 14:39:33 +0100
-Subject: [PATCH 6/6] drop extraversion
+Subject: [PATCH] drop extraversion
 
 Let the build tool provide extra versions as required
 ---

@@ -1,7 +1,7 @@
 From e0fa6670fa789a35ecb2b1d0b53327256dfbabbd Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Fri, 30 Dec 2016 13:36:45 +0100
-Subject: [PATCH 3/6] renamed board from skov_cpu_module to arm9-cpu
+Subject: [PATCH] renamed board from skov_cpu_module to arm9-cpu
 
 ---
  arch/arm/lib/board.c                         |   8 +-

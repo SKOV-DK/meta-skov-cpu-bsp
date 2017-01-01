@@ -1,7 +1,7 @@
 From 1a281d3c55d084bb8d7306025892c52ee3b0038f Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Fri, 30 Dec 2016 14:54:52 +0100
-Subject: [PATCH 5/6] fix gcc5 build errors
+Subject: [PATCH] fix gcc5 build errors
 
 gcc5 did not like the weak definition of show_boot_progress - drop it
 ---

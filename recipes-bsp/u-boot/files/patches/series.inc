@@ -4,3 +4,4 @@ SRC_URI += "file://patches/0003-renamed-board-from-skov_cpu_module-to-arm9-cpu.p
 SRC_URI += "file://patches/0004-backport-gcc5-support-from-latest-u-boot.patch"
 SRC_URI += "file://patches/0005-fix-gcc5-build-errors.patch"
 SRC_URI += "file://patches/0006-drop-extraversion.patch"
+SRC_URI += "file://patches/0007-arm9-cpu-use-1203-as-machine-type.patch"
