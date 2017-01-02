@@ -42,6 +42,10 @@ SRC_URI += "\
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
   file://patches/0403-micrel-fix-config_aneg-for-ksz886x.patch \
   "
+#San Ubifs error FIX
+SRC_URI += "\
+  file://patches/0404-ubifs-ecc-error.patch \
+  "
 # umpf-release: 4.4/customers/skov/imx6/20161124-1
 # umpf-topic-range: 0a864e944276cf169b28cf2d9f85d70f9147da73..b2b55f922dd9f7ec4ee71422d6dacc78f7c9abec
 SRC_URI += "\

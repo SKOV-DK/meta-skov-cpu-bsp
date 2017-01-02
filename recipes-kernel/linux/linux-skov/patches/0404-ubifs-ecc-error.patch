@@ -1,0 +1,95 @@
+--- a/drivers/mtd/nand/gpmi-nand/bch-regs.h	2016-11-21 10:06:53.000000000 +0100
++++ b/drivers/mtd/nand/gpmi-nand/bch-regs.h	2017-01-02 11:05:39.708864754 +0100
+@@ -31,6 +31,7 @@
+ 
+ #define HW_BCH_STATUS0				0x00000010
+ #define HW_BCH_MODE				0x00000020
++#define BM_BCH_MODE_ERASE_THRESHOLD_MASK	0xff
+ #define HW_BCH_ENCODEPTR			0x00000030
+ #define HW_BCH_DATAPTR				0x00000040
+ #define HW_BCH_METAPTR				0x00000050
+--- a/drivers/mtd/nand/gpmi-nand/gpmi-nand.c	2016-11-21 10:06:53.000000000 +0100
++++ b/drivers/mtd/nand/gpmi-nand/gpmi-nand.c	2017-01-02 11:42:11.812936970 +0100
+@@ -991,6 +991,30 @@
+ 	p[1] = (p[1] & mask) | (from_oob >> (8 - bit));
+ }
+ 
++/*
++ * Count the number of 0 bits in a supposed to be
++ * erased region and correct them. Return the number
++ * of bitflips or zero when the region was correct.
++ */
++static unsigned int erased_sector_bitflips(unsigned char *data,
++					unsigned int chunk,
++					struct bch_geometry *geo)
++{
++	unsigned int flip_bits = 0;
++	int i;
++	int base = geo->ecc_chunk_size * chunk;
++
++	/* Count bitflips */
++	for (i = 0; i < geo->ecc_chunk_size; i++)
++		flip_bits += hweight8(~data[base + i]);
++
++	/* Correct bitflips by 0xFF'ing this chunk. */
++	if (flip_bits)
++		memset(&data[base], 0xFF, geo->ecc_chunk_size);
++
++	return flip_bits;
++}
++
+ static int gpmi_ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
+ 				uint8_t *buf, int oob_required, int page)
+ {
+@@ -1002,6 +1026,7 @@
+ 	dma_addr_t    auxiliary_phys;
+ 	unsigned int  i;
+ 	unsigned char *status;
++	unsigned int  flips;
+ 	unsigned int  max_bitflips = 0;
+ 	int           ret;
+ 
+@@ -1036,15 +1061,24 @@
+ 	status = auxiliary_virt + nfc_geo->auxiliary_status_offset;
+ 
+ 	for (i = 0; i < nfc_geo->ecc_chunk_count; i++, status++) {
+-		if ((*status == STATUS_GOOD) || (*status == STATUS_ERASED))
++		if (*status == STATUS_GOOD)
+ 			continue;
+ 
+ 		if (*status == STATUS_UNCORRECTABLE) {
+ 			mtd->ecc_stats.failed++;
+ 			continue;
+ 		}
+-		mtd->ecc_stats.corrected += *status;
+-		max_bitflips = max_t(unsigned int, max_bitflips, *status);
++
++		if (*status == STATUS_ERASED)
++			/* Erased block, check/correct bitflips manually. */
++			flips = erased_sector_bitflips(payload_virt, i,
++							nfc_geo);
++		else
++			/* BCH block corrected some errors for us. */
++			flips = *status;
++
++		mtd->ecc_stats.corrected += flips;
++		max_bitflips = max_t(unsigned int, max_bitflips, flips);
+ 	}
+ 
+ 	if (oob_required) {
+--- a/drivers/mtd/nand/gpmi-nand/gpmi-lib.c	2016-11-21 10:06:53.000000000 +0100
++++ b/drivers/mtd/nand/gpmi-nand/gpmi-lib.c	2017-01-02 11:19:36.041892306 +0100
+@@ -298,6 +298,13 @@
+ 			| BF_BCH_FLASH0LAYOUT1_DATAN_SIZE(block_size, this),
+ 			r->bch_regs + HW_BCH_FLASH0LAYOUT1);
+ 
++	/*
++	 * Set the tolerance for bitflips when reading erased blocks
++	 * equal to the ecc_strength.
++	 */
++	writel(bch_geo->ecc_strength & BM_BCH_MODE_ERASE_THRESHOLD_MASK,
++		r->bch_regs + HW_BCH_MODE);
++
+ 	/* Set *all* chip selects to use layout 0. */
+ 	writel(0, r->bch_regs + HW_BCH_LAYOUTSELECT);
+ 
