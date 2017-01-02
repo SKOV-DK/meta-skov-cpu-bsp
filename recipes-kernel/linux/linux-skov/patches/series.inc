@@ -44,7 +44,7 @@ SRC_URI += "\
   "
 #San Ubifs error FIX
 SRC_URI += "\
-  file://patches/0404-ubifs-ecc-error.patch \
+  file://patches/0404-mtd-gpmi-Deal-with-bitflips-in-erased-regions.patch \
   "
 # umpf-release: 4.4/customers/skov/imx6/20161124-1
 # umpf-topic-range: 0a864e944276cf169b28cf2d9f85d70f9147da73..b2b55f922dd9f7ec4ee71422d6dacc78f7c9abec
