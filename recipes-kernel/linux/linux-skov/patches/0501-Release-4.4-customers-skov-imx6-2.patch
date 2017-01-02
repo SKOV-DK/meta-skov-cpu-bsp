@@ -1,11 +1,9 @@
-From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Thu, 24 Nov 2016 11:10:41 +0100
-Subject: [PATCH] Release 4.4/customers/skov/imx6/20161124-1
+From: Sam Ravnborg <srn@skov.dk>
+Subject: [PATCH] Release 4.4/customers/skov/imx6/-2
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -19,7 +17,7 @@ index 30924aabf1b4..b9d09306bf33 100644
  PATCHLEVEL = 4
  SUBLEVEL = 34
 -EXTRAVERSION =
-+EXTRAVERSION =-20161124-1
++EXTRAVERSION =-2
  NAME = Blurry Fish Butt
  
  # *DOCUMENTATION*
