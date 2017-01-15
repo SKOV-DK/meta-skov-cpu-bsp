@@ -1,0 +1,55 @@
+From 17404b83d4020fa18d434d449f0c06549a6bcbea Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 15 Jan 2017 17:43:15 +0100
+Subject: [PATCH] pmc: fix PLL setup for ARM9-CPU
+
+Fix setup of PLL to adjust to the 100 MHz frequency.
+Uses hardcoded numbers as leftovers from the original
+patch.
+---
+ driver/pmc.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/driver/pmc.c b/driver/pmc.c
+index 950cb1b..da764ab 100644
+--- a/driver/pmc.c
++++ b/driver/pmc.c
+@@ -125,7 +125,27 @@ void lowlevel_clock_init()
+ 	while (!(read_pmc(PMC_SR) & AT91C_PMC_MOSCXTS))
+ 		;
+ #endif
++#if defined(CONFIG_ARM9_CPU)
++	if ((read_pmc(PMC_MCKR) & 3) != 2) {
++		tmp = read_pmc(PMC_MCKR);
++		tmp &= (~(0x1 << 13));
++	//	tmp &= ~AT91C_PMC_CSS;
++		tmp &= ~0x03;  // TODO
++		tmp |= AT91C_PMC_CSS_MAIN_CLK;
++		write_pmc(PMC_MCKR, tmp);
++
++		while (!(read_pmc(PMC_SR) & AT91C_PMC_MCKRDY))
++			;
+ 
++	//	tmp &= ~AT91C_PMC_PRES;
++	//	tmp |= AT91C_PMC_PRES_CLK;
++		tmp &= ~0x1C; // TODO
++		write_pmc(PMC_MCKR, tmp);
++
++		while (!(read_pmc(PMC_SR) & AT91C_PMC_MCKRDY))
++			;
++	}
++#else
+ 	/* After stablization, switch to Main Oscillator */
+ 	if ((read_pmc(PMC_MCKR) & AT91C_PMC_CSS) == AT91C_PMC_CSS_SLOW_CLK) {
+ 		tmp = read_pmc(PMC_MCKR);
+@@ -144,6 +164,7 @@ void lowlevel_clock_init()
+ 		while (!(read_pmc(PMC_SR) & AT91C_PMC_MCKRDY))
+ 			;
+ 	}
++#endif
+ 
+ 	return;
+ }
+-- 
+1.8.3.1
+

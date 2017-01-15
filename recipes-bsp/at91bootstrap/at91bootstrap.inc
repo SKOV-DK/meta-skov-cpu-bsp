@@ -11,7 +11,7 @@ HOMEPAGE = "http://www.at91.com/linux4sam/bin/view/Linux4SAM/AT91Bootstrap"
 BUGTRACKER = "https://github.com/linux4sam/at91bootstrap/issues"
 SECTION = "bootloaders"
 LICENSE = "ATMEL"
-LIC_FILES_CHKSUM = "file://main.c;endline=27;md5=42f86d2f6fd17d1221c5c651b487a07f"
+LIC_FILES_CHKSUM = "file://main.c;endline=27;md5=a2a70db58191379e2550cbed95449fbd"
 
 inherit cml1 deploy
 
@@ -20,20 +20,19 @@ EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHA
 # at91 bootstarp source code
 SRC_URI = "https://github.com/linux4sam/at91bootstrap/archive/v${PV}.tar.gz;name=tarball"
 
-# patches for at9bootstrap
+
+# patches for at91bootstrap
 require files/patches/series.inc
 
-# configuration
-SRC_URI += "file://defconfig"
-
 S = "${WORKDIR}/at91bootstrap-${PV}"
+defconfig = "${S}/contrib/board/skov/arm9_cpu/arm9_cpu_defconfig"
+REVISION = "v2"
 
 do_configure() {
-	if [ -e ${WORKDIR}/defconfig ]; then
-		cp ${WORKDIR}/defconfig ${S}/.config
+	if [ -e ${defconfig} ]; then
+		cp ${defconfig} ${S}/.config
 	else
-		
-		bbfatal "No defconfig given - not found in ${WORKDIR}"
+		bbfatal "No defconfig given - not found in ${defconfig}"
 	fi
 
 	cml1_do_configure
@@ -41,10 +40,10 @@ do_configure() {
 
 do_compile() {
 	unset CFLAGS CPPFLAGS LDFLAGS
-	oe_runmake
+	oe_runmake REVISION=${REVISION}
 }
 
-AT91BOOTSTRAP_BINARY = "arm9-cpu-sdcardboot-uboot-${PV}-1.bin"
+AT91BOOTSTRAP_BINARY = "arm9_cpu-flashboot-uboot-${PV}-${REVISION}.bin"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}
