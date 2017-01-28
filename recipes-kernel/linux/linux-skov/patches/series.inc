@@ -52,3 +52,4 @@ SRC_URI += "\
   file://patches/0501-Release-4.4-customers-skov-imx6-2.patch \
   "
 # umpf-end
+SRC_URI += "file://patches/0601-micrel-support-write-to-registers-via-regmap.patch"
