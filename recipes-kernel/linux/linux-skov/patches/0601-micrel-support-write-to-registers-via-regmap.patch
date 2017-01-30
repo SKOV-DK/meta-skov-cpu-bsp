@@ -1,4 +1,4 @@
-From 6968a93200d8a27cc6443f7dae4212dfc0f404c3 Mon Sep 17 00:00:00 2001
+From bef1a49b52e3fefb790ca361d4102d255ee330ce Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sat, 28 Jan 2017 16:15:26 +0100
 Subject: [PATCH] micrel: support write to registers via regmap
@@ -17,13 +17,13 @@ the micrel phy registers.
 - fixed write support
 - added list of RO registers
 
-Sigend-off-by: Sam Ravnborg <sam@ravnborg.org>
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
  drivers/base/regmap/regmap-debugfs.c |  2 +-
  drivers/net/phy/mdio-bitbang.c       | 23 ++++++++++-
- drivers/net/phy/micrel-smi.c         | 78 ++++++++++++++++++++----------------
+ drivers/net/phy/micrel-smi.c         | 75 ++++++++++++++++++++----------------
  include/linux/phy.h                  |  1 +
- 4 files changed, 67 insertions(+), 37 deletions(-)
+ 4 files changed, 64 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/base/regmap/regmap-debugfs.c b/drivers/base/regmap/regmap-debugfs.c
 index 3f0a7e2..2437186 100644
@@ -94,10 +94,10 @@ index b118236..5e0bbf7 100644
  		mdiobb_cmd(ctrl, MDIO_WRITE, phy, reg);
  
 diff --git a/drivers/net/phy/micrel-smi.c b/drivers/net/phy/micrel-smi.c
-index 143a1ec..4e74e76 100644
+index 143a1ec..a6ac023 100644
 --- a/drivers/net/phy/micrel-smi.c
 +++ b/drivers/net/phy/micrel-smi.c
-@@ -38,74 +38,84 @@ struct ksz8873_priv {
+@@ -38,74 +38,81 @@ struct ksz8873_priv {
  	unsigned int nregs;
  };
  
@@ -183,13 +183,10 @@ index 143a1ec..4e74e76 100644
 +		case REG_SWITCH_CTRL_5 + 2: /* Global Control 7 */
 +		case REG_SWITCH_CTRL_5 + 3: /* Global Control 8 */
 +		case REG_PORT_1_LINK_MD_CTRL:
-+		case REG_PORT_1_LINK_MD_CTRL + REG_PORT_CTRL_OFFSET:
 +		case REG_PORT_1_LINK_MD_CTRL + 2 * REG_PORT_CTRL_OFFSET:
 +		case REG_PORT_1_LINK_MD_STATUS:
-+		case REG_PORT_1_LINK_MD_STATUS + REG_PORT_CTRL_OFFSET:
 +		case REG_PORT_1_LINK_MD_STATUS + 2 * REG_PORT_CTRL_OFFSET:
 +		case REG_PORT_1_STATUS1:
-+		case REG_PORT_1_STATUS1 + REG_PORT_CTRL_OFFSET:
 +		case REG_PORT_1_STATUS1 + 2 * REG_PORT_CTRL_OFFSET:
 +		case REG_IND_DATA_8:
 +		case REG_SWITCH_MODE_STATUS:
