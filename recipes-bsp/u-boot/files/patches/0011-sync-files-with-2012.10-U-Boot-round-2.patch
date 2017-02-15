@@ -1,0 +1,127 @@
+From c7c7f3bab529cb94b5c3391f00e26e013b95ac6d Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 15 Feb 2017 23:48:24 +0100
+Subject: [PATCH] sync files with 2012.10 U-Boot - round 2
+
+    Copy files to kill random whitespace changes etc.
+    Keep diff smaller
+
+    Drop dataflash specific file in arm9-cpu dir
+---
+ arch/arm/lib/board.c            |  1 -
+ board/skov/arm9-cpu/Makefile    |  1 -
+ board/skov/arm9-cpu/partition.c | 36 ------------------------------------
+ common/env_dataflash.c          |  3 +++
+ drivers/mtd/nand/atmel_nand.c   |  7 -------
+ 5 files changed, 3 insertions(+), 45 deletions(-)
+ delete mode 100644 board/skov/arm9-cpu/partition.c
+
+diff --git a/arch/arm/lib/board.c b/arch/arm/lib/board.c
+index 83222fa..8b0decb 100644
+--- a/arch/arm/lib/board.c
++++ b/arch/arm/lib/board.c
+@@ -553,7 +553,6 @@ void board_init_r(gd_t *id, ulong dest_addr)
+ #endif
+ 
+ 	/* initialize environment */
+-	env_init(); /**< Martin Bjærre Re-init for dataflash */
+ 	env_relocate();
+ 
+ #if defined(CONFIG_CMD_PCI) || defined(CONFIG_PCI)
+diff --git a/board/skov/arm9-cpu/Makefile b/board/skov/arm9-cpu/Makefile
+index 25058c4..506f3bb 100644
+--- a/board/skov/arm9-cpu/Makefile
++++ b/board/skov/arm9-cpu/Makefile
+@@ -33,7 +33,6 @@ COBJS-y += arm9-cpu.o
+ COBJS-y += lc7981.o
+ COBJS-y += cmd_lcd.o
+ COBJS-y += led.o
+-COBJS-$(CONFIG_HAS_DATAFLASH) += partition.o
+ 
+ SRCS	:= $(SOBJS-y:.o=.S) $(COBJS-y:.o=.c)
+ OBJS	:= $(addprefix $(obj),$(COBJS-y))
+diff --git a/board/skov/arm9-cpu/partition.c b/board/skov/arm9-cpu/partition.c
+deleted file mode 100644
+index 7742d73..0000000
+--- a/board/skov/arm9-cpu/partition.c
++++ /dev/null
+@@ -1,36 +0,0 @@
+-/*
+- * (C) Copyright 2008
+- * Ulf Samuelsson <ulf@atmel.com>
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- *
+- */
+-#include <common.h>
+-#include <config.h>
+-#include <asm/hardware.h>
+-#include <dataflash.h>
+-
+-AT91S_DATAFLASH_INFO dataflash_info[CONFIG_SYS_MAX_DATAFLASH_BANKS];
+-
+-struct dataflash_addr cs[CONFIG_SYS_MAX_DATAFLASH_BANKS] = {
+-	{CONFIG_SYS_DATAFLASH_LOGIC_ADDR_CS0, 0},	/* Logical adress, CS */
+-};
+-
+-/*define the area offsets*/
+-dataflash_protect_t area_list[NB_DATAFLASH_AREA] = {
+-	{0x00000000, 0x0007FDFF, FLAG_PROTECT_CLEAR, 0, "Bootstrap + U-Boot"},
+-	{0x0007FE00, 0x00083FFF, FLAG_PROTECT_CLEAR, 0, "Environment"},
+-};
+diff --git a/common/env_dataflash.c b/common/env_dataflash.c
+index d641f09..3c5af37 100644
+--- a/common/env_dataflash.c
++++ b/common/env_dataflash.c
+@@ -39,6 +39,7 @@ uchar env_get_char_spec(int index)
+ 			1, (char *)&c);
+ 	return c;
+ }
++
+ void env_relocate_spec(void)
+ {
+ 	char buf[CONFIG_ENV_SIZE];
+@@ -85,7 +86,9 @@ int env_init(void)
+ 
+ 	if (gd->env_valid)
+ 		return 0;
++
+ 	AT91F_DataflashInit();	/* prepare for DATAFLASH read/write */
++
+ 	/* read old CRC */
+ 	read_dataflash(CONFIG_ENV_ADDR + offsetof(env_t, crc),
+ 		sizeof(ulong), (char *)&crc);
+diff --git a/drivers/mtd/nand/atmel_nand.c b/drivers/mtd/nand/atmel_nand.c
+index 3f2c52c..994dd9f 100644
+--- a/drivers/mtd/nand/atmel_nand.c
++++ b/drivers/mtd/nand/atmel_nand.c
+@@ -1014,13 +1014,6 @@ int atmel_nand_chip_init(int devnum, ulong base_addr)
+ #ifdef CONFIG_SYS_NAND_DBW_16
+ 	nand->options = NAND_BUSWIDTH_16;
+ #endif
+-/** 
+-  * @author Martin Bjærre <mab@rosetechnology.dk>
+-  * Bad Block table should be physically on the NAND flash 
+-  */
+-#ifdef CONFIG_SYS_NAND_USE_FLASH_BBT 
+-        nand->options     |= NAND_USE_FLASH_BBT;
+-#endif
+ 	nand->cmd_ctrl = at91_nand_hwcontrol;
+ #ifdef CONFIG_SYS_NAND_READY_PIN
+ 	nand->dev_ready = at91_nand_ready;
+-- 
+1.8.3.1
+
