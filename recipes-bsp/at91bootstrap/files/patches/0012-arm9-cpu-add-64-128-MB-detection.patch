@@ -1,0 +1,120 @@
+From 64e669188b7534296e9828d343660fd2175f3413 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 15 Feb 2017 15:58:10 +0100
+Subject: [PATCH] arm9-cpu: add 64/128 MB detection
+
+Port form original code, but use a helper function
+to make code more readable.
+This also introduces the magocs used by U-Boot to
+check if bootloaded found 64 or 128 MB RAM.
+
+MCI setup was also changed (reverser order), but I did
+not test if this has any real impact. It is just a more logical
+order now.
+---
+ contrib/board/skov/arm9_cpu/arm9_cpu.c | 63 ++++++++++++++++++++++++++++++++--
+ 1 file changed, 60 insertions(+), 3 deletions(-)
+
+diff --git a/contrib/board/skov/arm9_cpu/arm9_cpu.c b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+index 3622e92..d524b12 100644
+--- a/contrib/board/skov/arm9_cpu/arm9_cpu.c
++++ b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+@@ -278,10 +278,53 @@ static void sdramc_hw_init(void)
+ 	pio_configure(sdramc_pins);
+ }
+ 
++/* Run-time check for RAM size
++ * Pass result to U-Boot
++ */
++static int check_if_128mb(void)
++{
++	unsigned int *test_adr1 = (unsigned int *)0x20000000;
++	unsigned int *test_adr2 = (unsigned int *)0x21000000;
++	unsigned int test_val1 = 0x534b4f56;
++	unsigned int test_val2 = 0x564f4b53;
++	unsigned int *p;
++	int mb128;
++	int i;
++
++	mb128 = 1;
++
++	/* Fill up memory with a known pattern */
++	p = test_adr1;
++	for (i = 0; i < 3000; i++) {
++		*p++ = test_val2 + i;
++	}
++
++	/* Check that we can read back the values just written
++	* If one or more fails, we have only 64 MB
++	*/
++	p = test_adr1;
++	for (i = 0; i < 3000; i++)
++		if (*p++ != (test_val2 + i))
++			mb128 = 0;
++
++	/* Signal to U-Boot the memory size. See dram_init() */
++	if (mb128) {
++		dbg_log(1,"128MB Ram\n");
++		*test_adr1 = test_val1; //SKOV
++		*test_adr2 = test_val2; //VOKS
++	} else {
++		dbg_log(1,"64MB Ram\n");
++		*test_adr1 = test_val2; //VOKS
++		*test_adr2 = test_val1; //SKOV
++	}
++
++	return mb128;
++}
++
+ static void sdramc0_init(void)
+ {
+-	unsigned int reg;
+ 	struct sdramc_register sdramc_config;
++	unsigned int reg;
+ 
+ #ifdef CONFIG_SDRAM_16BIT
+ 	sdramc_config.cr = AT91C_SDRAMC_NC_10 | AT91C_SDRAMC_NR_13 | AT91C_SDRAMC_CAS_2
+@@ -308,6 +351,18 @@ static void sdramc0_init(void)
+ 	writel(reg, AT91C_BASE_CCFG + CCFG_EBI0CSA);
+ 
+ 	sdramc_initialize(&sdramc_config, AT91C_BASE_EBI0_CS1);
++
++#ifndef CONFIG_SDRAM_16BIT
++	if (!check_if_128mb()) {
++		/* Change number of colums to 9 for 64MB ram. */
++		/* Other parameters does not need to be changed due to chip size. */
++
++		/* Clear NC bits */
++		sdramc_config.cr &= ~0x3;
++		sdramc_config.cr = AT91C_SDRAMC_NC_9;
++		sdramc_initialize(&sdramc_config, AT91C_BASE_EBI0_CS1);
++	}
++#endif
+ }
+ #endif /* #ifdef CONFIG_SDRAM */
+ 
+@@ -415,7 +470,8 @@ void hw_init(void)
+ 
+ 	/* Test if variables are initialized */
+ 	if (test_var_init != 0xacdcabba) {
+-		dbg_info("Error: test_var_init=%x\n\r", test_var_init);
++		dbg_info("Error: Variables not initialized. test_var_init=%x\n\r",
++		         test_var_init);
+ 	}
+ 
+ 	/* Enable clock for Boot Mode Select (BMS) pin */
+@@ -481,9 +537,10 @@ void at91_mci0_hw_init(void)
+ 
+ 	};
+ 
+-	pmc_enable_periph_clock(AT91C_ID_PIOA);
+ 	pio_configure(mci_pins);
+ 
++	pmc_enable_periph_clock(AT91C_ID_PIOA);
++
+ 	/* Enable the clock */
+ 	pmc_enable_periph_clock(AT91C_ID_MCI1);
+ }
+-- 
+1.8.3.1
+

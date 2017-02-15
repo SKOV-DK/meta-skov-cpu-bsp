@@ -1,0 +1,27 @@
+From 663d6d119b9381a01e7bffb14f3bae9683d79446 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 15 Feb 2017 16:00:39 +0100
+Subject: [PATCH] flash: silence warning
+
+In our configuration length was not used, resulting
+in the only warning.
+Silence it so we notice if new warnings starts to appear
+---
+ driver/flash.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/driver/flash.c b/driver/flash.c
+index b64d9c5..999bc65 100644
+--- a/driver/flash.c
++++ b/driver/flash.c
+@@ -61,6 +61,7 @@ int load_norflash(struct image_info *image)
+ {
+ 	int length = 0;
+ 
++	length = length; /* silence unused warning */
+ 	norflash_hw_init();
+ 
+ #if defined(CONFIG_LOAD_LINUX) || defined(CONFIG_LOAD_ANDROID)
+-- 
+1.8.3.1
+

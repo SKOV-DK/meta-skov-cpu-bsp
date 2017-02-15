@@ -1,4 +1,4 @@
-From 222c83fcd2aca3aba9f651ab6112f3caa9f9e195 Mon Sep 17 00:00:00 2001
+From 014278216fcc262f82f7ba162fe91bbc5b01e9d8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 17:44:19 +0100
 Subject: [PATCH] MACH_TYPE set to 1203

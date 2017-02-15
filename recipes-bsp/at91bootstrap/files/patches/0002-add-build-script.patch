@@ -1,4 +1,4 @@
-From 875d0821cf45a5df968a7b3cd1a3b123bb99b6aa Mon Sep 17 00:00:00 2001
+From 1af81897e1c651f83b5e7a7b7e173079dc8a7640 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sat, 14 Jan 2017 21:43:28 +0100
 Subject: [PATCH] add build script

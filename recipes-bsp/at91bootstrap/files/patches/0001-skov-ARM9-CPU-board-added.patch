@@ -1,4 +1,4 @@
-From c79fdf7f8502c2f83d7827be6d7f9ef1121d6a7b Mon Sep 17 00:00:00 2001
+From 07d7ab0ab6482a28e9a00167cfae5c5a1991f160 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sat, 14 Jan 2017 21:42:46 +0100
 Subject: [PATCH] skov: ARM9 CPU board added

@@ -1,4 +1,4 @@
-From 73291fad6d518ea03ae9e0927dc19808ed357300 Mon Sep 17 00:00:00 2001
+From 166a8e3dbe52198bbbdde6cfa3eec0c5ffc5533a Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 13:15:07 +0100
 Subject: [PATCH] Add pmc_cfg_pllb() - so we can configure PLLB

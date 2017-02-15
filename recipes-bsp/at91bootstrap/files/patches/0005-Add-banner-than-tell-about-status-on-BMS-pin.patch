@@ -1,4 +1,4 @@
-From b02449db82b2c8c55615c57c137348e1e883900a Mon Sep 17 00:00:00 2001
+From 2263938c62f77fc86149aed0bb619a9ce1303105 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 13:06:00 +0100
 Subject: [PATCH] Add banner than tell about status on BMS pin

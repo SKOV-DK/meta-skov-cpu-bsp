@@ -1,4 +1,4 @@
-From 6b8b4b90706ecfa3d2fd4399ad076cccfec4aea3 Mon Sep 17 00:00:00 2001
+From c17832820f991b43ff73da0aaf8d25e82bfa1840 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 13:03:49 +0100
 Subject: [PATCH] support norflash + sdcard booting

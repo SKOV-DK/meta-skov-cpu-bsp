@@ -1,4 +1,4 @@
-From 17404b83d4020fa18d434d449f0c06549a6bcbea Mon Sep 17 00:00:00 2001
+From a7c48f87e7c06ffb970505b337d7b2f250ddaff8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 17:43:15 +0100
 Subject: [PATCH] pmc: fix PLL setup for ARM9-CPU

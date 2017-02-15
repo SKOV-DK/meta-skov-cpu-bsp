@@ -7,4 +7,7 @@ SRC_URI += "file://patches/0006-Add-pmc_cfg_pllb-so-we-can-configure-PLLB.patch"
 SRC_URI += "file://patches/0007-Configure-PLLB-for-use-by-USB.patch"
 SRC_URI += "file://patches/0008-pmc-fix-PLL-setup-for-ARM9-CPU.patch"
 SRC_URI += "file://patches/0009-MACH_TYPE-set-to-1203.patch"
-
+SRC_URI += "file://patches/0010-Fix-so-we-tell-that-we-have-loaded-from-SD-CARD-when.patch"
+SRC_URI += "file://patches/0011-arm9-cpu-fix-so-we-use-MCI1-for-SD-CARD.patch"
+SRC_URI += "file://patches/0012-arm9-cpu-add-64-128-MB-detection.patch"
+SRC_URI += "file://patches/0013-flash-silence-warning.patch"

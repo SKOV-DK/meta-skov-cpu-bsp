@@ -1,4 +1,4 @@
-From 7a93d8cd48577e6acd022d14eeabafe0a838368d Mon Sep 17 00:00:00 2001
+From 033d0a11498e0d8a9cf34bf351ab1370fe0505e3 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sun, 15 Jan 2017 13:16:55 +0100
 Subject: [PATCH] Configure PLLB for use by USB
