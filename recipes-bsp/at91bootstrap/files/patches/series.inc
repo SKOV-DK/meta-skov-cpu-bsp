@@ -11,3 +11,4 @@ SRC_URI += "file://patches/0010-Fix-so-we-tell-that-we-have-loaded-from-SD-CARD-
 SRC_URI += "file://patches/0011-arm9-cpu-fix-so-we-use-MCI1-for-SD-CARD.patch"
 SRC_URI += "file://patches/0012-arm9-cpu-add-64-128-MB-detection.patch"
 SRC_URI += "file://patches/0013-flash-silence-warning.patch"
+SRC_URI += "file://patches/0014-arm9-cpu-fix-starting-up-u-boot.patch"
