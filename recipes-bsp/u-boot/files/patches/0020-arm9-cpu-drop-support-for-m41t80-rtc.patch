@@ -1,0 +1,380 @@
+From 8c5cf5a86dae137df70e5afc31399379c67c82c7 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 21:31:43 +0100
+Subject: [PATCH] arm9-cpu: drop support for m41t80 rtc
+
+There has never been produced any boards with the rtc.
+So no need to carry support for this rtc anymore
+---
+ board/skov/arm9-cpu/arm9-cpu.c |  72 +++++---------
+ drivers/rtc/Makefile           |   1 -
+ drivers/rtc/m41t80.c           | 208 -----------------------------------------
+ include/m41t80.h               |  26 ------
+ 4 files changed, 24 insertions(+), 283 deletions(-)
+ delete mode 100644 drivers/rtc/m41t80.c
+ delete mode 100644 include/m41t80.h
+
+diff --git a/board/skov/arm9-cpu/arm9-cpu.c b/board/skov/arm9-cpu/arm9-cpu.c
+index b61457d..e5a8fba 100644
+--- a/board/skov/arm9-cpu/arm9-cpu.c
++++ b/board/skov/arm9-cpu/arm9-cpu.c
+@@ -56,9 +56,6 @@
+ #include <asm/arch/at91_wdt.h>
+ #include <i2c.h>
+ #include <ds1374.h>
+-#include <m41t80.h>
+-int skov_with_ds1374 = 0;
+-int skov_with_m41t82 = 0;
+ int wd_init = 0;
+ /* End san */
+ 
+@@ -465,42 +462,25 @@ int board_init(void)
+ 	 */                                            
+ 	at91sam9263_i2c_init();
+ 
+-	/* find out if we hade a m41t82 or ds1374 rtc */
+-	i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
+-	i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x19, 0x45);
+-	
+-	if(i2c_tmp1 == 1 && i2c_tmp2 == 1) { //We dont have an m41t82
+-		
+-		i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
+-		i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
++	/* find out if we have a ds1374 rtc */
++	i2c_tmp1 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
++	i2c_tmp2 = i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, 0x07, 0);
+ 		
+-		if(i2c_tmp1 == 0 || i2c_tmp2 == 0) // We have a ds1374
+-		{
+-			printf("WD: DS1374\n");
+-			at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-			skov_with_ds1374 = 1;	
+-			timer_init();
+-			//4096 for one secound
+-			ds1374_wdt_settimeout(1228800); //->5 minuts
+-			writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
+-			wd_init = 1;
+-		} else {
+-			//No external watchdog
+-			skov_with_ds1374 = 0;
+-		}
+-	} else  {
+-		printf("WD: M41T82\n");
++	if (i2c_tmp1 == 0 || i2c_tmp2 == 0) {
++		// We have a ds1374
++		printf("WD: DS1374\n");
+ 		at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-		skov_with_m41t82 = 1;
+ 		timer_init();
+-		m41t82_wdt_settimeout(32); //32 sek
++
++		// 4096 for one second
++		ds1374_wdt_settimeout(1228800); //->5 minuts
+ 		writel(AT91_WDT_WDDIS, &wd->mr); //Disable internal wdt
+ 		wd_init = 1;
+ 	}
+-    	if(wd_init == 0) {
+-    	    printf("WD: AT91WDT\n");
+-    	}
+-    	/* End San */
++
++	if (wd_init == 0) {
++		printf("WD: AT91WDT\n");
++	}
+ 	return 0;
+ }
+ 
+@@ -614,21 +594,17 @@ int board_eth_init(bd_t *bis)
+  */
+ void hw_watchdog_reset(void)
+ {
+-    //If we have an i2c watchdog -> Use this one
+-    if(skov_with_ds1374 == 1 && wd_init == 1)
+-    {
+-        ds1374_hw_watchdog_reset();    	
+-    }
+-    else if(skov_with_m41t82 == 1 && wd_init == 1)
+-    {
+-        m41t82_hw_watchdog_reset();
+-    }
+-    else
+-    {
+-        at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
+-        writel(AT91_WDT_CR_WDRSTT | AT91_WDT_CR_KEY, &wd->cr);   
+-    }
+-} 
++	// If we have an i2c watchdog -> Use this one
++	if (wd_init == 1)
++	{
++		ds1374_hw_watchdog_reset();
++	}
++	else
++	{
++		at91_wdt_t *wd  = (at91_wdt_t *) ATMEL_BASE_WDT;
++		 writel(AT91_WDT_CR_WDRSTT | AT91_WDT_CR_KEY, &wd->cr);
++	}
++}
+ /* End San */  
+ 
+ /** 
+diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
+index ca42fc1..8316e8f 100644
+--- a/drivers/rtc/Makefile
++++ b/drivers/rtc/Makefile
+@@ -49,7 +49,6 @@ COBJS-$(CONFIG_RTC_ISL1208) += isl1208.o
+ COBJS-$(CONFIG_RTC_M41T11) += m41t11.o
+ COBJS-$(CONFIG_RTC_M41T60) += m41t60.o
+ COBJS-$(CONFIG_RTC_M41T62) += m41t62.o
+-COBJS-$(CONFIG_RTC_M41T80) += m41t80.o # San Rose
+ COBJS-$(CONFIG_RTC_M41T94) += m41t94.o
+ COBJS-$(CONFIG_RTC_M48T35A) += m48t35ax.o
+ COBJS-$(CONFIG_RTC_MAX6900) += max6900.o
+diff --git a/drivers/rtc/m41t80.c b/drivers/rtc/m41t80.c
+deleted file mode 100644
+index 23c6aff..0000000
+--- a/drivers/rtc/m41t80.c
++++ /dev/null
+@@ -1,208 +0,0 @@
+-/*
+- * (C) Copyright 2008
+- * Stefan Roese, DENX Software Engineering, sr@denx.de.
+- *
+- * based on a the Linux rtc-m41t80.c driver which is:
+- *   Alexander Bigga <ab@mycable.de>, 2006 (c) mycable GmbH
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- */
+-
+-/*
+- * Date & Time support for STMicroelectronics M41T80
+- */
+-
+-/* #define	DEBUG	*/
+-
+-#include <common.h>
+-#include <command.h>
+-#include <rtc.h>
+-#include <i2c.h>
+-
+-
+-#define M41T80_REG_SSEC	0
+-#define M41T80_REG_SEC	1
+-#define M41T80_REG_MIN	2
+-#define M41T80_REG_HOUR	3
+-#define M41T80_REG_WDAY	4
+-#define M41T80_REG_DAY	5
+-#define M41T80_REG_MON	6
+-#define M41T80_REG_YEAR	7
+-/* San Rose */
+-#define M41T80_REG_WATCHDOG 	0x09
+-/* End san */
+-#define M41T80_REG_ALARM_MON	0xa
+-#define M41T80_REG_ALARM_DAY	0xb
+-#define M41T80_REG_ALARM_HOUR	0xc
+-#define M41T80_REG_ALARM_MIN	0xd
+-#define M41T80_REG_ALARM_SEC	0xe
+-#define M41T80_REG_FLAGS	0xf
+-
+-#define M41T80_DATETIME_REG_SIZE	(M41T80_REG_YEAR + 1)
+-#define M41T80_ALARM_REG_SIZE	\
+-	(M41T80_REG_ALARM_SEC + 1 - M41T80_REG_ALARM_MON)
+-
+-#define M41T80_SEC_ST		(1 << 7)	/* ST: Stop Bit */
+-#define M41T80_ALMON_AFE	(1 << 7)	/* AFE: AF Enable Bit */
+-#define M41T80_ALMON_SQWE	(1 << 6)	/* SQWE: SQW Enable Bit */
+-#define M41T80_ALHOUR_HT	(1 << 6)	/* HT: Halt Update Bit */
+-#define M41T80_FLAGS_AF		(1 << 6)	/* AF: Alarm Flag Bit */
+-#define M41T80_FLAGS_BATT_LOW	(1 << 4)	/* BL: Battery Low Bit */
+-#define M41T80_WATCHDOG_RB2     (1 << 7)        /* RB: Watchdog resolution */
+-#define M41T80_WATCHDOG_RB1     (1 << 1)        /* RB: Watchdog resolution */
+-#define M41T80_WATCHDOG_RB0     (1 << 0)        /* RB: Watchdog resolution */
+-
+-#define M41T80_FEATURE_HT	(1 << 0)	/* Halt feature */
+-#define M41T80_FEATURE_BL	(1 << 1)	/* Battery low indicator */
+-#define M41T80_FEATURE_WD       (1 << 3)        /* Extra watchdog resolution */
+-
+-/* San Rose */
+-#include <m41t80.h>
+-int m41t83_g_timeout = 0;
+-/* End san */
+-
+-#if defined(CONFIG_CMD_DATE)
+-#if 0
+-int rtc_get(struct rtc_time *tm)
+-{
+-	u8 buf[M41T80_DATETIME_REG_SIZE];
+-
+-	i2c_read(CONFIG_SYS_I2C_RTC_ADDR, 0, 1, buf, M41T80_DATETIME_REG_SIZE);
+-
+-	debug("%s: raw read data - sec=%02x, min=%02x, hr=%02x, "
+-	      "mday=%02x, mon=%02x, year=%02x, wday=%02x, y2k=%02x\n",
+-	      __FUNCTION__,
+-	      buf[0], buf[1], buf[2], buf[3],
+-	      buf[4], buf[5], buf[6], buf[7]);
+-
+-	tm->tm_sec = bcd2bin(buf[M41T80_REG_SEC] & 0x7f);
+-	tm->tm_min = bcd2bin(buf[M41T80_REG_MIN] & 0x7f);
+-	tm->tm_hour = bcd2bin(buf[M41T80_REG_HOUR] & 0x3f);
+-	tm->tm_mday = bcd2bin(buf[M41T80_REG_DAY] & 0x3f);
+-	tm->tm_wday = buf[M41T80_REG_WDAY] & 0x07;
+-	tm->tm_mon = bcd2bin(buf[M41T80_REG_MON] & 0x1f);
+-
+-	/* assume 20YY not 19YY, and ignore the Century Bit */
+-	/* U-Boot needs to add 1900 here */
+-	tm->tm_year = bcd2bin(buf[M41T80_REG_YEAR]) + 100 + 1900;
+-
+-	debug("%s: tm is secs=%d, mins=%d, hours=%d, "
+-	      "mday=%d, mon=%d, year=%d, wday=%d\n",
+-	      __FUNCTION__,
+-	      tm->tm_sec, tm->tm_min, tm->tm_hour,
+-	      tm->tm_mday, tm->tm_mon, tm->tm_year, tm->tm_wday);
+-
+-	return 0;
+-}
+-
+-int rtc_set(struct rtc_time *tm)
+-{
+-	u8 buf[M41T80_DATETIME_REG_SIZE];
+-
+-	debug("Set DATE: %4d-%02d-%02d (wday=%d)  TIME: %2d:%02d:%02d\n",
+-	      tm->tm_year, tm->tm_mon, tm->tm_mday, tm->tm_wday,
+-	      tm->tm_hour, tm->tm_min, tm->tm_sec);
+-
+-	i2c_read(CONFIG_SYS_I2C_RTC_ADDR, 0, 1, buf, M41T80_DATETIME_REG_SIZE);
+-
+-	/* Merge time-data and register flags into buf[0..7] */
+-	buf[M41T80_REG_SSEC] = 0;
+-	buf[M41T80_REG_SEC] =
+-		bin2bcd(tm->tm_sec) | (buf[M41T80_REG_SEC] & ~0x7f);
+-	buf[M41T80_REG_MIN] =
+-		bin2bcd(tm->tm_min) | (buf[M41T80_REG_MIN] & ~0x7f);
+-	buf[M41T80_REG_HOUR] =
+-		bin2bcd(tm->tm_hour) | (buf[M41T80_REG_HOUR] & ~0x3f) ;
+-	buf[M41T80_REG_WDAY] =
+-		(tm->tm_wday & 0x07) | (buf[M41T80_REG_WDAY] & ~0x07);
+-	buf[M41T80_REG_DAY] =
+-		bin2bcd(tm->tm_mday) | (buf[M41T80_REG_DAY] & ~0x3f);
+-	buf[M41T80_REG_MON] =
+-		bin2bcd(tm->tm_mon) | (buf[M41T80_REG_MON] & ~0x1f);
+-	/* assume 20YY not 19YY */
+-	buf[M41T80_REG_YEAR] = bin2bcd(tm->tm_year % 100);
+-
+-	if (i2c_write(CONFIG_SYS_I2C_RTC_ADDR, 0, 1, buf, M41T80_DATETIME_REG_SIZE)) {
+-		printf("I2C write failed in %s()\n", __func__);
+-		return -1;
+-	}
+-
+-	return 0;
+-}
+-
+-void rtc_reset(void)
+-{
+-	/*
+-	 * Nothing to do
+-	 */
+-}
+-#endif
+-#endif
+-
+-/**
+- * @author Søren Andersen <san@rosetechnology.dk>
+- * Watchdog functionality
+- */
+-#if defined(CONFIG_RTC_M41T82_WATCHDOG)
+-void m41t82_wdt_settimeout(unsigned int timeout)
+-{
+-   unsigned char reg_val;
+-   if (timeout > 31) {
+-        reg_val = (timeout & 0xFC) | 0x83; /* resolution = 4s */
+-   }
+-   else {
+-        /*
+-         * WDS = 1 (0x80), mulitplier = WD_TIMO, resolution = 1s (0x02)
+-         */
+-        reg_val = timeout<<2 | 0x82;
+-   }
+-   
+-   i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, M41T80_REG_WATCHDOG, reg_val);   
+-   m41t83_g_timeout = timeout;
+-}
+-                                  
+-void m41t82_hw_watchdog_reset(void)
+-{
+-   unsigned char reg_val;
+-   static int mutex = 0;
+-   unsigned static long long last = 0;
+-   unsigned long long now;    
+-   if(m41t83_g_timeout == 0) {       
+-         return;
+-   }
+-   mutex++;
+-   if(mutex > 1) {
+-         mutex--;
+-         return; 
+-   }
+-   now = get_ticks();
+-   
+-   //Piiv = Mck/16   
+-   if((now - last) > 1e6) {  
+-       if (m41t83_g_timeout > 31) {
+-            reg_val = (m41t83_g_timeout & 0xFC) | 0x83; /* resolution = 4s */
+-       }
+-       else {
+-            reg_val = m41t83_g_timeout<<2 | 0x82;
+-       }
+-       i2c_reg_write (CONFIG_SYS_I2C_RTC_ADDR, M41T80_REG_WATCHDOG, reg_val);
+-       //val = i2c_reg_read (CONFIG_SYS_I2C_RTC_ADDR, M41T80_REG_WATCHDOG);
+-       last = now;
+-   }
+-   mutex--;
+-}
+-#endif
+-                                                                                                                         
+diff --git a/include/m41t80.h b/include/m41t80.h
+deleted file mode 100644
+index 4394656..0000000
+--- a/include/m41t80.h
++++ /dev/null
+@@ -1,26 +0,0 @@
+-/*
+- * See file CREDITS for list of people who contributed to this
+- * project.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation; either version 2 of
+- * the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+- * MA 02111-1307 USA
+- */
+-
+-#ifndef _M41T80_H_
+-#define _M41T80_H_
+-
+-void m41t82_hw_watchdog_reset(void);
+-void m41t82_wdt_settimeout(unsigned int timeout);
+-#endif /* _M41T80_H_ */
+-- 
+1.8.3.1
+

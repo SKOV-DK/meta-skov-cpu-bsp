@@ -1,0 +1,26 @@
+From 92c78ee46665e91bee5527b450c1e34b55fe532f Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 21:18:41 +0100
+Subject: [PATCH] logo: add black logo
+
+We will later add a neutral hourglass logo
+---
+ tools/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tools/Makefile b/tools/Makefile
+index c31437e..c240897 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -148,6 +148,8 @@ ifeq ($(VENDOR),intercontrol)
+ LOGO_BMP= logos/intercontrol.bmp
+ endif
+ 
++LOGO_BMP= logos/black-100x100.bmp
++
+ # now $(obj) is defined
+ HOSTSRCS += $(addprefix $(SRCTREE)/,$(EXT_OBJ_FILES-y:.o=.c))
+ HOSTSRCS += $(addprefix $(SRCTREE)/tools/,$(OBJ_FILES-y:.o=.c))
+-- 
+1.8.3.1
+

@@ -1,0 +1,39 @@
+From 32fd5a4cc8e6043049b51eb8ce8b93b210baddc2 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 10:29:36 +0100
+Subject: [PATCH] ds1374: fix build warning
+
+Drop unused variable to fix a build warning
+---
+ drivers/rtc/ds1374.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/rtc/ds1374.c b/drivers/rtc/ds1374.c
+index e88a87b..063bbba 100644
+--- a/drivers/rtc/ds1374.c
++++ b/drivers/rtc/ds1374.c
+@@ -298,10 +298,10 @@ void stop_kicking_the_dog(unsigned char status)
+  
+ void ds1374_hw_watchdog_reset(void)
+ {
+-   unsigned char val;
+    static int mutex = 0;
+    unsigned static long long last = 0;
+-   unsigned long long now;    
++   unsigned long long now;
++
+    if(g_timeout == 0 || kick_the_dog_is_disabled ) {   /* PTA ROSE: added check for kick_the_dog_is_disabled flag */    
+      return;
+    }
+@@ -315,7 +315,7 @@ void ds1374_hw_watchdog_reset(void)
+    if((now - last) > 1e6)
+    {  
+        //wd_time_tick = 0;
+-       val = i2c_reg_read (CONFIG_SYS_I2C_RTC_ADDR, RTC_WD_ALM_CNT_BYTE2_ADDR);
++       i2c_reg_read (CONFIG_SYS_I2C_RTC_ADDR, RTC_WD_ALM_CNT_BYTE2_ADDR);
+        last = now;
+    }
+    mutex--;
+-- 
+1.8.3.1
+

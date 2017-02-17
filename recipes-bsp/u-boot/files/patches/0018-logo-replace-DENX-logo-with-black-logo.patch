@@ -1,0 +1,25 @@
+From c5c5aecc4b15d99831225ed8772a9360f76592da Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 20:59:34 +0100
+Subject: [PATCH] logo: replace DENX logo with black logo
+
+Later we will introduce a small hourglass
+---
+ tools/Makefile                |   2 ++
+ tools/logos/black-100x100.bmp | Bin 0 -> 3226 bytes
+ 2 files changed, 2 insertions(+)
+ create mode 100644 tools/logos/black-100x100.bmp
+
+diff --git a/tools/Makefile b/tools/Makefile
+index c31437e..c240897 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -148,6 +148,8 @@ ifeq ($(VENDOR),intercontrol)
+ LOGO_BMP= logos/intercontrol.bmp
+ endif
+ 
++LOGO_BMP= logos/black-100x100.bmp
++
+ # now $(obj) is defined
+ HOSTSRCS += $(addprefix $(SRCTREE)/,$(EXT_OBJ_FILES-y:.o=.c))
+ HOSTSRCS += $(addprefix $(SRCTREE)/tools/,$(OBJ_FILES-y:.o=.c))

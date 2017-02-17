@@ -1,0 +1,29 @@
+From a29650b88dc0fa0003be74b5a76a68cef3a03cb5 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 10:32:18 +0100
+Subject: [PATCH] arm9-cpu: do not enable caches
+
+We have so far not enabeld caches - so do not do so now.
+But leave a comment so we may do so later and know where to do it
+---
+ board/skov/arm9-cpu/arm9-cpu.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/board/skov/arm9-cpu/arm9-cpu.c b/board/skov/arm9-cpu/arm9-cpu.c
+index 4b6409c..851cdf6 100644
+--- a/board/skov/arm9-cpu/arm9-cpu.c
++++ b/board/skov/arm9-cpu/arm9-cpu.c
+@@ -513,7 +513,9 @@ int board_init(void)
+ 
+ void enable_caches(void)
+ {
+-	printf("enable_caches\n");
++	// Defining this function prevents a print during boot
++	// We may later enable icache her like this:
++	// icache_enable();
+ }
+ 
+ int dram_init(void)
+-- 
+1.8.3.1
+

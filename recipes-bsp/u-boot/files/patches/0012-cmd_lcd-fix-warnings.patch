@@ -1,0 +1,26 @@
+From 85150d30a889eea03563ed9347382bd8f11f8283 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 10:28:44 +0100
+Subject: [PATCH] cmd_lcd: fix warnings
+
+A const was missing in the protoype, causing a build warning
+---
+ board/skov/arm9-cpu/cmd_lcd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/skov/arm9-cpu/cmd_lcd.c b/board/skov/arm9-cpu/cmd_lcd.c
+index 9ab86b4..02a5fcb 100644
+--- a/board/skov/arm9-cpu/cmd_lcd.c
++++ b/board/skov/arm9-cpu/cmd_lcd.c
+@@ -37,7 +37,7 @@ extern void lc7981_update_contrast(uint contrast);
+  * Return:      None
+  *
+  */
+-int do_lcd(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++int do_lcd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ {
+ 	char *x, *y;
+ 	x = y = "";
+-- 
+1.8.3.1
+
