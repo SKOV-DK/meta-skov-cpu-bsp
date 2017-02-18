@@ -1,0 +1,25 @@
+From 335c293a2d6bded0733b0d6f5f2a6be7fddc4a69 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sat, 18 Feb 2017 10:01:08 +0100
+Subject: [PATCH] rename logo to hourglass.bmp
+
+---
+ tools/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/Makefile b/tools/Makefile
+index c240897..652b9a5 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -148,7 +148,7 @@ ifeq ($(VENDOR),intercontrol)
+ LOGO_BMP= logos/intercontrol.bmp
+ endif
+ 
+-LOGO_BMP= logos/black-100x100.bmp
++LOGO_BMP= logos/hourglass.bmp
+ 
+ # now $(obj) is defined
+ HOSTSRCS += $(addprefix $(SRCTREE)/,$(EXT_OBJ_FILES-y:.o=.c))
+-- 
+1.8.3.1
+

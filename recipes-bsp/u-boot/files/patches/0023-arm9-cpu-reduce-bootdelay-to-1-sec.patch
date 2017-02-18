@@ -1,0 +1,34 @@
+From d328c45f75bacee279f5ca205aeb511ed211b7d0 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sat, 18 Feb 2017 10:04:18 +0100
+Subject: [PATCH] arm9-cpu: reduce bootdelay to 1 sec
+
+Saving 2 seconds at startup is worth this
+---
+ include/configs/arm9-cpu.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/include/configs/arm9-cpu.h b/include/configs/arm9-cpu.h
+index e30e890..5440a1e 100644
+--- a/include/configs/arm9-cpu.h
++++ b/include/configs/arm9-cpu.h
+@@ -89,7 +89,7 @@
+ #define	CONFIG_GREEN_LED	AT91_PIN_PD1	/* the user1 led */
+ #define	CONFIG_YELLOW_LED	AT91_PIN_PD7	/* the user2 led */
+ 
+-#define CONFIG_BOOTDELAY	3
++#define CONFIG_BOOTDELAY	1
+ 
+ /*
+  * BOOTP options
+@@ -250,7 +250,6 @@ KJP: layout_nor added 13 spaces to compensate for binary replacement by old layo
+ /* Real time clock */
+ #define CONFIG_CMD_DATE
+ #define CONFIG_RTC_DS1374
+-#define CONFIG_RTC_M41T80
+ 
+ /* USB */
+ #define CONFIG_USB_ATMEL
+-- 
+1.8.3.1
+

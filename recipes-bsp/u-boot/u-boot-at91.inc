@@ -16,7 +16,7 @@ S = "${WORKDIR}/u-boot-${PV}"
 
 require files/patches/series.inc
 
-SRC_URI += "file://logos/black-100x100.bmp"
+SRC_URI += "file://logos/hourglass.bmp"
 
 do_compile () {
 	if [ ! -e ${S}/.scmversion ]
@@ -25,7 +25,7 @@ do_compile () {
 	fi
 
 	mkdir -p ${S}/tools/logos
-	cp ${WORKDIR}/logos/black-100x100.bmp ${S}/tools/logos
+	cp ${WORKDIR}/logos/hourglass.bmp ${S}/tools/logos
 
         unset CFLAGS CPPFLAGS LDFLAGS
 	oe_runmake arm9-cpu
