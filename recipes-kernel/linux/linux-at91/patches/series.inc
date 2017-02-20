@@ -15,3 +15,4 @@ SRC_URI += "file://patches/0014-can-rx-fifo-Add-support-for-simple-irq-offloadin
 SRC_URI += "file://patches/0015-can-at91_can-switch-to-rx-fifo-implementation.patch"
 SRC_URI += "file://patches/0016-usb-serial-add-support-for-telit-he910.patch"
 SRC_URI += "file://patches/0017-skip-setup_mm_for_reboot.patch"
+SRC_URI += "file://patches/0018-skovarm9-set-correct-machine-type.patch"
