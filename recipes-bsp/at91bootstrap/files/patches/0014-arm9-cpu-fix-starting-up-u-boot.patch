@@ -1,0 +1,73 @@
+From e2e61392cfdda3a35a3f0da5d53664f96b329df1 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Fri, 17 Feb 2017 19:54:41 +0100
+Subject: [PATCH] arm9-cpu: fix starting up u-boot
+
+Fix a few cases where the order of init pio was not logical.
+fix so we init norfalsh also when booting from SD-CARD.
+This fixes that u-boot now can read from the Flash and
+show something on the display
+---
+ contrib/board/skov/arm9_cpu/arm9_cpu.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/contrib/board/skov/arm9_cpu/arm9_cpu.c b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+index d524b12..7a8b3aa 100644
+--- a/contrib/board/skov/arm9_cpu/arm9_cpu.c
++++ b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+@@ -46,6 +46,8 @@
+ #include "string.h"
+ #include "arm9_cpu.h"
+ 
++static void local_norflash_hw_init();
++
+ static int test_var_init = 0xacdcabba;
+ 
+ static inline void matrix_writel(const unsigned int value, unsigned int reg)
+@@ -238,8 +240,8 @@ static void at91_dbgu_hw_init(void)
+ 	};
+ 
+ 	/*  Configure the dbgu pins */
+-	pmc_enable_periph_clock(AT91C_ID_PIOCDE);
+ 	pio_configure(dbgu_pins);
++	pmc_enable_periph_clock(AT91C_ID_PIOCDE);
+ }
+ 
+ static void initialize_dbgu(void)
+@@ -486,6 +488,9 @@ void hw_init(void)
+ 	psram_hw_init();
+ #endif
+ 
++	/* Init nor flash in all cases, also when we boot from SD-CARD */
++	local_norflash_hw_init();
++
+ #if defined(CONFIG_NANDFLASH_RECOVERY) || defined(CONFIG_DATAFLASH_RECOVERY)
+ 	/* Init the recovery buttons pins */
+ 	recovery_buttons_hw_init();
+@@ -505,9 +510,10 @@ void at91_spi0_hw_init(void)
+ 		{(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
+ 	};
+ 
++	pio_configure(spi0_pins);
++
+ 	/* Configure the spi0 pins */
+ 	pmc_enable_periph_clock(AT91C_ID_PIOA);
+-	pio_configure(spi0_pins);
+ 
+ 	/* Enable the spi0 clock */
+ 	pmc_enable_periph_clock(AT91C_ID_SPI0);
+@@ -549,6 +555,11 @@ void at91_mci0_hw_init(void)
+ #ifdef CONFIG_FLASH
+ void norflash_hw_init(void)
+ {
++	/* Already done as part of hw_init */
++}
++
++static void local_norflash_hw_init()
++{
+ 	/* Configure SMC CS0 for NOR flash */
+ 
+ 	// Setup time is 2 cycles after the CS signal
+-- 
+1.8.3.1
+

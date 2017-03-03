@@ -1,0 +1,51 @@
+From 8ab5a944fab6c982fc9e8ca17981fc55ce9ba087 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 1 Jan 2017 13:43:05 +0100
+Subject: [PATCH] at91-gpio: make pin gpio functions public
+
+Required by SKOV ARM9-CPU board support
+---
+ arch/arm/mach-at91/gpio.c              | 4 ++--
+ arch/arm/mach-at91/include/mach/gpio.h | 4 ++++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-at91/gpio.c b/arch/arm/mach-at91/gpio.c
+index 224e9e2..4674566 100644
+--- a/arch/arm/mach-at91/gpio.c
++++ b/arch/arm/mach-at91/gpio.c
+@@ -67,7 +67,7 @@ static struct at91_gpio_chip gpio_chip[] = {
+ 
+ static int gpio_banks;
+ 
+-static inline void __iomem *pin_to_controller(unsigned pin)
++/*static*/ inline void __iomem *pin_to_controller(unsigned pin)
+ {
+ 	pin -= PIN_BASE;
+ 	pin /= 32;
+@@ -77,7 +77,7 @@ static inline void __iomem *pin_to_controller(unsigned pin)
+ 	return NULL;
+ }
+ 
+-static inline unsigned pin_to_mask(unsigned pin)
++/*static */inline unsigned pin_to_mask(unsigned pin)
+ {
+ 	pin -= PIN_BASE;
+ 	return 1 << (pin % 32);
+diff --git a/arch/arm/mach-at91/include/mach/gpio.h b/arch/arm/mach-at91/include/mach/gpio.h
+index 2b9a1f5..d2df82d 100644
+--- a/arch/arm/mach-at91/include/mach/gpio.h
++++ b/arch/arm/mach-at91/include/mach/gpio.h
+@@ -189,6 +189,10 @@
+ #define	AT91_PIN_PE31	(PIN_BASE + 0x80 + 31)
+ 
+ #ifndef __ASSEMBLY__
++/* ROSE: make internal gpio fuctions public Used for skov drivers */
++extern void __iomem *pin_to_controller(unsigned pin);
++extern unsigned pin_to_mask(unsigned pin);
++
+ /* setup setup routines, called from board init or driver probe() */
+ extern int __init_or_module at91_set_GPIO_periph(unsigned pin, int use_pullup);
+ extern int __init_or_module at91_set_A_periph(unsigned pin, int use_pullup);
+-- 
+1.8.3.1
+

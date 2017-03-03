@@ -1,0 +1,5348 @@
+From a27a97ff27fc3e8f0c7f8c94a868ae12a729c210 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 1 Jan 2017 11:04:12 +0100
+Subject: [PATCH] drivers: add skov drivers
+
+---
+ drivers/Kconfig                              |   2 +
+ drivers/Makefile                             |   1 +
+ drivers/skov/Kconfig                         |  99 +++++
+ drivers/skov/Makefile                        |  17 +
+ drivers/skov/ad_converter_mcp3002.c          | 242 ++++++++++++
+ drivers/skov/encoder.c                       | 302 ++++++++++++++
+ drivers/skov/encoder_example.c               |  70 ++++
+ drivers/skov/lc7981.c                        | 530 +++++++++++++++++++++++++
+ drivers/skov/led.c                           | 566 +++++++++++++++++++++++++++
+ drivers/skov/matrix_kbd.c                    | 522 ++++++++++++++++++++++++
+ drivers/skov/matrix_test.c                   | 223 +++++++++++
+ drivers/skov/pwm.c                           | 502 ++++++++++++++++++++++++
+ drivers/skov/readme_485.txt                  | 110 ++++++
+ drivers/skov/readme_ad_converter_mcp3002.txt |   7 +
+ drivers/skov/readme_encoder.txt              | 184 +++++++++
+ drivers/skov/readme_lc7981.txt               | 187 +++++++++
+ drivers/skov/readme_led.txt                  | 241 ++++++++++++
+ drivers/skov/readme_pwm.txt                  | 163 ++++++++
+ drivers/skov/readme_reset_state.txt          |  83 ++++
+ drivers/skov/readme_rtc.txt                  |  41 ++
+ drivers/skov/readme_under_voltage.txt        | 135 +++++++
+ drivers/skov/reset_state.c                   |  81 ++++
+ drivers/skov/reset_state_example.c           |  45 +++
+ drivers/skov/skov_gpio.c                     | 104 +++++
+ drivers/skov/skov_input.h                    |  72 ++++
+ drivers/skov/under_voltage.c                 | 306 +++++++++++++++
+ drivers/skov/under_voltage_example.c         |  50 +++
+ include/linux/encoder.h                      |  16 +
+ include/linux/lc7981.h                       |  22 ++
+ include/linux/reset_state.h                  |  15 +
+ include/linux/skov_led.h                     |  15 +
+ include/linux/skov_pwm.h                     | 106 +++++
+ include/linux/spi/mcp3002.h                  |   5 +
+ 33 files changed, 5064 insertions(+)
+ create mode 100644 drivers/skov/Kconfig
+ create mode 100644 drivers/skov/Makefile
+ create mode 100644 drivers/skov/ad_converter_mcp3002.c
+ create mode 100644 drivers/skov/encoder.c
+ create mode 100644 drivers/skov/encoder_example.c
+ create mode 100644 drivers/skov/lc7981.c
+ create mode 100644 drivers/skov/led.c
+ create mode 100644 drivers/skov/matrix_kbd.c
+ create mode 100644 drivers/skov/matrix_test.c
+ create mode 100644 drivers/skov/pwm.c
+ create mode 100644 drivers/skov/readme_485.txt
+ create mode 100644 drivers/skov/readme_ad_converter_mcp3002.txt
+ create mode 100644 drivers/skov/readme_encoder.txt
+ create mode 100644 drivers/skov/readme_lc7981.txt
+ create mode 100644 drivers/skov/readme_led.txt
+ create mode 100644 drivers/skov/readme_pwm.txt
+ create mode 100644 drivers/skov/readme_reset_state.txt
+ create mode 100644 drivers/skov/readme_rtc.txt
+ create mode 100644 drivers/skov/readme_under_voltage.txt
+ create mode 100644 drivers/skov/reset_state.c
+ create mode 100644 drivers/skov/reset_state_example.c
+ create mode 100644 drivers/skov/skov_gpio.c
+ create mode 100644 drivers/skov/skov_input.h
+ create mode 100644 drivers/skov/under_voltage.c
+ create mode 100644 drivers/skov/under_voltage_example.c
+ create mode 100644 include/linux/encoder.h
+ create mode 100644 include/linux/lc7981.h
+ create mode 100644 include/linux/reset_state.h
+ create mode 100644 include/linux/skov_led.h
+ create mode 100644 include/linux/skov_pwm.h
+ create mode 100644 include/linux/spi/mcp3002.h
+
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index 34460e0..81d5ec4 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -136,6 +136,8 @@ source "drivers/hv/Kconfig"
+ 
+ source "drivers/devfreq/Kconfig"
+ 
++source "drivers/skov/Kconfig"
++
+ source "drivers/bd/Kconfig"
+ 
+ endmenu
+diff --git a/drivers/Makefile b/drivers/Makefile
+index da20d1f..b3edbf1 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -36,6 +36,7 @@ obj-y				+= char/
+ 
+ # Rose Technology
+ obj-y                           += bd/
++obj-y                           += skov/
+ # End Rose
+ 
+ # gpu/ comes after char for AGP vs DRM startup
+diff --git a/drivers/skov/Kconfig b/drivers/skov/Kconfig
+new file mode 100644
+index 0000000..4bd9ff8
+--- /dev/null
++++ b/drivers/skov/Kconfig
+@@ -0,0 +1,99 @@
++#
++# Skov Driver configuration
++#
++
++menu "Skov Drivers"
++
++config RESET_STATE_DRIVER
++	tristate "Reset state driver. Reports the cause of the last processor reset."
++	default m
++
++config UNDER_VOLTAGE_DEVICE
++	bool "Under voltage device. Used to detect power down in an early state"
++	default y
++
++config UNDER_VOLTAGE_DRIVER
++	bool "Under voltage driver. Makes under voltage devices as char devices"
++	depends on UNDER_VOLTAGE_DEVICE != n
++	default y
++
++config PWM_DEVICE
++	bool "PWM device. Used to control backlight and contrast value of LCD display"
++	default y
++
++config PWM_DRIVER
++	tristate "PWM driver. Accesses pwm devices as char devices"
++	depends on PWM_DEVICE != n
++	default m
++
++config LCD_LC7981_DEVICE
++	bool "lcd device based on lc7981 controller"
++	depends on AT91_PWM_DEVICE != n
++	default y
++
++config LCD_LC7981_DRIVER
++	tristate "LCD driver"
++	depends on LCD_LC7981_DEVICE != n
++	default m
++	help
++          Build to use with ramtex. Expect write and read one byte a time
++
++config MATRIX_KBD_DEVICE
++	bool "Matrix keyboard device based on gpio"
++	default y
++
++config MATRIX_KBD_DRIVER
++	tristate "Matrix keyboard driver"
++	depends on MATRIX_KBD_DEVICE != n
++	default m
++	help
++	  Driver for the front panel (button, keys, ..).
++
++config MATRIX_TEST
++        tristate "Matrix test"
++        depends on MATRIX_KBD_DEVICE != n
++	default m
++        help
++          Driver for testing the matrix keyboard connection, without having the matrix keyboard
++
++config ENCODER_DEVICE
++	bool "Scroll wheel / encoder device based on gpio"
++	default y
++
++config ENCODER_DRIVER
++	tristate "Scroll wheel / encoder driver"
++	depends on ENCODER_DEVICE != n
++	default m
++	help
++	  Driver for the scroll wheel
++
++config LED_DEVICE
++	bool "LED device"
++	default y
++
++config LED_DRIVER
++	tristate "LED driver"
++	depends on LED_DEVICE != n
++	default m
++	help
++	  Driver which enables controlling of LED's
++
++config SKOV_POWER_FAIL_DETECT
++	tristate "Power fail detect"
++	default y
++	help
++	  Driver which enables the powerfail/low voltage from Power supply detection
++
++config ADC_MCP3002
++	tristate "MCP3002 AD converter"
++	default m
++	help
++	  Driver for the MCP3002 AD converter to read the voltage and temperature analog signals.
++
++config SKOV_GPIO
++        tristate "SKOV GPIO"
++        default m
++        help
++          Driver for gpio signals on SKOV board.
++
++endmenu
+diff --git a/drivers/skov/Makefile b/drivers/skov/Makefile
+new file mode 100644
+index 0000000..2a1dbed
+--- /dev/null
++++ b/drivers/skov/Makefile
+@@ -0,0 +1,17 @@
++#
++# Makefile SKOV board
++#
++
++#
++#
++#
++obj-$(CONFIG_MATRIX_KBD_DRIVER)		+= matrix_kbd.o
++obj-$(CONFIG_ENCODER_DRIVER)		+= encoder.o
++obj-$(CONFIG_LED_DRIVER)		+= led.o
++obj-$(CONFIG_LCD_LC7981_DRIVER)		+= lc7981.o
++obj-$(CONFIG_PWM_DRIVER)		+= pwm.o
++obj-$(CONFIG_UNDER_VOLTAGE_DRIVER)	+= under_voltage.o
++obj-$(CONFIG_RESET_STATE_DRIVER)	+= reset_state.o
++obj-$(CONFIG_ADC_MCP3002)		+= ad_converter_mcp3002.o
++obj-$(CONFIG_MATRIX_TEST)               += matrix_test.o
++obj-$(CONFIG_SKOV_GPIO)                 += skov_gpio.o
+diff --git a/drivers/skov/ad_converter_mcp3002.c b/drivers/skov/ad_converter_mcp3002.c
+new file mode 100644
+index 0000000..febc2df
+--- /dev/null
++++ b/drivers/skov/ad_converter_mcp3002.c
+@@ -0,0 +1,242 @@
++/*
++ * MCP3002 Driver
++ * San Rose tecchnology
++ */
++#include <linux/device.h>
++#include <linux/init.h>
++#include <linux/delay.h>
++#include <linux/input.h>
++#include <linux/interrupt.h>
++#include <linux/spi/spi.h>
++#include <linux/spi/mcp3002.h>
++#include <asm/irq.h>
++#include <linux/module.h>
++
++#ifdef	CONFIG_ARM
++#include <asm/mach-types.h>
++#endif
++
++struct mcp3002 {
++        struct spi_device       *spi;
++        struct spi_transfer     xfer[10];
++        struct spi_message      msg[5];
++        struct spi_message      *last_msg;
++        u16                     zero;
++        u8 			tx_buf[2];
++	u8 			rx_buf[2];
++        spinlock_t              lock;
++        unsigned                disabled:1;
++};
++
++
++struct ser_req {
++        u8                      ref_on;
++	u8                      command;
++        u8                      ref_off;
++        u16                     scratch;
++        u16                     zero;
++        __be16                  sample;
++        struct spi_message      msg;
++        struct spi_transfer     xfer[1];
++};
++
++
++#if	1
++#define	CS_CHANGE(xfer)	((xfer).cs_change = 1)
++#else
++#define	CS_CHANGE(xfer)	((xfer).cs_change = 0)
++#endif
++
++static void mcp3002_enable(struct mcp3002 *adc);
++static void mcp3002_disable(struct mcp3002 *adc);
++
++static int mcp3002_CH0(struct device *dev)
++{
++	struct spi_device 	*spi = to_spi_device(dev);
++	struct ser_req          *req = kzalloc(sizeof *req, GFP_KERNEL);
++	int 			ret;
++	u16			word;
++	u16 			buf = 0x0006;
++
++	if (!req) {
++	    return -ENOMEM;
++	}
++	ret = spi_write_then_read(spi,(u8 *) &buf, 2, (u8 *) &word, 2);
++	word = word >> 4;
++	word = word & 0x03ff;
++
++	kfree(req);
++	return word;
++}
++
++
++static int mcp3002_CH1(struct device *dev)
++{
++	struct spi_device 	*spi = to_spi_device(dev);
++	struct ser_req          *req = kzalloc(sizeof *req, GFP_KERNEL);
++	int 			ret;
++	u16			word;
++	u16 			buf = 0x0007;
++
++	if (!req) {
++	    return -ENOMEM;
++	}
++	ret = spi_write_then_read(spi,(u8 *) &buf, 2, (u8 *) &word, 2);
++	word = word >> 4;
++	word = word & 0x03ff;
++
++	kfree(req);
++	return word;
++}
++
++#define SHOW0(name) static ssize_t \
++name ## _show(struct device *dev, struct device_attribute *attr, char *buf) \
++{ \
++        ssize_t v = mcp3002_CH0(dev); \
++        if (v < 0) \
++               return v; \
++	return sprintf(buf, "%u\n", (unsigned) v); \
++} \
++static DEVICE_ATTR(name, S_IRUGO, name ## _show, NULL);
++
++SHOW0(voltage)
++
++#define SHOW1(name) static ssize_t \
++name ## _show(struct device *dev, struct device_attribute *attr, char *buf) \
++{ \
++        ssize_t v = mcp3002_CH1(dev); \
++        if (v < 0) \
++               return v; \
++	return sprintf(buf, "%u\n", (unsigned) v); \
++} \
++static DEVICE_ATTR(name, S_IRUGO, name ## _show, NULL);
++
++SHOW1(temp)
++
++/* Must be called with ts->lock held */
++static void mcp3002_disable(struct mcp3002 *adc)
++{
++        if (adc->disabled)
++	 	return;
++
++	adc->disabled = 1;
++}
++
++static int mcp3002_suspend(struct spi_device *spi, pm_message_t message)
++{
++	struct mcp3002 *adc = dev_get_drvdata(&spi->dev);
++
++        spi->dev.power.power_state = message;
++        mcp3002_disable(adc);
++
++	return 0;
++}
++
++static int mcp3002_resume(struct spi_device *spi)
++{
++	struct mcp3002 *adc = dev_get_drvdata(&spi->dev);
++
++	spi->dev.power.power_state = PMSG_ON;
++	mcp3002_enable(adc);
++
++	return 0;
++}
++
++static void mcp3002_enable(struct mcp3002 *adc)
++{
++        if (!adc->disabled)
++		return;
++
++	adc->disabled = 0;
++}
++
++
++
++
++static int __devinit mcp3002_probe(struct spi_device *spi)
++{
++	struct mcp3002		*adc;
++	struct mcp3002_platform_data	*pdata = spi->dev.platform_data;
++        int                     	err;
++	if (!pdata) {
++		dev_dbg(&spi->dev, "no platform data?\n");
++		printk("no spi platform data \n");
++		return -ENODEV;
++	}
++
++	/* We'd set TX wordsize 8 bits and RX wordsize to 13 bits ... except
++	 * that even if the hardware can do that, the SPI controller driver
++	 * may not.  So we stick to very-portable 8 bit words, both RX and TX.
++	 */
++	spi->bits_per_word = 16;
++	spi->max_speed_hz = 1000000;
++	spi->mode = SPI_MODE_0;
++	err = spi_setup(spi);
++	if (err < 0)
++		return err;
++
++	adc = kzalloc(sizeof(struct mcp3002), GFP_KERNEL);
++	if (!adc) {
++		err = -ENOMEM;
++		goto err_free_mem;
++	}
++
++	dev_set_drvdata(&spi->dev, adc);
++
++	adc->spi = spi;
++
++
++	spin_lock_init(&adc->lock);
++
++	err = device_create_file(&spi->dev, &dev_attr_voltage);
++	err = device_create_file(&spi->dev, &dev_attr_temp);
++
++	dev_info(&spi->dev, "adc init\n");
++
++	return 0;
++
++
++ err_free_mem:
++	kfree(adc);
++	return err;
++
++}
++
++static int __devexit mcp3002_remove(struct spi_device *spi)
++{
++	struct mcp3002  *adc = dev_get_drvdata(&spi->dev);
++	device_remove_file(&spi->dev, &dev_attr_voltage);
++	device_remove_file(&spi->dev, &dev_attr_temp);
++
++	kfree(adc);
++
++	dev_dbg(&spi->dev, "unregistered adc\n");
++	return 0;
++}
++
++static struct spi_driver mcp3002_driver = {
++	.driver = {
++		.name	= "mcp3002",
++		.bus	= &spi_bus_type,
++		.owner	= THIS_MODULE,
++	},
++	.probe		= mcp3002_probe,
++	.remove		= __devexit_p(mcp3002_remove),
++	.suspend	= mcp3002_suspend,
++	.resume		= mcp3002_resume,
++};
++
++static int __init mcp3002_init(void)
++{
++	return spi_register_driver(&mcp3002_driver);
++}
++module_init(mcp3002_init);
++
++static void __exit mcp3002_exit(void)
++{
++	spi_unregister_driver(&mcp3002_driver);
++}
++module_exit(mcp3002_exit);
++
++MODULE_DESCRIPTION("MCP3002 driver");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/skov/encoder.c b/drivers/skov/encoder.c
+new file mode 100644
+index 0000000..411f324
+--- /dev/null
++++ b/drivers/skov/encoder.c
+@@ -0,0 +1,302 @@
++/*
++ * Encoder driver
++ *
++ * driver/skov/encoder.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * November 2007
++ *
++ * Changes February 2008 according to coding style, cleanup
++ * and bugfix
++ */
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/fs.h>
++#include <linux/interrupt.h>
++#include <linux/sched.h>
++#include <linux/pm.h>
++#include <linux/sysctl.h>
++#include <linux/proc_fs.h>
++#include <linux/delay.h>
++#include <linux/input.h>
++#include <linux/gpio_keys.h>
++#include <linux/kthread.h>
++#include <linux/gpio_keys.h>
++
++#include <linux/encoder.h>
++#include <mach/board.h>
++#include <mach/at91_pio.h>
++#include <asm/gpio.h>
++
++MODULE_DESCRIPTION("Scroll wheel / Encoder Device");
++MODULE_AUTHOR("Marc Petersen, RoseTechnology A/S");
++MODULE_LICENSE("GPL");
++
++#define ENCODER_NAME "Encoder"
++
++#define err( fmt, arg... )  printk(KERN_ERR  "%s: %s() " fmt "\n" , ENCODER_NAME , __FUNCTION__, ## arg)
++
++
++
++static struct input_dev       	*enc_input_dev;
++static atomic_t 		enc_old;
++
++
++
++/*
++ * read_pio
++ */
++inline unsigned read_pio(struct encoder_data *enc_data, int p)
++{
++	return (unsigned)((u32)__raw_readl(enc_data->pio_map[p].pio + PIO_PDSR) & enc_data->pio_map[p].mask);
++}
++
++
++static irqreturn_t kbd_isr( int irq, void *dev_id )
++{
++	int 			enc_new = 0, right = 0, left = 0;
++	struct platform_device 	*pdev = dev_id;
++	struct device 		*dev = &pdev->dev;
++	struct encoder_data 	*enc_data = (struct encoder_data *)dev->platform_data;;
++
++	/* need to have a delay here to remove bouncing.
++	   There will be 1nF condenser on the target footprint
++	   to avoid this. The delay may be removed or can be reduced
++	   then */
++
++	udelay( 90 );
++
++	if ( irq == gpio_to_irq( enc_data->pio_map[ENC_LEFT].pin ) ||
++	     irq == gpio_to_irq( enc_data->pio_map[ENC_RIGHT].pin ))
++	{
++
++		if ( read_pio( enc_data, ENC_LEFT  ) == 0 ) enc_new |= 1<<0;
++		if ( read_pio( enc_data, ENC_RIGHT ) == 0 ) enc_new |= 1<<1;
++
++	}
++	else if ( irq == gpio_to_irq( enc_data->pio_map[ENC_CONFIRM].pin ))
++	{
++		input_event( enc_input_dev, EV_KEY, ENC_CONFIRM_KK, (( read_pio( enc_data, ENC_CONFIRM ) == 0)?1:0 ));
++		goto input_sync;
++	}
++	else {
++		err("kbd_isr irq %d unknown", irq );
++		return IRQ_NONE;
++	}
++
++	switch ( atomic_read( &enc_old )) {
++	case 0: if ( enc_new == 2 ) right = 1; else if ( enc_new == 1 ) left  = 1; break;
++	case 1: if ( enc_new == 0 ) right = 1; else if ( enc_new == 3 ) left  = 1; break;
++	case 2: if ( enc_new == 3 ) right = 1; else if ( enc_new == 0 ) left  = 1; break;
++	case 3: if ( enc_new == 1 ) right = 1; else if ( enc_new == 2 ) left  = 1; break;
++	}
++
++	atomic_set( &enc_old, enc_new );
++
++	if ( left )
++	{
++		input_event( enc_input_dev, EV_KEY, ENC_LEFT_KK, 1 );
++		input_event( enc_input_dev, EV_KEY, ENC_LEFT_KK, 0 );
++	}
++	else if ( right )
++	{
++		input_event( enc_input_dev, EV_KEY, ENC_RIGHT_KK, 1 );
++		input_event( enc_input_dev, EV_KEY, ENC_RIGHT_KK, 0 );
++	}
++
++ input_sync:
++
++	input_sync( enc_input_dev );
++
++	return IRQ_HANDLED;
++}
++
++
++
++static int __devinit encoder_probe( struct platform_device *pdev )
++{
++
++	int 		irq, error = 0;
++	struct device 	*dev = &pdev->dev;
++	struct encoder_data *enc_data = NULL;
++
++	if ( dev->platform_data )
++	{
++		enc_data    = (struct encoder_data *)dev->platform_data;
++	}
++	else {
++		err("encoder_probe cannot get default configuration");
++		return -EIO;
++	}
++
++	atomic_set( &enc_old, 0 );
++
++	// enable gpio pin for encoder usage
++	at91_set_gpio_output( enc_data->pio_map[ENC_ENABLE].pin, 1 );
++	at91_set_multi_drive( enc_data->pio_map[ENC_ENABLE].pin, 0 );
++	at91_set_gpio_value(  enc_data->pio_map[ENC_ENABLE].pin, 1 );
++
++	// set gipo pins for input
++	at91_set_gpio_input( enc_data->pio_map[ENC_LEFT].pin, 1 ); // set pin as input with pullup
++	at91_set_deglitch(   enc_data->pio_map[ENC_LEFT].pin, 1 ); // enable glitch filter
++
++	at91_set_gpio_input( enc_data->pio_map[ENC_RIGHT].pin, 1 ); // set pin as input with pullup
++	at91_set_deglitch(   enc_data->pio_map[ENC_RIGHT].pin, 1 ); // enable glitch filter
++
++	at91_set_gpio_input( enc_data->pio_map[ENC_CONFIRM].pin, 1 ); // set pin as input with pullup
++	at91_set_deglitch(   enc_data->pio_map[ENC_CONFIRM].pin, 1 ); // enable glitch filter
++
++	// prepare for standard input usage
++	enc_input_dev = input_allocate_device();
++
++	if ( !enc_input_dev )
++	{
++		err("encoder_probe: not enough memory for encoder input device");
++		error = -ENOMEM;
++		goto input_fail;
++	}
++
++	enc_input_dev->name = "Scroll Wheel";
++	enc_input_dev->phys = "encoder/input0";
++	enc_input_dev->id.bustype = BUS_HOST;
++	enc_input_dev->id.vendor = 0x0001;
++	enc_input_dev->id.product = 0x0001;
++	enc_input_dev->id.version = 0x0100;
++
++	enc_input_dev->evbit[0] = BIT( EV_KEY );
++
++	// all used keycodes has to be added
++
++	set_bit( ENC_LEFT_KK,    enc_input_dev->keybit );
++	set_bit( ENC_RIGHT_KK,   enc_input_dev->keybit );
++	set_bit( ENC_CONFIRM_KK, enc_input_dev->keybit );
++
++	clear_bit( 0, enc_input_dev->keybit );
++
++	error = input_register_device( enc_input_dev );
++	if ( error )
++	{
++		err("can't register input device");
++		goto register_fail;
++	}
++
++	// register all ret pins to generate interrupts
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_LEFT].pin );
++	if (( error = request_irq( irq, kbd_isr, IRQF_DISABLED|IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING, ENCODER_NAME, pdev )))
++	{
++		err("encoder device is unable to claim irq %d; error %d", irq, error );
++		goto irq_fail_left;
++	}
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_RIGHT].pin );
++	if (( error = request_irq( irq, kbd_isr, IRQF_DISABLED|IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING, ENCODER_NAME, pdev )))
++	{
++		err("encoder device is unable to claim irq %d; error %d", irq, error );
++		goto irq_fail_right;
++	}
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_CONFIRM].pin );
++	if (( error = request_irq( irq, kbd_isr, IRQF_DISABLED|IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING, ENCODER_NAME, pdev )))
++	{
++		err("encoder device is unable to claim irq %d; error %d", irq, error );
++		goto irq_fail_confirm;
++	}
++
++	pr_info( ENCODER_NAME ": probe succeded\n");
++
++	return 0;
++
++
++ irq_fail_confirm:
++	irq = gpio_to_irq( enc_data->pio_map[ENC_RIGHT].pin );
++	free_irq( irq, pdev );
++
++ irq_fail_right:
++	irq = gpio_to_irq( enc_data->pio_map[ENC_LEFT].pin );
++	free_irq( irq, pdev );
++
++ irq_fail_left:
++	input_unregister_device( enc_input_dev );
++
++ register_fail:
++
++ input_fail:
++	gpio_free( enc_data->pio_map[ENC_ENABLE].pin );
++	gpio_free( enc_data->pio_map[ENC_LEFT].pin );
++	gpio_free( enc_data->pio_map[ENC_RIGHT].pin );
++	gpio_free( enc_data->pio_map[ENC_CONFIRM].pin );
++
++	return error;
++};
++
++
++static int __exit encoder_remove( struct platform_device *pdev )
++{
++	int 		        irq;
++	struct device 	        *dev = &pdev->dev;
++	struct encoder_data	*enc_data = NULL;
++
++	if ( dev->platform_data )
++	{
++		enc_data = (struct encoder_data *)dev->platform_data;
++	}
++	else {
++		err( "encoder_remove cannot get platform data" );
++		return -EIO;
++	}
++
++	input_unregister_device( enc_input_dev );
++
++	/*
++	 * Once device has been successfully registered it can be unregistered
++	 * with input_unregister_device(); input_free_device() should not be
++	 * called in this case.
++
++	 input_free_device( enc_input_dev );
++	*/
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_LEFT].pin );
++	free_irq( irq, pdev );
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_RIGHT].pin );
++	free_irq( irq, pdev );
++
++	irq = gpio_to_irq( enc_data->pio_map[ENC_CONFIRM].pin );
++	free_irq( irq, pdev );
++
++	gpio_free( enc_data->pio_map[ENC_ENABLE].pin );
++	gpio_free( enc_data->pio_map[ENC_LEFT].pin );
++	gpio_free( enc_data->pio_map[ENC_RIGHT].pin );
++	gpio_free( enc_data->pio_map[ENC_CONFIRM].pin );
++
++	return 0;
++};
++
++struct platform_driver encoder_device_driver =
++{
++	.remove		= __exit_p( encoder_remove ),
++	.probe 		= encoder_probe,
++	.driver		= {
++		.name	= "encoder_device",
++		.owner	= THIS_MODULE,
++	}
++};
++
++static int __init encoder_init(void)
++{
++	return platform_driver_register( &encoder_device_driver );
++};
++
++static void __exit encoder_exit(void)
++{
++	platform_driver_unregister( &encoder_device_driver );
++};
++
++module_init( encoder_init );
++module_exit( encoder_exit );
++
+diff --git a/drivers/skov/encoder_example.c b/drivers/skov/encoder_example.c
+new file mode 100644
+index 0000000..4edf460
+--- /dev/null
++++ b/drivers/skov/encoder_example.c
+@@ -0,0 +1,70 @@
++#include <linux/input.h>
++#include <fcntl.h>
++#include <time.h>
++#include "skov_input.h"
++#include "skov_encoder.h"
++
++#define EVENT_FD_1 "/dev/input/event0"
++#define EVENT_FD_2 "/dev/input/event1"
++
++
++int main (int argc, char *argv[]) {
++
++    int			 fd1, fd2;
++    struct input_event	 inev;
++    fd_set		 rfds;
++    int			 retval;
++    struct tm		 mtime;
++
++    fd1 = open( EVENT_FD_1, O_RDONLY );
++    if ( fd1 < 1 ) {
++	printf("can't open %s\n", EVENT_FD_1 );
++	return -1;
++    }
++
++    fd2 = open( EVENT_FD_2, O_RDONLY );
++    if ( fd2 < 1 ) {
++	printf("can't open %s\n", EVENT_FD_2 );
++	return -1;
++    }
++
++    do {
++	FD_ZERO( &rfds);
++	FD_SET( fd1, &rfds);
++	FD_SET( fd2, &rfds);
++
++	retval = select( fd2+1, &rfds, NULL, NULL, NULL );
++
++	if (retval == -1) {
++	    return(-1);
++	}
++	else if (retval) {
++	    if ( FD_ISSET(fd1, &rfds) ) {
++		read( fd1, &inev, sizeof(struct input_event));
++	    }
++	    else {
++		read( fd2, &inev, sizeof(struct input_event));
++	    }
++
++	    if ( !inev.type ) {continue;}
++
++	    mtime = (struct tm)*localtime(&inev.time.tv_sec);
++
++	    if ( mtime.tm_year > 100 ) { mtime.tm_year -= 100; }
++
++	    printf("  input_event:\n");
++	    printf("  time    = %02d.%02d.%02d / %02d:%02d:%02d\n",
++		   mtime.tm_mday, mtime.tm_mon+1, mtime.tm_year,
++		   mtime.tm_hour, mtime.tm_min, mtime.tm_sec );
++
++	    printf("  type    = %d\n", inev.type);
++	    printf("  code    = 0x%x\n", inev.code );
++	    printf("  value   = %s\n", (inev.value==PRESSED?"pressed":"released"));
++	    printf("\n");
++	}
++
++    } while ( inev.code != ENC_CONFIRM_KK );
++
++    close( fd1 );
++    close( fd2 );
++}
+diff --git a/drivers/skov/lc7981.c b/drivers/skov/lc7981.c
+new file mode 100644
+index 0000000..91f6feb
+--- /dev/null
++++ b/drivers/skov/lc7981.c
+@@ -0,0 +1,530 @@
++/*
++ * LCD LC7981 driver
++ *
++ * driver/skov/lc7981.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * November 2007
++ *
++ * Changes February 2008 according to coding style, cleanup
++ * and bugfix
++ */
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/delay.h>
++#include <linux/platform_device.h>
++#include <linux/ioctl.h>
++#include <linux/fs.h>
++#include <linux/cdev.h>
++
++#include <mach/at91_pio.h>
++#include <mach/board.h>
++#include <linux/lc7981.h>
++#include <asm/gpio.h>
++#include <asm/uaccess.h>
++
++MODULE_DESCRIPTION( "LCD LC7981 Device" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++#define LC7981_NAME "LCD LC7981"
++#define LC7981_CDEV "lc7981"
++
++/* ioctl values */
++#define LCD_RESET    0x0003
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , LC7981_NAME, __FUNCTION__, ## arg )
++
++/* --------------------------------------------------------------------
++ * LCD LC7981 Controller
++ * -------------------------------------------------------------------- */
++
++static int 			write_count = 0;
++static int 			major;
++static struct lcd_lc7981_data 	*lcd_data;
++static struct class 		*lcd_class;
++static struct cdev 		*cdev;
++
++#define HIGH( p ) __raw_writel( lcd_data->pio_map[p].mask, lcd_data->pio_map[p].pio + PIO_SODR )
++#define LOW( p )  __raw_writel( lcd_data->pio_map[p].mask, lcd_data->pio_map[p].pio + PIO_CODR )
++
++
++enum { EN=LCD_EN, RW, RS, CS, RST, B0, B1, B2, B3, B4, B5, B6, B7 } _pins;
++
++
++/**
++ * lc7981_read - read a byte
++ * @adr: address to read
++ *
++ * This function read one byte from the requested
++ * address command. This is based on the syntax
++ * of the lc7981 display contrller.
++ * Returns whatever it got without check.
++ * This function won't be used because RAMTEX
++ * keeps a buffer with the visual data of the
++ * display.
++ */
++unsigned char lc7981_read( unsigned char adr )
++{
++
++	unsigned char dat = 0x00;
++	int i = 0;
++
++	/* a: Set RW = 1, RS line according to adr, set /CS line active low */
++	HIGH( RW );
++
++	if (( adr&0x02 ) >> 1 ) { HIGH( RS ); }
++	else { LOW( RS ); }
++
++	LOW( CS );
++
++	/* b: Make data port an input ( if required by port architecture ) */
++	for ( i=B0; i <= B7; i++ )
++	{
++		at91_set_gpio_input( lcd_data->pio_map[i].pin, 1 );
++	}
++
++	// wait 90ns
++
++	/* c: Set E active high, */
++	HIGH( EN );
++
++	// wait 140ns
++
++	/* d: Read data from data port */
++	for ( i=B0; i <= B7; i++ )
++	{
++		if (( (u32)__raw_readl( lcd_data->pio_map[i].pio + PIO_PDSR ) & lcd_data->pio_map[i].mask ) == 0 )
++		{
++			dat |= 1<<( i-B0 );
++		}
++	}
++
++	// wait 10ns
++
++	/* e: Set E passive low, Set /CS passive high ( could be ignored ) */
++	LOW( EN );
++
++	HIGH( CS );
++
++	/* back to default out */
++	for ( i=B0; i <= B7; i++ )
++	{
++		at91_set_gpio_output( lcd_data->pio_map[i].pin, 1 );
++	}
++
++	return dat;
++};
++
++
++
++/**
++ * lc7981_write - write a byte
++ * @adr: address byte
++ * @dat: data byte
++ *
++ * This function writes one byte to the lc7081 display
++ * controller. The first parameter adr will determine
++ * if the data byte will be writen with RS high as a
++ * command.
++ * Returns void.
++ */
++inline void lc7981_write( unsigned char adr, unsigned char dat )
++{
++	/* A: Set RW = 0, RS line according to adr, set /CS line active low */
++	LOW( RW );
++
++	if ( ( adr&0x02 )>>1 ) { HIGH( RS ); } else { LOW( RS ); }
++
++	LOW( CS );
++
++	/* B1: Make data port an output ( if required by port architecture ) */
++
++	/* B2: Write data to data port */
++
++	if ( ( dat&0x01 )>>0 ) 	{ HIGH( B0 ); } else 	{ LOW( B0 ); };
++	if ( ( dat&0x02 )>>1 ) 	{ HIGH( B1 ); } else 	{ LOW( B1 ); };
++	if ( ( dat&0x04 )>>2 ) 	{ HIGH( B2 ); } else 	{ LOW( B2 ); };
++	if ( ( dat&0x08 )>>3 ) 	{ HIGH( B3 ); } else 	{ LOW( B3 ); };
++	if ( ( dat&0x10 )>>4 ) 	{ HIGH( B4 ); } else 	{ LOW( B4 ); };
++	if ( ( dat&0x20 )>>5 ) 	{ HIGH( B5 ); } else 	{ LOW( B5 ); };
++	if ( ( dat&0x40 )>>6 ) 	{ HIGH( B6 ); } else 	{ LOW( B6 ); };
++	if ( ( dat&0x80 )>>7 ) 	{ HIGH( B7 ); } else 	{ LOW( B7 ); };
++
++	// wait 90ns
++
++	/* C: Set E active high */
++	HIGH( EN );
++
++	// wait 230ns
++
++	/* C: Set E passive low */
++	LOW( EN );
++
++	/* E: Set /CS passive high ( could be ignored ) */
++	HIGH( CS );
++
++	HIGH( RW );
++};
++
++/**
++ * lc7981_reset - reset the display
++ *
++ * This function set RTS high for reset the display
++ * Returns void.
++ */
++int lc7981_reset( void )
++{
++	int i = 0;
++	/* 1. Init data port setup ( if required by port architecture ) */
++
++	LOW( RS );
++	HIGH( RW );
++	HIGH( CS );
++	LOW( EN );
++
++	for ( i=B0; i <= B7; i++ ) {
++		LOW(i);
++	}
++
++	/* 4. Set LCD reset line /RST active low  ( if /RST is connected to a port bit ) */
++	LOW( RST );
++
++	// wait 1ms ???
++	udelay( 1 );
++
++	/* 5. Set LCD reset line /RST passive high ( if /RST is connected to a port bit ) */
++	HIGH( RST );
++
++	return 0;
++}
++
++// ------------------------------------------------------------------------
++/**
++ * lcd_read - file operation interface function for read
++ * @file: file struct ref to file which is read from
++ * @buff: target buffer which things go to
++ * @len: length of target buffer
++ * @off: offset
++ *
++ * This function use lc7981_read and parse data to the file desc.
++ * ToDo: Need to be tested ! Ramtex don't use this
++ */
++int lcd_read( struct file *file, char *buff, size_t len, loff_t *off )
++{
++	int i = 0;
++	unsigned char dat[2] = {0x00, 0x00};
++
++	i = copy_from_user( dat, buff, 2 );
++
++	if ( i < 0 )
++	{
++		err( "lcd_read( ) parameter missing" );
++		return -EINVAL;
++	}
++
++	dat[1] = lc7981_read( dat[0] );
++
++	i = copy_to_user( buff, &dat[1], 1 );
++
++	*off += 1;
++	return 1;
++};
++
++// ------------------------------------------------------------------------
++/**
++ * lcd_write - file operation interface function for write
++ * @file: file struct ref to file which is written to
++ * @buff: source buffer where data come from
++ * @len: length of source buffer
++ * @off: offset
++ *
++ * This function parses the data from the file desc. and
++ * use lc7981_write to write the first two bytes to the
++ * display.
++ * Returns number of bytes parsed.
++ */
++int lcd_write( struct file *file, const char *buff, size_t len, loff_t *off )
++{
++	unsigned char dat[3] = {0x00, 0x00, 0x00};
++	int i = 0;
++
++	if ( len < 2 )
++	{
++		err( "lcd_write( ) to less data" );
++		return 1;
++	}
++
++	if ( buff == NULL )
++	{
++		err( "lcd_write( ) param buff = NULL !" );
++		return 1;
++	}
++
++	i = copy_from_user( dat, buff, 3 );
++
++	lc7981_write( dat[0], dat[1] );
++
++	return i;
++};
++
++
++// ------------------------------------------------------------------------
++/**
++ * lcd_open - file operation interface function for open
++ * @inode: inode struct ref to inode which wants to be opened
++ * @file: file struct ref to file which wants to be opened
++ *
++ * This function resets the display
++ * Returns zero or BUSY if allready opened
++ */
++int lcd_open( struct inode *inode, struct file *file )
++{
++	if ( write_count ) return -EBUSY;
++
++	write_count = 1;
++
++	lc7981_reset( );
++
++	return 0;
++};
++
++
++// ------------------------------------------------------------------------
++/**
++ * lcd_release - file operation interface function for release
++ * @inode: inode struct ref to inode which wants to be released
++ * @file: file struct ref to file which wants to be released
++ *
++ * This function set the write counter back to 0.
++ * Returnes zero.
++ */
++int lcd_release( struct inode *inode, struct file *file )
++{
++	write_count = 0;
++
++	return 0;
++};
++
++
++// ------------------------------------------------------------------------
++/**
++ * lcd_ioctl - file operation interface function for ioctl
++ * @file:  file struct ref to file which wants to be released
++ * @cmd:
++ * @arg:
++ *
++ *
++ *
++ */
++static long lcd_ioctl(struct file *file,
++		     unsigned int cmd, unsigned long arg) {
++
++    int error = 0;
++    // info("lcd_ioctl() called 0x%4.4x %p\n", cmd, (void*)arg );
++
++    switch ( cmd ) {
++
++    case LCD_RESET:
++
++	lc7981_reset();
++
++	break;
++
++    default:
++	err("lcd_ioctl() unknown IOCTL 0x%x", cmd );
++	error = -EINVAL;
++    }
++
++    return error;
++};
++
++
++struct file_operations lc7981_file_ops =
++{
++	.owner 				= THIS_MODULE,
++	.write 				= lcd_write,
++	.open				= lcd_open,
++	.release			= lcd_release,
++	.unlocked_ioctl		= lcd_ioctl,
++};
++
++
++static int __devinit gpio_lcd_probe( struct platform_device *pdev )
++{
++	int i = 0, ret = -EIO;
++	dev_t dev_t;
++
++	struct device *dev = &pdev->dev;
++	struct device *class_dev;
++
++	if ( dev->platform_data )
++	{
++		lcd_data  = ( struct lcd_lc7981_data * )dev->platform_data;
++	}
++	else
++	{
++		err( "gpio_lcd_probe( ) cannot get default configuration" );
++		return -EIO;
++	}
++
++	if ( lcd_data == NULL )
++	{
++		err( "gpio_lcd_probe( ) platform_data = NULL" );
++		return -EIO;
++	}
++
++	if ( lcd_data->pio_map == NULL )
++	{
++		err( "gpio_lcd_probe( ) pio_map not set" );
++		return -EIO;
++	}
++
++	// common settings for all
++	for ( i=EN; i <= B7; i++ )
++	{
++		// output
++		at91_set_gpio_output( lcd_data->pio_map[i].pin, 1 );
++
++		// multi drive
++		at91_set_multi_drive( lcd_data->pio_map[i].pin, 0 );
++
++		// deglitch
++		at91_set_deglitch( lcd_data->pio_map[i].pin, 0 );
++	}
++
++	// set default values
++	LOW(  EN );
++	LOW(  RW );
++	HIGH( RS );
++	HIGH( CS );
++	HIGH( RST );
++
++	// set all data to low
++	for ( i=B0; i <= B7; LOW(i++) ) {}
++
++
++
++	ret = alloc_chrdev_region( &dev_t, 0, 1, LC7981_CDEV );
++	if ( ret < 0 )
++	{
++		err( "lcd_probe( ) cannot register character devices" );
++		goto gpio_init;
++	}
++
++	major = MAJOR( dev_t );
++
++	cdev = cdev_alloc( );
++	if ( !cdev )
++	{
++		err( "led_probe( ) unable to alloc new char device" );
++		goto alloc_chrdev;
++	}
++
++	cdev->owner = THIS_MODULE;
++	cdev->ops  = &lc7981_file_ops;
++
++	kobject_set_name( &cdev->kobj, "%s", LC7981_CDEV );
++
++	ret = cdev_add( cdev, dev_t, 1 );
++	if ( ret )
++	{
++		err( "led_probe( ) unable to add a new char device" );
++		goto cdev_alloc;
++	}
++
++	lcd_class = class_create( THIS_MODULE, LC7981_CDEV );
++	if ( IS_ERR( lcd_class ) )
++	{
++		err( "led_probe( ) can't create class. No udev support ?" );
++		ret = -EINVAL;
++		goto cdev_add;
++	}
++
++
++	class_dev = device_create( lcd_class, NULL, MKDEV( major,0 ), NULL, LC7981_CDEV );
++        if (IS_ERR(class_dev)) {
++               printk(KERN_WARNING "device_create failed\n");
++               goto class_create;
++        }
++
++	pr_info( LC7981_NAME ": probe succeded\n" );
++
++	return 0;
++
++ class_create:
++
++	device_destroy( lcd_class, MKDEV( major,i ) );
++
++	class_destroy( lcd_class );
++
++ cdev_add:
++
++ cdev_alloc:
++	cdev_del( cdev );
++
++
++ alloc_chrdev:
++	unregister_chrdev_region( dev_t, 1 );
++
++
++ gpio_init:
++
++	for ( i=EN; i <= B7; i++ )
++	{
++		gpio_free( lcd_data->pio_map[i].pin );
++	}
++
++	return ret;
++}
++
++
++static int __exit gpio_lcd_remove( struct platform_device *pdev )
++{
++	int i = 0;
++
++	lcd_data = pdev->dev.platform_data;
++
++	device_destroy( lcd_class, MKDEV( major,0 ) );
++
++	class_destroy( lcd_class );
++
++	cdev_del( cdev );
++
++	unregister_chrdev_region( MKDEV( major,0 ), 1 );
++
++	for ( i=0; i < lcd_data->pio_map_len; i++ )
++	{
++		gpio_free( lcd_data->pio_map[i].pin );
++	}
++
++	return 0;
++};
++
++
++struct platform_driver gpio_lcd_device_driver =
++{
++	.remove		= __exit_p( gpio_lcd_remove ),
++	.probe		= gpio_lcd_probe,
++	.driver		= {
++		.name	= "lcd_lc7981_device",
++		.owner	= THIS_MODULE,
++	}
++};
++
++
++static int __init lc7981_init( void )
++{
++	return platform_driver_register( &gpio_lcd_device_driver );
++};
++
++
++static void __exit lc7981_exit( void )
++{
++	platform_driver_unregister( &gpio_lcd_device_driver );
++};
++
++module_init( lc7981_init );
++module_exit( lc7981_exit );
+diff --git a/drivers/skov/led.c b/drivers/skov/led.c
+new file mode 100644
+index 0000000..a119254
+--- /dev/null
++++ b/drivers/skov/led.c
+@@ -0,0 +1,566 @@
++/*
++ * LED driver
++ *
++ * driver/skov/led.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * November 2007
++ *
++ * Changes February 2008 according to coding style and cleanup
++ */
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/ioctl.h>
++#include <linux/timer.h>
++#include <linux/fs.h>
++#include <linux/cdev.h>
++
++#include <asm/gpio.h>
++#include <mach/board.h>
++#include <asm/uaccess.h>
++#include <mach/at91_pio.h>
++#include <linux/skov_led.h>
++
++MODULE_DESCRIPTION( "LED Device" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++#define LED_NAME "Skov led"
++#define LED_CDEV "skov_led"
++#define LED_MAJOR 247
++
++
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , LED_NAME ,__FUNCTION__, ## arg )
++
++static struct timer_list 	ptimer;
++
++static atomic_t 		timer_is_running;
++static short 			led_state_1; // 100 ms  1/2 periode
++static short 			led_state_2; // 200 ms
++static short 			led_state_4; // 400 ms
++
++static struct class 		*led_class;
++static struct led_dev_data	*led_data;
++
++/*
++ * Device
++ */
++
++static int 			major;
++static int 			minor;
++static dev_t 			devt;
++static struct cdev 		*cdev;
++
++/**
++ * led_on
++ */
++inline void led_on( struct led_dev_data *data, int p )
++{
++	data->leds[p].state = 1;
++	__raw_writel( data->pio_map[p].mask, data->pio_map[p].pio + PIO_CODR );
++}
++
++/**
++ * led_off
++ */
++inline void led_off( struct led_dev_data *data, int p )
++{
++	data->leds[p].state = 0;
++	__raw_writel( data->pio_map[p].mask, data->pio_map[p].pio + PIO_SODR );
++}
++
++/**
++ * led_open - file operation interface function for open
++ * @inode: inode struct ref to inode which wants to be opened
++ * @file: file struct ref to file which wants to be opened
++ *
++ */
++int led_open( struct inode *inode, struct file *file )
++{
++	int 		i = 0;
++	int 		ret = -EINVAL; // set to default failure
++	const char	*name;
++
++	/* Need to find out which led we want to talk to. */
++
++	/*
++	  i = iminor( file->f_dentry->d_inode ) - 1;
++	*/
++
++	/* Minor numbers has to fit to be used as index
++	   in the led_data struct array.
++
++	   242,  1 Nov 2 14:33 /dev/led_1
++	   242,  2 Nov 2 14:33 /dev/led_2
++	   242,  3 Nov 2 14:33 /dev/led_3
++	   242,  4 Nov 2 14:33 /dev/led_4
++	   242,  5 Nov 2 14:33 /dev/led_5
++	   242,  6 Nov 2 14:33 /dev/led_6
++	   242,  7 Nov 2 14:33 /dev/led_7
++	   242,  8 Nov 2 14:33 /dev/led_8
++	   242,  9 Nov 2 14:33 /dev/led_9
++	   242, 10 Nov 2 14:34 /dev/led_10
++	   242, 11 Nov 2 14:34 /dev/led_11
++	*/
++	/*
++	  if ( i > -1 && i < led_data->led_len ) {
++	  file->private_data = ( void* )&led_data->leds[i];
++	  return 0;
++	  }
++	*/
++	/*
++	  That is a little bit ugly, I know but as an
++	  alternative I have to go through all device names
++	  and compare them with the name of the file.
++	*/
++	name = file->f_path.dentry->d_name.name;
++
++	for ( i=0; i < led_data->led_len; i++ )
++	{
++		if ( !strcmp( name, led_data->leds[i].dev_name ) )
++		{
++			file->private_data = ( void* )&led_data->leds[i];
++			return 0;
++		}
++	}
++
++	err( "led_open: invalid inode or unknown led" );
++
++	return ret;
++};
++
++
++/**
++ * led_release - file operation interface function for release
++ * @inode: inode struct ref to inode which wants to be released
++ * @file: file struct ref to file which wants to be released
++ *
++ * nothing jet
++ */
++int led_release( struct inode *inode, struct file *file )
++{
++	/* nothing to do */
++	return 0;
++};
++
++/**
++ * led_read - file operation interface function for read
++ * @file: file struct ref to file which is read from
++ * @buff: target buffer which things go to
++ * @len: length of target buffer
++ * @off: offset
++ *
++ * This function reads the state of led from the struct.
++ */
++int led_read( struct file *file, char *buff, size_t len, loff_t *off )
++{
++	unsigned char dat[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
++	int i = 0, l = 0;
++	struct led *pled = NULL;
++
++	if ( file->private_data == NULL )
++	{
++		err( "led_read: file->private_data == NULL" );
++		return -EINVAL;
++	}
++
++	if( *off != 0 ) { return 0; }
++
++	pled = ( struct led * )file->private_data;
++
++	sprintf( dat, "%d\n", pled->speed );
++	l = strlen( dat ) + 1;
++
++	if ( l > len ) { l = len; }
++
++	i = copy_to_user( buff, dat, l );
++
++	*off += ( l-i );
++
++	return ( l-i );
++};
++
++
++
++/**
++ * led_write - file operation interface function for write
++ * @file: file struct ref to file which is written to
++ * @buff: source buffer where data come from
++ * @len: length of source buffer
++ * @off: offset
++ *
++ */
++int led_write( struct file *file, const char *buff, size_t len, loff_t *off )
++{
++	unsigned char dat[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
++	unsigned int speed;
++	int i = 0, l = 0;
++
++	l = len;
++
++	if ( l >= sizeof( dat ) )
++	{
++		l = sizeof( dat ) - 1;
++	}
++
++	i = copy_from_user( dat, buff, l );
++
++	if ( i < 0 )
++	{
++		err( "led_write: parameter missing" );
++		return -EINVAL;
++	}
++
++	dat[( l-i )] = 0x00;
++	speed = ( int )simple_strtol( dat, NULL, 0 );
++
++	if ( speed < SKOV_LED_OFF || speed > SKOV_LED_BLINK_SLOW )
++	{
++		err( "led_write: invald parameter. Use defines" );
++		return -EINVAL;
++	}
++
++	if ( file->private_data == NULL )
++	{
++		err( "led_write: file->private_data == NULL" );
++		return -ENOMEM;
++	}
++
++	( (struct led *)file->private_data )->speed = speed;
++
++	if ( atomic_read( &timer_is_running ) == 0 )
++	{
++		atomic_inc( &timer_is_running );
++
++		ptimer.expires = jiffies + ( HZ/10 );
++		add_timer( &ptimer );
++	}
++
++	return ( l - i );
++};
++
++
++/**
++ * file_operations led_fops
++ *
++ *
++ *
++ */
++static const struct file_operations led_fops =
++{
++	.owner 		= THIS_MODULE,
++	.read		= led_read,
++	.write 		= led_write,
++	.open		= led_open,
++	.release	= led_release,
++};
++
++
++
++/**
++ * blink - runs as tasklet as long as a led has to blink
++ * @dat: init param ( not used jet )
++ *
++ *
++ */
++static void blink( unsigned long dat )
++{
++
++	int i = 0, speed = 0, state = 0;
++	int stop_running = 1;
++
++
++	/*
++	  toggle light synchron to led state 1
++	*/
++	if ( led_state_1 ) { led_state_1 = 0; }
++
++	else {
++		led_state_1 = 1;
++
++		if ( led_state_2 ) { led_state_2 = 0; }
++
++		else {
++			led_state_2 = 1;
++
++			if ( led_state_4 ) { led_state_4 = 0; }
++
++			else {
++				led_state_4 = 1;
++			}
++		}
++	}
++
++
++	for ( i=0; i < led_data->led_len; i++ )
++	{
++		if ( !led_data->pio_map[i].pin ) continue;
++
++		speed = led_data->leds[i].speed;
++		state = led_data->leds[i].state;
++
++		if ( speed == SKOV_LED_OFF && state == 1 )
++		{
++			/*  set led off  */
++			led_off( led_data,  i );
++		}
++		else if ( speed == SKOV_LED_ON && state == 0 )
++		{
++			/*  set led constantly on */
++			led_on( led_data, i );
++		}
++		else if ( speed == SKOV_LED_BLINK_FAST )
++		{
++			/*  make led blink synchron to the global led state 1 */
++			if ( led_state_1 && state == 0 )
++			{
++				led_on( led_data, i );
++			}
++			else if ( !led_state_1 && state == 1 )
++			{
++				led_off( led_data,  i );
++			}
++
++			stop_running = 0;
++		}
++		else if ( speed == SKOV_LED_BLINK )
++		{
++			/*  make led blink synchron to the global led state 2 */
++			if ( led_state_2 && state == 0 )
++			{
++				led_on( led_data, i );
++			}
++			else if ( !led_state_2 && state == 1 )
++			{
++				led_off( led_data,  i );
++			}
++
++			stop_running = 0;
++		}
++		else if ( speed == SKOV_LED_BLINK_SLOW )
++		{
++			/*  make led blink synchron to the global led state 3 */
++			if ( led_state_4 && state == 0 )
++			{
++				led_on( led_data, i );
++			}
++			else if ( !led_state_4 && state == 1 )
++			{
++				led_off( led_data,  i );
++			}
++
++			stop_running = 0;
++		}
++	}
++
++	if ( stop_running )
++	{
++		/*
++		   no led is set to blink. Just run out
++		*/
++		atomic_dec( &timer_is_running );
++		return;
++	}
++
++	/*
++	   still blinking leds left, set this task to rerun in 100 ms
++	*/
++	ptimer.expires = jiffies + ( HZ/10 );
++	add_timer( &ptimer );
++};
++
++/**
++ * led_probe
++ *
++ *
++ *
++ *
++ */
++static int __devinit led_probe( struct platform_device *pdev )
++{
++	int i = 0, ret = 0;
++	unsigned int pin;
++	struct device *dev = &pdev->dev;
++        struct device *class_dev;
++
++	if ( dev->platform_data )
++	{
++		led_data  = ( struct led_dev_data * )dev->platform_data;
++	}
++	else
++	{
++		err( "led_probe: cannot get default configuration" );
++		return -EIO;
++	}
++
++	if ( led_data->led_len < 1 )
++	{
++		err( "led_probe: no valid configuration found" );
++		return -EIO;
++	}
++
++	// enable gpio pin for led usage without pullup
++	for ( i=0; i < led_data->led_len; i++ )
++	{
++		led_data->leds[i].speed = SKOV_LED_OFF;
++
++		if ( ( pin = led_data->pio_map[i].pin ) )
++		{
++			at91_set_gpio_output( pin, 1 );
++
++			led_off( led_data,  i );
++		}
++	}
++
++
++	minor = 0;
++	major = LED_MAJOR;
++	devt = MKDEV( major, minor );
++
++	ret = register_chrdev_region( devt, led_data->led_len, LED_CDEV );
++	if ( ret < 0 )
++	{
++		err( "led_probe: cannot register character devices" );
++		return ret;
++	}
++
++	cdev = cdev_alloc( );
++	if ( !cdev )
++	{
++		err( "led_probe: unable to alloc new char device" );
++		goto alloc_chrdev;
++	}
++
++	cdev->owner = THIS_MODULE;
++	cdev->ops  = &led_fops;
++
++	kobject_set_name( &cdev->kobj, "%s", LED_CDEV );
++
++	ret = cdev_add( cdev, devt, led_data->led_len );
++	if ( ret )
++	{
++		err( "led_probe: unable to add a new char device" );
++		goto cdev_alloc;
++	}
++
++	led_class = class_create( THIS_MODULE, LED_CDEV );
++
++	if ( IS_ERR( led_class ) )
++	{
++		err( "led_probe: can't create class. No udev support ?" );
++		ret = -EINVAL;
++		goto cdev_add;
++	}
++
++	for ( i=0; i < led_data->led_len; i++ )
++	{
++		class_dev = device_create( led_class, NULL, MKDEV( major,i ), NULL, led_data->leds[i].dev_name );
++		if (IS_ERR(class_dev)) {
++                	printk(KERN_WARNING "ch%d: device_create failed\n", i);
++                        ret = PTR_ERR(class_dev);
++		        goto class_create;
++		}
++	}
++
++	init_timer( &ptimer );
++	ptimer.function 	= blink;
++	ptimer.data		= 0;
++
++	atomic_set( &timer_is_running, 0 );
++	led_state_1 = 0;
++	led_state_2 = 0;
++	led_state_4 = 0;
++
++	pr_info( LED_NAME ": probe succeded\n");
++
++	return 0;
++
++ class_create:
++	for ( ;i>-1;i-- )
++	{
++		device_destroy( led_class, MKDEV( major,i ) );
++	}
++
++	class_destroy( led_class );
++
++ cdev_add:
++
++ cdev_alloc:
++	cdev_del( cdev );
++
++ alloc_chrdev:
++	unregister_chrdev_region( devt, led_data->led_len );
++
++
++	for ( i=0; i < led_data-> led_len; i++ )
++	{
++		if ( led_data->pio_map[i].pin )
++			gpio_free( led_data->pio_map[i].pin );
++	}
++
++	del_timer_sync( &ptimer );
++
++	return ret;
++};
++
++static int __exit led_remove( struct platform_device *pdev )
++{
++	int 		i = 0;
++
++	for ( i=0; i < led_data-> led_len; i++ )
++	{
++		device_destroy( led_class, MKDEV( major,i ) );
++	}
++
++	class_destroy( led_class );
++
++
++	cdev_del( cdev );
++
++
++	unregister_chrdev_region( devt, led_data->led_len );
++
++
++	for ( i=0; i < led_data-> led_len; i++ )
++	{
++		if ( led_data->pio_map[i].pin )
++		{
++			led_off( led_data,  i ); // set off
++			gpio_free( led_data->pio_map[i].pin );
++		}
++	}
++
++
++	del_timer_sync( &ptimer );
++
++	return 0;
++};
++
++struct platform_driver led_device_driver =
++{
++	.remove	= __exit_p( led_remove ),
++	.probe  = led_probe,
++	.driver		= {
++		.name	= "led_device",
++		.owner	= THIS_MODULE,
++	},
++};
++
++static int __init led_init( void )
++{
++	return platform_driver_register( &led_device_driver );
++};
++
++static void __exit led_exit( void )
++{
++	platform_driver_unregister( &led_device_driver );
++};
++
++module_init( led_init );
++module_exit( led_exit );
++
+diff --git a/drivers/skov/matrix_kbd.c b/drivers/skov/matrix_kbd.c
+new file mode 100644
+index 0000000..de6df5e
+--- /dev/null
++++ b/drivers/skov/matrix_kbd.c
+@@ -0,0 +1,522 @@
++/*
++ * Matrix keyboard driver
++ *
++ * driver/skov/matrix_kbd.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * November 2007
++ *
++ * Depends on platform device matrix_kbd_device
++ *
++ * Changes February 2008 according to coding style, cleanup
++ * and bugfix
++ *
++ * Changed May 2010 moved from interrupt to polling because of emc errors
++ */
++
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++
++#include <linux/fs.h>
++#include <linux/interrupt.h>
++#include <linux/sched.h>
++#include <linux/pm.h>
++#include <linux/sysctl.h>
++#include <linux/proc_fs.h>
++#include <linux/delay.h>
++#include <linux/platform_device.h>
++#include <linux/input.h>
++#include <linux/kthread.h>
++#include <linux/string.h>
++
++#include <asm/gpio.h>
++#include <mach/at91_pio.h>
++#include <mach/board.h>
++
++#include <linux/timer.h>
++#include <linux/ktime.h>
++#include <linux/hrtimer.h>
++
++MODULE_DESCRIPTION( "Matrix Keyboard Device" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++#define MKBD_NAME "Matrix keyboard"
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , MKBD_NAME , __FUNCTION__, ## arg )
++
++static struct input_dev    	*kbd_input_dev;
++static struct matrix_kbd_data 	*kbd_data;
++static atomic_t 		kbd_polling;
++static int 			scan, pscan;
++static int			key_matrix[6][5];
++static bool			key_matrix_state[6][5];
++static int 			fowl_vector[5];
++static bool			fowl_vector_state[5];
++struct platform_device *pdev_gl;
++#define MAX_LEN_KBD_TYPE	20
++char keyboard_type		[MAX_LEN_KBD_TYPE];
++char 				BD_OLD_KBD[20] = "BD505";
++char 				BD_NEW_KBD[20] = "FOWL";
++
++#define PRESSED 		1
++#define RELEASED 		0
++#define DEBOUNCE_MASK           0x0F
++#define pushed( s1, s2, x )    ( kbd_chg[s1][x] > kbd_chg[s2][x] ? 0 : 1 )
++#define get_next( s, m )       ( ( s+1 ) >= m ? 0 : ( s+1 ) )
++
++#define HIGH( p ) __raw_writel( kbd_data->pio_map_scan[p].mask, kbd_data->pio_map_scan[p].pio + PIO_SODR )
++#define LOW( p )  __raw_writel( kbd_data->pio_map_scan[p].mask, kbd_data->pio_map_scan[p].pio + PIO_CODR )
++#define _READ( p ) ( ( u32 )__raw_readl( kbd_data->pio_map_ret[p].pio + PIO_PDSR ) & kbd_data->pio_map_ret[p].mask ) == 0
++
++#define HIGH_NEW( p ) __raw_writel( kbd_data->pio_map_ret[p].mask, kbd_data->pio_map_ret[p].pio + PIO_SODR )
++#define LOW_NEW( p )  __raw_writel( kbd_data->pio_map_ret[p].mask, kbd_data->pio_map_ret[p].pio + PIO_CODR )
++#define _READ_NEW( p ) ( ( u32 )__raw_readl( kbd_data->pio_map_scan[p].pio + PIO_PDSR ) & kbd_data->pio_map_scan[p].mask ) == 0
++
++struct at91_can_timer_data {
++        struct hrtimer          timer;
++        ktime_t                 period;
++} *data;
++static void scan_kbd(void);
++
++
++/**
++ * hrtimer_restart
++ * @data: timer reset function
++ *
++ */
++static enum hrtimer_restart keyboard_timer (struct hrtimer *var)
++{
++   ktime_t now = var->base->get_time();
++   scan_kbd();
++   hrtimer_forward (var, now, data->period);
++   return HRTIMER_RESTART;
++}
++
++
++/**
++ * mk_keycode
++ * @data: create a key code for a certain combination presed in the matrix
++ *
++ */
++static int mk_keycode( int a, int b )
++{
++	int keycode = 0;
++	keycode = a + 1;
++	keycode += ( b + 1 ) << 4;
++	return keycode;
++};
++
++
++
++/**
++ * set_key_board_type - driver function for setting the keyboard type
++ * @data: driver func for global variable
++ *
++ */
++int set_key_board_type(const char* type, int len)
++{
++	/* Set the type in a global variable */
++	if ( len < MAX_LEN_KBD_TYPE )
++	{
++		strncpy(keyboard_type,type,len);
++		keyboard_type[len] = '\0';
++	}
++
++	if(!strcmp(keyboard_type, BD_OLD_KBD))
++	{
++		//Do nothing
++	}
++	else if(!strcmp(keyboard_type, BD_NEW_KBD))
++	{
++		//Do nothing
++	}
++	else
++	{
++		strncpy(keyboard_type,"ERROR NO TYPE",13);
++		keyboard_type[13] = '\0';
++	}
++	return 0;
++}
++
++/**
++ * @data: sysfs events
++ *
++ */
++static ssize_t keyboard_type_read(struct device *dev, struct device_attribute *attr, char *buf)
++{
++        return sprintf(buf, "%s\n", keyboard_type);
++}
++
++static ssize_t keyboard_type_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
++{
++        int len = strlen(buf);
++
++        if(buf[len-1] == '\n') len --;  // for some unknown reason '\n' is added at end of string, but before null-term;
++
++	if (len < MAX_LEN_KBD_TYPE)
++	{
++		set_key_board_type(buf,len);
++	}
++	return strlen(buf);
++}
++
++static DEVICE_ATTR(keyboard_type, S_IRUGO | S_IWUSR, keyboard_type_read, keyboard_type_write);
++
++
++static ssize_t phase_ok_read(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	if(!strcmp(keyboard_type, BD_OLD_KBD))
++	{
++		return sprintf(buf, "%s\n", "ERROR NOT SUPPORTED IN THIS MODE");
++	}
++	else if(!strcmp(keyboard_type, BD_NEW_KBD))
++	{
++		return sprintf(buf, "%i\n", at91_get_gpio_value(AT91_PIN_PB21));
++	}
++	else
++	{
++		return sprintf(buf, "%s\n", "WRONG KEYBOARD CHOOSEN");
++	}
++}
++
++static DEVICE_ATTR(phase_ok, S_IRUGO, phase_ok_read, NULL);
++
++static ssize_t bat_ok_read(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	if(!strcmp(keyboard_type, BD_OLD_KBD))
++	{
++		return sprintf(buf, "%s\n", "ERROR NOT SUPPORTED IN THIS MODE");
++	}
++	else if(!strcmp(keyboard_type, BD_NEW_KBD))
++	{
++		return sprintf(buf, "%i\n", at91_get_gpio_value(AT91_PIN_PB12));
++	}
++	else
++	{
++		return sprintf(buf, "%s\n", "WRONG KEYBOARD CHOOSEN");
++	}
++
++}
++
++static DEVICE_ATTR(bat_ok, S_IRUGO, bat_ok_read, NULL);
++
++static ssize_t enter_key_read(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	if(!strcmp(keyboard_type, BD_OLD_KBD))
++	{
++		return sprintf(buf, "%s\n", "ERROR NOT SUPPORTED IN THIS MODE");
++	}
++	else if(!strcmp(keyboard_type, BD_NEW_KBD))
++	{
++		return sprintf(buf, "%i\n", at91_get_gpio_value(AT91_PIN_PB16));
++	}
++	else
++	{
++		return sprintf(buf, "%s\n", "WRONG KEYBOARD CHOOSEN");
++	}
++}
++
++static DEVICE_ATTR(enter_key, S_IRUGO | S_IWUSR, enter_key_read, NULL);
++
++/**
++ * function called by timer - scan keyboard
++ * @data:
++ *
++ */
++
++static void scan_kbd(void)
++{
++	int s,r;
++	int keycode = 0;
++
++	//BD505 keyboard type
++	if(!strcmp(keyboard_type, BD_OLD_KBD) ) {
++		//Set all the lines Low
++		for ( s = 0; s < kbd_data->pio_map_scan_len; s++ ) {
++			LOW( s );
++		}
++
++		for ( s = 0; s < kbd_data->pio_map_scan_len; s++ ) {
++			HIGH( s );
++			if ( s > 0 ) {
++			  LOW( s-1 );
++			}
++
++			for ( r=0; r < kbd_data->pio_map_ret_len; r++ ) {
++				udelay( 10 );
++				key_matrix[s][r] = key_matrix[s][r]<<1;
++				if(!_READ( r )) {
++					key_matrix[s][r] |= 0x01;
++				}
++				if(key_matrix_state[s][r] == PRESSED) {
++
++					if((key_matrix[s][r] & DEBOUNCE_MASK) == 0) {
++						key_matrix_state[s][r] = RELEASED;
++						keycode = mk_keycode( s,r );
++						input_event( kbd_input_dev, EV_KEY, keycode, 0 );
++						input_sync( kbd_input_dev );
++					}
++				} else {
++					if((key_matrix[s][r] & DEBOUNCE_MASK) == DEBOUNCE_MASK) {
++						key_matrix_state[s][r] = PRESSED;
++						keycode = mk_keycode( s,r );
++						input_event( kbd_input_dev, EV_KEY, keycode, 1 );
++						input_sync( kbd_input_dev );
++					}
++
++				}
++
++			}
++
++		}
++        //FOWL Keyboard type
++	} else if(!strcmp(keyboard_type, BD_NEW_KBD)) {
++		for ( s = 0; s < kbd_data->pio_map_scan_len; s++ ) {
++			HIGH( s );
++		}
++		for ( r=0; r < kbd_data->pio_map_ret_len; r++ ) {
++			udelay( 20 );
++			fowl_vector[r] = fowl_vector[r]<<1;
++			if(!_READ( r )) {
++				fowl_vector[r] |= 0x01;
++			}
++			if(fowl_vector_state[r] == PRESSED) {
++				if((fowl_vector[r] & DEBOUNCE_MASK) == 0) {
++					fowl_vector_state[r] = RELEASED;
++					keycode = r;
++					keycode = keycode + 0x51;
++					input_event( kbd_input_dev, EV_KEY, keycode, 0 );
++					input_sync( kbd_input_dev );
++				}
++			} else {
++				if((fowl_vector[r] & DEBOUNCE_MASK) == DEBOUNCE_MASK) {
++					fowl_vector_state[r] = PRESSED;
++					keycode = r;
++					keycode = keycode + 0x51;
++					input_event( kbd_input_dev, EV_KEY, keycode, 1 );
++					input_sync( kbd_input_dev );
++				}
++			}
++		}
++	}
++}
++
++
++/**
++ * matrix_kbd_probe - probe function
++ * @pdev: platform device struct ref
++ *
++ *
++ */
++static int __devinit matrix_kbd_probe( struct platform_device *pdev )
++{
++	unsigned int 	pin, i, r;
++	int 		error = 0;
++	unsigned char    keycode;
++	struct device 	*dev = &pdev->dev;
++
++	pdev_gl = pdev;
++
++	atomic_set( &kbd_polling, 0 );
++
++	pscan = 0;
++	scan = 1;
++
++	if ( dev->platform_data )
++	{
++		kbd_data  = (struct matrix_kbd_data *)dev->platform_data;
++	}
++	else
++	{
++		err( "cannot get default configuration" );
++		return -EIO;
++	}
++
++	// prepare gpio pins for matrix keyboard usage
++	for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++	{
++		pin = kbd_data->pio_map_scan[i].pin;
++		at91_set_gpio_output( pin, 1 );
++		at91_set_multi_drive( pin, 0 );
++		at91_set_GPIO_periph( pin, 1 );
++		HIGH( i );
++	}
++
++	for ( i = 0; i < kbd_data->pio_map_ret_len; i++ )
++	{
++		pin = kbd_data->pio_map_ret[i].pin;
++		at91_set_gpio_input( pin, 0 ); // set pin as input without pullup
++		at91_set_deglitch( pin, 1 ); // enable glitch filter
++		at91_set_GPIO_periph( pin, 0 );
++	}
++
++	// prepare lock
++	spin_lock_init( &kbd_data->keys_lock );
++
++	// prepare for standard input usage
++	kbd_input_dev = input_allocate_device();
++
++	if ( !kbd_input_dev )
++	{
++		err( "unable to allocate input device!" );
++		error = -ENOMEM;
++		//goto input_fail;
++	}
++
++	kbd_input_dev->name = "Matrix Keyboard";
++	kbd_input_dev->phys = "matrix_kbd/input0";
++	kbd_input_dev->id.bustype = BUS_HOST;
++	kbd_input_dev->id.vendor  = 0x0001;
++	kbd_input_dev->id.product = 0x0001;
++	kbd_input_dev->id.version = 0x0100;
++
++	kbd_input_dev->evbit[0] = BIT( EV_KEY );
++
++	// all used keycodes has to be added
++	for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++	{
++		for ( r=0; r < kbd_data->pio_map_ret_len; r++ )
++		{
++			keycode = mk_keycode( i,r );
++			set_bit( keycode, kbd_input_dev->keybit );
++		}
++	}
++
++	clear_bit( 0, kbd_input_dev->keybit );
++
++	if ( set_key_board_type("BD505",5) != 0 )
++	{
++		goto register_fail;
++	}
++
++	error = input_register_device( kbd_input_dev );
++	if ( error )
++	{
++		err( "unable to register input device!" );
++		goto register_fail;
++	}
++
++
++	error = device_create_file(&pdev->dev, &dev_attr_keyboard_type);
++	if ( error )
++	{
++		goto register_fail;
++	}
++
++	error = device_create_file(&pdev->dev, &dev_attr_phase_ok);
++	if ( error )
++	{
++		goto register_fail;
++	}
++
++	error = device_create_file(&pdev->dev, &dev_attr_bat_ok);
++	if ( error )
++	{
++		goto register_fail;
++	}
++
++
++	error = device_create_file(&pdev->dev, &dev_attr_enter_key);
++	if ( error )
++	{
++		goto register_fail;
++	}
++	pr_info( MKBD_NAME ": probe succeded\n" );
++
++	data = kmalloc (sizeof (*data), GFP_KERNEL);
++	data->period = ktime_set (0, 5000000LL);
++	hrtimer_init(&data->timer, CLOCK_REALTIME, HRTIMER_MODE_REL);
++	data->timer.function = keyboard_timer;
++	hrtimer_start(&data->timer, data->period, HRTIMER_MODE_REL);
++
++	return 0;
++
++ register_fail:
++	input_free_device( kbd_input_dev );
++/*
++ input_fail:
++
++	for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++	{
++		gpio_free( kbd_data->pio_map_scan[i].pin );
++	}
++
++	for ( i = 0; i < kbd_data->pio_map_ret_len; i++ )
++	{
++		gpio_free( kbd_data->pio_map_ret[i].pin );
++	}
++*/
++	return error;
++};
++
++
++/**
++ * matrix_kbd_remove - remove function
++ * @pdev: platform device struct ref
++ *
++ */
++static int __exit matrix_kbd_remove( struct platform_device *pdev )
++{
++//	int i;
++	struct device *dev = &pdev->dev;
++
++	if ( dev->platform_data )
++	{
++		kbd_data  = ( struct matrix_kbd_data * )dev->platform_data;
++	}
++
++	input_unregister_device( kbd_input_dev );
++
++	/* input_free_device( kbd_input_dev ); */
++/*
++	for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++	{
++		gpio_free( kbd_data->pio_map_scan[i].pin );
++	}
++
++	for ( i = 0; i < kbd_data->pio_map_ret_len; i++ )
++	{
++		gpio_free( kbd_data->pio_map_ret[i].pin );
++	}
++*/
++	device_remove_file(&pdev->dev, &dev_attr_keyboard_type);
++	device_remove_file(&pdev->dev, &dev_attr_phase_ok);
++	device_remove_file(&pdev->dev, &dev_attr_bat_ok);
++	device_remove_file(&pdev->dev, &dev_attr_enter_key);
++	kfree(data);
++	hrtimer_cancel (&data->timer);
++
++	return 0;
++};
++
++
++/**
++ * matrix_kbd_device_driver - platform driver struct
++ *
++ */
++struct platform_driver matrix_kbd_device_driver =
++{
++	.remove		= __exit_p( matrix_kbd_remove ),
++	.probe		= matrix_kbd_probe,
++	.driver		= {
++		.name	= "matrix_kbd_device",
++		.owner	= THIS_MODULE,
++	}
++};
++
++static int __init matrix_kbd_init( void )
++{
++	return platform_driver_register( &matrix_kbd_device_driver );
++};
++
++static void __exit matrix_kbd_exit( void )
++{
++	platform_driver_unregister( &matrix_kbd_device_driver );
++};
++
++module_init( matrix_kbd_init );
++module_exit( matrix_kbd_exit );
+diff --git a/drivers/skov/matrix_test.c b/drivers/skov/matrix_test.c
+new file mode 100644
+index 0000000..2491a3a
+--- /dev/null
++++ b/drivers/skov/matrix_test.c
+@@ -0,0 +1,223 @@
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/string.h>
++#include <linux/fs.h>
++
++#include <asm/gpio.h>
++#include <mach/at91_pio.h>
++#include <mach/board.h>
++
++#define MAX_LEN 3
++
++#define MKBD_NAME "Matrix keyboard Test Driver"
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , MKBD_NAME , __FUNCTION__, ## arg )
++
++static struct matrix_kbd_data   *kbd_data;
++
++MODULE_DESCRIPTION( "Matrix Keyboard Test" );
++MODULE_AUTHOR( "Soren Andersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++/**
++ * @data: sysfs events
++ *
++ */
++static ssize_t matrix_read(struct device *dev, struct device_attribute *attr, char *buf)
++{
++        return sprintf(buf, "%i\n", (at91_get_gpio_value(kbd_data->pio_map_ret[0].pin) + at91_get_gpio_value(kbd_data->pio_map_ret[1].pin)*2 +\
++        at91_get_gpio_value(kbd_data->pio_map_ret[2].pin)*4 + at91_get_gpio_value(kbd_data->pio_map_ret[3].pin)*8 + at91_get_gpio_value(kbd_data->pio_map_ret[4].pin)*16));
++}
++
++static ssize_t matrix_write(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
++{
++        int len = strlen(buf);
++        unsigned long i,pin;
++
++        if(buf[len-1] == '\n') len --;  // for some unknown reason '\n' is added at end of string, but before null-term;
++
++        if (len < MAX_LEN)
++        {
++                 i = simple_strtol(buf,NULL,10);
++                 if ((i & 1) == 1)
++                 {
++                     pin = kbd_data->pio_map_scan[0].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[0].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++
++                 if ((i & 2) == 2)
++                 {
++                     pin = kbd_data->pio_map_scan[1].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[1].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++
++                 if ((i & 4) == 4)
++                 {
++                     pin = kbd_data->pio_map_scan[2].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[2].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++
++                 if((i & 8) == 8)
++                 {
++                     pin = kbd_data->pio_map_scan[3].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[3].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++
++                 if((i & 16) == 16)
++                 {
++                     pin = kbd_data->pio_map_scan[4].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[4].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++
++                 if((i & 32) == 32)
++                 {
++                     pin = kbd_data->pio_map_scan[5].pin;
++                     at91_set_gpio_value(pin, 0);
++                 }
++                 else
++                 {
++                     pin = kbd_data->pio_map_scan[5].pin;
++                     at91_set_gpio_value(pin, 1);
++                 }
++        }
++        return strlen(buf);
++}
++
++static DEVICE_ATTR(matrix_io, S_IRUGO | S_IWUSR, matrix_read, matrix_write);
++
++/**
++ * matrix_test_probe - probe function
++ * @pdev: platform device struct ref
++ *
++ *
++ */
++static int __devinit matrix_test_probe( struct platform_device *pdev )
++{
++        unsigned int i, pin;
++        int error = 0;
++        struct device   *dev = &pdev->dev;
++
++        if ( dev->platform_data )
++        {
++            kbd_data  = (struct matrix_kbd_data *)dev->platform_data;
++        }
++        else
++        {
++            err( "cannot get default configuration" );
++            return -EIO;
++        }
++
++        // prepare gpio pins for matrix keyboard usage
++        for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++        {
++              pin = kbd_data->pio_map_scan[i].pin;
++              at91_set_gpio_output( pin, 1 );
++              at91_set_multi_drive( pin, 0 );
++              at91_set_GPIO_periph( pin, 1 );
++        }
++
++        for ( i = 0; i < kbd_data->pio_map_ret_len; i++ )
++        {
++              pin = kbd_data->pio_map_ret[i].pin;
++              at91_set_gpio_input( pin, 0 ); // set pin as input without pullup
++              at91_set_deglitch( pin, 1 ); // enable glitch filter
++              at91_set_GPIO_periph( pin, 0 );
++        }
++
++        error = device_create_file(&pdev->dev, &dev_attr_matrix_io);
++        if ( error )
++        {
++                goto register_fail;
++        }
++
++        //pr_info( MKBD_NAME ": probe succeded\n" );
++
++        return 0;
++
++ register_fail:
++
++        return error;
++};
++
++/**
++ * matrix_test_remove - remove function
++ * @pdev: platform device struct ref
++ *
++ */
++static int __exit matrix_test_remove( struct platform_device *pdev )
++{
++
++/*
++        int i;
++        struct device *dev = &pdev->dev;
++
++
++        if ( dev->platform_data )
++        {
++            kbd_data  = ( struct matrix_kbd_data * )dev->platform_data;
++        }
++
++        for ( i = 0; i < kbd_data->pio_map_scan_len; i++ )
++        {
++            gpio_free( kbd_data->pio_map_scan[i].pin );
++        }
++*/
++        device_remove_file(&pdev->dev, &dev_attr_matrix_io);
++
++        return 0;
++};
++
++
++/**
++ * matrix_kbd_device_driver - platform driver struct
++ *
++ */
++struct platform_driver matrix_test_device_driver =
++{
++        .remove         = __exit_p( matrix_test_remove ),
++        .probe          = matrix_test_probe,
++        .driver         = {
++                .name   = "matrix_kbd_device",
++                .owner  = THIS_MODULE,
++        }
++};
++
++static int __init matrix_test_init( void )
++{
++        return platform_driver_register( &matrix_test_device_driver );
++};
++
++static void __exit matrix_test_exit( void )
++{
++        platform_driver_unregister( &matrix_test_device_driver );
++};
++
++module_init( matrix_test_init );
++module_exit( matrix_test_exit );
+diff --git a/drivers/skov/pwm.c b/drivers/skov/pwm.c
+new file mode 100644
+index 0000000..817cabf
+--- /dev/null
++++ b/drivers/skov/pwm.c
+@@ -0,0 +1,502 @@
++/*
++ * PWM driver
++ *
++ * driver/skov/pwm.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * December 2007
++ *
++ * Changes February 2008 according to coding style, cleanup
++ * and start_offset, end_offset
++ */
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/delay.h>
++#include <linux/platform_device.h>
++#include <linux/ioctl.h>
++#include <linux/fs.h>
++#include <linux/cdev.h>
++#include <linux/clk.h>
++
++#include <mach/at91_pio.h>
++#include <linux/skov_pwm.h>
++#include <mach/board.h>
++#include <linux/lc7981.h>
++#include <asm/gpio.h>
++#include <asm/uaccess.h>
++
++MODULE_DESCRIPTION( "PWM Devices" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++#define PWM_NAME "PWM"
++#define PWM_CDEV "pwm"
++#define PWM_MAJOR 248
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , PWM_NAME, __FUNCTION__, ## arg )
++
++
++
++static struct skov_pwm_dev_data      *skov_pwm_data;
++static struct class 		*pwm_class;
++static struct cdev 		*cdev;
++static unsigned long            base_addr;
++static int                      dev_counter = 0;
++static int 			major;
++static int 			minor;
++static dev_t 			devt;
++
++
++/*
++ * Write to a PWM register.
++ */
++static inline void at91_pwm_write( unsigned int reg, unsigned long value )
++{
++	__raw_writel( value, base_addr + reg );
++}
++
++/*
++ * Read from a PWM register.
++ */
++static inline unsigned long at91_pwm_read( unsigned int reg )
++{
++	return __raw_readl( base_addr + reg );
++}
++
++/**
++ * pwm_open
++ *
++ */
++int skov_pwm_open( struct inode *inode, struct file *file )
++{
++	int 		i = 0;
++	int 		ret = -EINVAL; // set to default failure
++	const char	*name;
++	unsigned    l;
++
++	name = file->f_path.dentry->d_name.name;
++
++	for ( i=0; i < skov_pwm_data->pwm_len; i++ )
++	{
++
++		if ( ! strcmp( name, skov_pwm_data->pwms[i].dev_name ) )
++		{
++			l = skov_pwm_data->pwms[i].id;
++
++			file->private_data = ( void* )&skov_pwm_data->pwms[i];
++
++			return 0;
++		}
++	}
++
++	err( "invalid inode or unknown pwm" );
++
++	return ret;
++};
++
++/**
++ * pwm_read - file operation interface function for read
++ * @file: file struct ref to file which is read from
++ * @buff: target buffer which things go to
++ * @len: length of target buffer
++ * @off: offset
++ *
++ */
++int skov_pwm_read( struct file *file, char *buff, size_t len, loff_t *off )
++{
++	struct skov_pwm *p;
++	unsigned i = 0, l = 0;
++	unsigned char dat[4] = {0x00, 0x00, 0x00, 0x00};
++
++
++	if( *off != 0 ) { return 0; }
++
++
++	if ( file->private_data == NULL )
++	{
++		err( "pwm_read: file->private_data == NULL" );
++		return -ENOMEM;
++	}
++
++	p = ( struct skov_pwm * )file->private_data;
++
++
++	snprintf( dat, sizeof( dat ), "%d", ( p->duty_cycle - p->start_offset ) * 100 / ( p->period - p->start_offset - p->end_offset ) );
++
++	l = strlen( dat ) + 1;
++
++	if ( l > len ) l = len;
++
++	i = copy_to_user( buff, dat, l );
++
++	*off += ( l-i );
++	return ( l-i );
++};
++
++// ------------------------------------------------------------------------
++/**
++ * pwm_write - file operation interface function for write
++ * @file: file struct ref to file which is written to
++ * @buff: source buffer where data come from
++ * @len: length of source buffer
++ * @off: offset
++ *
++ */
++int skov_pwm_write( struct file *file, const char *buff, size_t len, loff_t *off )
++{
++	unsigned char dat[10] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++	int i = 0, l = 0;
++	unsigned val, duty;
++	struct skov_pwm *p;
++	int change_period = 0,change_clock = 0, change_duty = 0;
++	unsigned char *ptr;
++
++	if ( len < 1 )
++	{
++		err( "to less data" );
++		return 1;
++	}
++
++	if ( buff == NULL )
++	{
++		err( "param buff = NULL !" );
++		return 1;
++	}
++
++	l = len;
++
++	if ( l >= sizeof( dat ) )
++	{
++		l = sizeof( dat ) - 1;
++	}
++
++	i = copy_from_user( dat, buff, l );
++
++	dat[( l-i )] = 0x00;
++
++	if ( i < 0 )
++	{
++		err( "parameter missing" );
++		return -EINVAL;
++	}
++
++
++	if ( dat[0] == 'p' )
++	{
++		change_period = 1;
++		ptr = &dat[1];
++	}
++	else if ( dat[0] == 'c' )
++	{
++		change_clock = 1;
++		ptr = &dat[1];
++	}
++	else
++	{
++		change_duty = 1;
++		ptr = &dat[0];
++	}
++
++
++	val = ( unsigned )simple_strtol( ptr, NULL, 0 );
++
++	if ( file->private_data == NULL )
++	{
++		err( "pwm_write: file->private_data == NULL" );
++		return -ENOMEM;
++	}
++
++	p = ( struct skov_pwm * )file->private_data;
++
++	if ( change_period )
++	{
++		p->period = val;
++
++		/*
++		  CHANGE PERIOD
++		*/
++
++		at91_pwm_write( AT91_PWM_CMR( p->id ), AT91_PWM_CMR_HIGH_POL | p->pre_scaler | AT91_PWM_CMR_UPDATE_PERIOD  );
++		at91_pwm_write( AT91_PWM_CMR( p->id ) + AT91_PWM_CUPD, val );
++	}
++
++	if ( change_duty )
++	{
++		if ( val < 0 )  { err( "value out of range! Must be 0-100" ); val = 0; }
++		if ( val > 100 ) { err( "value out of range! Must be 0-100" ); val = 100;}
++
++		duty = p->start_offset;
++		duty += val * ( p->period - p->start_offset - p->end_offset ) / 100;
++
++		p->duty_cycle = duty;
++
++		/*
++		  CHANGE DUTY CYCLE
++		*/
++
++		at91_pwm_write( AT91_PWM_CMR( p->id ), AT91_PWM_CMR_HIGH_POL | p->pre_scaler | AT91_PWM_CMR_UPDATE_DUTY );
++		at91_pwm_write( AT91_PWM_CMR( p->id ) + AT91_PWM_CUPD, duty );
++	}
++	if ( change_clock )
++	{
++		/*
++		  CHANGE CLOCK
++		*/
++		p->pre_scaler = val;
++		at91_pwm_write( AT91_PWM_CMR( p->id ), AT91_PWM_CMR_HIGH_POL | val );
++	}
++
++	return ( l - i );
++};
++
++
++struct file_operations skov_pwm_file_ops =
++{
++	.owner 	= THIS_MODULE,
++	.open	= skov_pwm_open,
++	.read   = skov_pwm_read,
++	.write 	= skov_pwm_write,
++};
++
++
++static int __devinit skov_pwm_probe( struct platform_device *pdev )
++{
++	int i = 0, ret = -EIO, x = 0;
++	struct resource *res;
++	struct clk *pwm_clk;
++        struct device *class_dev;
++
++	skov_pwm_data = pdev->dev.platform_data;
++	if ( !skov_pwm_data )
++	{
++		err( "no platform data" );
++		return -ENODEV;
++	}
++
++	pwm_clk = clk_get( &pdev->dev, "pwm_clk" );
++	if ( IS_ERR( pwm_clk ) )
++	{
++		err( "no clock defined" );
++		return -ENODEV;
++	}
++
++	clk_enable( pwm_clk );
++
++	/* Get I/O base address and IRQ */
++	res = platform_get_resource( pdev, IORESOURCE_MEM, 0 );
++	if ( !res )
++	{
++		err( "platform_get_resource failed" );
++		return -ENODEV;
++	}
++
++	if ( !request_mem_region( res->start, res->end - res->start + 1, "pwm" ) )
++	{
++		err( "request_mem_region failed" );
++		return -ENODEV;
++	}
++
++	base_addr = ( unsigned long )ioremap( res->start, res->end - res->start + 1 );
++	if ( !base_addr ) {
++		err( "ioremap failed" );
++		goto request_mem_region;
++	}
++
++	for ( i=0; i < skov_pwm_data->pwm_len; i++ )
++	{
++
++		if ( !skov_pwm_data->pwms[i].state ) continue;
++
++		dev_counter++;
++
++		// Set periph
++		if (  skov_pwm_data->pwms[i].periph == 'A' )
++		{
++			at91_set_A_periph( skov_pwm_data->pwms[i].pin, 0 );
++		}
++		else // ( at91sam9263_pwm[i].periph == 'B' )
++		{
++			at91_set_B_periph( skov_pwm_data->pwms[i].pin, 0 );
++		}
++
++		// Selection of the clock for each channel ( CPRE field in the PWM_CMRx register )
++		// Configuration of the waveform alignment for each channel ( CALG field in the PWM_CMRx register )
++		// Configuration of the output waveform polarity for each channel ( CPOL in the PWM_CMRx register )
++		at91_pwm_write( AT91_PWM_CMR( i ), AT91_PWM_CMR_HIGH_POL | skov_pwm_data->pwms[i].pre_scaler );
++
++		// Configuration of the period for each channel ( CPRD in the PWM_CPRDx register ). Writing
++		// in PWM_CPRDx Register is possible while the channel is disabled. After validation of the
++		// channel, the user must use PWM_CUPDx Register to update PWM_CPRDx as explained
++		// below.
++		at91_pwm_write( AT91_PWM_CMR( i ) + AT91_PWM_CPRD, skov_pwm_data->pwms[i].period );
++
++		// Configuration of the duty cycle for each channel ( CDTY in the PWM_CDTYx register ).
++		// Writing in PWM_CDTYx Register is possible while the channel is disabled. After validation
++		// of the channel, the user must use PWM_CUPDx Register to update PWM_CDTYx as
++		// explained below.
++		if(!skov_pwm_data->pwms[i].startup) // Dont make PWM output if the startup flag is set
++		{
++			at91_pwm_write( AT91_PWM_CMR( i ), AT91_PWM_CMR_LOW_POL | skov_pwm_data->pwms[i].pre_scaler | AT91_PWM_CMR_UPDATE_DUTY );
++			at91_pwm_write( AT91_PWM_CMR( i ) + AT91_PWM_CDTY, 0 );
++			at91_pwm_write( AT91_PWM_CMR( i ) + AT91_PWM_CUPD, 0 );
++		}
++		else
++		{
++			at91_pwm_write( AT91_PWM_CMR( i ) + AT91_PWM_CDTY, skov_pwm_data->pwms[i].duty_cycle );
++			at91_pwm_write( AT91_PWM_CMR( i ) + AT91_PWM_CUPD, skov_pwm_data->pwms[i].duty_cycle );
++		}
++	}
++
++	// Enable the PWM channel ( Writing CHIDx in the PWM_ENA register )
++	// It is possible to synchronize different channels by enabling them at the same time by means of
++	// writing simultaneously several CHIDx bits in the PWM_ENA register.
++	// In such a situation, all channels may have the same clock selector configuration and the
++	// same period specified.
++	at91_pwm_write( AT91_PWM_PER, 0xf ); //( AT91_PWM_PER_CH2 | AT91_PWM_PER_CH3 ) & ~( AT91_PWM_PER_CH0 | AT91_PWM_PER_CH1 ) );
++
++	minor = 0;
++	major = PWM_MAJOR;
++	devt = MKDEV( major,minor );
++
++	ret = register_chrdev_region( devt, dev_counter, PWM_CDEV );
++
++	if ( ret < 0 )
++	{
++		err( "cannot register character devices" );
++		goto gpio_init;
++	}
++
++
++	cdev = cdev_alloc();
++	if ( !cdev )
++	{
++		err( "unable to alloc new char device" );
++		goto alloc_chrdev;
++	}
++
++	cdev->owner = THIS_MODULE;
++	cdev->ops  = &skov_pwm_file_ops;
++
++
++	kobject_set_name( &cdev->kobj, "%s", PWM_CDEV );
++
++
++	ret = cdev_add( cdev, devt, dev_counter );
++	if ( ret )
++	{
++		err( "unable to add a new char device" );
++		goto cdev_alloc;
++	}
++
++	pwm_class = class_create( THIS_MODULE, PWM_CDEV );
++	if ( IS_ERR( pwm_class ) )
++	{
++		err( "can't create class. No udev support ?" );
++		ret = -EINVAL;
++		goto cdev_add;
++	}
++
++	for ( i=0, x=0; i < skov_pwm_data->pwm_len; i++ )
++	{
++		if ( skov_pwm_data->pwms[i].state )
++		{
++			class_dev = device_create( pwm_class, NULL, MKDEV( major,x++ ), NULL, skov_pwm_data->pwms[i].dev_name );
++			if (IS_ERR(class_dev)) {
++				printk(KERN_WARNING "ch%d: device_create failed\n", i);
++				ret = PTR_ERR(class_dev);
++				goto  class_create;
++                        }
++		}
++	}
++
++	pr_info( PWM_NAME ": probe succeded\n");
++
++	return 0;
++
++ class_create:
++
++	for ( ;x>-1;x-- )
++	{
++		device_destroy( pwm_class, MKDEV( major,x ) );
++	}
++
++	class_destroy( pwm_class );
++
++ cdev_add:
++
++ cdev_alloc:
++	cdev_del( cdev );
++
++ alloc_chrdev:
++	unregister_chrdev_region( devt, dev_counter );
++
++ gpio_init:
++	/*
++	  for ( i=0; i < pwm_data->pwm_len; i++ ) {
++	  if ( pwm_data->pwms[i].state )
++	  gpio_free( pwm_data->pwms[i].pin );
++	  }
++
++	*/
++ request_mem_region:
++
++	release_mem_region( res->start, res->end - res->start + 1 );
++
++	return ret;
++}
++
++
++
++static int __exit skov_pwm_remove( struct platform_device *pdev )
++{
++
++	struct resource *res;
++
++	skov_pwm_data = pdev->dev.platform_data;
++
++	device_destroy( pwm_class, MKDEV( major,0 ) );
++
++	class_destroy( pwm_class );
++
++	cdev_del( cdev );
++
++	unregister_chrdev_region( MKDEV( major,0 ), dev_counter );
++
++	res = platform_get_resource( pdev, IORESOURCE_MEM, 0 );
++	if ( !res )
++	{
++		err( "platform_get_resource failed" );
++		return -ENODEV;
++	}
++
++	release_mem_region( res->start, res->end - res->start + 1 );
++
++	return 0;
++};
++
++struct platform_driver skov_pwm_device_driver =
++{
++	.remove	= __exit_p( skov_pwm_remove ),
++	.probe  = skov_pwm_probe,
++	.driver	= {
++		.name	= "pwm_device",
++		.owner	= THIS_MODULE,
++	}
++};
++
++static int __init skov_pwm_init( void )
++{
++	return platform_driver_register( &skov_pwm_device_driver );
++};
++
++static void __exit skov_pwm_exit( void )
++{
++	platform_driver_unregister( &skov_pwm_device_driver );
++};
++
++module_init( skov_pwm_init );
++module_exit( skov_pwm_exit );
++
+diff --git a/drivers/skov/readme_485.txt b/drivers/skov/readme_485.txt
+new file mode 100644
+index 0000000..07d91b7
+--- /dev/null
++++ b/drivers/skov/readme_485.txt
+@@ -0,0 +1,110 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/* Serial */
++#define ATMEL_UART_CTS  0x01
++#define ATMEL_UART_RTS  0x02
++#define ATMEL_UART_DSR  0x04
++#define ATMEL_UART_DTR  0x08
++#define ATMEL_UART_DCD  0x10
++#define ATMEL_UART_RI   0x20
++
++extern void __init at91_register_uart(unsigned id, unsigned portnr, unsigned pins, unsigned mode);
++extern void __init at91_set_serial_console(unsigned portnr);
++
++struct at91_uart_config {
++        unsigned short  console_tty;    /* tty number of serial console */
++        unsigned short  nr_tty;         /* number of serial tty's */  
++        short           tty_map[];      /* map UART to tty number */
++};
++extern struct platform_device *atmel_default_console_device;
++extern void __init __deprecated at91_init_serial(struct at91_uart_config *config);
++
++struct atmel_uart_data {
++        short           use_dma_tx;     /* use transmit DMA? */
++        short           use_dma_rx;     /* use receive DMA? */
++        void __iomem    *regs;          /* virtual base address, if any */
++        short           rs485_mode;     /* Use for setting the port to RS485 */        <----------------------------------------------
++};
++extern void __init at91_add_device_serial(void);
++
++
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++static void __init ek_map_io(void)
++{
++        /* Initialize processor: 16.000 MHz crystal */
++        at91sam9263_initialize(16000000);
++
++        /* DGBU on ttyS0. (Rx & Tx only) */
++        at91_register_uart(0, 0, 0, ATMEL_US_USMODE_NORMAL);
++
++        /* USART0 on ttyS1. (Rx, Tx, RTS) RS 485 mode */
++        at91_register_uart(AT91SAM9263_ID_US0, 1, ATMEL_UART_RTS, ATMEL_US_USMODE_RS485 );
++        /* set serial console to ttyS0 (ie, DBGU) */
++        at91_set_serial_console(0);
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++
++void __init at91_register_uart(unsigned id, unsigned portnr, unsigned pins , unsigned mode)
++{
++        struct platform_device *pdev;
++
++        switch (id) {
++                case 0:         /* DBGU */
++                        pdev = &at91sam9263_dbgu_device;
++                        configure_dbgu_pins();
++                        at91_clock_associate("mck", &pdev->dev, "usart");
++                        break;
++                case AT91SAM9263_ID_US0:
++                        pdev = &at91sam9263_uart0_device;
++                        configure_usart0_pins(pins);
++                        uart0_data.rs485_mode = mode;   <---------------------------------------------------------------------------
++                        at91_clock_associate("usart0_clk", &pdev->dev, "usart");
++                        break;
++                case AT91SAM9263_ID_US1:
++                        pdev = &at91sam9263_uart1_device;
++                        configure_usart1_pins(pins);
++                        uart1_data.rs485_mode = mode;
++                        at91_clock_associate("usart1_clk", &pdev->dev, "usart");
++                        break;
++                case AT91SAM9263_ID_US2:
++                        pdev = &at91sam9263_uart2_device;
++                        configure_usart2_pins(pins);
++                        uart2_data.rs485_mode = mode;
++                        at91_clock_associate("usart2_clk", &pdev->dev, "usart");
++                        break;
++                default:
++                        return;
++        }
++        pdev->id = portnr;              /* update to mapped ID */
++
++        if (portnr < ATMEL_MAX_UART)
++                at91_uarts[portnr] = pdev;
++}
++
++
++---------------------------------------------------------------
++drivers/serial/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_SERIAL_ATMEL) += atmel_serial.o
++
++---------------------------------------------------------------
++drivers/serial/Kconfig
++---------------------------------------------------------------
++
++config SERIAL_ATMEL
++        bool "AT91 / AT32 on-chip serial port support"
++        depends on (ARM && ARCH_AT91) || AVR32
++        select SERIAL_CORE
++        help
++          This enables the driver for the on-chip UARTs of the Atmel
++          AT91 and AT32 processors.
+diff --git a/drivers/skov/readme_ad_converter_mcp3002.txt b/drivers/skov/readme_ad_converter_mcp3002.txt
+new file mode 100644
+index 0000000..439b135
+--- /dev/null
++++ b/drivers/skov/readme_ad_converter_mcp3002.txt
+@@ -0,0 +1,7 @@
++Author: San Rose Technology
++If the device is an module
++#modprobe ad_converter_mpc3002
++Read from Temperatur from device
++#cat /sys/bus/spi/devices/spi0.1/temp
++Read Voltage from Device
++#cat /sys/bus/spi/devices/spi0.1/voltage
+diff --git a/drivers/skov/readme_encoder.txt b/drivers/skov/readme_encoder.txt
+new file mode 100644
+index 0000000..fd0d41a
+--- /dev/null
++++ b/drivers/skov/readme_encoder.txt
+@@ -0,0 +1,184 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/* GPIO MAP */
++
++struct gpio_pin_pio_map {
++    unsigned int	pin;
++    void __iomem	*pio;
++    unsigned int	mask;
++};
++
++/* Encoder (Scroll Wheel) */
++
++#define ENC_MAX_PIO	4
++
++struct encoder_data {   
++    short 			pio_map_len;
++    struct gpio_pin_pio_map 	pio_map[ENC_MAX_PIO];
++};
++
++extern void __init at91_add_device_encoder(struct encoder_data *enc_data);
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++static struct encoder_data enc_data = {
++    .pio_map = {
++	[ENC_ENABLE]  = { .pin = AT91_PIN_PB25, }, // 1
++	[ENC_LEFT]    = { .pin = AT91_PIN_PB29, }, // 2
++	[ENC_RIGHT]   = { .pin = AT91_PIN_PB31, }, // 3
++	[ENC_CONFIRM] = { .pin = AT91_PIN_PB27, }, // 4
++    },
++    .pio_map_len = 4,
++};
++
++
++static void __init ek_board_init(void)
++{
++  ...		
++
++  /* Scroll wheel / Encoder */
++  at91_add_device_encoder(&enc_data);
++  ...
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++
++#if defined(CONFIG_ENCODER_DEVICE) || defined(CONFIG_ENCODER_DEVICE_MODULE)
++
++static struct platform_device encoder_device = {
++    .name		= "encoder_device",
++    .id			= -1,
++    .num_resources 	= 0,
++};
++
++void __init at91_add_device_encoder(struct encoder_data *data) {
++
++    unsigned      i = 0;
++    unsigned      pin;
++
++    if (!data) {
++	printk(KERN_ERR "Add encoder platform device failed ! ( data == NULL )\n");
++	return;
++    }
++
++    for ( i=0; i < data->pio_map_len; i++ ) {
++	pin = data->pio_map[i].pin; 
++	if ( pin > 0 ) {
++	    data->pio_map[i].pio  = pin_to_controller( pin ); 
++	    data->pio_map[i].mask = pin_to_mask( pin );
++	}
++	else {
++	    printk(KERN_ERR "Add encoder platform device failed ! (gpio pin configuration mismatch)\n");
++	    return;
++	}
++    }
++
++    encoder_device.dev.platform_data = data;
++    platform_device_register(&encoder_device);
++}
++#else
++void __init at91_add_device_encoder(struct encoder_data *data) {}
++#endif
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_ENCODER_DRIVER)		+= encoder.o
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++
++config ENCODER_DEVICE
++	bool "Scroll wheel / encoder device based on gpio"
++	default y
++
++config ENCODER_DRIVER
++	tristate "Scroll wheel / encoder driver"
++	depends on ENCODER_DEVICE != n
++	default y
++	help
++	  Driver for the scroll wheel
++
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++#include <linux/input.h>
++#include <fcntl.h>
++#include <time.h>
++#include "skov_input.h"
++#include "skov_encoder.h"
++
++#define EVENT_FD_1 "/dev/input/event0"
++#define EVENT_FD_2 "/dev/input/event1"
++
++
++int main (int argc, char *argv[]) {
++
++    int			 fd1, fd2;
++    struct input_event	 inev;
++    fd_set		 rfds;
++    int			 retval;
++    struct tm		 mtime;
++
++    fd1 = open( EVENT_FD_1, O_RDONLY );
++    if ( fd1 < 1 ) {
++	printf("can't open %s\n", EVENT_FD_1 );
++	return -1;
++    }
++
++    fd2 = open( EVENT_FD_2, O_RDONLY );
++    if ( fd2 < 1 ) {
++	printf("can't open %s\n", EVENT_FD_2 );
++	return -1;
++    }
++
++    do {
++	FD_ZERO( &rfds);
++	FD_SET( fd1, &rfds);
++	FD_SET( fd2, &rfds);
++
++	retval = select( fd2+1, &rfds, NULL, NULL, NULL ); 
++
++	if (retval == -1) {
++	    return(-1);
++	}
++	else if (retval) {
++	    if ( FD_ISSET(fd1, &rfds) ) {
++		read( fd1, &inev, sizeof(struct input_event));
++	    }
++	    else {
++		read( fd2, &inev, sizeof(struct input_event));
++	    }
++
++	    if ( !inev.type ) {continue;}
++
++	    mtime = (struct tm)*localtime(&inev.time.tv_sec);
++
++	    if ( mtime.tm_year > 100 ) { mtime.tm_year -= 100; }
++
++	    printf("  input_event:\n");
++	    printf("  time    = %02d.%02d.%02d / %02d:%02d:%02d\n",
++		   mtime.tm_mday, mtime.tm_mon+1, mtime.tm_year,
++		   mtime.tm_hour, mtime.tm_min, mtime.tm_sec );
++
++	    printf("  type    = %d\n", inev.type);
++	    printf("  code    = 0x%x\n", inev.code );
++	    printf("  value   = %s\n", (inev.value==PRESSED?"pressed":"released"));
++	    printf("\n");
++	}
++
++    } while ( inev.code != ENC_CONFIRM_KK );
++
++    close( fd1 );
++    close( fd2 );
++}
+diff --git a/drivers/skov/readme_lc7981.txt b/drivers/skov/readme_lc7981.txt
+new file mode 100644
+index 0000000..dd6fe17
+--- /dev/null
++++ b/drivers/skov/readme_lc7981.txt
+@@ -0,0 +1,187 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/* GPIO MAP */
++
++struct gpio_pin_pio_map {
++    unsigned int	pin;
++    void __iomem	*pio;
++    unsigned int	mask;
++};
++
++
++/* LCD cl7981 Data */
++
++struct lcd_lc7981_data {
++    short 			state; // 0 off , 1 on
++    short			pio_map_len;
++    struct gpio_pin_pio_map 	pio_map[24];
++
++};
++
++extern void __init at91_add_device_lc7981( struct lcd_lc7981_data *data);
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++static struct lcd_lc7981_data lc7981_data = {
++    .state  = 0,
++    .pio_map = {
++	[LCD_EN] = { .pin = AT91_PIN_PE8, },//  1
++	[LCD_RW] = { .pin = AT91_PIN_PE11,},//  2
++	[LCD_RS] = { .pin = AT91_PIN_PE12,},//  3 
++	[LCD_CS] = { .pin = AT91_PIN_PE9, },//  4
++	[LCD_RST]= { .pin = AT91_PIN_PE13,},//  5
++
++	[LCD_B0] = { .pin = AT91_PIN_PE0, },//  6
++	[LCD_B1] = { .pin = AT91_PIN_PE1, },//  7
++	[LCD_B2] = { .pin = AT91_PIN_PE2, },//  8
++	[LCD_B3] = { .pin = AT91_PIN_PE3, },//  9
++	[LCD_B4] = { .pin = AT91_PIN_PE4, },// 10
++	[LCD_B5] = { .pin = AT91_PIN_PE5, },// 11
++	[LCD_B6] = { .pin = AT91_PIN_PE6, },// 12
++	[LCD_B7] = { .pin = AT91_PIN_PE7, },// 13
++    },
++    .pio_map_len = 13,
++};
++
++
++static void __init ek_board_init(void)
++{
++  ...	
++
++  /* LCD Controller */
++  at91_add_device_lc7981(&lc7981_data);
++  ...
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++
++/* --------------------------------------------------------------------
++ *  LC7981 LCD Controller
++ * -------------------------------------------------------------------- */
++
++#if defined(CONFIG_LCD_LC7981_DEVICE) || defined(CONFIG_LCD_LC7981_DEVICE_MODULE)
++
++static struct platform_device lcd_lc7981_device = {
++    .name		= "lcd_lc7981_device",
++    .id			= -1,
++    .num_resources	= 0,
++
++};
++
++void __init at91_add_device_lc7981( struct lcd_lc7981_data *data) 
++{
++    int i = 0;
++    unsigned pin = 0;
++    if (!data) {
++	printk(KERN_ERR "LC7981: add platform device failed ! (data = NULL)\n");
++	return;
++    }
++
++    for ( i=0; i < data->pio_map_len; i++ ) {
++	pin = data->pio_map[i].pin; 
++	if ( pin > 0 ) {
++	    data->pio_map[i].pio  = pin_to_controller( pin ); 
++	    data->pio_map[i].mask = pin_to_mask( pin );
++	}
++	else {
++	    printk(KERN_ERR "LD7981: add platform device failed ! (gpio pin configuration mismatch)\n");
++	    return;
++	}
++    }
++
++    lcd_lc7981_device.dev.platform_data = data;
++    platform_device_register(&lcd_lc7981_device);
++}
++#else
++void __init at91_add_device_lc7981( struct lcd_lc7981_data *data) {}
++#endif
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_LCD_LC7981_DRIVER)		+= lc7981.o
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++config LCD_LC7981_DEVICE
++	bool "lcd device based on lc7981 controller"
++	default y
++
++config LCD_LC7981_DRIVER
++	tristate "LCD driver"
++	depends on LCD_LC7981_DEVICE != n
++	default y
++	help
++          Build to use with ramtex. Expect write and read one byte a time
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++
++// Makefile
++
++all: simple_test
++
++PREFIX=/toolchain/gcc-3.4.5-glibc-2.3.6/arm-softfloat-linux-gnu/bin
++CC=$(PREFIX)/arm-softfloat-linux-gnu-gcc
++STRIP=$(PREFIX)/arm-softfloat-linux-gnu-strip
++CFLAGS=-g -O0 -D_LARGEFILE64_SOURCE -DGHW_SINGLE_CHIP -I../glcd/inc -I../glcd/fonts -I. -I/prj/skov/at91sam9263ek/linux-2.6.23-rc3/include 
++LDFLAGS= -lm
++FLAGS = -Wall
++
++OBJS=simple_test.o bussim.o 
++
++.o:
++	$(CC) $(LDFLAGS) $< $(LIBS) -o $(OUT)/$@
++
++.c.o:
++	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
++
++clean:
++	rm -f $(OBJS) *.o *~
++
++simple_test: simple_test.o bussim.o ghwioini.o ghwbuf.o ghwinit.o gvpinit.o gsputs.o gvpsel.o gvpcset.o gfsymw.o gfputch.o gfgeth.o gstrln.o gvpset.o gslen.o gvpfill.o gvpscrol.o ghwfill.o giputsym.o ghwgscrl.o ghwsymwr.o ggline.o ghwblkrw.o ghwretgl.o ghwpixel.o gvpreset.o gvpvpw.o gvpvph.o ggrect.o ggpixel.o
++	$(CC) $+ -o $(OUT)/$@ $(LDFLAGS) 
++
++
++
++// simple_test.c
++
++/* RAMTEX */
++
++#include <gdisp.h> /* LCD prototypes */
++
++int main(void)
++{
++    ginit();
++
++    gfillvp(0,0,GDISPW-1, GDISPH-1, 0xaa55 );
++
++    gselvp(1);
++    gsetcvp(0,2,11,4);
++
++    gselvp(2);
++    gsetcvp(12,2,20,16);
++
++    gselvp(0);
++    gputs("First message");
++
++    gselvp(1);
++    gputs("viewport");
++    gputch("1");
++
++    gselvp(2);
++    gputs("long line wrapping asdasdas asdasdasdasd");
++
++    return 0;
++}
++
+diff --git a/drivers/skov/readme_led.txt b/drivers/skov/readme_led.txt
+new file mode 100644
+index 0000000..8cded91
+--- /dev/null
++++ b/drivers/skov/readme_led.txt
+@@ -0,0 +1,241 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/* GPIO MAP */
++
++struct gpio_pin_pio_map {
++    unsigned int	pin;
++    void __iomem	*pio;
++    unsigned int	mask;
++};
++
++/* LED's */
++
++#define LED_MAX_PIO	11
++
++struct led {
++    short 		state;
++    int 		speed;
++    unsigned char 	dev_name[13];
++
++};
++
++struct led_dev_data {  
++    short	       		led_len;
++    struct led	       		leds[LED_MAX_PIO];
++    struct gpio_pin_pio_map 	pio_map[LED_MAX_PIO];
++};
++
++extern void __init at91_add_device_led(struct led_dev_data *data);
++
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++static struct led_dev_data led_data = {
++    .leds = {
++	[0] = {	.dev_name = "led_0", 	}, // 1
++	[1] = {	.dev_name = "led_1", 	}, // 2
++	[2] = {	.dev_name = "led_2", 	}, // 3
++	[3] = {	.dev_name = "led_3", 	}, // 4
++	[4] = {	.dev_name = "led_4", 	}, // 5
++	[5] = {	.dev_name = "led_5", 	}, // 6
++	[6] = {	.dev_name = "led_6", 	}, // 7
++	[7] = {	.dev_name = "led_7", 	}, // 8
++	[8] = {	.dev_name = "led_DB1", 	}, // 9
++	[9] = {	.dev_name = "led_DB2", 	}, // 10
++	[10]= {	.dev_name = "led_DB3", 	}, // 11
++    },
++    .pio_map = {
++// eval board
++/*
++  [0] = { .pin = AT91_PIN_PB8, 	}, // 1
++  [1] = { .pin = AT91_PIN_PC29,	}, // 2
++*/
++// skov target
++
++	 [0] = { .pin = AT91_PIN_PA18,	}, // 1
++	 [1] = { .pin = AT91_PIN_PA19,	}, // 2
++	 [2] = { .pin = AT91_PIN_PA20,	}, // 3
++	 [3] = { .pin = AT91_PIN_PA21,	}, // 4
++	 [4] = { .pin = AT91_PIN_PA22,	}, // 5
++	 [5] = { .pin = AT91_PIN_PA23,	}, // 6
++	 [6] = { .pin = AT91_PIN_PA24,	}, // 7
++	 [7] = { .pin = AT91_PIN_PA25,	}, // 8
++	 [8] = { .pin = AT91_PIN_PD0,	}, // 9
++	 [9] = { .pin = AT91_PIN_PD1,	}, // 10
++	 [10]= { .pin = AT91_PIN_PD7,	}, // 11
++     },
++    .led_len = 11,
++};
++
++
++static struct led_dev_data led_data = {
++    .leds = {
++	[0] = {	.dev_name = "led_1", 	}, // 1
++	[1] = {	.dev_name = "led_2", 	}, // 2
++    },
++    .pio_map = {
++	[0] = { .pin = AT91_PIN_PB8, 	}, // 1
++	[1] = { .pin = AT91_PIN_PC29,	}, // 2
++    },
++    .led_len = 2,
++};
++
++
++
++static void __init ek_board_init(void)
++{
++  ...	
++  /* LEDs */
++  at91_add_device_led(&led_data);
++  ...
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++#if defined(CONFIG_LED_DEVICE) || defined(CONFIG_LED_DEVICE_MODULE)
++
++static struct platform_device led_device = {
++    .name		= "led_device",
++    .id			= -1,
++    .num_resources 	= 0,
++};
++
++void __init at91_add_device_led(struct led_dev_data *data) {
++
++    int 		i = 0;
++    unsigned int 	pin;
++
++    if (!data) {
++	printk(KERN_ERR "Add LED platform device failed ! (data = NULL)\n");
++	return;
++    }
++
++    for ( i=0; i < data->led_len; i++ ) {
++	pin = data->pio_map[i].pin; 
++	if ( pin > 0 ) {
++	    data->pio_map[i].pio  = pin_to_controller( pin ); 
++	    data->pio_map[i].mask = pin_to_mask( pin );
++	}
++	else {
++	    printk(KERN_ERR "Add LED platform device failed ! (gpio pin configuration mismatch)\n");
++	    return;
++	}
++    }
++
++    led_device.dev.platform_data = data;
++    platform_device_register(&led_device);
++}
++#else
++void __init at91_add_device_led(struct led_dev_data *data) {}
++#endif
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_LED_DRIVER)		+= led.o
++
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++config LED_DEVICE
++	bool "LED device"
++	default y		  
++
++config LED_DRIVER
++	tristate "LED driver"
++	depends on LED_DEVICE != n
++	default n
++	help
++	  Driver which enables controlling of the LED's of the 
++	  Atmel at91sam9263-ek board.
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include "skov_led.h"
++
++
++#define LED_0 "/dev/led_0"
++#define LED_1 "/dev/led_1"
++
++int main (int argc, char *argv[]) {
++    int fd_led_0;
++    int fd_led_1;
++    unsigned char state_c[2] = {0x00, 0x00};
++    int 	  state;
++
++
++    fd_led_0 = open( LED_0, O_RDWR );
++    if ( fd_led_0 < 1) {
++	printf("can't open %s\n", LED_0 );
++	return -1;
++    }
++
++    fd_led_1 = open( LED_1, O_RDWR );
++    if ( fd_led_1 < 1) {
++	printf("can't open %s\n", LED_1 );
++	return -1;
++    }
++
++    // led 0 on
++    write( fd_led_0, SKOV_LED_ON_C, 1 ); 
++
++    // led 1 blink
++    write( fd_led_1, SKOV_LED_BLINK_C, 1 ); 
++
++
++
++    read( fd_led_0, state_c, 1 );
++
++    printf("LED 0:\n");
++    switch( atol(state_c) ) {
++    case SKOV_LED_OFF:		printf("SKOV_LED_OFF\n"); break;
++    case SKOV_LED_ON:		printf("SKOV_LED_ON\n"); break;
++    case SKOV_LED_BLINK_FAST:	printf("SKOV_LED_BLINK_FAST\n"); break;
++    case SKOV_LED_BLINK:	printf("SKOV_LED_BLINK\n"); break;
++    case SKOV_LED_BLINK_SLOW:	printf("SKOV_LED_BLINK_SLOW\n"); break;
++    default: printf("invalid state\n");
++    }
++
++    printf("\n");
++
++    read( fd_led_1, state_c, 1 );
++
++    printf("LED 1:\n");
++    switch( atol(state_c)) {
++    case SKOV_LED_OFF: 		printf("SKOV_LED_OFF\n"); break;
++    case SKOV_LED_ON:		printf("SKOV_LED_ON\n"); break;
++    case SKOV_LED_BLINK_FAST:	printf("SKOV_LED_BLINK_FAST\n"); break;
++    case SKOV_LED_BLINK:	printf("SKOV_LED_BLINK\n"); break;
++    case SKOV_LED_BLINK_SLOW:	printf("SKOV_LED_BLINK_SLOW\n"); break;
++    default: printf("invalid state\n");
++    }
++
++
++    sleep(2);
++
++    // led 0 off
++    write( fd_led_0, SKOV_LED_OFF_C, 1 ); 
++
++    // led 1 off
++    write( fd_led_1, SKOV_LED_OFF_C, 1 ); 
++
++
++    close(fd_led_0);
++    close(fd_led_1);
++    
++    return 0;
++};
++
+diff --git a/drivers/skov/readme_pwm.txt b/drivers/skov/readme_pwm.txt
+new file mode 100644
+index 0000000..7f73ae5
+--- /dev/null
++++ b/drivers/skov/readme_pwm.txt
+@@ -0,0 +1,163 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++ /* PWM */
++#define PWM_MAX 4
++
++struct pwm {
++	unsigned 	state;
++	unsigned	id;
++	unsigned	period;
++	unsigned        start_offset;
++	unsigned        end_offset;
++	unsigned	duty_cycle;
++	unsigned char 	dev_name[13];
++	unsigned char 	periph;
++	unsigned      	pin;
++	unsigned 	pre_scaler;
++};
++
++struct pwm_dev_data {
++	short 		pwm_len;
++	struct pwm	pwms[PWM_MAX];
++};
++
++extern void __init at91_add_device_pwm(struct pwm_dev_data *data);
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++/* 
++ * PWM 
++ */
++static struct pwm_dev_data pwm_data = {
++	.pwm_len = 4,
++	.pwms = {
++		[0] = {
++			.state = 0,
++			.id = 0,
++			.period = 1000,
++			.start_offset = 0,
++			.end_offset = 0,
++			.duty_cycle = 500,
++			.dev_name = "pwm0",
++			.periph = 'A',
++			.pin = AT91_PIN_PC28, 
++			.pre_scaler = AT91_PWM_CMR_MCK1024,
++		},
++		[1] = {
++			.state = 0,
++			.id = 1,
++			.period = 100,
++			.start_offset = 0,
++			.end_offset = 0,
++			.duty_cycle = 30,
++			.dev_name = "pwm1",
++			.periph = 'B',
++			.pin = AT91_PIN_PB8, 
++			.pre_scaler = AT91_PWM_CMR_MCK1024,
++		},
++		[2] = {
++			.state = 1,
++			.id = 2,
++			.period = 500,
++			.start_offset = 60,
++			.end_offset = 340,
++			.duty_cycle = 110, // value about 22   (duty_cycle * 100 / period)
++			.dev_name = "lcd_contrast",
++			.periph = 'B',
++			.pin = AT91_PIN_PC29, 
++			.pre_scaler = AT91_PWM_CMR_MCK512,
++		},
++		[3] = {
++			.state = 1,
++			.id = 3,
++			.period = 100,
++			.start_offset = 0,
++			.end_offset = 0,
++			.duty_cycle = 80,
++			.dev_name = "lcd_bglight",
++			.periph = 'B',
++			.pin = AT91_PIN_PE10, 
++			.pre_scaler = AT91_PWM_CMR_MCK1024,
++		},
++	},
++};
++
++static void __init ek_board_init(void)
++{
++  ...		
++
++ /* PWM for LCD backlight and contrast */
++  at91_add_device_pwm(&pwm_data);
++  ...
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++
++#if defined(CONFIG_PWM_DEVICE) || defined(CONFIG_PWM_DEVICE_MODULE)
++
++static struct resource pwm_resources[] = {
++    [0] = {
++	.start	= AT91SAM9263_BASE_PWMC,
++	.end	= AT91SAM9263_BASE_PWMC + SZ_16K - 1,
++	.flags	= IORESOURCE_MEM,
++    },
++};
++
++static struct platform_device pwm_device = {
++    .name		= "pwm_device",
++    .id			= -1,
++    .resource		= pwm_resources,
++    .num_resources	= ARRAY_SIZE(pwm_resources),
++};
++
++void __init at91_add_device_pwm(struct pwm_dev_data *data) {
++
++    if (!data) {
++	printk(KERN_ERR "Add pwm platform device failed ! (data = NULL)\n");
++	return;
++    }
++
++    pwm_device.dev.platform_data = data;
++    platform_device_register(&pwm_device);
++}
++#else 
++void __init at91_add_device_pwm(struct pwm_dev_data *data) {}
++#endif
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_PWM_DRIVER)		+= pwm.o
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++config PWM_DEVICE
++	bool "PWM device. Used to control backlight and contrast value of LCD display"
++	default y
++
++config PWM_DRIVER
++	tristate "PWM driver. Accesses pwm devices as char devices"
++	depends on PWM_DEVICE != n
++	default m
++
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++
++echo 80 > /dev/lcd_contrast
++
++echo 20 > /dev/lcd_backlight
++
++cat /dev/lcd_contrast
++
++cat /dev/lcd_backlight
+\ No newline at end of file
+diff --git a/drivers/skov/readme_reset_state.txt b/drivers/skov/readme_reset_state.txt
+new file mode 100644
+index 0000000..1c52cbd
+--- /dev/null
++++ b/drivers/skov/readme_reset_state.txt
+@@ -0,0 +1,83 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/**
++ * defines for the reset state driver
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * February 2008
++ *
++ */
++
++#define RSTC_RSTTYP_GENERAL  0
++#define RSTC_RSTTYP_WAKEUP   1
++#define RSTC_RSTTYP_WATCHDOG 2
++#define RSTC_RSTTYP_SOFTWARE 3 
++#define RSTC_RSTTYP_USER     4
++#define RSTC_RSTTYP_UNKNOWN  5
++
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_RESET_STATE_DRIVER)		+= reset_state.o
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++config RESET_STATE_DRIVER
++	tristate "Reset state driver. Reports the cause of the last processor reset."
++	default m
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++#include <linux/input.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++
++// #include <asm/arch/reset_state.h>
++
++#define RSTC_RSTTYP_GENERAL  0
++#define RSTC_RSTTYP_WAKEUP   1
++#define RSTC_RSTTYP_WATCHDOG 2
++#define RSTC_RSTTYP_SOFTWARE 3 
++#define RSTC_RSTTYP_USER     4
++#define RSTC_RSTTYP_UNKNOWN  5
++
++#define FD "/sys/module/reset_state/parameters/state"
++
++int main (int argc, char *argv[]) {
++
++	int		  fd, val;
++	unsigned char     buffer[2] = { 0x00, 0x00 };
++
++	fd = open( FD, O_RDONLY );
++
++	if ( fd < 1 ) {
++		printf("can't open %s\n", FD );
++		return -1;
++	}
++
++	read( fd, &buffer, sizeof(buffer));
++	val = ( unsigned )strtol( buffer, NULL, 0 );
++
++	printf("The cause of the last processor reset was ");
++
++	switch ( val ) 
++	{
++	case RSTC_RSTTYP_GENERAL:  printf("GENERAL. \n");break;
++	case RSTC_RSTTYP_WAKEUP:   printf("WAKEUP.  \n");break;
++	case RSTC_RSTTYP_WATCHDOG: printf("WATCHDOG.\n");break;
++	case RSTC_RSTTYP_SOFTWARE: printf("SOFTWARE.\n");break;
++	case RSTC_RSTTYP_USER:     printf("USER.    \n");break;
++	default: printf("UNKNOWN.\n");
++	}
++
++	close( fd );
++}
+diff --git a/drivers/skov/readme_rtc.txt b/drivers/skov/readme_rtc.txt
+new file mode 100644
+index 0000000..9a58925
+--- /dev/null
++++ b/drivers/skov/readme_rtc.txt
+@@ -0,0 +1,41 @@
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++
++#include <sys/time.h>
++#include <time.h>
++#include <stdio.h>
++
++int main(int argc, char *argv[])
++{
++    int ret = 0;
++    struct timeval      tv;
++    struct timezone     tz;
++    time_t              my_time;
++    struct tm           _tm;
++
++    if (argc < 2) {
++        printf("time param missing\n");
++        printf("%s 1193908274\n", argv[0] );
++        return -1;
++    }
++
++    tv.tv_sec  = atoi(argv[1]);
++    tv.tv_usec = 0;
++
++    ret = settimeofday( &tv, NULL );
++    printf("settimeofday() ret %d\n", ret);
++
++
++    my_time = time(NULL);
++    _tm = (struct tm)*localtime(&my_time);
++
++    if ( _tm.tm_year > 100 ) { _tm.tm_year -= 100; }
++
++    printf("  time    = %02d.%02d.%02d / %02d:%02d:%02d\n",
++           _tm.tm_mday, _tm.tm_mon+1, _tm.tm_year,
++           _tm.tm_hour, _tm.tm_min, _tm.tm_sec );
++
++
++    return 0;
++}
+diff --git a/drivers/skov/readme_under_voltage.txt b/drivers/skov/readme_under_voltage.txt
+new file mode 100644
+index 0000000..c37a76e
+--- /dev/null
++++ b/drivers/skov/readme_under_voltage.txt
+@@ -0,0 +1,135 @@
++---------------------------------------------------------------
++arch/arm/mach-at91/include/mach/board.h
++---------------------------------------------------------------
++
++/* Under Voltage Lock Out */
++
++struct under_voltage_data {   
++	u8              pin;
++};
++
++extern void __init at91_add_device_under_voltage(struct under_voltage_data *data);
++
++---------------------------------------------------------------
++arch/arm/mach-at91/board-sam9263ek.c
++---------------------------------------------------------------
++
++/*
++ * Under Voltage Lock Out
++ */
++static struct under_voltage_data uv_data = {
++	.pin = AT91_PIN_PE14,
++};
++
++
++static void __init ek_board_init(void)
++{
++  ...		
++
++  /* Under Voltage */
++  at91_add_device_under_voltage(&uv_data);
++  ...
++}
++
++---------------------------------------------------------------
++arch/arm/mach-at91/at91sam9263_devices.c
++---------------------------------------------------------------
++
++
++/* --------------------------------------------------------------------
++ *  UnderVoltage LockOut
++ * -------------------------------------------------------------------- */
++#if defined(CONFIG_UNDER_VOLTAGE_DEVICE) || defined(CONFIG_UNDER_VOLTAGE_DEVICE_MODULE)
++
++static struct platform_device under_voltage_device = {
++	.name		= "under_voltage_device",
++	.id		= -1,
++	.num_resources 	= 0,
++};
++
++void __init at91_add_device_under_voltage(struct under_voltage_data *data) {
++
++	if (!data) {
++		printk(KERN_ERR "Under_Voltage: add platform device failed ! ( data == NULL )\n");
++		return;
++	}
++
++	under_voltage_device.dev.platform_data = data;
++	platform_device_register(&under_voltage_device);
++}
++#else
++void __init at91_add_device_under_voltage(struct under_voltage_data *data) {}
++#endif
++
++---------------------------------------------------------------
++drivers/skov/Makefile
++---------------------------------------------------------------
++
++obj-$(CONFIG_UNDER_VOLTAGE_DRIVER)	+= under_voltage.o
++
++---------------------------------------------------------------
++drivers/skov/Kconfig
++---------------------------------------------------------------
++
++config UNDER_VOLTAGE_DEVICE
++	bool "under voltage device. Used to detect power down in an early state"
++	default y
++
++config UNDER_VOLTAGE_DRIVER
++	tristate "under voltage driver. Makes under voltage devices as char devices"
++	depends on UNDER_VOLTAGE_DEVICE != n
++	default m
++
++---------------------------------------------------------------
++user space programming
++---------------------------------------------------------------
++#include <linux/input.h>
++#include <fcntl.h>
++#include <time.h>
++
++
++#define FD "/dev/under_voltage"
++
++
++int main (int argc, char *argv[]) {
++
++	int	         fd;
++	fd_set		 rfds;
++	int		 retval;
++	unsigned char    buffer[8];
++	struct timeval   tv;
++
++	fd = open( FD, O_RDONLY );
++	if ( fd < 1 ) {
++		printf("can't open %s\n", FD );
++		return -1;
++	}
++
++	do {
++		FD_ZERO( &rfds);
++		FD_SET( fd, &rfds);
++
++		/* Wait up to five seconds. */
++		tv.tv_sec = 5;
++		tv.tv_usec = 0;
++
++		retval = select( fd+1, &rfds, NULL, NULL, &tv ); 
++
++		if (retval == -1) {
++			printf("failure while waiting in select\n");
++			break;
++		}
++		else if (retval) {
++
++			printf("under voltage detected\n");
++			read( fd, &buffer, sizeof(buffer));
++			break;
++		}
++		else {
++			printf("nothing happened jet\n");
++		}
++	
++	} while (1);
++
++	close( fd );
++}
+diff --git a/drivers/skov/reset_state.c b/drivers/skov/reset_state.c
+new file mode 100644
+index 0000000..3bd53b7
+--- /dev/null
++++ b/drivers/skov/reset_state.c
+@@ -0,0 +1,81 @@
++/*
++ * Reset state driver
++ *
++ * driver/skov/reset_state.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * February 2008
++ */
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/io.h>
++
++#include <mach/at91_rstc.h>
++#include <linux/reset_state.h>
++
++MODULE_DESCRIPTION( "Reset state device" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++/* cat  /sys/module/reset_state/parameters/state */
++static unsigned int state = 0;
++module_param( state, uint, S_IRUGO );
++MODULE_PARM_DESC( state, "Reports the cause of the last processor reset." );
++
++static int __init rstst_init( void )
++{
++	unsigned int sr, mr;
++
++	sr = at91_sys_read( AT91_RSTC_SR );
++	mr = at91_sys_read( AT91_RSTC_MR );
++
++	switch ( sr & AT91_RSTC_RSTTYP )
++	{
++
++	case AT91_RSTC_RSTTYP_GENERAL:
++		pr_info("Reset state: GENERAL\n");
++		state = RSTC_RSTTYP_GENERAL;
++		break;
++
++	case AT91_RSTC_RSTTYP_WAKEUP:
++		pr_info("Reset state: WAKEUP\n");
++		state = RSTC_RSTTYP_WAKEUP;
++		break;
++
++	case AT91_RSTC_RSTTYP_WATCHDOG:
++		pr_info("Reset state: WATCHDOG\n");
++		state = RSTC_RSTTYP_WATCHDOG;
++		break;
++
++	case AT91_RSTC_RSTTYP_SOFTWARE:
++		pr_info("Reset state: SOFTWARE\n");
++		state = RSTC_RSTTYP_SOFTWARE;
++		break;
++
++	case AT91_RSTC_RSTTYP_USER:
++		pr_info("Reset state: USER\n");
++		state = RSTC_RSTTYP_USER;
++		break;
++
++	default:
++		pr_info("Reset state: UNKNOWN\n");
++		state = RSTC_RSTTYP_UNKNOWN;
++		break;
++	}
++	pr_info("Reset mode 0x%x\n",mr);
++
++
++	return 0;
++};
++
++static void __exit rstst_exit( void )
++{
++
++};
++
++module_init( rstst_init );
++module_exit( rstst_exit );
++
+diff --git a/drivers/skov/reset_state_example.c b/drivers/skov/reset_state_example.c
+new file mode 100644
+index 0000000..93e3fe1
+--- /dev/null
++++ b/drivers/skov/reset_state_example.c
+@@ -0,0 +1,45 @@
++#include <linux/input.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++
++// #include <asm/arch/reset_state.h>
++
++#define RSTC_RSTTYP_GENERAL  0
++#define RSTC_RSTTYP_WAKEUP   1
++#define RSTC_RSTTYP_WATCHDOG 2
++#define RSTC_RSTTYP_SOFTWARE 3
++#define RSTC_RSTTYP_USER     4
++#define RSTC_RSTTYP_UNKNOWN  5
++
++#define FD "/sys/module/reset_state/parameters/state"
++
++int main (int argc, char *argv[]) {
++
++	int		  fd, val;
++	unsigned char     buffer[2] = { 0x00, 0x00 };
++
++	fd = open( FD, O_RDONLY );
++
++	if ( fd < 1 ) {
++		printf("can't open %s\n", FD );
++		return -1;
++	}
++
++	read( fd, &buffer, sizeof(buffer));
++	val = ( unsigned )strtol( buffer, NULL, 0 );
++
++	printf("The cause of the last processor reset was ");
++
++	switch ( val )
++	{
++	case RSTC_RSTTYP_GENERAL:  printf("GENERAL. \n");break;
++	case RSTC_RSTTYP_WAKEUP:   printf("WAKEUP.  \n");break;
++	case RSTC_RSTTYP_WATCHDOG: printf("WATCHDOG.\n");break;
++	case RSTC_RSTTYP_SOFTWARE: printf("SOFTWARE.\n");break;
++	case RSTC_RSTTYP_USER:     printf("USER.    \n");break;
++	default: printf("UNKNOWN.\n");
++	}
++
++	close( fd );
++}
+diff --git a/drivers/skov/skov_gpio.c b/drivers/skov/skov_gpio.c
+new file mode 100644
+index 0000000..4e1906d
+--- /dev/null
++++ b/drivers/skov/skov_gpio.c
+@@ -0,0 +1,104 @@
++/*
++ * Skov GPIO Driver
++ * San Rose technology
++ * Created 2014-01-31
++ * Formed for kernel 3.3
++ * 2014-02-27
++ */
++#include <linux/device.h>
++#include <linux/init.h>
++#include <linux/delay.h>
++#include <asm/gpio.h>
++#include <linux/platform_device.h>
++#include <asm/uaccess.h>
++#include <linux/module.h>
++
++#ifdef	CONFIG_ARM
++#include <asm/mach-types.h>
++#endif
++
++#define PIN_DISP_TYPE 	AT91_PIN_PD2
++
++#define SKOV_NAME "SKOVIO"
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , SKOVIO_NAME, __FUNCTION__, ## arg )
++
++#define SHOW0(name) static ssize_t \
++name ## _show(struct device *dev, struct device_attribute *attr, char *buf) \
++{ \
++	int val; \
++	if(at91_get_gpio_value(PIN_DISP_TYPE) == 1) { \
++		val = 1; \
++	} else { \
++		val = 0; \
++	} \
++	return sprintf( buf, "%i\n", val); \
++} \
++static DEVICE_ATTR(name, S_IRUGO, name ## _show, NULL);
++
++SHOW0(DISP_TYPE)
++
++
++#define SHOW_ALL(name) static ssize_t \
++name ## _show(struct device *dev, struct device_attribute *attr, char *buf) \
++{ \
++        int val; \
++        if(at91_get_gpio_value(PIN_DISP_TYPE) == 1) { \
++                val = 1; \
++        } else { \
++                val = 0; \
++        } \
++        return sprintf( buf, "%i\n", val); \
++} \
++static DEVICE_ATTR(name, S_IRUGO, name ## _show, NULL);
++
++SHOW_ALL(input_parallel)
++
++
++static int __devinit skov_gpio_probe( struct platform_device *pdev )
++{
++ 	int err;
++ 	/* Input */
++ 	at91_set_gpio_input(PIN_DISP_TYPE, 0);
++ 	at91_set_deglitch(PIN_DISP_TYPE, 0);
++
++        /* input */
++        err = device_create_file(&pdev->dev, &dev_attr_DISP_TYPE);
++        /* Show all input */
++        err = device_create_file(&pdev->dev, &dev_attr_input_parallel);
++
++        return err;
++}
++
++static int __devexit skov_gpio_remove(struct platform_device *pdev)
++{
++	device_remove_file(&pdev->dev, &dev_attr_DISP_TYPE);
++	device_remove_file(&pdev->dev, &dev_attr_input_parallel);
++	return 0;
++}
++
++struct platform_driver skov_gpio_driver =
++{
++        .remove         = __exit_p( skov_gpio_remove ),
++	.probe          = skov_gpio_probe,
++        .driver         = {
++                .name   = "skov_gpio",
++                .owner  = THIS_MODULE,
++        }
++};
++
++
++static int __init skov_gpio_init(void)
++{
++	return platform_driver_register( &skov_gpio_driver );
++}
++
++static void __exit skov_gpio_exit(void)
++{
++	platform_driver_unregister( &skov_gpio_driver );
++}
++
++module_init(skov_gpio_init);
++module_exit(skov_gpio_exit);
++
++MODULE_DESCRIPTION("SKOV GPIO driver");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/skov/skov_input.h b/drivers/skov/skov_input.h
+new file mode 100644
+index 0000000..cd8311f
+--- /dev/null
++++ b/drivers/skov/skov_input.h
+@@ -0,0 +1,72 @@
++
++#define PRESSED	    1
++#define RELEASED    0
++
++#define S_KEY_3		0x11
++#define S_KEY_6		0x12
++#define S_KEY_9		0x13
++#define S_KEY_DOT	0x14
++#define S_KEY_2		0x15
++
++#define S_KEY_5		0x21
++#define S_KEY_8		0x22
++#define S_KEY_0		0x23
++#define S_KEY_1		0x24
++#define S_KEY_4		0x25
++
++#define S_KEY_7		0x31
++#define S_KEY_PM	0x32
++#define S_KEY_HOME	0x33
++#define S_KEY_RAPORT	0x34
++#define S_KEY_QUESTION	0x35
++
++#define S_KEY_C_DEL	0x41
++#define S_KEY_LEFT	0x42
++#define S_KEY_RIGTH	0x43
++#define S_KEY_PLUS	0x44
++#define S_KEY_MINUS	0x45
++
++#define S_KEY_RET	0x51
++#define S_KEY_UP	0x52
++#define S_KEY_DOWN	0x53
++#define S_KEY_TEST1	0x54
++#define S_KEY_TEST2     0x54
++
++#define S_KEY_ESC       0x61
++#define S_KEY_START     0x62
++#define S_KEY_STOP      0x63
++#define S_KEY_TEST3     0x64
++#define S_KEY_TEST4     0x64
++
++
++#define S_KEY_3_DESC		"3"
++#define S_KEY_6_DESC		"6"
++#define S_KEY_9_DESC		"9"
++#define S_KEY_DOT_DESC		". (DOT)"
++#define S_KEY_2_DESC		"2"
++
++#define S_KEY_5_DESC		"5"
++#define S_KEY_8_DESC		"8"
++#define S_KEY_0_DESC		"0"
++#define S_KEY_1_DESC		"1"
++#define S_KEY_4_DESC		"4"
++
++#define S_KEY_7_DESC		"7"
++#define S_KEY_PM_DESC		"+/-"
++#define S_KEY_HOME_DESC		"HOME"
++#define S_KEY_RAPORT_DESC	"RAPORT"
++#define S_KEY_QUESTION_DESC	"?/info"
++
++#define S_KEY_C_DEL_DESC	"C/DEL"
++#define S_KEY_LEFT_DESC		"LEFT"
++#define S_KEY_RIGTH_DESC	"RIGTH"
++#define S_KEY_PLUS_DESC		"+ PLUS"
++#define S_KEY_MINUS_DESC	"- MINUS"
++
++#define S_KEY_RET_DESC		"RETURN"
++#define S_KEY_UP_DESC		"UP"
++#define S_KEY_DOWN_DESC		"DOWN"
++
++#define S_KEY_ESC_DESC       	"ESC"
++#define S_KEY_START_DESC     	"START"
++#define S_KEY_STOP_DESC      	"STOP"
+diff --git a/drivers/skov/under_voltage.c b/drivers/skov/under_voltage.c
+new file mode 100644
+index 0000000..d208c7c
+--- /dev/null
++++ b/drivers/skov/under_voltage.c
+@@ -0,0 +1,306 @@
++/*
++ * Under Voltage Lock Out driver
++ *
++ * driver/skov/under_voltage.c
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * December 2007
++ *
++ * Changes February 2008 according to coding style, cleanup
++ */
++
++#include <linux/module.h>
++#include <linux/version.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/ioctl.h>
++#include <linux/fs.h>
++#include <linux/interrupt.h>
++#include <linux/pm.h>
++#include <linux/sysctl.h>
++#include <linux/cdev.h>
++#include <linux/poll.h>
++
++#include <asm/gpio.h>
++#include <asm/uaccess.h>
++#include <mach/board.h>
++
++
++MODULE_DESCRIPTION( "Under Voltage Lock Out Device" );
++MODULE_AUTHOR( "Marc Petersen, RoseTechnology A/S" );
++MODULE_LICENSE( "GPL" );
++
++#define UNDER_VOLTAGE_NAME "Under voltage"
++#define UNDER_VOLTAGE_CDEV "under_voltage"
++
++
++#define err( fmt, arg... ) printk( KERN_ERR "%s: %s() " fmt "\n" , UNDER_VOLTAGE_NAME, __FUNCTION__, ## arg )
++
++
++/*
++ * Device
++ */
++
++static int 			major;
++static int 			minor;
++
++static dev_t 			devt;
++static struct cdev 		*cdev;
++
++static struct class 		*uv_class;
++
++static wait_queue_head_t    	listener_queue;
++static int           		under_voltage_detected = 0;
++static int                      startet = 0;
++
++static irqreturn_t uv_isr( int irq, void *dev_id )
++{
++ 	struct platform_device 	  *pdev = dev_id;
++ 	struct device 		  *dev = &pdev->dev;
++ 	struct under_voltage_data *uv_data = (struct under_voltage_data *)dev->platform_data;
++
++	if ( irq != gpio_to_irq( uv_data->pin ) )
++	{
++		err( "irq %d unknown", irq );
++		return IRQ_NONE;
++	}
++
++	if ( !startet ) return IRQ_HANDLED;
++
++	under_voltage_detected = 1;
++
++ 	wake_up_interruptible_all( &listener_queue );
++
++	pr_info( UNDER_VOLTAGE_NAME ": lock out !\n" );
++
++	return IRQ_HANDLED;
++};
++
++
++unsigned int uv_poll( struct file *file, poll_table *wait )
++{
++	unsigned int	mask = 0;
++
++	if ( under_voltage_detected == 1 )
++	{
++		mask |= POLLIN | POLLRDNORM;
++	}
++
++	poll_wait( file, &listener_queue, wait );
++	return mask;
++};
++
++
++int uv_read( struct file *file, char *buff, size_t len, loff_t *off )
++{
++	unsigned char	dat[2] = {0x41,0x00}; // "A"
++	int		i = 0, l = 0;
++	int		retval;
++
++	l = ARRAY_SIZE( dat );
++
++	if( *off != 0 ) { return 0; }
++
++	if( !under_voltage_detected )
++	{
++		retval = wait_event_interruptible( listener_queue, under_voltage_detected );
++		pr_info( UNDER_VOLTAGE_NAME ": woke up\n" );
++		if ( retval == -ERESTARTSYS )
++		{
++			err( "got signal, break" );
++			return -EINTR;
++		}
++	}
++
++	i = copy_to_user( buff, dat, l );
++
++	*off += ( l-i );
++	return ( l-i );
++};
++
++/**
++ * file_operations uv_fops
++ *
++ *
++ *
++ */
++static const struct file_operations uv_file_ops =
++{
++	.owner 	= THIS_MODULE,
++	.read	= uv_read,
++	.poll   = uv_poll,
++};
++
++
++static int __devinit under_voltage_probe( struct platform_device *pdev )
++{
++	int 				error = 0, ret = 0, uv_irq = 0;
++	struct device 			*dev = &pdev->dev;
++	struct under_voltage_data 	*uv_data = NULL;
++	struct device 			*class_dev;
++
++	if ( dev->platform_data )
++	{
++		uv_data  = ( struct under_voltage_data * )dev->platform_data;
++	}
++	else
++	{
++		err( "cannot get default configuration" );
++		return -EIO;
++	}
++
++
++	minor = 0;
++
++	ret = alloc_chrdev_region( &devt, minor, 1, UNDER_VOLTAGE_NAME );
++
++	if ( ret < 0 )
++	{
++		err( "cannot register character devices" );
++		return ret;
++	}
++
++	major = MAJOR( devt );
++
++	cdev = cdev_alloc();
++	if ( !cdev )
++	{
++		err( "unable to alloc new char device" );
++		goto alloc_chrdev;
++	}
++
++	cdev->owner	= THIS_MODULE;
++	cdev->ops	= &uv_file_ops;
++
++	kobject_set_name( &cdev->kobj, "%s", UNDER_VOLTAGE_CDEV );
++
++	ret = cdev_add( cdev, devt, 1 );
++	if ( ret )
++	{
++		err( "unable to add a new char device" );
++		goto cdev_alloc;
++	}
++
++	uv_class = class_create( THIS_MODULE, UNDER_VOLTAGE_CDEV );
++	if ( IS_ERR( uv_class ) )
++	{
++		err( "can't create class. No udev support ?" );
++		ret = -EINVAL;
++		goto cdev_add;
++	}
++
++	class_dev = device_create( uv_class, NULL, MKDEV( major,minor ), NULL, UNDER_VOLTAGE_CDEV );
++	if (IS_ERR(class_dev)) {
++		printk(KERN_WARNING "ch%d: device_create failed\n",
++		minor);
++	        ret = PTR_ERR(class_dev);
++                goto class_create;
++        }
++
++
++
++	// set gipo pin for input
++	at91_set_gpio_input( uv_data->pin, 1 ); // set pin as input with pullup
++	at91_set_deglitch( uv_data->pin, 1 ); // enable glitch filter
++
++	init_waitqueue_head( &listener_queue );
++
++	// register pin to generate interrupts
++	uv_irq = gpio_to_irq( uv_data->pin );
++
++ 	if (( error = request_irq( uv_irq, uv_isr, IRQF_DISABLED|IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING, UNDER_VOLTAGE_NAME, pdev ) ) )
++ 	{
++ 		err( "device is unable to claim irq %d; error %d", uv_irq, error );
++ 		goto irq_fail;
++ 	}
++
++	under_voltage_detected = 0;
++	startet = 1;
++
++	pr_info( UNDER_VOLTAGE_NAME ": probe succeded\n" );
++
++	return 0;
++
++ irq_fail:
++
++ class_create:
++	device_destroy( uv_class, MKDEV( major,minor ) );
++	class_destroy( uv_class );
++
++ cdev_add:
++
++ cdev_alloc:
++	cdev_del( cdev );
++
++ alloc_chrdev:
++	unregister_chrdev_region( devt, 1 );
++
++	gpio_free( uv_data->pin );
++/*
++remove_idr:
++         idr_remove(&ch_index_idr, minor);
++*/
++	return error;
++
++};
++
++
++static int __exit under_voltage_remove( struct platform_device *pdev )
++{
++	struct device 			*dev = &pdev->dev;
++	struct under_voltage_data	*uv_data = NULL;
++	int 				uv_irq;
++
++	if ( dev->platform_data )
++	{
++		uv_data  = ( struct under_voltage_data * )dev->platform_data;
++	}
++	else
++	{
++		err( "cannot get platform data" );
++		return -EIO;
++	}
++
++	uv_irq = gpio_to_irq( uv_data->pin );
++
++	free_irq( uv_irq, pdev );
++
++	device_destroy( uv_class, MKDEV( major,minor ) );
++
++	class_destroy( uv_class );
++
++	cdev_del( cdev );
++
++	unregister_chrdev_region( devt, 1 );
++
++	gpio_free( uv_data->pin );
++
++	return 0;
++};
++
++
++struct platform_driver under_voltage_device_driver =
++{
++	.remove		= __exit_p( under_voltage_remove ),
++	.probe		= under_voltage_probe,
++	.driver		= {
++		.name	= "under_voltage_device",
++		.owner	= THIS_MODULE,
++	}
++};
++
++
++static int __init under_voltage_init( void )
++{
++	return platform_driver_register( &under_voltage_device_driver );
++};
++
++
++static void __exit under_voltage_exit( void )
++{
++	platform_driver_unregister( &under_voltage_device_driver );
++};
++
++module_init( under_voltage_init );
++module_exit( under_voltage_exit );
+diff --git a/drivers/skov/under_voltage_example.c b/drivers/skov/under_voltage_example.c
+new file mode 100644
+index 0000000..4fa376b
+--- /dev/null
++++ b/drivers/skov/under_voltage_example.c
+@@ -0,0 +1,50 @@
++#include <linux/input.h>
++#include <fcntl.h>
++#include <time.h>
++
++
++#define FD "/dev/under_voltage"
++
++
++int main (int argc, char *argv[]) {
++
++	int			 fd;
++	fd_set		 rfds;
++	int			 retval;
++	unsigned char     buffer[8];
++	struct timeval tv;
++
++	fd = open( FD, O_RDONLY );
++	if ( fd < 1 ) {
++		printf("can't open %s\n", FD );
++		return -1;
++	}
++
++	do {
++		FD_ZERO( &rfds);
++		FD_SET( fd, &rfds);
++
++		/* Wait up to five seconds. */
++		tv.tv_sec = 5;
++		tv.tv_usec = 0;
++
++		retval = select( fd+1, &rfds, NULL, NULL, &tv );
++
++		if (retval == -1) {
++			printf("failure while waiting in select\n");
++			break;
++		}
++		else if (retval) {
++
++			printf("under voltage detected\n");
++			read( fd, &buffer, sizeof(buffer));
++			break;
++		}
++		else {
++			printf("nothing happened jet\n");
++		}
++
++	} while (1);
++
++	close( fd );
++}
+diff --git a/include/linux/encoder.h b/include/linux/encoder.h
+new file mode 100644
+index 0000000..f12b7e1
+--- /dev/null
++++ b/include/linux/encoder.h
+@@ -0,0 +1,16 @@
++/*
++ * Scroll wheel / Encoder
++ *
++ * RoseTechnology A/S
++ *
++ * Marc (mpe@rosetechnology.dk)
++ */
++
++#define ENC_ENABLE	0
++#define ENC_LEFT	1
++#define ENC_RIGHT	2
++#define ENC_CONFIRM	3
++
++#define ENC_LEFT_KK	0x100
++#define ENC_RIGHT_KK	0x101
++#define ENC_CONFIRM_KK	0x102
+diff --git a/include/linux/lc7981.h b/include/linux/lc7981.h
+new file mode 100644
+index 0000000..b03db83
+--- /dev/null
++++ b/include/linux/lc7981.h
+@@ -0,0 +1,22 @@
++/*
++ * LC7981 LCD Connector
++ *
++ * RoseTechnology A/S
++ *
++ * Marc (mpe@rosetechnology.dk)
++ */
++
++#define LCD_EN		0 
++#define LCD_RW		1
++#define LCD_RS		2
++#define LCD_CS		3
++#define LCD_RST		4
++#define LCD_B0		5
++#define LCD_B1		6
++#define LCD_B2 		7
++#define LCD_B3		8
++#define LCD_B4 		9
++#define LCD_B5		10
++#define LCD_B6		11
++#define LCD_B7		12
++
+diff --git a/include/linux/reset_state.h b/include/linux/reset_state.h
+new file mode 100644
+index 0000000..7d85dbd
+--- /dev/null
++++ b/include/linux/reset_state.h
+@@ -0,0 +1,15 @@
++/**
++ * defines for the reset state driver
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * February 2008
++ *
++ */
++
++#define RSTC_RSTTYP_GENERAL  0
++#define RSTC_RSTTYP_WAKEUP   1
++#define RSTC_RSTTYP_WATCHDOG 2
++#define RSTC_RSTTYP_SOFTWARE 3 
++#define RSTC_RSTTYP_USER     4
++#define RSTC_RSTTYP_UNKNOWN  5
+diff --git a/include/linux/skov_led.h b/include/linux/skov_led.h
+new file mode 100644
+index 0000000..4acb0ea
+--- /dev/null
++++ b/include/linux/skov_led.h
+@@ -0,0 +1,15 @@
++/**
++ * defines for the led driver
++ *
++ * RoseTechnology A/S
++ * Marc Petersen mpe<at>rosetechnology.dk
++ * November 2007
++ *
++ */
++
++
++#define SKOV_LED_OFF  		0
++#define SKOV_LED_ON		1
++#define SKOV_LED_BLINK_FAST	2
++#define SKOV_LED_BLINK		3
++#define SKOV_LED_BLINK_SLOW	4
+diff --git a/include/linux/skov_pwm.h b/include/linux/skov_pwm.h
+new file mode 100644
+index 0000000..5a83a8a
+--- /dev/null
++++ b/include/linux/skov_pwm.h
+@@ -0,0 +1,106 @@
++/*
++ * include/asm-arm/arch-at91/at91_pwm.h
++ *
++ * Copyright (C) 2007 Marc Petersen
++ * Copyright (C) RoseTechnology A/S (Denmark)
++ *
++ * Pulse Width Modulation (PWM) - System peripherals registers.
++ * Based on AT91sam9263 datasheet.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#ifndef AT91_PWM_H
++#define AT91_PWM_H
++
++#define AT91_PWM_MR         0x00    /* Mode Register */
++#define     AT91_PWM_MR_DIVA (0xFF << 0)
++#define     AT91_PWM_MR_PREA (0x0F << 8)
++#define     AT91_PWM_MR_DIVB (0xFF << 16)
++#define     AT91_PWM_MR_PREB (0x0F << 24)
++
++
++#define AT91_PWM_PER		0x04	/* Enable Register */
++#define AT91_PWM_PDR		0x08	/* Disable Register */
++#define AT91_PWM_SR		0x0C	/* Status Register */
++#define AT91_PWM_IER		0x10	/* Interrupt Enable Register */
++#define AT91_PWM_IDR		0x14	/* Interrupt Disable Register */
++#define AT91_PWM_IMR		0x18	/* Interrupt Mask Register */
++#define AT91_PWM_ISR		0x1c	/* Interrupt Status Register */
++#define     AT91_PWM_PER_CH0  (1 << 1)
++#define     AT91_PWM_PER_CH1  (1 << 2)
++#define     AT91_PWM_PER_CH2  (1 << 3)
++#define     AT91_PWM_PER_CH3  (1 << 4)
++
++
++
++
++#define AT91_PWM_CMR0   0x200	/* Channel 0 Mode Register */
++
++
++#define AT91_PWM_CDTY  0x04   /* Channel Duty Cycle Register */
++#define AT91_PWM_CPRD  0x08   /* Channel Period Register */
++#define AT91_PWM_CCNT  0x0C   /* Channel Counter Register (RO) */
++#define AT91_PWM_CUPD  0x10   /* Channel Update Register (WO) */
++
++
++#define AT91_PWM_CMR(n) (AT91_PWM_CMR0 + ((n) * 0x20))  /* Source Mode Registers 0-31 */
++
++#define AT91_PWM_CDTY0	0x204	/* Channel 0 Duty Cycle Register */
++#define AT91_PWM_CPRD0	0x208	/* Channel 0 Period Register */
++#define AT91_PWM_CCNT0	0x20C	/* Channel 0 Counter Register (RO) */
++#define AT91_PWM_CUPD0  0x210	/* Channel 0 Update Register (WO) */
++
++#define AT91_PWM_CMR1   0x220	/* Channel 1 Mode Register */
++#define AT91_PWM_CDTY1	0x224	/* Channel 1 Duty Cycle Register */
++#define AT91_PWM_CPRD1	0x228	/* Channel 1 Period Register */
++#define AT91_PWM_CCNT1	0x22C	/* Channel 1 Counter Register (RO) */
++#define AT91_PWM_CUPD1  0x230	/* Channel 1 Update Register (WO) */
++
++#define AT91_PWM_CMR2   0x240	/* Channel 2 Mode Register */
++#define AT91_PWM_CDTY2	0x244	/* Channel 2 Duty Cycle Register */
++#define AT91_PWM_CPRD2	0x248	/* Channel 2 Period Register */
++#define AT91_PWM_CCNT2	0x24C	/* Channel 2 Counter Register (RO) */
++#define AT91_PWM_CUPD2  0x250	/* Channel 2 Update Register (WO) */
++
++#define AT91_PWM_CMR3   0x260	/* Channel 3 Mode Register */
++#define AT91_PWM_CDTY3	0x264	/* Channel 3 Duty Cycle Register */
++#define AT91_PWM_CPRD3	0x268	/* Channel 3 Period Register */
++#define AT91_PWM_CCNT3	0x26C	/* Channel 3 Counter Register (RO) */
++#define AT91_PWM_CUPD3  0x270	/* Channel 3 Update Register (WO) */
++
++
++#define     AT91_PWM_CMR_CPRE ( 0xFF << 0 ) /* Channel Pre-scaler */
++#define     AT91_PWM_CMR_CALG ( 1 << 8 ) /* Channel Alignment */
++#define     AT91_PWM_CMR_CPOL ( 1 << 9 ) /* Channel Polarity */
++#define     AT91_PWM_CMR_CPD ( 1 << 10 ) /* Channel Update Period */
++
++#define     AT91_PWM_CMR_UPDATE_DUTY ( 0 << 10 ) /* Channel Update Duty */
++#define     AT91_PWM_CMR_UPDATE_PERIOD ( 1 << 10 ) /* Channel Update Period */
++
++
++#define AT91_PWM_CMR_LEFT_ALIGNED (0 << 8) /* period is left aligned */
++#define AT91_PWM_CMR_CENTER_ALIGNED (1 << 8) /* period is center aligned */
++
++#define AT91_PWM_CMR_LOW_POL  (0 << 9) /* output waveform starts at a low level */
++#define AT91_PWM_CMR_HIGH_POL  (1 << 9) /* output waveform starts at a high level */
++
++/* Channel pre scaler */
++#define AT91_PWM_CMR_MCK     (0x0 << 0)  /* MCK        */
++#define AT91_PWM_CMR_MCK2    (0x1 << 0)  /* MCK / 2    */
++#define AT91_PWM_CMR_MCK4    (0x2 << 0)  /* MCK / 4    */
++#define AT91_PWM_CMR_MCK8    (0x3 << 0)  /* MCK / 8    */
++#define AT91_PWM_CMR_MCK16   (0x4 << 0)  /* MCK / 16   */
++#define AT91_PWM_CMR_MCK32   (0x5 << 0)  /* MCK / 32   */
++#define AT91_PWM_CMR_MCK64   (0x6 << 0)  /* MCK / 64   */
++#define AT91_PWM_CMR_MCK128  (0x7 << 0)  /* MCK / 128  */
++#define AT91_PWM_CMR_MCK256  (0x8 << 0)  /* MCK / 256  */
++#define AT91_PWM_CMR_MCK512  (0x9 << 0)  /* MCK / 512  */
++#define AT91_PWM_CMR_MCK1024 (0xA << 0)  /* MCK / 1024 */
++#define AT91_PWM_CMR_CLKA    (0xB << 0)  /* CLKA       */
++#define AT91_PWM_CMR_CLKB    (0xC << 0)  /* CLKB       */
++
++#endif
+diff --git a/include/linux/spi/mcp3002.h b/include/linux/spi/mcp3002.h
+new file mode 100644
+index 0000000..797dad7
+--- /dev/null
++++ b/include/linux/spi/mcp3002.h
+@@ -0,0 +1,5 @@
++/* linux/spi/mcp3002.h */
++
++struct mcp3002_platform_data {
++	char*	     model;
++};
+-- 
+1.8.3.1
+

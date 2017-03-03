@@ -1,0 +1,161 @@
+From c17832820f991b43ff73da0aaf8d25e82bfa1840 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 15 Jan 2017 13:03:49 +0100
+Subject: [PATCH] support norflash + sdcard booting
+
+Add setup of Static Memocy controller 0 (SMC)
+Add helpers to determine if BMS pin (prog pins on J2) is activated
+If activated force boot from SD Card - if SD card is present
+---
+ contrib/board/skov/arm9_cpu/arm9_cpu.c | 55 ++++++++++++++++++++++++++++++++++
+ contrib/board/skov/arm9_cpu/arm9_cpu.h |  3 ++
+ driver/Config.in.memory                |  5 ++--
+ driver/common.c                        |  8 +++--
+ 4 files changed, 66 insertions(+), 5 deletions(-)
+
+diff --git a/contrib/board/skov/arm9_cpu/arm9_cpu.c b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+index dfef95a..4811eee 100644
+--- a/contrib/board/skov/arm9_cpu/arm9_cpu.c
++++ b/contrib/board/skov/arm9_cpu/arm9_cpu.c
+@@ -415,6 +415,9 @@ void hw_init(void)
+ 		dbg_info("Error: test_var_init=%x\n\r", test_var_init);
+ 	}
+ 
++	/* Enable clock for Boot Mode Select (BMS) pin */
++	pmc_enable_periph_clock(AT91C_ID_PIOB);
++
+ #ifdef CONFIG_SDRAM
+ 	/* Initialize SDRAMC0 */
+ 	sdramc0_init();
+@@ -483,6 +486,46 @@ void at91_mci0_hw_init(void)
+ }
+ #endif /* #ifdef CONFIG_SDCARD */
+ 
++#ifdef CONFIG_FLASH
++void norflash_hw_init(void)
++{
++	/* Configure SMC CS0 for NOR flash */
++
++	// Setup time is 2 cycles after the CS signal
++	writel((AT91C_SMC_NWESETUP_(2)
++		| AT91C_SMC_NCS_WRSETUP_(0)
++		| AT91C_SMC_NRDSETUP_(2)
++		| AT91C_SMC_NCS_RDSETUP_(0)),
++		(AT91C_BASE_SMC0 + SMC_SETUP0));
++
++	// Set pulse long enough - pulse should be a bit shorter than the cycle
++	writel(AT91C_SMC_NWEPULSE_(10)
++		| AT91C_SMC_NCS_WRPULSE_(12)
++		| AT91C_SMC_NRDPULSE_(10)
++		| AT91C_SMC_NCS_RDPULSE_(12),
++		(AT91C_BASE_SMC0 + SMC_PULSE0));
++
++	// Set cycle long enougth at least 12 Cycles->120ns plus a little extra 
++	writel(AT91C_SMC_NWECYCLE_(0x13)
++		| AT91C_SMC_NRDCYCLE_(0x13),
++		(AT91C_BASE_SMC0 + SMC_CYCLE0));
++
++	// Set mode
++	//   Set to 16Bit bus width, enable read and write
++	//   Note: pagemode + 32 byte pages do not work with the 29GL512P flash
++	writel(AT91C_SMC_READMODE
++		| AT91C_SMC_WRITEMODE
++		| AT91C_SMC_NWAITM_NWAIT_DISABLE
++		| AT91C_SMC_BAT_BYTE_WRITE
++		| AT91C_SMC_DBW_WIDTH_BITS_16
++		| AT91_SMC_TDF_(1)
++		| AT91C_SMC_TDFEN,
++		(AT91C_BASE_SMC0 + SMC_CTRL0));
++
++}
++#endif /* #ifdef CONFIG_FLASH */
++
++
+ #ifdef CONFIG_NANDFLASH
+ void nandflash_hw_init(void)
+ {
+@@ -528,3 +571,15 @@ void nandflash_hw_init(void)
+ 		AT91C_BASE_SMC0 + SMC_CTRL3);
+ }
+ #endif /* #ifdef CONFIG_NANDFLASH */
++
++/* If strap inserted for "PROG" then return 1 */
++int boot_mode_force_sdcard(void)
++{
++	return pio_get_value(CONFIG_SYS_BMS_PIN) != 0;
++}
++
++/* Return 1 if SD Card is inserted */
++int sdcard_detected(void)
++{
++	return pio_get_value(CONFIG_SYS_SD_CD_PIN) == 0;
++}
+diff --git a/contrib/board/skov/arm9_cpu/arm9_cpu.h b/contrib/board/skov/arm9_cpu/arm9_cpu.h
+index 555476d..79e7499 100644
+--- a/contrib/board/skov/arm9_cpu/arm9_cpu.h
++++ b/contrib/board/skov/arm9_cpu/arm9_cpu.h
+@@ -135,4 +135,7 @@
+ #define SKOV_LED2			AT91C_PIN_PD(1)
+ #define SKOV_LED3			AT91C_PIN_PD(7)
+ 
++int boot_mode_force_sdcard(void);
++int sdcard_detected(void);
++
+ #endif /* #ifndef __ARM9_CPU_H__ */
+diff --git a/driver/Config.in.memory b/driver/Config.in.memory
+index ab20d3b..f5814d8 100644
+--- a/driver/Config.in.memory
++++ b/driver/Config.in.memory
+@@ -127,18 +127,17 @@ config	CONFIG_NANDFLASH
+ 	bool "NAND flash"
+ 	depends on ALLOW_NANDFLASH
+ 
++endchoice
++
+ config	CONFIG_SDCARD
+ 	bool "SD card"
+ 	depends on ALLOW_SDCARD
+ 
+-endchoice
+-
+ config CONFIG_MEMORY
+ 	string
+ 	default "dataflash"	if CONFIG_DATAFLASH
+ 	default "flash"		if CONFIG_FLASH
+ 	default "nandflash"	if CONFIG_NANDFLASH
+-	default "sdcard"	if CONFIG_SDCARD
+ 
+ menu  "SD Card Configuration"
+ 	depends on CONFIG_SDCARD
+diff --git a/driver/common.c b/driver/common.c
+index ab40cb2..a8fa9e0 100644
+--- a/driver/common.c
++++ b/driver/common.c
+@@ -26,6 +26,7 @@
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ #include "common.h"
++#include "board.h"
+ #include "dataflash.h"
+ #include "nandflash.h"
+ #include "sdcard.h"
+@@ -104,11 +105,14 @@ void init_load_image(struct image_info *image)
+ 	load_image = &load_norflash;
+ #elif defined(CONFIG_NANDFLASH)
+ 	load_image = &load_nandflash;
+-#elif defined(CONFIG_SDCARD)
+-	load_image = &load_sdcard;
+ #else
+ #error "No booting media_str specified!"
+ #endif
++
++#if defined(CONFIG_SDCARD)
++	if (boot_mode_force_sdcard() && sdcard_detected())
++		load_image = &load_sdcard;
++#endif
+ #endif
+ }
+ 
+-- 
+1.8.3.1
+

@@ -1,0 +1,84 @@
+From c47999665dade7b278fe971f0cf962e9c91b2b7a Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 15 Feb 2017 15:55:40 +0100
+Subject: [PATCH] Fix so we tell that we have loaded from SD-CARD when we do so
+
+---
+ driver/common.c | 31 ++++++++++++-------------------
+ 1 file changed, 12 insertions(+), 19 deletions(-)
+
+diff --git a/driver/common.c b/driver/common.c
+index a8fa9e0..46240fe 100644
+--- a/driver/common.c
++++ b/driver/common.c
+@@ -35,6 +35,7 @@
+ #include "usart.h"
+ 
+ load_function load_image;
++static char *load_media;
+ 
+ #ifdef CONFIG_SDCARD
+ char filename[FILENAME_BUF_LEN];
+@@ -98,48 +99,40 @@ void init_load_image(struct image_info *image)
+ 
+ #if defined(CONFIG_LOAD_LINUX) || defined(CONFIG_LOAD_ANDROID)
+ 	load_image = &load_kernel;
++	load_media = "KERNEL";
+ #else
+ #if defined(CONFIG_DATAFLASH)
+ 	load_image = &load_dataflash;
++	load_media = "DATA-FLASH";
+ #elif defined(CONFIG_FLASH)
+ 	load_image = &load_norflash;
++	load_media = "NOR-FLASH";
+ #elif defined(CONFIG_NANDFLASH)
+ 	load_image = &load_nandflash;
++	load_media = "NAND-FLASH";
+ #else
+ #error "No booting media_str specified!"
+ #endif
+ 
+ #if defined(CONFIG_SDCARD)
+-	if (boot_mode_force_sdcard() && sdcard_detected())
++	if (boot_mode_force_sdcard() && sdcard_detected()) {
+ 		load_image = &load_sdcard;
++		load_media = "SDCARD";
++	}
+ #endif
+ #endif
+ }
+ 
+ void load_image_done(int retval)
+ {
+-	char *media;
+-
+-#if defined(CONFIG_FLASH)
+-	media = "FLASH: ";
+-#elif defined(CONFIG_NANDFLASH)
+-	media = "NAND: ";
+-#elif defined(CONFIG_DATAFLASH)
+-	media = "SF: ";
+-#elif defined(CONFIG_SDCARD)
+-	media = "SD/MMC: ";
+-#else
+-	media = NULL;
+-#endif
+-
+-	if (media)
+-		usart_puts(media);
++	if (load_media)
++		usart_puts(load_media);
+ 
+ 	if (retval == 0){
+-		usart_puts("Done to load image\n");
++		usart_puts(": Done to load image\n");
+ 	}
+ 	if (retval == -1) {
+-		usart_puts("Failed to load image\n");
++		usart_puts(": Failed to load image\n");
+ 		while(1);
+ 	}
+ 	if (retval == -2) {
+-- 
+1.8.3.1
+

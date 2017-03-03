@@ -1,0 +1,29 @@
+From 1a329e7ac0ff01d2f530c818f75e48ca7959f04f Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Mon, 20 Feb 2017 06:24:25 +0100
+Subject: [PATCH] skovarm9: set correct machine-type
+
+We no longer use the machine type of the evaluation board,
+but updating the machinetype in the kernel was missing
+---
+ arch/arm/mach-at91/board-skovarm9.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-at91/board-skovarm9.c b/arch/arm/mach-at91/board-skovarm9.c
+index 244128c..d4cfdac 100644
+--- a/arch/arm/mach-at91/board-skovarm9.c
++++ b/arch/arm/mach-at91/board-skovarm9.c
+@@ -1077,8 +1077,8 @@ static void __init skovarm9_board_init(void)
+         at91_add_skov_gpio(&skov_gpio_data);
+ }
+ 
+-MACHINE_START(AT91SAM9263EK, "Atmel AT91SAM9263-EK")
+-	/* Maintainer: Atmel */
++MACHINE_START(SKOVARM9CPU, "SKOV ARM9-CPU")
++	/* Maintainer: SKOV A/S */
+ 	.timer		= &at91sam926x_timer,
+ 	.map_io		= at91_map_io,
+ 	.init_early	= skovarm9_init_early,
+-- 
+1.8.3.1
+

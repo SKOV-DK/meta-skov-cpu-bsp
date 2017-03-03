@@ -1,0 +1,36 @@
+From b51094114a1b4c8a8270a1cee9beca8d004c94d3 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Wed, 15 Feb 2017 23:28:45 +0100
+Subject: [PATCH] i2c: too verbose with DEBUG enabled
+
+A small hack to avoid printing too much noise with DEBUG enabled
+This must be reverted later
+---
+ include/i2c.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/i2c.h b/include/i2c.h
+index 6953d51..38ebfdb 100644
+--- a/include/i2c.h
++++ b/include/i2c.h
+@@ -167,7 +167,7 @@ static inline u8 i2c_reg_read(u8 addr, u8 reg)
+ 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
+ #endif
+ 
+-#ifdef DEBUG
++#ifdef xDEBUG
+ 	printf("%s: addr=0x%02x, reg=0x%02x\n", __func__, addr, reg);
+ #endif
+ 
+@@ -184,7 +184,7 @@ static inline u8 i2c_reg_write(u8 addr, u8 reg, u8 val) /**< Add return val */
+ 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
+ #endif
+ 
+-#ifdef DEBUG
++#ifdef xDEBUG
+ 	printf("%s: addr=0x%02x, reg=0x%02x, val=0x%02x\n",
+ 	       __func__, addr, reg, val);
+ #endif
+-- 
+1.8.3.1
+

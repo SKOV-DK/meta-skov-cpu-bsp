@@ -1,0 +1,46 @@
+From 85d6d85d98b00d4e9e25f0dfbb3c0f036fda5e80 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 1 Jan 2017 10:20:28 +0100
+Subject: [PATCH] touchscreen/ads7846: fix irq oneshot
+
+touchscreen did not work with oneshot irq - disable oneshot irq
+as a workaround
+---
+ drivers/input/touchscreen/ads7846.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/ads7846.c b/drivers/input/touchscreen/ads7846.c
+index de31ec6..012a5c8 100644
+--- a/drivers/input/touchscreen/ads7846.c
++++ b/drivers/input/touchscreen/ads7846.c
+@@ -1190,6 +1190,13 @@ static void __devinit ads7846_setup_spi_msg(struct ads7846 *ts,
+ 	spi_message_add_tail(x, m);
+ }
+ 
++
++/**
++ * Touch screen not working with oneshot irq.
++ * @author Mab
++ * @param spi the spi device
++ * @return interrupt handled
++ */
+ static int __devinit ads7846_probe(struct spi_device *spi)
+ {
+ 	struct ads7846 *ts;
+@@ -1316,7 +1323,12 @@ static int __devinit ads7846_probe(struct spi_device *spi)
+ 	}
+ 
+ 	irq_flags = pdata->irq_flags ? : IRQF_TRIGGER_FALLING;
+-	irq_flags |= IRQF_ONESHOT;
++	/**
++	 * Touch screen not working with oneshot irq.
++	 * @author Mab
++	 */
++	//irq_flags |= IRQF_ONESHOT;
++	/*End Mab Rose */
+ 
+ 	err = request_threaded_irq(spi->irq, ads7846_hard_irq, ads7846_irq,
+ 				   irq_flags, spi->dev.driver->name, ts);
+-- 
+1.8.3.1
+

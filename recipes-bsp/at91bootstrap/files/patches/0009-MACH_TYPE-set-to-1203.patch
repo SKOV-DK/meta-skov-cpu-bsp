@@ -1,0 +1,30 @@
+From 014278216fcc262f82f7ba162fe91bbc5b01e9d8 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sun, 15 Jan 2017 17:44:19 +0100
+Subject: [PATCH] MACH_TYPE set to 1203
+
+Fix bug in Config.in so MACH_TYPE is now set to 1203 as
+expected by U-Boot
+---
+ board/Config.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/Config.in b/board/Config.in
+index 4f003d1..faac329 100644
+--- a/board/Config.in
++++ b/board/Config.in
+@@ -213,10 +213,10 @@ config SAMA5D2
+ 
+ config CONFIG_MACH_TYPE
+ 	string
++	default "1203"	if CONFIG_ARM9_CPU
+ 	default "1099"	if AT91SAM9260
+ 	default "0x350"	if AT91SAM9261
+ 	default "0x4B2"	if AT91SAM9263
+-	default "1203"	if ARM9_CPU
+ 	default "1326"	if AT91SAM9RL
+ 	default "0x44B"	if AT91SAM9XE
+ 	default "0x86F"	if AT91SAM9G10
+-- 
+1.8.3.1
+
