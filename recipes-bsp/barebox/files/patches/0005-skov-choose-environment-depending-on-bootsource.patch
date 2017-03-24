@@ -1,4 +1,3 @@
-From c844cf9f117799414bb183e44b2159690468c841 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
 Date: Tue, 21 Mar 2017 10:42:59 +0100
 Subject: [PATCH] skov: choose environment depending on bootsource
@@ -115,6 +114,3 @@ index 57e66eeb3b93..2915371d0804 100644
  	};
  
  	leds {
--- 
-2.11.0
-

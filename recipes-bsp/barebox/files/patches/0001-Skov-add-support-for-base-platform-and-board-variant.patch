@@ -1,7 +1,7 @@
 From: Juergen Borleis <jbe@pengutronix.de>
 Date: Tue, 8 Dec 2015 09:59:19 +0100
-Subject: [PATCH] Skov: add support for base platform and board variants 19 &
- 20
+Subject: [PATCH] Skov: add support for base platform and board variants 19,
+ 20, 21 & 22
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -20,7 +20,7 @@ Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 Signed-off-by: Søren Andersen <san@skov.dk>
-[Note: this commit results of squashing commits v2016.08.0..17bb4fca9a0c]
+Signed-off-by: Sam Ravnborg <srn@skov.dk>
 ---
  arch/arm/boards/Makefile                           |   1 +
  arch/arm/boards/skov-imx6/Makefile                 |   2 +
@@ -28,8 +28,8 @@ Signed-off-by: Søren Andersen <san@skov.dk>
  arch/arm/boards/skov-imx6/env/init/automount       |  14 +
  arch/arm/boards/skov-imx6/env/nv/boot.default      |   1 +
  .../skov-imx6/flash-header-mx6-skov-imx6.imxcfg    |   3 +
- arch/arm/boards/skov-imx6/lowlevel.c               | 673 +++++++++++++++++++++
- arch/arm/boards/skov-imx6/version.c                | 245 ++++++++
+ arch/arm/boards/skov-imx6/lowlevel.c               | 695 +++++++++++++++++++++
+ arch/arm/boards/skov-imx6/version.c                | 257 ++++++++
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
@@ -37,7 +37,7 @@ Signed-off-by: Søren Andersen <san@skov.dk>
  arch/arm/mach-imx/Kconfig                          |   5 +
  common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1359 insertions(+), 8 deletions(-)
+ 15 files changed, 1393 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -50,7 +50,7 @@ Signed-off-by: Søren Andersen <san@skov.dk>
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 1a0f63fbfc4c..ff1132785b28 100644
+index 250ccb88896f..8206c3b48fe2 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
 @@ -102,6 +102,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
@@ -143,10 +143,10 @@ index 000000000000..400a87015425
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..de210016e149
+index 000000000000..d1b3d0d10328
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
-@@ -0,0 +1,673 @@
+@@ -0,0 +1,695 @@
 +/*
 + * This program is free software; you can redistribute it and/or
 + * modify it under the terms of the GNU General Public License as
@@ -731,6 +731,8 @@ index 000000000000..de210016e149
 + * 00010010       C    4096 MiB     16 GiB     i.MX6Q+
 + * 00010011       C     512 MiB      2 GiB     i.MX6S
 + * 00010100       C    1024 MiB      4 GiB     i.MX6Q
++ * 00010101       C     512 MiB      2 GIB     i.MX6S
++ * 00010110       C    1024 MiB      4 GIB     i.MX6Q
 + *
 + * This routine does not return if starting the image from SD card or NOR
 + * was successful. It restarts skov_imx6_start() instead
@@ -754,6 +756,26 @@ index 000000000000..de210016e149
 +			return;
 +		}
 +		pr_debug("Initializing board variant 20\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
++					&skov_imx6_calib_4x128Mb_1066MHz,
++					&skov_imx6_cfg_4x128Mb_1066MHz);
++		break;
++	case 21: /* i.MX6S "Solo_R512M_F2G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
++			pr_err("Invalid SoC! i.MX6S expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 21\n");
++		spl_imx6sdl_dram_init(&skov_imx6_sysinfo_2x128Mb_800MHz,
++					&skov_imx6_calib_2x128Mb_800MHz,
++					&skov_imx6_cfg_2x128Mb_800MHz);
++		break;
++	case 22: /* i.MX6Q, "Quad_R1G_F4G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 22\n");
 +		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
 +					&skov_imx6_calib_4x128Mb_1066MHz,
 +					&skov_imx6_cfg_4x128Mb_1066MHz);
@@ -822,10 +844,10 @@ index 000000000000..de210016e149
 +}
 diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
 new file mode 100644
-index 000000000000..f2e1f024513f
+index 000000000000..7f6651011d7c
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/version.c
-@@ -0,0 +1,245 @@
+@@ -0,0 +1,257 @@
 +/*
 + * SPDX-License-Identifier: GPL-2.0
 + */
@@ -910,49 +932,61 @@ index 000000000000..f2e1f024513f
 +		.value = "low cost",
 +		.revision = "C",
 +		.soc = "i.MX6S",
-+		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
 +	},
 +	[14] = {
 +		.value = "high performance",
 +		.revision = "C",
 +		.soc = "i.MX6Q",
-+		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
 +	},
 +	[15] = {
 +		.value = "middle performance",
 +		.revision = "C",
 +		.soc = "i.MX6S",
-+		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
 +	},
 +	[16] = {
 +		.value = "Solo_R512M_F4G",
 +		.revision = "C",
 +		.soc = "i.MX6S",
-+		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
 +	},
 +	[17] = {
 +		.value = "Quad_R2G_F8G",
 +		.revision = "C",
 +		.soc = "i.MX6Q",
-+		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
 +	},
 +	[18] = {
 +		.value = "QuadPlus_R4G_F16G",
 +		.revision = "C",
 +		.soc = "i.MX6Q+",
-+		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
 +	},
 +	[19] = {
 +		.value = "Solo_R512M_F2G",
 +		.revision = "C",
 +		.soc = "i.MX6S",
-+		.dts_compatible = "skov,imx6-imxdl-revC",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt2",
 +	},
 +	[20] = {
 +		.value = "Quad_R1G_F4G",
 +		.revision = "C",
 +		.soc = "i.MX6Q",
-+		.dts_compatible = "skov,imx6-imxq-revC",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
++	},
++	[21] = {
++		.value = "Solo_R512M_F2G",
++		.revision = "C",
++		.soc = "i.MX6S",
++		.dts_compatible = "skov,imx6dl-skov-revc-lt6",
++	},
++	[22] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "C",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6q-skov-revc-lt6",
 +	},
 +};
 +
@@ -1072,10 +1106,10 @@ index 000000000000..f2e1f024513f
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 8d8d1fb86216..ab38074b33f6 100644
+index 70359d8242a5..a7da4b053d8b 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -59,6 +59,7 @@ pbl-dtb-$(CONFIG_MACH_PHYTEC_SOM_RK3288) += rk3288-phycore-som.dtb.o
+@@ -60,6 +60,7 @@ pbl-dtb-$(CONFIG_MACH_PHYTEC_SOM_RK3288) += rk3288-phycore-som.dtb.o
  pbl-dtb-$(CONFIG_MACH_REALQ7) += imx6q-dmo-edmqmx6.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
@@ -1469,12 +1503,12 @@ index 000000000000..54651c894ad5
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index f23af99c11d3..63119107e0ac 100644
+index f83aedc0b9fa..7a966e95c0c3 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -327,6 +327,11 @@ config MACH_CM_FX6
- 	bool "CM FX6"
- 	select ARCH_IMX6
+@@ -375,6 +375,11 @@ config MACH_ZII_VF610_DEV
+ 	select ARCH_VF610
+ 	select CLKDEV_LOOKUP
  
 +config MACH_SKOV_IMX6
 +	bool "Skov IMX6"
@@ -1516,12 +1550,12 @@ index ec63ddb40730..1818f285746b 100644
  	if (entry->rootpath)
  		abspath = entry->rootpath;
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index 8db9c754f212..4fc38e47fc26 100644
+index 2563779484fd..6ea1ffbc3a96 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -394,6 +394,11 @@ CFG_start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg = $(board)/phytec-som-
- FILE_barebox-phytec-phycore-imx6dl-som-emmc-1gib.img = start_phytec_phycore_imx6dl_som_emmc_1gib.pblx.imximg
- image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6dl-som-emmc-1gib.img
+@@ -399,6 +399,11 @@ CFG_start_phytec_phycore_imx6ul_som_512mb.pblx.imximg = $(board)/phytec-som-imx6
+ FILE_barebox-phytec-phycore-imx6ul-512mb.img = start_phytec_phycore_imx6ul_som_512mb.pblx.imximg
+ image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6ul-512mb.img
  
 +pblx-$(CONFIG_MACH_SKOV_IMX6) += start_imx6_skov_imx6
 +CFG_start_imx6_skov_imx6.imx-sram-img = $(board)/skov-imx6/flash-header-mx6-skov-imx6.imxcfg

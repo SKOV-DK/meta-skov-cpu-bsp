@@ -1,9 +1,13 @@
 require barebox-skov.inc
 
+SRC_URI += "\
+  file://env/boot/nfs \
+"
+
 PROVIDES_remove = "virtual/bootloader"
 
-SRC_URI[md5sum] = "53a04c58562e2aba874b5a1079146eba"
-SRC_URI[sha256sum] = "9a670ab785738ce4ef7a15bcac2522564dc3af1c49064440f3fd31d0e7a342db"
+SRC_URI[md5sum] = "886fc74cb85130d37beb6a5c8119a357"
+SRC_URI[sha256sum] = "98236a0b09cc5fcf8db23f4ed56e36f87202f4f7733c8a6a765b9ecf6c842b2a"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}
