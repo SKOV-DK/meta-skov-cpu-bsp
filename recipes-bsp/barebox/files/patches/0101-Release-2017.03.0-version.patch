@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
 Date: Fri, 24 Mar 2017 19:56:22 +0100
-Subject: [PATCH] Release 2017.03.0/customers/skov/imx6/20170324-1
+Subject: [PATCH] Release 2017.03.0-version
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -19,7 +19,7 @@ index 76463ab3c0d0..8849780ddc8b 100644
  PATCHLEVEL = 03
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20170324-1
++EXTRAVERSION =-1
  NAME = None
  
  # *DOCUMENTATION*

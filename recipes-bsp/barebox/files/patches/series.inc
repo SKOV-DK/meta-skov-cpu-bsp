@@ -14,6 +14,6 @@ SRC_URI += "\
 # umpf-release: 2017.03.0/customers/skov/imx6/20170324-1
 # umpf-topic-range: af6579c3ff1ff94728790f0b2c900d0ec891ed07..f7b28e15b29b0a663f10742856708fd50a4721c0
 SRC_URI += "\
-  file://patches/0101-Release-2017.03.0-customers-skov-imx6-20170324-1.patch \
+  file://patches/0101-Release-2017.03.0-version.patch \
   "
 # umpf-end
