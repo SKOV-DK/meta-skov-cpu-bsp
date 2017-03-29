@@ -42,14 +42,27 @@ SRC_URI += "\
   file://patches/0402-micrel-smi-add-driver-for-KSZ8873.patch \
   file://patches/0403-micrel-fix-config_aneg-for-ksz886x.patch \
   "
+# umpf-end
+
 #San Ubifs error FIX
 SRC_URI += "\
   file://patches/0404-mtd-gpmi-Deal-with-bitflips-in-erased-regions.patch \
   "
-# umpf-release: 4.4/customers/skov/imx6/20161124-1
-# umpf-topic-range: 0a864e944276cf169b28cf2d9f85d70f9147da73..b2b55f922dd9f7ec4ee71422d6dacc78f7c9abec
-SRC_URI += "\
-  file://patches/0501-Release-4.4-customers-skov-imx6-3.patch \
-  "
-# umpf-end
+
+# Write support in micrel driver (hackish - using regmap)
 SRC_URI += "file://patches/0601-micrel-support-write-to-registers-via-regmap.patch"
+
+# sync ocotp with upstream and add write support
+SRC_URI += "file://patches/0701-nvmem-imx-ocotp-Fix-return-value-of-imx_ocotp_read.patch"
+SRC_URI += "file://patches/0702-nvmem-imx-ocotp-remove-nvmem-regmap-dependency.patch"
+SRC_URI += "file://patches/0703-nvmem-imx-ocotp-handling-clock.patch"
+SRC_URI += "file://patches/0704-nvmem-imx-ocotp-Fix-assignment-warning.patch"
+SRC_URI += "file://patches/0705-nvmem-imx-ocotp-Fix-wrong-register-size.patch"
+SRC_URI += "file://patches/0706-nvmem-octop-Add-support-for-imx6ul.patch"
+SRC_URI += "file://patches/0707-Subject-nvmem-imx-ocotp-clear-error-bit-after-readin.patch"
+SRC_URI += "file://patches/0708-Subject-nvmem-imx-ocotp-add-write-support.patch"
+
+# Version tag
+SRC_URI += "file://patches/Release-4.4-customers-skov-imx6-version.patch"
+
+
