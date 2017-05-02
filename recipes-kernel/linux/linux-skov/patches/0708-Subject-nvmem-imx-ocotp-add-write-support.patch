@@ -321,7 +321,40 @@ index e2b62b347b84..eb55b419af5b 100644
 +
  	if (IS_ERR(nvmem))
  		return PTR_ERR(nvmem);
- 
--- 
-2.12.0
 
+--- a/include/linux/nvmem-provider.h	2017-05-02 10:54:14.424281646 +0200
++++ b/include/linux/nvmem-provider.h	2017-05-02 10:54:18.768281789 +0200
+@@ -14,6 +14,10 @@
+ 
+ struct nvmem_device;
+ struct nvmem_cell_info;
++typedef int (*nvmem_reg_read_t)(void *priv, unsigned int offset,
++				void *val, size_t bytes);
++typedef int (*nvmem_reg_write_t)(void *priv, unsigned int offset,
++				 void *val, size_t bytes);
+ 
+ struct nvmem_config {
+ 	struct device		*dev;
+@@ -23,6 +27,16 @@
+ 	const struct nvmem_cell_info	*cells;
+ 	int			ncells;
+ 	bool			read_only;
++	bool			root_only;
++	nvmem_reg_read_t	reg_read;
++	nvmem_reg_write_t	reg_write;
++	int	size;
++	int	word_size;
++	int	stride;
++	void	*priv;
++	/* To be only used by old driver/misc/eeprom drivers */
++	bool			compat;
++	struct device		*base_dev;
+ };
+ 
+ #if IS_ENABLED(CONFIG_NVMEM)
+@@ -43,5 +57,4 @@
+ }
+ 
+ #endif /* CONFIG_NVMEM */
+-
+ #endif  /* ifndef _LINUX_NVMEM_PROVIDER_H */
