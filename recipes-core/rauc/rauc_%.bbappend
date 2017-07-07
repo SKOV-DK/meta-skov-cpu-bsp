@@ -6,8 +6,6 @@ SRC_URI += "file://system.conf \
 PACKAGES =+ "${PN}-dhcp"
 
 do_install_append() {
-	install -d ${D}${sysconfdir}/tmpfiles.d
-	echo "d /run/mount/rauc 0644 root root 10d" > ${D}${sysconfdir}/tmpfiles.d/rauc.conf
 	install -d ${D}${sysconfdir}/rauc
 	install -m 0644 ${WORKDIR}/dhcp.system.conf ${D}${sysconfdir}/rauc/
 }
