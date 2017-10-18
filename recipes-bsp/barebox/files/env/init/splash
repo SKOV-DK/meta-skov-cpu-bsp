@@ -5,10 +5,19 @@ if [ -z "${global.board.display}" ]; then
 fi
 
 if [ -e /env/splash.png ]; then
-  fb0.mode_name="${global.board.display}"
-  splash -b 0 /env/splash.png
   if [ ${state.display.external} -eq 0 ]; then
-	fb0.enable=1
+    fb0.mode_name="${global.board.display}"
+    splash -f /dev/fb0 -b 0 /env/splash.png
+    fb0.enable=1
+    backlight0.brightness="${state.display.brightness}"
+  else
+    splash -f /dev/fb3 -b 0 /env/splash.png
+    fb3.enable=1
+    BRIGHTNESS=${state.display.brightness}
+    if [ ${BRIGHTNESS} -gt 100 ]; then
+      BRIGHTNESS=100
+    fi
+    let CHECKSUM=0x6e^0x51^0x84^0x03^0x10^0x00^${BRIGHTNESS}
+    i2c_write -b 0 -a 0x37 -r 0x51 0x84 0x03 0x10 0x00 ${BRIGHTNESS} ${CHECKSUM}
   fi
-  backlight0.brightness="${state.display.brightness}"
 fi
