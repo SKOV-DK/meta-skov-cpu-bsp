@@ -15,7 +15,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  2 files changed, 47 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 6bdd14cc7c5d..664982725883 100644
+index 9625390b1ffa..dc49c46c6070 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -17,6 +17,7 @@
@@ -23,10 +23,10 @@ index 6bdd14cc7c5d..664982725883 100644
  #include <mach/bbu.h>
  #include <environment.h>
 +#include <bootsource.h>
+ #include <i2c/i2c.h>
  
  static int skov_imx6_fixup(struct device_node *root, void *unused)
- {
-@@ -25,13 +26,21 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
+@@ -26,13 +27,21 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
  	uint32_t brightness;
  	struct device_node *node;
  
@@ -54,7 +54,7 @@ index 6bdd14cc7c5d..664982725883 100644
  
  	for_each_compatible_node_from(node, root, NULL, "pwm-backlight") {
  		ret = of_property_write_u32(node, "default-brightness-level", brightness);
-@@ -45,6 +54,9 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
+@@ -46,6 +55,9 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
  
  static int skov_imx6_devices_init(void)
  {
@@ -64,7 +64,7 @@ index 6bdd14cc7c5d..664982725883 100644
  	if (!of_machine_is_compatible("skov,imx6"))
  		return 0;
  
-@@ -53,6 +65,23 @@ static int skov_imx6_devices_init(void)
+@@ -54,6 +66,23 @@ static int skov_imx6_devices_init(void)
  
  	of_register_fixup(skov_imx6_fixup, NULL);
  
@@ -89,13 +89,13 @@ index 6bdd14cc7c5d..664982725883 100644
  }
  coredevice_initcall(skov_imx6_devices_init);
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 57e66eeb3b93..2915371d0804 100644
+index d44eccb206ae..7aa3e2327e5f 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-@@ -12,9 +12,18 @@
- #include <dt-bindings/gpio/gpio.h>
+@@ -16,9 +16,18 @@
+ 		state = &state;
+ 	};
  
- / {
 -	barebox_environment {
 -		compatible = "barebox,environment";
 -		device-path = &barebox_env;

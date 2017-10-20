@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Fri, 24 Mar 2017 19:56:22 +0100
-Subject: [PATCH] Release 2017.03.0-version
+Date: Fri, 20 Oct 2017 08:54:27 +0200
+Subject: [PATCH] Release 2017.03.0/customers/skov/imx6/20171020-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 76463ab3c0d0..8849780ddc8b 100644
+index 76463ab3c0d0..732233a65592 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -19,7 +19,7 @@ index 76463ab3c0d0..8849780ddc8b 100644
  PATCHLEVEL = 03
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-1
++EXTRAVERSION =-20171020-1
  NAME = None
  
  # *DOCUMENTATION*

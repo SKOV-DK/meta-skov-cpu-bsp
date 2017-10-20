@@ -33,11 +33,11 @@ Signed-off-by: Sam Ravnborg <srn@skov.dk>
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
- arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 319 ++++++++++
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 323 ++++++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
  common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1393 insertions(+), 8 deletions(-)
+ 15 files changed, 1397 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -1119,7 +1119,7 @@ index 70359d8242a5..a7da4b053d8b 100644
  pbl-dtb-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES) += socfpga_cyclone5_socrates.dtb.o
 diff --git a/arch/arm/dts/imx6dl-skov-imx6.dts b/arch/arm/dts/imx6dl-skov-imx6.dts
 new file mode 100644
-index 000000000000..e7e4310ebf47
+index 000000000000..c2dac682048a
 --- /dev/null
 +++ b/arch/arm/dts/imx6dl-skov-imx6.dts
 @@ -0,0 +1,24 @@
@@ -1135,8 +1135,8 @@ index 000000000000..e7e4310ebf47
 + */
 +
 +/dts-v1/;
-+#include "imx6dl.dtsi"
 +#include <arm/imx6dl.dtsi>
++#include "imx6dl.dtsi"
 +#include "imx6qdl-skov-imx6.dtsi"
 +
 +/ {
@@ -1149,7 +1149,7 @@ index 000000000000..e7e4310ebf47
 +};
 diff --git a/arch/arm/dts/imx6q-skov-imx6.dts b/arch/arm/dts/imx6q-skov-imx6.dts
 new file mode 100644
-index 000000000000..33b2ebe41c22
+index 000000000000..278c2c944f2c
 --- /dev/null
 +++ b/arch/arm/dts/imx6q-skov-imx6.dts
 @@ -0,0 +1,24 @@
@@ -1165,8 +1165,8 @@ index 000000000000..33b2ebe41c22
 + */
 +
 +/dts-v1/;
-+#include "imx6q.dtsi"
 +#include <arm/imx6q.dtsi>
++#include "imx6q.dtsi"
 +#include "imx6qdl-skov-imx6.dtsi"
 +
 +/ {
@@ -1179,10 +1179,10 @@ index 000000000000..33b2ebe41c22
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 new file mode 100644
-index 000000000000..54651c894ad5
+index 000000000000..bddc68b3c73a
 --- /dev/null
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-@@ -0,0 +1,319 @@
+@@ -0,0 +1,323 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
 + *
@@ -1195,6 +1195,10 @@ index 000000000000..54651c894ad5
 + */
 +
 +/ {
++	aliases {
++		state = &state;
++	};
++
 +	barebox_environment {
 +		compatible = "barebox,environment";
 +		device-path = &barebox_env;

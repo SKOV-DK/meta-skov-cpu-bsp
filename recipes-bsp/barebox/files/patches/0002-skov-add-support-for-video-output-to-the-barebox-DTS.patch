@@ -4,34 +4,46 @@ Subject: [PATCH] skov: add support for video output to the barebox DTS
 
 Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
 ---
- arch/arm/boards/skov-imx6/board.c   |  10 +++
- arch/arm/boards/skov-imx6/version.c |  23 ++++---
- arch/arm/dts/imx6qdl-skov-imx6.dtsi | 134 ++++++++++++++++++++++++++++++++++++
- 3 files changed, 156 insertions(+), 11 deletions(-)
+ arch/arm/boards/skov-imx6/board.c   |  21 +++++
+ arch/arm/boards/skov-imx6/version.c |  23 +++---
+ arch/arm/dts/imx6q-skov-imx6.dts    |   4 +
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi | 157 ++++++++++++++++++++++++++++++++++++
+ 4 files changed, 194 insertions(+), 11 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 0362379bb88a..8bb2c525e42b 100644
+index 0362379bb88a..c86473297853 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -16,6 +16,7 @@
+@@ -16,6 +16,8 @@
  #include <common.h>
  #include <init.h>
  #include <mach/bbu.h>
 +#include <environment.h>
++#include <i2c/i2c.h>
  
  static int skov_imx6_devices_init(void)
  {
-@@ -28,3 +29,12 @@ static int skov_imx6_devices_init(void)
+@@ -28,3 +30,22 @@ static int skov_imx6_devices_init(void)
  	return 0;
  }
  coredevice_initcall(skov_imx6_devices_init);
 +
 +static void skov_imx6_devices_shutdown(void)
 +{
++	const char *external;
++
 +	if (!of_machine_is_compatible("skov,imx6"))
 +		return;
 +
-+	setenv("backlight0.brightness", "0");
++	external = getenv("state.display.external");
++	if (!external) {
++		pr_err("could not get state variable display.external\n");
++		return;
++	}
++
++	if (!strcmp(external, "0")) {
++		setenv("backlight0.brightness", "0");
++	}
 +}
 +predevshutdown_exitcall(skov_imx6_devices_shutdown);
 diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
@@ -143,8 +155,20 @@ index 7f6651011d7c..c939994ddc19 100644
  
  	tweak_board(var);
  
+diff --git a/arch/arm/dts/imx6q-skov-imx6.dts b/arch/arm/dts/imx6q-skov-imx6.dts
+index 278c2c944f2c..fea84cb4986b 100644
+--- a/arch/arm/dts/imx6q-skov-imx6.dts
++++ b/arch/arm/dts/imx6q-skov-imx6.dts
+@@ -22,3 +22,7 @@
+ 		stdout-path = &uart2;
+ 	};
+ };
++
++&i2c2 {
++	status = "okay";
++};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 54651c894ad5..57e66eeb3b93 100644
+index bddc68b3c73a..d44eccb206ae 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -9,6 +9,8 @@
@@ -154,9 +178,9 @@ index 54651c894ad5..57e66eeb3b93 100644
 +#include <dt-bindings/gpio/gpio.h>
 +
  / {
- 	barebox_environment {
- 		compatible = "barebox,environment";
-@@ -127,6 +129,87 @@
+ 	aliases {
+ 		state = &state;
+@@ -131,6 +133,101 @@
  			};
  		};
  	};
@@ -239,15 +263,38 @@ index 54651c894ad5..57e66eeb3b93 100644
 +	status = "okay";
 +};
 +
++&i2c2 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2_2>;
++};
++
++&hdmi {
++	status = "okay";
++	ddc-i2c-bus = <&i2c2>;
++};
++
++/delete-node/&ipu1_di0_hdmi;
++/delete-node/&hdmi_mux_0;
++
 +&ipu1_di0_disp0 {
 +	remote-endpoint = <&display0_in>;
  };
  
  &iomuxc {
-@@ -225,6 +308,57 @@
+@@ -229,6 +326,66 @@
  			MX6QDL_PAD_NANDF_D7__NAND_DATA07 0xb0b1
  		>;
  	};
++
++	pinctrl_i2c2_2: i2c2grp-2 {
++		fsl,pins = <
++			/* internal 22 k pull up required */
++			MX6QDL_PAD_KEY_COL3__I2C2_SCL		0x4001F878
++			/* internal 22 k pull up required */
++			MX6QDL_PAD_KEY_ROW3__I2C2_SDA		0x4001F878
++		>;
++	};
 +
 +	pinctrl_ipu1_4: ipu1grp-4 {
 +		fsl,pins = <
