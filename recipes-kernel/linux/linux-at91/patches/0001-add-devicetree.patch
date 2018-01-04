@@ -1,0 +1,256 @@
+ arch/arm/boot/dts/arm9-cpu.dts | 235 +++++++++++++++++++++++++++++++++++++++++
+ arch/arm/tools/mach-types      |   1 +
+ 2 files changed, 236 insertions(+)
+diff --git a/arch/arm/boot/dts/arm9-cpu.dts b/arch/arm/boot/dts/arm9-cpu.dts
+new file mode 100644
+index 0000000..6c2a7e5
+--- /dev/null
++++ b/arch/arm/boot/dts/arm9-cpu.dts
+@@ -0,0 +1,235 @@
++/*
++ * Device Tree file for SKOV ARM9 CPU board with 128 MB RAM and Logic Technology Display
++ *
++ *  Copyright (C) 2018 Sam Ravnborg <sam@ravnborg.org>
++ *
++ * Licensed under GPLv2 only
++ */
++/dts-v1/;
++#include "arm/at91sam9263.dtsi"
++
++/ {
++	model = "SKOV ARM9 CPU";
++	compatible = "skov,arm9-cpu", "atmel,at91sam9263", "atmel,at91sam9", "skov,arm9cpu";
++
++	chosen {
++		bootargs = "mem=64M root=/dev/mtdblock3 rw rootfstype=ubifs";
++		stdout-path = "serial0:115200n8";
++
++		environment@0 {
++			compatible = "barebox,environment";
++			device-path = &flash, "partname:bareboxenv";
++		};
++	};
++
++	memory {
++		reg = <0x20000000 0x8000000>;
++	};
++
++	clocks {
++		slow_xtal {
++			clock-frequency = <32768>;
++		};
++
++		main_xtal {
++			clock-frequency = <16000000>;
++		};
++	};
++
++	ahb {
++		apb {
++			dbgu: serial@ffffee00 {
++				status = "okay";
++			};
++
++			usart0: serial@fff8c000 {
++				pinctrl-0 = <
++					&pinctrl_usart0
++					&pinctrl_usart0_rts
++					&pinctrl_usart0_cts>;
++				status = "okay";
++			};
++
++			macb0: ethernet@fffbc000 {
++				phy-mode = "rmii";
++				status = "okay";
++			
++                                ethernet-phy@0 {
++                                        reg = <0x1>;
++                                        interrupt-parent = <&pioE>;
++                                        interrupts = <31 IRQ_TYPE_LEVEL_LOW>;
++                                };
++
++			};
++
++			usb1: gadget@fff78000 {
++				atmel,vbus-gpio = <&pioA 25 GPIO_ACTIVE_HIGH>;
++				status = "okay";
++			};
++
++			mmc1: mmc@fff84000 {
++				pinctrl-0 = <
++					&pinctrl_board_mmc1
++					&pinctrl_mmc1_clk
++					&pinctrl_mmc1_slot0_cmd_dat0
++					&pinctrl_mmc1_slot0_dat1_3>;
++				cd-gpios = <&pioE 18 GPIO_ACTIVE_HIGH>;
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioE 18 GPIO_ACTIVE_HIGH>;
++					wp-gpios = <&pioE 19 GPIO_ACTIVE_HIGH>;
++				};
++			};
++
++			pinctrl@fffff200 {
++				mmc1 {
++					pinctrl_board_mmc1: mmc1-board {
++						atmel,pins =
++							<AT91_PIOE 18 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH 	/* PE18 gpio CD pin pull up and deglitch */
++							 AT91_PIOE 19 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP>;	/* PE19 gpio WP pin pull up */
++					};
++				};
++			};
++
++			spi0: spi@fffa4000 {
++				cs-gpios = <0>, <&pioA 3 0>, <0>, <&pioB 11 0>;
++				status = "okay";
++
++				mcp3002@0 {
++					compatible = "microchip,mcp3002";
++                                        reg = <1>;
++                                        spi-max-frequency = <1000000>;
++                                };
++
++				tsc2046@0 {
++					reg = <3>;
++					compatible = "ti,tsc2046";
++					interrupts-extended = <&pioA 15 IRQ_TYPE_LEVEL_LOW>;
++					spi-max-frequency = <1000000>;
++					//pendown-gpio = <&pioA 15 GPIO_ACTIVE_LOW>;
++
++					ti,x-min = /bits/ 16 <800>;
++					ti,x-max = /bits/ 16 <3830>;
++					ti,y-min = /bits/ 16 <500>;
++					ti,y-max = /bits/ 16 <3830>;
++					ti,vref-delay-usecs = /bits/ 16 <300>;
++					ti,x-plate-ohms = /bits/ 16 <642>;
++					ti,y-plate-ohms = /bits/ 16 <295>;
++					ti,pressure-max = /bits/ 16 <1500>;
++					ti,debounce-rep = /bits/ 16 <8>;
++					ti,debounce-tol = /bits/ 16 <65535>;
++					ti,debounce-max = /bits/ 16 <100>;
++
++					wakeup-source;
++				};
++			};
++
++			watchdog@fffffd40 {
++				status = "okay";
++			};
++		};
++
++		fb0: fb@0x00700000 {
++			display = <&display0>;
++			status = "okay";
++
++			display0: display {
++				bits-per-pixel = <16>;
++				atmel,lcdcon-backlight;
++				atmel,dmacon = <0x1>;
++				atmel,lcdcon2 = <0x80008002>;
++				atmel,guard-time = <1>;
++
++				display-timings {
++					native-mode = <&timing0>;
++					timing0: timing0 {
++						clock-frequency = <33000000>;
++						hactive = <800>;
++						vactive = <480>;
++						hback-porch = <85>;
++						hfront-porch = <112>;
++						vback-porch = <29>;
++						vfront-porch = <38>;
++						hsync-len = <3>;
++						vsync-len = <3>;
++						pixelclk-active = <1>;
++						hsync-active = <0>;
++						vsync-active = <0>;
++						de-active = <1>;
++					};
++				};
++			};
++		};
++
++		usb0: ohci@00a00000 {
++			num-ports = <2>;
++			status = "okay";
++			atmel,vbus-gpio = <&pioA 24 GPIO_ACTIVE_HIGH
++					   &pioA 21 GPIO_ACTIVE_HIGH
++					  >;
++		};
++
++		flash: nor_flash@10000000 {
++			compatible = "cfi-flash";
++			reg = <0x10000000 0x4000000>;
++			linux,mtd-name = "physmap-flash.0";
++			bank-width = <2>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			barebox@0 {
++				label = "barebox";
++				reg = <0x00000 0x40000>;
++			};
++
++			bareboxenv@40000 {
++				label = "bareboxenv";
++				reg = <0x40000 0x10000>;
++			};
++
++			kernel@50000 {
++				label = "kernel";
++				reg = <0x50000 0x300000>;
++			};
++
++			root@350000  {
++				label = "root";
++				reg = <0x350000 0x4B0000>;
++			};
++		};
++
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		d0 {
++			label = "d0";
++			gpios = <&pioD 0 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "heartbeat";
++		};
++
++		d1 {
++			label = "d1";
++			gpios = <&pioD 1 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "mmc0";
++		};
++
++		d2 {
++			label = "d2";
++			gpios = <&pioD 7 GPIO_ACTIVE_LOW>;
++		};
++	};
++	
++	i2c-gpio-0 {
++		status = "okay";
++
++		rtc@68 {
++			compatible = "dallas,ds1374";
++			reg = <0x68>;
++		};
++        };
++
++};
+diff --git a/arch/arm/tools/mach-types b/arch/arm/tools/mach-types
+index a9313b6..b18c657 100644
+--- a/arch/arm/tools/mach-types
++++ b/arch/arm/tools/mach-types
+@@ -230,6 +230,7 @@ vstms			MACH_VSTMS		VSTMS			1140
+ micro9m			MACH_MICRO9M		MICRO9M			1169
+ bug			MACH_BUG		BUG			1179
+ at91sam9263ek		MACH_AT91SAM9263EK	AT91SAM9263EK		1202
++arm9cpu                 MACH_ARM9CPU            ARM9CPU                 1203
+ em7210			MACH_EM7210		EM7210			1212
+ vpac270			MACH_VPAC270		VPAC270			1227
+ treo680			MACH_TREO680		TREO680			1230
