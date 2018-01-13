@@ -1,6 +1,16 @@
 --- a/include/configs/arm9-cpu.h	2018-01-03 13:58:31.385240730 +0100
-+++ b/include/configs/arm9-cpu.h	2018-01-04 10:12:34.201394937 +0100
-@@ -177,43 +177,27 @@
++++ b/include/configs/arm9-cpu.h	2018-01-09 10:43:11.888799156 +0100
+@@ -164,7 +164,8 @@
+ #define CONFIG_ENV_IS_IN_FLASH
+ /* Address and size of Primary Environment Sector */
+ #define CONFIG_ENV_SIZE			0x000004000 /**< Must be smaller that 64KB otherwise h_export fails*/
+-#define CONFIG_ENV_ADDR                   (CONFIG_SYS_FLASH_BASE + 0x00080000)
++//* Fake it so it dont use the installed env. Note real one is on 0x00080000 */ 
++#define CONFIG_ENV_ADDR                   (CONFIG_SYS_FLASH_BASE + 0x000A0000)
+ #define CONFIG_ENV_SECT_SIZE		0x00020000 /**< One sector is 128KB in Nor flash*/
+ #define CONFIG_ENV_OVERWRITE			1 /**< San Rose It Shall be possible to change eth addr */
+ 
+@@ -177,43 +178,27 @@
  KJP: layout_nor added 13 spaces to compensate for binary replacement by old layoutstring: physmap-flash.0:384k(u-boot),128k(Env),2048k(Linux),768k(Bmp_Image),-(User)
  */
  #define CONFIG_BOOTCOUNT_LIMIT  		1 /**< San Rose do something else if it is not possible to boot default partiton */ 
@@ -48,7 +58,7 @@
 +    "lcdtype=tft\0" \
      "lcd_bglight=80\0"
  
-+#define CONFIG_BOOTARGS		"console=ttyS0,115200 init=/bin/init.skov mtdparts=physmap-flash.0:512k(u-boot),128k(Env),2688k(Linux),-(Rootfs1) root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait"
++#define CONFIG_BOOTARGS		"console=ttyS0,115200 init=/usr/bin/kmsfb-manage.sh mtdparts=physmap-flash.0:512k(u-boot),128k(Env),2688k(Linux),-(Rootfs1) root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait"
 +#define CONFIG_BOOTCOMMAND      "ext2load mmc 0:2 21000000 /boot/uImage-4.14.10skov-1.0; ext2load mmc 0:2 22000000 /boot/devicetree-uImage-arm9-cpu.dtb; bootm 21000000  - 22000000"
 +
  #define CONFIG_CMD_UBI

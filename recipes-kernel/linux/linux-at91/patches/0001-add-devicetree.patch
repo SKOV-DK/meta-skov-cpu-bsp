@@ -1,12 +1,12 @@
- arch/arm/boot/dts/arm9-cpu.dts | 270 +++++++++++++++++++++++++++++++++++++++++
+ arch/arm/boot/dts/arm9-cpu.dts | 278 +++++++++++++++++++++++++++++++++++++++++
  arch/arm/tools/mach-types      |   1 +
- 2 files changed, 271 insertions(+)
+ 2 files changed, 279 insertions(+)
 diff --git a/arch/arm/boot/dts/arm9-cpu.dts b/arch/arm/boot/dts/arm9-cpu.dts
 new file mode 100644
-index 0000000..0941098
+index 0000000..c068634
 --- /dev/null
 +++ b/arch/arm/boot/dts/arm9-cpu.dts
-@@ -0,0 +1,270 @@
+@@ -0,0 +1,278 @@
 +/*
 + * Device Tree file for SKOV ARM9 CPU board with 128 MB RAM and Logic Technology Display
 + *
@@ -22,7 +22,7 @@ index 0000000..0941098
 +	compatible = "skov,arm9-cpu", "atmel,at91sam9263", "atmel,at91sam9", "skov,arm9cpu";
 +
 +	chosen {
-+		bootargs = "mem=64M root=/dev/mtdblock3 rw rootfstype=ubifs";
++		bootargs = "mem=128M root=/dev/mtdblock3 rw rootfstype=ubifs";
 +		stdout-path = "serial0:115200n8";
 +
 +		environment@0 {
@@ -103,11 +103,11 @@ index 0000000..0941098
 +				inputs {
 +					pinctrl_disp_type: disp_type-0 {
 +						atmel,pins =
-+							<AT91_PIOD 2 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;    	      	/* PD2 gpio DISP_TYPE (Seiko or Logic) */
++							<AT91_PIOD 2 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;		/* PD2 gpio DISP_TYPE (Seiko or Logic) */
 +					};
 +					pinctrl_logic_type: logic_type-0 {
 +						atmel,pins =
-+							<AT91_PIOB 8 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;                /* PB8 gpio LOGIC_TYPE (l2 or l6) */
++							<AT91_PIOB 8 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;		/* PB8 gpio LOGIC_TYPE (l2 or l6) */
 +					};
 +
 +				};
@@ -253,30 +253,39 @@ index 0000000..0941098
 +        };
 +
 +	inputs {
-+		compatible = "atmel,at91sam9x5-pinctrl, atmel,at91rm9200-pinctrl", "simple-bus";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_disp_type>;
-+/*		
++		//compatible = "atmel,at91sam9x5-pinctrl, atmel,at91rm9200-pinctrl", "simple-bus";
++		//pinctrl-names = "default";
++		//pinctrl-0 = <&pinctrl_disp_type>;
++		
 +		DISP_TYPE {
 +			gpio-hog;
 +			input;
 +			line-name = "DISP_TYPE";
-+			gpios = <&pioD 2>;
-+			label = "DISP_TYPE";
++			gpios = <&pioD 2 GPIO_ACTIVE_HIGH>;
 +		};
 +		
 +		LOGIC_TYPE {
 +			gpio-hog;
 +			input;
 +			line-name = "LIGIC_TYPE";		
-+			gpios = <&pioB 8>;
++			gpios = <&pioB 8 GPIO_ACTIVE_HIGH>;
 +			label = "LOGIC_TYPE";
 +		};
 +
-+*/
 +	};
-+
 +};
++
++/*
++&pioD {
++	DISP_TYPE {
++		gpio-hog;
++		input;
++		line-name = "DISP_TYPE";
++		gpios = <&pioD 2 GPIO_ACTIVE_HIGH>;
++	};
++};
++*/
+\ No newline at end of file
 diff --git a/arch/arm/tools/mach-types b/arch/arm/tools/mach-types
 index a9313b6..b18c657 100644
 --- a/arch/arm/tools/mach-types
