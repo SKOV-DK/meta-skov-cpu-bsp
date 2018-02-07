@@ -1,21 +1,21 @@
-# umpf-base: v2017.03.0
-# umpf-name: 2017.03.0/customers/skov/imx6
-# umpf-version: 2017.03.0/customers/skov/imx6/20171020-1
-# umpf-topic: v2017.03.0/customers/skov/imx6
-# umpf-hashinfo: aad37fe3de597dd849ff493bf5b48ee3222d3ab6
-# umpf-topic-range: a614f64d72812a4c569ae06d6ee81dfdfeea812c..245c894cd8ce0f96094c5f5f303b5ff442d4f60f
+# umpf-base: v2018.04.0
+# umpf-name: 2018.04.0/customers/skov/imx6
+# umpf-version: 2018.04.0/customers/skov/imx6/20180418-1
+# umpf-topic: v2018.04.0/customers/skov/imx6
+# umpf-hashinfo: 53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca
+# umpf-topic-range: bd9ad3a602295fb9aa8882fbf27c54288b150d5f..53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov-add-support-for-video-output-to-the-barebox-DTS.patch \
   file://patches/0003-skov-set-backlight-brightness-from-state.patch \
   file://patches/0004-mtd-nand_mxs-fix-NAND-error-when-change-clk-rate.patch \
   file://patches/0005-skov-choose-environment-depending-on-bootsource.patch \
-  file://patches/0006-commands-i2c-do-not-restrict-i2c_write-s-data-to-be-.patch \
-  file://patches/0007-graphic_utils-Fix-freeing-uninitialzed-pointer-in-fb.patch \
+  file://patches/0006-fs-fix-error-path-in-__canonicalize_path.patch \
+  file://patches/0007-fs-remove-shortcut-in-canonicalizing-filenames.patch \
   "
-# umpf-release: 2017.03.0/customers/skov/imx6/20171020-1
-# umpf-topic-range: 245c894cd8ce0f96094c5f5f303b5ff442d4f60f..b704de45b51807f069ce075b43501b3d5267347d
+# umpf-release: 2018.04.0/customers/skov/imx6/20180418-1
+# umpf-topic-range: 53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca..d4ccd9e9582c69f6140abc2fc576688fe9170b9d
 SRC_URI += "\
-  file://patches/0101-Release-2017.03.0-customers-skov-imx6-20171020-1.patch \
+  file://patches/0101-Release-2018.04.0-customers-skov-imx6-20180418-1.patch \
   "
 # umpf-end

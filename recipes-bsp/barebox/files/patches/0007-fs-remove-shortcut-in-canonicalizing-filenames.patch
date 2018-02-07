@@ -1,0 +1,54 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 16 Apr 2018 13:00:29 +0200
+Subject: [PATCH] fs: remove shortcut in canonicalizing filenames
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Only individually getting the file status for every part of the path tells us if
+a symbolic link is involved or not. If this is the case the later call to
+readlink will check if the filesystem supports symbolic links or not.
+
+Hence this reverts commit d79a81736f64 ("fs: Don't bother filesystems without
+link support with additional stat() calls").
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ fs/fs.c | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/fs/fs.c b/fs/fs.c
+index 7c818eca024f..b2da0a62a29d 100644
+--- a/fs/fs.c
++++ b/fs/fs.c
+@@ -144,7 +144,6 @@ char *normalise_path(const char *pathname)
+ EXPORT_SYMBOL(normalise_path);
+ 
+ static int __lstat(const char *filename, struct stat *s);
+-static struct fs_device_d *get_fsdevice_by_path(const char *path);
+ 
+ static char *__canonicalize_path(const char *_pathname, int level)
+ {
+@@ -167,7 +166,6 @@ static char *__canonicalize_path(const char *_pathname, int level)
+ 		char *p = strsep(&path, "/");
+ 		char *tmp;
+ 		char link[PATH_MAX] = {};
+-		struct fs_device_d *fsdev;
+ 
+ 		if (!p)
+ 			break;
+@@ -186,14 +184,6 @@ static char *__canonicalize_path(const char *_pathname, int level)
+ 		free(outpath);
+ 		outpath = tmp;
+ 
+-		/*
+-		 * Don't bother filesystems without link support
+-		 * with an additional stat() call.
+-		 */
+-		fsdev = get_fsdevice_by_path(outpath);
+-		if (!fsdev || !fsdev->driver->readlink)
+-			continue;
+-
+ 		ret = __lstat(outpath, &s);
+ 		if (ret)
+ 			goto out;

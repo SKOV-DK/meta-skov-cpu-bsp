@@ -15,17 +15,17 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  2 files changed, 47 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 9625390b1ffa..dc49c46c6070 100644
+index 9625390b1ffa..29c0b4385802 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -17,6 +17,7 @@
- #include <init.h>
+@@ -18,6 +18,7 @@
  #include <mach/bbu.h>
  #include <environment.h>
-+#include <bootsource.h>
  #include <i2c/i2c.h>
++#include <bootsource.h>
  
  static int skov_imx6_fixup(struct device_node *root, void *unused)
+ {
 @@ -26,13 +27,21 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
  	uint32_t brightness;
  	struct device_node *node;
@@ -89,7 +89,7 @@ index 9625390b1ffa..dc49c46c6070 100644
  }
  coredevice_initcall(skov_imx6_devices_init);
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index d44eccb206ae..7aa3e2327e5f 100644
+index 3de79248d516..ae712a0b87f3 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -16,9 +16,18 @@

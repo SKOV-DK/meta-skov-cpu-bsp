@@ -1,0 +1,49 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 16 Apr 2018 12:06:44 +0200
+Subject: [PATCH] fs: fix error path in __canonicalize_path()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Report failure in resolving links to the caller and only clean up memory then.
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ fs/fs.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/fs/fs.c b/fs/fs.c
+index 5135112c8b81..7c818eca024f 100644
+--- a/fs/fs.c
++++ b/fs/fs.c
+@@ -202,8 +202,11 @@ static char *__canonicalize_path(const char *_pathname, int level)
+ 			continue;
+ 
+ 		ret = readlink(outpath, link, PATH_MAX - 1);
+-		if (ret < 0)
++		if (ret < 0) {
++			free(outpath);
++			outpath = ERR_PTR(ret);
+ 			goto out;
++		}
+ 
+ 		if (link[0] == '/') {
+ 			free(outpath);
+@@ -218,14 +221,15 @@ static char *__canonicalize_path(const char *_pathname, int level)
+ 		if (IS_ERR(outpath))
+ 			goto out;
+ 	}
+-out:
+-	free(freep);
+ 
+ 	if (!*outpath) {
+ 		free(outpath);
+ 		outpath = xstrdup("/");
+ 	}
+ 
++out:
++	free(freep);
++
+ 	return outpath;
+ }
+ 

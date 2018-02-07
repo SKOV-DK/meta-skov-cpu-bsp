@@ -1,8 +1,14 @@
 From: Jan Luebbe <jlu@pengutronix.de>
 Date: Tue, 6 Dec 2016 17:23:30 +0100
 Subject: [PATCH] skov: add support for video output to the barebox DTS
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+[Note: this commit results of fixing up 3030da6f8b4a with
+cd507b63d504..f5684d3276dd]
 ---
  arch/arm/boards/skov-imx6/board.c   |  21 +++++
  arch/arm/boards/skov-imx6/version.c |  23 +++---
@@ -168,7 +174,7 @@ index 278c2c944f2c..fea84cb4986b 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index bddc68b3c73a..d44eccb206ae 100644
+index f17d910608b0..3de79248d516 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -9,6 +9,8 @@

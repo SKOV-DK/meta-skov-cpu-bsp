@@ -21,6 +21,8 @@ Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 Signed-off-by: Søren Andersen <san@skov.dk>
 Signed-off-by: Sam Ravnborg <srn@skov.dk>
+[Note: this commit results of fixing up f583fe1afc7e with 4828235c325a &
+e9a1f3cbaf5f]
 ---
  arch/arm/boards/Makefile                           |   1 +
  arch/arm/boards/skov-imx6/Makefile                 |   2 +
@@ -33,11 +35,11 @@ Signed-off-by: Sam Ravnborg <srn@skov.dk>
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
- arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 323 ++++++++++
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 335 ++++++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
- common/blspec.c                                    |  20 +-
+ common/blspec.c                                    |  22 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1397 insertions(+), 8 deletions(-)
+ 15 files changed, 1410 insertions(+), 9 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -50,10 +52,10 @@ Signed-off-by: Sam Ravnborg <srn@skov.dk>
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 250ccb88896f..8206c3b48fe2 100644
+index ca187ccb8998..924f67e637e4 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -102,6 +102,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
+@@ -104,6 +104,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
@@ -1106,11 +1108,11 @@ index 000000000000..7f6651011d7c
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 70359d8242a5..a7da4b053d8b 100644
+index 0526a6f40724..73e18450a77a 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -60,6 +60,7 @@ pbl-dtb-$(CONFIG_MACH_PHYTEC_SOM_RK3288) += rk3288-phycore-som.dtb.o
- pbl-dtb-$(CONFIG_MACH_REALQ7) += imx6q-dmo-edmqmx6.dtb.o
+@@ -68,6 +68,7 @@ pbl-dtb-$(CONFIG_MACH_RPI) += bcm2835-rpi.dtb.o
+ pbl-dtb-$(CONFIG_MACH_RPI2) += bcm2836-rpi-2.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
 +pbl-dtb-$(CONFIG_MACH_SKOV_IMX6) += imx6dl-skov-imx6.dtb.o imx6q-skov-imx6.dtb.o
@@ -1179,10 +1181,10 @@ index 000000000000..278c2c944f2c
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 new file mode 100644
-index 000000000000..bddc68b3c73a
+index 000000000000..f17d910608b0
 --- /dev/null
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-@@ -0,0 +1,323 @@
+@@ -0,0 +1,335 @@
 +/*
 + * Copyright 2015 Juergen Borleis, Pengutronix <kernel@pengutronix.de>
 + *
@@ -1216,7 +1218,7 @@ index 000000000000..bddc68b3c73a
 +
 +		led1: D2 {
 +			label = "D2";
-+			gpios = <&gpio1 0 0>; 
++			gpios = <&gpio1 0 0>;
 +			default-state = "off";
 +		};
 +
@@ -1233,7 +1235,7 @@ index 000000000000..bddc68b3c73a
 +		status = "okay";
 +		compatible = "skov-imx6,version";
 +		version-gpio = <&gpio2 10 0>, <&gpio2 15 0>, <&gpio2 8 0>, <&gpio2 9 0>, <&gpio2 12 0>, <&gpio2 14 0>, <&gpio2 11 0>, <&gpio2 13 0>;
-+	};	
++	};
 +
 +	/* State: mutable part */
 +	state: state {
@@ -1475,31 +1477,43 @@ index 000000000000..bddc68b3c73a
 +	nand-on-flash-bbt;
 +	status = "okay";
 +
-+	partition@0 {
-+		label = "firmware";
-+		reg = <0x00000000 0x000000000>; /* keep zero sized to enable autodetection */
++	partitions {
++		compatible = "fixed-partitions";
++		#address-cells = <1>;
++		#size-cells = <1>;
++
++		partition@0 {
++			label = "firmware";
++			reg = <0x00000000 0x000000000>; /* keep zero sized to enable autodetection */
++		};
 +	};
 +};
 +
 +/* define the SPI based 8 MiB NOR flash layout */
 +&norflash {
-+	partition@0 {
-+		label = "barebox";
-+		reg = <0x0 0x100000>;
-+	};
++	partitions {
++		compatible = "fixed-partitions";
++		#address-cells = <1>;
++		#size-cells = <1>;
 +
-+	/* space left to let barebox grow */
++		partition@0 {
++			label = "barebox";
++			reg = <0x0 0x100000>;
++		};
 +
-+	/* placed near the end of the NOR memory */
-+	barebox_env: partition@780000 {
-+		label = "barebox-environment";
-+		reg = <0x780000 0x40000>;
-+	};
++		/* space left to let barebox grow */
 +
-+	/* placed at the end of the NOR memory */
-+	state_storage: partition@7C0000 {
-+		label = "barebox-state";
-+		reg = <0x7C0000 0x40000>; /* four times mirrored */
++		/* placed near the end of the NOR memory */
++		barebox_env: partition@780000 {
++			label = "barebox-environment";
++			reg = <0x780000 0x40000>;
++		};
++
++		/* placed at the end of the NOR memory */
++		state_storage: partition@7C0000 {
++			label = "barebox-state";
++			reg = <0x7C0000 0x40000>; /* four times mirrored */
++		};
 +	};
 +};
 +
@@ -1507,12 +1521,12 @@ index 000000000000..bddc68b3c73a
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index f83aedc0b9fa..7a966e95c0c3 100644
+index eb135c3f534c..5aa54309a3c2 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -375,6 +375,11 @@ config MACH_ZII_VF610_DEV
- 	select ARCH_VF610
- 	select CLKDEV_LOOKUP
+@@ -420,6 +420,11 @@ config MACH_NXP_IMX6ULL_EVK
+ 	bool "NXP i.MX6ull EVK Board"
+ 	select ARCH_IMX6UL
  
 +config MACH_SKOV_IMX6
 +	bool "Skov IMX6"
@@ -1523,12 +1537,12 @@ index f83aedc0b9fa..7a966e95c0c3 100644
  
  # ----------------------------------------------------------
 diff --git a/common/blspec.c b/common/blspec.c
-index ec63ddb40730..1818f285746b 100644
+index 6171461a721c..ce81da54781c 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -361,14 +361,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
- 	const char *compat;
- 	char *filename;
+@@ -370,14 +370,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
+ 	if (!strcmp(devicetree, "none"))
+ 		return true;
  
 -	/* If we don't have a root node every entry is compatible */
 -	barebox_root = of_get_root_node();
@@ -1553,13 +1567,20 @@ index ec63ddb40730..1818f285746b 100644
  
  	if (entry->rootpath)
  		abspath = entry->rootpath;
+@@ -756,4 +760,4 @@ static int blspec_init(void)
+ {
+ 	return bootentry_register_provider(blspec_bootentry_provider);
+ }
+-device_initcall(blspec_init);
+\ No newline at end of file
++device_initcall(blspec_init);
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index 2563779484fd..6ea1ffbc3a96 100644
+index 5e0043f1f014..2e5107d1dd0c 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -399,6 +399,11 @@ CFG_start_phytec_phycore_imx6ul_som_512mb.pblx.imximg = $(board)/phytec-som-imx6
- FILE_barebox-phytec-phycore-imx6ul-512mb.img = start_phytec_phycore_imx6ul_som_512mb.pblx.imximg
- image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6ul-512mb.img
+@@ -455,6 +455,11 @@ CFG_start_phytec_phycore_imx6ull_som_256mb.pblx.imximg = $(board)/phytec-som-imx
+ FILE_barebox-phytec-phycore-imx6ull-256mb.img = start_phytec_phycore_imx6ull_som_256mb.pblx.imximg
+ image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6ull-256mb.img
  
 +pblx-$(CONFIG_MACH_SKOV_IMX6) += start_imx6_skov_imx6
 +CFG_start_imx6_skov_imx6.imx-sram-img = $(board)/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
