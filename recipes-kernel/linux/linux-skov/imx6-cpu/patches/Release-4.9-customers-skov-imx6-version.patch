@@ -1,5 +1,5 @@
 From: Sam Ravnborg <srn@skov.dk>
-Subject: [PATCH] Release 4.4/customers/skov/imx6/-2
+Subject: [PATCH] Release 4.9/customers/skov/imx6
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -9,15 +9,14 @@ Content-Transfer-Encoding: 8bit
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 30924aabf1b4..b9d09306bf33 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
  VERSION = 4
- PATCHLEVEL = 4
- SUBLEVEL = 34
+ PATCHLEVEL = 9
+ SUBLEVEL = 91
 -EXTRAVERSION =
-+EXTRAVERSION =-4
- NAME = Blurry Fish Butt
++EXTRAVERSION =-1
+ NAME = Roaring Lionus
  
  # *DOCUMENTATION*

@@ -1,59 +1,59 @@
+From 045788b3dfafcf1ca34a4ab2bebfe6f3bc29c2a5 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
 Date: Fri, 13 Nov 2015 10:12:01 +0100
-Subject: [PATCH] Skov: add support for base platform and board variants 19 &
- 20
+Subject: [PATCH] skov: add support for base platform
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-The Skov platform potentially consists of many variants of CPUs (i.MX6S/DL and
-i.MX6D/Q), NAND memories (size differs from 256 MiB to 8 GiB) and populated
-SDRAM (256 MiB up to 2 GiB). All these variants share one PCB.
+The Skov platform potentially consists of many
+variants of CPUs (i.MX6S/DL and i.MX6D/Q),
+NAND memories (size differs from 256 MiB to 8 GiB)
+and populated SDRAM (256 MiB up to 2 GiB).
+All these variants share one PCB.
 
-The devicetrees are based upon the original Skov/AS IMX6 trees and have been
-modified in a way that all needed hardware (SD card, RTC, switch, display panel
-etc.) is operational. Some bootstrap resistors are provided which decode the
-variant and which allow for it's detection at runtime. This information is
-needed to choose the bootspec entry with the matching devicetree to boot the
-system. Based upon this mechanism usage of a single Barebox image and Linux root
-filesystem for all known board variants is made possible.
+The devicetrees are based upon the original
+SKOV IMX6 trees and have been modified in
+a way that all needed hardware
+(SD card, RTC, switch, display panel etc.)
+is operational.
+Some bootstrap resistors are provided which
+decode the variant and which allow for it's
+detection at runtime. This information is
+needed to choose the bootspec entry with the
+matching devicetree to boot the system.
+Based upon this mechanism usage of a single
+Barebox image and Linux root filesystem for
+all known board variants is made possible.
 
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
 Signed-off-by: Søren Andersen <san@skov.dk>
-[Note: this commit results of squashing commits v4.4..4f1fe9dae5c0]
+Signed-off-by: Sam Ravnborg <srn@skov.dk>
 ---
  .../panel/logictechnologies,lttd800480070-l2rt.txt |   7 +
+ .../logictechnologies,lttd800480070-l6wh-rt.txt    |   7 +
  .../devicetree/bindings/vendor-prefixes.txt        |   1 +
- arch/arm/boot/dts/Makefile                         |   1 +
- arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts        |  23 +
- arch/arm/boot/dts/imx6q-skov-imx6-revC.dts         |  36 ++
- arch/arm/boot/dts/imx6qdl-cpu.dtsi                 | 662 +++++++++++++++++++++
- arch/arm/boot/dts/imx6qdl-cpuC.dtsi                |  80 +++
+ arch/arm/boot/dts/Makefile                         |   2 +
+ arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts         |  23 +
+ arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts         |  27 +
+ arch/arm/boot/dts/imx6q-skov-revc-lt2.dts          |  36 ++
+ arch/arm/boot/dts/imx6q-skov-revc-lt6.dts          |  40 ++
+ arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi       |  80 +++
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 662 +++++++++++++++++++++
  drivers/Kconfig                                    |   2 +
  drivers/Makefile                                   |   1 +
- drivers/gpu/drm/imx/ipuv3-crtc.c                   |   2 +-
- drivers/gpu/drm/panel/panel-simple.c               |  38 ++
- drivers/rtc/rtc-pcf85063.c                         |  40 ++
+ drivers/gpu/drm/panel/panel-simple.c               |  68 +++
+ drivers/rtc/rtc-pcf85063.c                         |  41 ++
  drivers/skov/Kconfig                               |  18 +
  drivers/skov/Makefile                              |   2 +
  drivers/skov/mem_peek.c                            | 163 +++++
- drivers/skov/skov_version.c                        | 305 ++++++++++
- 16 files changed, 1380 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
- create mode 100644 arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts
- create mode 100644 arch/arm/boot/dts/imx6q-skov-imx6-revC.dts
- create mode 100644 arch/arm/boot/dts/imx6qdl-cpu.dtsi
- create mode 100644 arch/arm/boot/dts/imx6qdl-cpuC.dtsi
- create mode 100644 drivers/skov/Kconfig
- create mode 100644 drivers/skov/Makefile
- create mode 100644 drivers/skov/mem_peek.c
- create mode 100644 drivers/skov/skov_version.c
-
+ drivers/skov/skov_version.c                        | 315 ++++++++++
+ 18 files changed, 1495 insertions(+)
 diff --git a/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
 new file mode 100644
-index 000000000000..ed05dc15cb97
+index 0000000..ed05dc1
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l2rt.txt
 @@ -0,0 +1,7 @@
@@ -64,35 +64,49 @@ index 000000000000..ed05dc15cb97
 +
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
+diff --git a/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt
+new file mode 100644
+index 0000000..c65b715
+--- /dev/null
++++ b/Documentation/devicetree/bindings/panel/logictechnologies,lttd800480070-l6wh-rt.txt
+@@ -0,0 +1,7 @@
++Logic Technologies LTTD800480070-L6WH-RT" WVGA TFT LCD panel
++
++Required properties:
++- compatible: should be "logictechnologies,lttd800480070-l6wh-rt"
++
++This binding is compatible with the simple-panel binding, which is specified
++in simple-panel.txt in this directory.
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
-index 55df1d444e9f..d4e9037932ee 100644
+index bceffff..6767134 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.txt
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
-@@ -130,6 +130,7 @@ lg	LG Corporation
+@@ -158,6 +158,7 @@ lenovo	Lenovo Group Ltd.
+ lg	LG Corporation
  linux	Linux-specific binding
- lsi	LSI Corp. (LSI Logic)
  lltc	Linear Technology Corporation
 +logictechnologies	Logic Technologies Ltd.
+ lsi	LSI Corp. (LSI Logic)
  marvell	Marvell Technology Group Ltd.
  maxim	Maxim Integrated Products
- mediatek	MediaTek Inc.
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 30bbc3746130..b7c7cd9a72e6 100644
+index 7037201..3c03da2 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -331,6 +331,7 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
- 	imx6q-sabrelite.dtb \
- 	imx6q-sabresd.dtb \
- 	imx6q-sbc6x.dtb \
-+	imx6q-skov-imx6-revC.dtb \
- 	imx6q-tbs2910.dtb \
- 	imx6q-tx6q-1010.dtb \
- 	imx6q-tx6q-1010-comtft.dtb \
-diff --git a/arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts b/arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts
+@@ -348,6 +348,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+ 	imx6dl-sabreauto.dtb \
+ 	imx6dl-sabrelite.dtb \
+ 	imx6dl-sabresd.dtb \
++	imx6dl-skov-revc-lt2.dtb \
++	imx6dl-skov-revc-lt6.dtb \
+ 	imx6dl-ts4900.dtb \
+ 	imx6dl-tx6dl-comtft.dtb \
+ 	imx6dl-tx6s-8034.dtb \
+diff --git a/arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts b/arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
 new file mode 100644
-index 000000000000..a7333f06f932
+index 0000000..f987973
 --- /dev/null
-+++ b/arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts
++++ b/arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
 @@ -0,0 +1,23 @@
 +/*
 + * Copyright 2014 Rose Technology
@@ -110,18 +124,51 @@ index 000000000000..a7333f06f932
 +/dts-v1/;
 +#include <dt-bindings/interrupt-controller/irq.h>
 +#include "imx6dl.dtsi"
-+#include "imx6qdl-cpu.dtsi"
-+#include "imx6qdl-cpuC.dtsi"
++#include "imx6qdl-skov-cpu.dtsi"
++#include "imx6qdl-skov-cpu-revc.dtsi"
 +
 +/ {
-+	model = "Freescale i.MX6 SKOV Solo Board";
-+	compatible = "skov,imx6-imxdl-revC", "skov,imx6", "fsl,imx6dl";
++	model = "SKOV IMX6 CPU SoloCore";
++	compatible = "skov,imx6dl-skov-revc-lt2", "skov,imx6", "fsl,imx6dl";
 +};
-diff --git a/arch/arm/boot/dts/imx6q-skov-imx6-revC.dts b/arch/arm/boot/dts/imx6q-skov-imx6-revC.dts
+diff --git a/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts b/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
 new file mode 100644
-index 000000000000..81730c79fd0c
+index 0000000..cc278ac
 --- /dev/null
-+++ b/arch/arm/boot/dts/imx6q-skov-imx6-revC.dts
++++ b/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
+@@ -0,0 +1,27 @@
++/*
++ * Copyright 2014 Rose Technology
++ * Copyright 2012 Freescale Semiconductor, Inc.
++ * Copyright 2011 Linaro Ltd.
++ *
++ * The code contained herein is licensed under the GNU General Public
++ * License. You may obtain a copy of the GNU General Public License
++ * Version 2 or later at the following locations:
++ *
++ * http://www.opensource.org/licenses/gpl-license.html
++ * http://www.gnu.org/copyleft/gpl.html
++ */
++
++/dts-v1/;
++#include <dt-bindings/interrupt-controller/irq.h>
++#include "imx6dl.dtsi"
++#include "imx6qdl-skov-cpu.dtsi"
++#include "imx6qdl-skov-cpu-revc.dtsi"
++
++/ {
++	model = "SKOV IMX6 CPU SoloCore";
++	compatible = "skov,imx6dl-skov-revc-lt6", "skov,imx6", "fsl,imx6dl";
++};
++
++&panel {
++	compatible = "logictechnologies,lttd800480070-l6wh-rt";
++};
+diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
+new file mode 100644
+index 0000000..7132c1f
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
 @@ -0,0 +1,36 @@
 +/*
 + * Copyright 2014 Rose Technology
@@ -139,12 +186,12 @@ index 000000000000..81730c79fd0c
 +/dts-v1/;
 +#include <dt-bindings/interrupt-controller/irq.h>
 +#include "imx6q.dtsi"
-+#include "imx6qdl-cpu.dtsi"
-+#include "imx6qdl-cpuC.dtsi"
++#include "imx6qdl-skov-cpu.dtsi"
++#include "imx6qdl-skov-cpu-revc.dtsi"
 +
 +/ {
-+	model = "Freescale i.MX6 SKOV Quad Board";
-+	compatible = "skov,imx6-imxq-revC", "skov,imx6", "fsl,imx6q";
++	model = "SKOV IMX6 CPU QuadCore";
++	compatible = "skov,imx6q-skov-revc-lt2", "skov,imx6", "fsl,imx6q";
 +};
 +
 +&sata {
@@ -159,11 +206,143 @@ index 000000000000..81730c79fd0c
 +	status = "okay";
 +	ddc-i2c-bus = <&i2c2>;
 +};
-diff --git a/arch/arm/boot/dts/imx6qdl-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
+diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
 new file mode 100644
-index 000000000000..f6d8d65252dc
+index 0000000..07dd8be
 --- /dev/null
-+++ b/arch/arm/boot/dts/imx6qdl-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
+@@ -0,0 +1,40 @@
++/*
++ * Copyright 2014 Rose Technology
++ * Copyright 2012 Freescale Semiconductor, Inc.
++ * Copyright 2011 Linaro Ltd.
++ *
++ * The code contained herein is licensed under the GNU General Public
++ * License. You may obtain a copy of the GNU General Public License
++ * Version 2 or later at the following locations:
++ *
++ * http://www.opensource.org/licenses/gpl-license.html
++ * http://www.gnu.org/copyleft/gpl.html
++ */
++
++/dts-v1/;
++#include <dt-bindings/interrupt-controller/irq.h>
++#include "imx6q.dtsi"
++#include "imx6qdl-skov-cpu.dtsi"
++#include "imx6qdl-skov-cpu-revc.dtsi"
++
++/ {
++	model = "SKOV IMX6 CPU QuadCore";
++	compatible = "skov,imx6q-skov-revc-lt6", "skov,imx6", "fsl,imx6q";
++};
++
++&sata {
++	status = "disabled";
++};
++
++&i2c2 {
++	status = "okay";
++};
++
++&hdmi {
++	status = "okay";
++	ddc-i2c-bus = <&i2c2>;
++};
++
++&panel {
++	compatible = "logictechnologies,lttd800480070-l6wh-rt";
++};
+diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
+new file mode 100644
+index 0000000..97284a9
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
+@@ -0,0 +1,80 @@
++/*
++ * Copyright 2014 Rose Technology.
++ * Copyright 2012 Freescale Semiconductor, Inc.
++ * Copyright 2011 Linaro Ltd.
++ *
++ * The code contained herein is licensed under the GNU General Public
++ * License. You may obtain a copy of the GNU General Public License
++ * Version 2 or later at the following locations:
++ *
++ * http://www.opensource.org/licenses/gpl-license.html
++ * http://www.gnu.org/copyleft/gpl.html
++ */
++
++&pinctrl_board {
++	pinctrl_flexcan2_1: flexcan2grp-1 {
++		fsl,pins = <
++			MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 	0x80000000
++			MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
++		>;
++	};
++
++	pinctrl_ads7846: ads7846grp {
++		fsl,pins = <
++			/* external pull up */
++			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0x10040		/* TSC2046 Pen down irq */
++		>;
++	};
++
++	pinctrl_backlight: backlight_grp {
++		fsl,pins = <
++			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23	0x40000058
++		>;
++	};
++
++	pinctrl_vcc_mmc: vcc_mmc_grp {
++		fsl,pins = <
++			MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x40000058	/* MMC Power Supply Switch */
++		>;
++	};
++};
++
++&backlight_lcd {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_backlight>;
++	enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
++};
++
++&gpio6 {
++	backlight {
++		gpios = <23 0>; /* initially switch off the panel backlight */
++		output-high;
++		gpio-initval;
++	};
++};
++
++&ads7846 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ads7846>;
++	pendown-gpio = <&gpio3 19 0>;
++	interrupt-parent = <&gpio3>;
++	interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&can2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan2_1>;
++	xceiver-supply = <&reg_3p3v>;
++	status = "okay";
++};
++
++&vcc_mmc {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_vcc_mmc>;
++	gpio = <&gpio7 8 GPIO_ACTIVE_HIGH>;
++	enable-active-high;
++	startup-delay-us = <100>;
++	/* don't switch off the SD card automatically */
++	regulator-always-on;
++	regulator-boot-on;
++};
+diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
+new file mode 100644
+index 0000000..73a118b
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 @@ -0,0 +1,662 @@
 +/*
 + * Copyright 2014 Rose Technology.
@@ -403,7 +582,7 @@ index 000000000000..f6d8d65252dc
 +		status = "okay";
 +	};
 +
-+	panel {
++	panel: panel {
 +		compatible = "logictechnologies,lttd800480070-l2rt";
 +		backlight = <&backlight_lcd>;
 +		power-supply = <&reg_3p3v>;
@@ -827,97 +1006,11 @@ index 000000000000..f6d8d65252dc
 +	vqmmc-supply = <&iovcc_mmc>;
 +	fsl,delay-line;
 +};
-diff --git a/arch/arm/boot/dts/imx6qdl-cpuC.dtsi b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
-new file mode 100644
-index 000000000000..97284a974c1c
---- /dev/null
-+++ b/arch/arm/boot/dts/imx6qdl-cpuC.dtsi
-@@ -0,0 +1,80 @@
-+/*
-+ * Copyright 2014 Rose Technology.
-+ * Copyright 2012 Freescale Semiconductor, Inc.
-+ * Copyright 2011 Linaro Ltd.
-+ *
-+ * The code contained herein is licensed under the GNU General Public
-+ * License. You may obtain a copy of the GNU General Public License
-+ * Version 2 or later at the following locations:
-+ *
-+ * http://www.opensource.org/licenses/gpl-license.html
-+ * http://www.gnu.org/copyleft/gpl.html
-+ */
-+
-+&pinctrl_board {
-+	pinctrl_flexcan2_1: flexcan2grp-1 {
-+		fsl,pins = <
-+			MX6QDL_PAD_KEY_COL4__FLEXCAN2_TX 	0x80000000
-+			MX6QDL_PAD_KEY_ROW4__FLEXCAN2_RX 	0x80000000
-+		>;
-+	};
-+
-+	pinctrl_ads7846: ads7846grp {
-+		fsl,pins = <
-+			/* external pull up */
-+			MX6QDL_PAD_EIM_D19__GPIO3_IO19		0x10040		/* TSC2046 Pen down irq */
-+		>;
-+	};
-+
-+	pinctrl_backlight: backlight_grp {
-+		fsl,pins = <
-+			MX6QDL_PAD_RGMII_TD3__GPIO6_IO23	0x40000058
-+		>;
-+	};
-+
-+	pinctrl_vcc_mmc: vcc_mmc_grp {
-+		fsl,pins = <
-+			MX6QDL_PAD_SD3_RST__GPIO7_IO08		0x40000058	/* MMC Power Supply Switch */
-+		>;
-+	};
-+};
-+
-+&backlight_lcd {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_backlight>;
-+	enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
-+};
-+
-+&gpio6 {
-+	backlight {
-+		gpios = <23 0>; /* initially switch off the panel backlight */
-+		output-high;
-+		gpio-initval;
-+	};
-+};
-+
-+&ads7846 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_ads7846>;
-+	pendown-gpio = <&gpio3 19 0>;
-+	interrupt-parent = <&gpio3>;
-+	interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
-+};
-+
-+&can2 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_flexcan2_1>;
-+	xceiver-supply = <&reg_3p3v>;
-+	status = "okay";
-+};
-+
-+&vcc_mmc {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_vcc_mmc>;
-+	gpio = <&gpio7 8 GPIO_ACTIVE_HIGH>;
-+	enable-active-high;
-+	startup-delay-us = <100>;
-+	/* don't switch off the SD card automatically */
-+	regulator-always-on;
-+	regulator-boot-on;
-+};
 diff --git a/drivers/Kconfig b/drivers/Kconfig
-index d2ac339de85f..aed39ec953b9 100644
+index e1e2066..55e6ed48 100644
 --- a/drivers/Kconfig
 +++ b/drivers/Kconfig
-@@ -198,4 +198,6 @@ source "drivers/hwtracing/intel_th/Kconfig"
+@@ -202,4 +202,6 @@ source "drivers/hwtracing/intel_th/Kconfig"
  
  source "drivers/fpga/Kconfig"
  
@@ -925,43 +1018,19 @@ index d2ac339de85f..aed39ec953b9 100644
 +
  endmenu
 diff --git a/drivers/Makefile b/drivers/Makefile
-index 795d0ca714bf..d3efe14ea9a7 100644
+index 7c3d58d..36d8e30 100644
 --- a/drivers/Makefile
 +++ b/drivers/Makefile
-@@ -172,3 +172,4 @@ obj-$(CONFIG_STM)		+= hwtracing/stm/
+@@ -175,3 +175,4 @@ obj-$(CONFIG_STM)		+= hwtracing/stm/
  obj-$(CONFIG_ANDROID)		+= android/
  obj-$(CONFIG_NVMEM)		+= nvmem/
  obj-$(CONFIG_FPGA)		+= fpga/
 +obj-y				+= skov/
-diff --git a/drivers/gpu/drm/imx/ipuv3-crtc.c b/drivers/gpu/drm/imx/ipuv3-crtc.c
-index 9b0abd44b751..1a32b47bce63 100644
---- a/drivers/gpu/drm/imx/ipuv3-crtc.c
-+++ b/drivers/gpu/drm/imx/ipuv3-crtc.c
-@@ -173,7 +173,7 @@ static int ipu_crtc_mode_set(struct drm_crtc *crtc,
- 		sig_cfg.clkflags = 0;
- 
- 	sig_cfg.enable_pol = 1;
--	sig_cfg.clk_pol = 0;
-+	sig_cfg.clk_pol = 1;
- 	sig_cfg.bus_format = ipu_crtc->bus_format;
- 	sig_cfg.v_to_h_sync = 0;
- 	sig_cfg.hsync_pin = ipu_crtc->di_hsync_pin;
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index f97b73ec4713..c1bf9f33860b 100644
+index 6f65846..fc0d6c0 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -44,6 +44,10 @@ struct panel_desc {
- 
- 	unsigned int bpc;
- 
-+	/**
-+	 * @width: the width of the panel (in millimeters)
-+	 * @height: the height of the panel (in millimeters)
-+	 */
- 	struct {
- 		unsigned int width;
- 		unsigned int height;
-@@ -949,6 +953,37 @@ static const struct panel_desc lg_lp129qe = {
+@@ -1140,6 +1140,68 @@ static void panel_simple_shutdown(struct device *dev)
  	},
  };
  
@@ -996,25 +1065,59 @@ index f97b73ec4713..c1bf9f33860b 100644
 +	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
 +};
 +
++static const struct drm_display_mode logic_techno_lttd800480070_l6wh_rt_mode  = {
++	.clock = 33000,
++	.hdisplay = 800,
++	.hsync_start = 800 + 154,
++	.hsync_end = 800 + 154 + 3,
++	.htotal = 800 + 154 + 3 + 43,
++	.vdisplay = 480,
++	.vsync_start = 480 + 47,
++	.vsync_end = 480 + 47 + 3,
++	.vtotal = 480 + 47 + 3 + 20,
++	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
++	.vrefresh = 60,
++};
++
++static const struct panel_desc logic_techno_lttd800480070_l6wh_rt = {
++	.modes = &logic_techno_lttd800480070_l6wh_rt_mode,
++	.num_modes = 1,
++	.bpc = 8,
++	.size = {
++		.width = 154,
++		.height = 86,
++	},
++	.delay = {
++		.prepare = 45,
++		.enable = 100,
++		.disable = 100,
++		.unprepare = 45
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
++};
++
  static const struct drm_display_mode nec_nl4827hc19_05b_mode = {
  	.clock = 10870,
  	.hdisplay = 480,
-@@ -1173,6 +1208,9 @@ static const struct of_device_id platform_of_match[] = {
+@@ -1652,6 +1714,12 @@ static void panel_simple_shutdown(struct device *dev)
  		.compatible = "lg,lp129qe",
  		.data = &lg_lp129qe,
  	}, {
 +		.compatible = "logictechnologies,lttd800480070-l2rt",
 +		.data = &logic_techno_lttd800480070_l2rt,
 +	}, {
++		.compatible = "logictechnologies,lttd800480070-l6wh-rt",
++		.data = &logic_techno_lttd800480070_l6wh_rt,
++	}, {
  		.compatible = "nec,nl4827hc19-05b",
  		.data = &nec_nl4827hc19_05b,
  	}, {
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index 0150e93043c1..2f9efe1840f6 100644
+index efb0a08..45ccc78 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
-@@ -19,8 +19,11 @@
- #define DRV_VERSION "0.0.1"
+@@ -27,8 +27,11 @@
+ */
  
  #define PCF85063_REG_CTRL1		0x00 /* status */
 +#define PCF85063_REG_CTRL1_CAP_SEL	BIT(0)
@@ -1025,7 +1128,7 @@ index 0150e93043c1..2f9efe1840f6 100644
  
  #define PCF85063_REG_SC			0x04 /* datetime */
  #define PCF85063_REG_SC_OS		0x80
-@@ -215,6 +218,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+@@ -187,6 +190,40 @@ static int pcf85063_rtc_set_time(struct device *dev, struct rtc_time *tm)
  	.set_time	= pcf85063_rtc_set_time
  };
  
@@ -1062,23 +1165,24 @@ index 0150e93043c1..2f9efe1840f6 100644
 +	return 0;
 +}
 +
++
  static int pcf85063_probe(struct i2c_client *client,
  				const struct i2c_device_id *id)
  {
-@@ -234,6 +270,10 @@ static int pcf85063_probe(struct i2c_client *client,
- 
- 	i2c_set_clientdata(client, pcf85063);
+@@ -197,6 +234,10 @@ static int pcf85063_probe(struct i2c_client *client,
+ 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+ 		return -ENODEV;
  
 +	if (pcf85063_init_for_skov(client) < 0)
 +		dev_warn(&client->dev,
 +			 "Board specific setup failed. Trying to continue\n");
 +
- 	pcf85063->rtc = devm_rtc_device_register(&client->dev,
- 				pcf85063_driver.driver.name,
- 				&pcf85063_rtc_ops, THIS_MODULE);
+ 	rtc = devm_rtc_device_register(&client->dev,
+ 				       pcf85063_driver.driver.name,
+ 				       &pcf85063_rtc_ops, THIS_MODULE);
 diff --git a/drivers/skov/Kconfig b/drivers/skov/Kconfig
 new file mode 100644
-index 000000000000..1845410e364b
+index 0000000..1845410
 --- /dev/null
 +++ b/drivers/skov/Kconfig
 @@ -0,0 +1,18 @@
@@ -1102,7 +1206,7 @@ index 000000000000..1845410e364b
 +endmenu
 diff --git a/drivers/skov/Makefile b/drivers/skov/Makefile
 new file mode 100644
-index 000000000000..9925771b0e0b
+index 0000000..9925771
 --- /dev/null
 +++ b/drivers/skov/Makefile
 @@ -0,0 +1,2 @@
@@ -1110,7 +1214,7 @@ index 000000000000..9925771b0e0b
 +obj-$(CONFIG_SKOV_VERSION)      += skov_version.o
 diff --git a/drivers/skov/mem_peek.c b/drivers/skov/mem_peek.c
 new file mode 100644
-index 000000000000..61e82b4592df
+index 0000000..61e82b4
 --- /dev/null
 +++ b/drivers/skov/mem_peek.c
 @@ -0,0 +1,163 @@
@@ -1279,15 +1383,15 @@ index 000000000000..61e82b4592df
 +
 diff --git a/drivers/skov/skov_version.c b/drivers/skov/skov_version.c
 new file mode 100644
-index 000000000000..f6178256a2c7
+index 0000000..2e7613e
 --- /dev/null
 +++ b/drivers/skov/skov_version.c
-@@ -0,0 +1,305 @@
+@@ -0,0 +1,315 @@
 +/*
 + * Skov version driver
 + *
 + * Copyright (C) 2013 Søren Andersen <san@rosetechnology.dk>
-+ * Copyright (C) 2013 Rose Technology.
++ * Copyright (C) 2015-2016 Søren Andersen <san@skov.dk> Skov A/S.
 + *
 + * Various SKOV boards and there version control configuration
 + * Resistors    - Version -         		Rev - Ram    - Flash
@@ -1308,6 +1412,8 @@ index 000000000000..f6178256a2c7
 + * 00010010	- i.MX6 CPU QuadCore+		 C    4192MB - 16384MB
 + * 00010011	- i.MX6 CPU SoloCore		 C    512 MB -  2048MB
 + * 00010100	- i.MX6 CPU QuadCore		 C    1024MB -  4096MB
++ * 00010101    - i.MX6 CPU SoloCore             C    512 MB -  2048MB
++ * 00010110    - i.MX6 CPU QuadCore             C    1024MB -  4096MB
 + */
 +#include <linux/err.h>
 +#include <linux/clk.h>
@@ -1399,8 +1505,10 @@ index 000000000000..f6178256a2c7
 +	if (strcmp(attr->attr.name, "mem") == 0) {
 +		switch(svpd->var ) {
 +		case 19:
++		case 21:
 +			return sprintf(buf, "%u\n", mem[1]);
 +		case 20:
++		case 22:
 +			return sprintf(buf, "%u\n", mem[2]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
@@ -1409,6 +1517,8 @@ index 000000000000..f6178256a2c7
 +		switch(svpd->var){
 +		case 19:
 +		case 20:
++		case 21:
++		case 22:
 +			return sprintf(buf, "%s\n", rev[2]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
@@ -1416,8 +1526,10 @@ index 000000000000..f6178256a2c7
 +	} else if (strcmp(attr->attr.name, "description") == 0) {
 +		switch(svpd->var) {
 +		case 19:
++		case 21:
 +			return sprintf(buf, "%s\n", description[5]);
 +		case 20:
++		case 22:
 +			return sprintf(buf, "%s\n", description[6]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
@@ -1425,8 +1537,10 @@ index 000000000000..f6178256a2c7
 +	} else if (strcmp(attr->attr.name, "nand") == 0) {
 +		switch(svpd->var) {
 +		case 19:
++		case 21:
 +			return sprintf(buf, "%u\n", nand[7]);
 +		case 20:
++		case 22:
 +			return sprintf(buf, "%u\n", nand[8]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
@@ -1588,3 +1702,5 @@ index 000000000000..f6178256a2c7
 +MODULE_LICENSE("GPL");
 +MODULE_AUTHOR("Søren Andersen <san@rosetechnology.dk");
 +MODULE_DESCRIPTION("Version Control");
+--
+2.12.0

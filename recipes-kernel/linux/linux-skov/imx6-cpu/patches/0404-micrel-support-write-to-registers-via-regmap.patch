@@ -1,4 +1,4 @@
-From bef1a49b52e3fefb790ca361d4102d255ee330ce Mon Sep 17 00:00:00 2001
+From b9c3c6446b506655468a16ae841333cfd574ebf2 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <srn@skov.dk>
 Date: Sat, 28 Jan 2017 16:15:26 +0100
 Subject: [PATCH] micrel: support write to registers via regmap
@@ -26,10 +26,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  4 files changed, 64 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/base/regmap/regmap-debugfs.c b/drivers/base/regmap/regmap-debugfs.c
-index 3f0a7e2..2437186 100644
+index 36ce3511c733..6d3dc1429ae5 100644
 --- a/drivers/base/regmap/regmap-debugfs.c
 +++ b/drivers/base/regmap/regmap-debugfs.c
-@@ -259,7 +259,7 @@ static ssize_t regmap_map_read_file(struct file *file, char __user *user_buf,
+@@ -269,7 +269,7 @@ static ssize_t regmap_map_read_file(struct file *file, char __user *user_buf,
  				   count, ppos);
  }
  
@@ -39,7 +39,7 @@ index 3f0a7e2..2437186 100644
  /*
   * This can be dangerous especially when we have clients such as
 diff --git a/drivers/net/phy/mdio-bitbang.c b/drivers/net/phy/mdio-bitbang.c
-index b118236..5e0bbf7 100644
+index b118236cc7e4..5e0bbf7bea6f 100644
 --- a/drivers/net/phy/mdio-bitbang.c
 +++ b/drivers/net/phy/mdio-bitbang.c
 @@ -25,6 +25,10 @@
@@ -94,7 +94,7 @@ index b118236..5e0bbf7 100644
  		mdiobb_cmd(ctrl, MDIO_WRITE, phy, reg);
  
 diff --git a/drivers/net/phy/micrel-smi.c b/drivers/net/phy/micrel-smi.c
-index 143a1ec..a6ac023 100644
+index 143a1ecb16b3..a6ac0233397c 100644
 --- a/drivers/net/phy/micrel-smi.c
 +++ b/drivers/net/phy/micrel-smi.c
 @@ -38,74 +38,81 @@ struct ksz8873_priv {
@@ -214,10 +214,10 @@ index 143a1ec..a6ac023 100644
  	.name = "micrel-ksz8873",
  };
 diff --git a/include/linux/phy.h b/include/linux/phy.h
-index 97e33c4..4b2301f 100644
+index 165355e2d386..1c914e198fe5 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
-@@ -146,6 +146,7 @@ static inline const char *phy_modes(phy_interface_t interface)
+@@ -152,6 +152,7 @@ static inline const char *phy_modes(phy_interface_t interface)
     IEEE 802.3ae clause 45 addressing mode used by 10GIGE phy chips. */
  #define MII_ADDR_C45 (1<<30)
  
@@ -226,5 +226,5 @@ index 97e33c4..4b2301f 100644
  
  struct device;
 -- 
-1.8.3.1
+2.12.0
 

@@ -1,3 +1,4 @@
+From 64c1ca60c6d21738a7700b4f31006642a72422a3 Mon Sep 17 00:00:00 2001
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Fri, 24 Jul 2015 13:02:59 +0200
 Subject: [PATCH] backlight: pwm_bl: add debug information for initial state
@@ -10,12 +11,11 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/video/backlight/pwm_bl.c | 22 +++++++++++++++++++---
  1 file changed, 19 insertions(+), 3 deletions(-)
-
 diff --git a/drivers/video/backlight/pwm_bl.c b/drivers/video/backlight/pwm_bl.c
-index a22c1ec29de7..3c9550d66c03 100644
+index d95ae09..74ad80c 100644
 --- a/drivers/video/backlight/pwm_bl.c
 +++ b/drivers/video/backlight/pwm_bl.c
-@@ -266,16 +266,26 @@ static int pwm_backlight_probe(struct platform_device *pdev)
+@@ -270,16 +270,26 @@ static int pwm_backlight_probe(struct platform_device *pdev)
  		pb->enable_gpio = gpio_to_desc(data->enable_gpio);
  	}
  
@@ -45,7 +45,7 @@ index a22c1ec29de7..3c9550d66c03 100644
  			initial_blank = FB_BLANK_POWERDOWN;
  		else
  			gpiod_direction_output(pb->enable_gpio, 1);
-@@ -287,9 +297,15 @@ static int pwm_backlight_probe(struct platform_device *pdev)
+@@ -291,9 +301,15 @@ static int pwm_backlight_probe(struct platform_device *pdev)
  		goto err_alloc;
  	}
  
@@ -61,3 +61,5 @@ index a22c1ec29de7..3c9550d66c03 100644
  	pb->pwm = devm_pwm_get(&pdev->dev, NULL);
  	if (IS_ERR(pb->pwm) && PTR_ERR(pb->pwm) != -EPROBE_DEFER && !node) {
  		dev_err(&pdev->dev, "unable to request PWM, trying legacy API\n");
+--
+2.12.0

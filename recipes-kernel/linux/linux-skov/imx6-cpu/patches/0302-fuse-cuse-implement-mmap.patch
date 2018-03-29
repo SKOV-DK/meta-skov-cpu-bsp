@@ -1,3 +1,4 @@
+From 27d49085c618557ef086ca50cac78640f0300f89 Mon Sep 17 00:00:00 2001
 From: Sascha Hauer <s.hauer@pengutronix.de>
 Date: Fri, 20 Sep 2013 16:49:01 +0200
 Subject: [PATCH] fuse: cuse: implement mmap
@@ -80,7 +81,7 @@ index c5b6b7165489..f63d2355ffdd 100644
  	/* make the device available */
  	list_add(&cc->list, cuse_conntbl_head(devt));
  	mutex_unlock(&cuse_lock);
-@@ -469,6 +494,8 @@ err:
+@@ -469,6 +494,8 @@ static int cuse_send_init(struct cuse_conn *cc)
  static void cuse_fc_release(struct fuse_conn *fc)
  {
  	struct cuse_conn *cc = fc_to_cc(fc);
@@ -89,3 +90,6 @@ index c5b6b7165489..f63d2355ffdd 100644
  	kfree_rcu(cc, fc.rcu);
  }
  
+-- 
+2.12.0
+

@@ -1,3 +1,4 @@
+From 2f13c8bfea45be35c002cd5ab662a1ca730c93ac Mon Sep 17 00:00:00 2001
 From: Michael Grzeschik <m.grzeschik@pengutronix.de>
 Date: Tue, 12 Apr 2016 17:28:29 +0200
 Subject: [PATCH] micrel-smi: add driver for KSZ8873
@@ -13,10 +14,10 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  create mode 100644 drivers/net/phy/micrel-smi.h
 
 diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
-index 60994a83a0d6..eaf73f156951 100644
+index 2651c8d8de2f..8e4616811bdc 100644
 --- a/drivers/net/phy/Kconfig
 +++ b/drivers/net/phy/Kconfig
-@@ -141,6 +141,11 @@ config MICREL_PHY
+@@ -269,6 +269,11 @@ config MICREL_PHY
  	---help---
  	  Supports the KSZ9021, VSC8201, KS8001 PHYs.
  
@@ -25,21 +26,21 @@ index 60994a83a0d6..eaf73f156951 100644
 +	---help---
 +	  Supports the KSZ8873 Switch.
 +
- config DP83848_PHY
- 	tristate "Driver for Texas Instruments DP83848 PHY"
- 	---help---
+ config MICROCHIP_PHY
+ 	tristate "Microchip PHYs"
+ 	help
 diff --git a/drivers/net/phy/Makefile b/drivers/net/phy/Makefile
-index f31a4e25cf15..a3f2fe4cc0d2 100644
+index e58667d111e7..b525f0c98a63 100644
 --- a/drivers/net/phy/Makefile
 +++ b/drivers/net/phy/Makefile
-@@ -30,6 +30,7 @@ obj-$(CONFIG_DP83848_PHY)	+= dp83848.o
- obj-$(CONFIG_DP83867_PHY)	+= dp83867.o
- obj-$(CONFIG_STE10XP)		+= ste10Xp.o
+@@ -43,6 +43,7 @@ obj-$(CONFIG_LXT_PHY)		+= lxt.o
+ obj-$(CONFIG_MARVELL_PHY)	+= marvell.o
+ obj-$(CONFIG_MICREL_KS8995MA)	+= spi_ks8995.o
  obj-$(CONFIG_MICREL_PHY)	+= micrel.o
 +obj-$(CONFIG_MICREL_SMI)	+= micrel-smi.o
- obj-$(CONFIG_MDIO_OCTEON)	+= mdio-octeon.o
- obj-$(CONFIG_MICREL_KS8995MA)	+= spi_ks8995.o
- obj-$(CONFIG_AT803X_PHY)	+= at803x.o
+ obj-$(CONFIG_MICROCHIP_PHY)	+= microchip.o
+ obj-$(CONFIG_MICROSEMI_PHY)	+= mscc.o
+ obj-$(CONFIG_NATIONAL_PHY)	+= national.o
 diff --git a/drivers/net/phy/micrel-smi.c b/drivers/net/phy/micrel-smi.c
 new file mode 100644
 index 000000000000..143a1ecb16b3
@@ -593,3 +594,6 @@ index 000000000000..92eedad648ba
 +
 +/*      END */
 +
+-- 
+2.12.0
+
