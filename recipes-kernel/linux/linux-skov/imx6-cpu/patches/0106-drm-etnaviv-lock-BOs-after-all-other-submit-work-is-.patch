@@ -1,0 +1,54 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Tue, 5 Dec 2017 10:55:02 +0100
+Subject: [PATCH] drm/etnaviv: lock BOs after all other submit work is done
+
+Populating objects, adding them to the GPU VM and patching/validating
+the command stream might take a lot of CPU time. There is no reason to
+hold all object reservations during that time.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+index 2e278a69f3f0..83339e0335ff 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+@@ -514,10 +514,6 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 	if (ret)
+ 		goto err_submit_objects;
+ 
+-	ret = submit_lock_objects(submit, &ticket);
+-	if (ret)
+-		goto err_submit_objects;
+-
+ 	if (!etnaviv_cmd_validate_one(gpu, stream, args->stream_size / 4,
+ 				      relocs, args->nr_relocs)) {
+ 		ret = -EINVAL;
+@@ -532,10 +528,6 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 		}
+ 	}
+ 
+-	ret = submit_fence_sync(submit);
+-	if (ret)
+-		goto err_submit_objects;
+-
+ 	ret = submit_pin_objects(submit);
+ 	if (ret)
+ 		goto err_submit_objects;
+@@ -552,6 +544,14 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 	memcpy(submit->cmdbuf.vaddr, stream, args->stream_size);
+ 	submit->cmdbuf.user_size = ALIGN(args->stream_size, 8);
+ 
++	ret = submit_lock_objects(submit, &ticket);
++	if (ret)
++		goto err_submit_objects;
++
++	ret = submit_fence_sync(submit);
++	if (ret)
++		goto err_submit_objects;
++
+ 	ret = etnaviv_sched_push_job(&ctx->sched_entity[args->pipe], submit);
+ 	if (ret)
+ 		goto err_submit_objects;

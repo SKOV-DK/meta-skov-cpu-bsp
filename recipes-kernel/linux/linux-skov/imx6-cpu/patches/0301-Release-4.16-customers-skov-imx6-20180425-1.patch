@@ -1,0 +1,25 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Wed, 25 Apr 2018 16:44:58 +0200
+Subject: [PATCH] Release 4.16/customers/skov/imx6/20180425-1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index d51175192ac1..654025eb6569 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 4
+ PATCHLEVEL = 16
+ SUBLEVEL = 4
+-EXTRAVERSION =
++EXTRAVERSION =-20180425-1
+ NAME = Fearless Coyote
+ 
+ # *DOCUMENTATION*

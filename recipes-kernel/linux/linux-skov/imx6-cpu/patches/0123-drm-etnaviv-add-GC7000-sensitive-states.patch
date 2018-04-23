@@ -1,0 +1,31 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Tue, 20 Feb 2018 10:31:02 +0100
+Subject: [PATCH] drm/etnaviv: add GC7000 sensitive states
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_cmd_parser.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_cmd_parser.c b/drivers/gpu/drm/etnaviv/etnaviv_cmd_parser.c
+index 68e6d3772ad8..c107171b7f9e 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_cmd_parser.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_cmd_parser.c
+@@ -82,6 +82,17 @@ static const struct {
+ 	ST(0x10800, 32 * 16),
+ 	ST(0x14600, 16),
+ 	ST(0x14800, 8 * 8),
++	ST(0x14000, 1),
++	ST(0x14010, 1),
++	ST(0x14018, 1),
++	ST(0x14020, 1),
++	ST(0x14074, 1),
++	ST(0x1407c, 1),
++	ST(0x14084, 1),
++	ST(0x1408c, 1),
++	ST(0x140a4, 1),
++	ST(0x140c0, 14),
++	ST(0x15c00, 128),
+ #undef ST
+ };
+ 

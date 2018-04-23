@@ -1,0 +1,24 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Thu, 4 Jan 2018 13:50:14 +0100
+Subject: [PATCH] drm/etnaviv: add missing major features field to debugfs
+
+This can be useful when dealing with a new GPU core.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index febbd1e5bbc7..bab6a8286520 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -811,6 +811,8 @@ int etnaviv_gpu_debugfs(struct etnaviv_gpu *gpu, struct seq_file *m)
+ 	verify_dma(gpu, &debug);
+ 
+ 	seq_puts(m, "\tfeatures\n");
++	seq_printf(m, "\t major_features: 0x%08x\n",
++		   gpu->identity.features);
+ 	seq_printf(m, "\t minor_features0: 0x%08x\n",
+ 		   gpu->identity.minor_features0);
+ 	seq_printf(m, "\t minor_features1: 0x%08x\n",

@@ -1,0 +1,53 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Thu, 15 Feb 2018 10:49:12 +0100
+Subject: [PATCH] drm/etnaviv: init DMA ops for virtual master device
+
+All the DRM GEM dma-buf import/export operations are done through the
+virtual DRM master device. As this isn't instanciated from DT anymore
+we need to make sure the DMA ops are set up correctly.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_drv.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_drv.c b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+index ab50090d066c..31c49a7bc93f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+@@ -655,8 +655,6 @@ static int etnaviv_pdev_probe(struct platform_device *pdev)
+ 	struct device *dev = &pdev->dev;
+ 	struct component_match *match = NULL;
+ 
+-	dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
+-
+ 	if (!dev->platform_data) {
+ 		struct device_node *core_node;
+ 
+@@ -693,6 +691,8 @@ static struct platform_driver etnaviv_platform_driver = {
+ 	},
+ };
+ 
++static u64 etnaviv_dmamask = DMA_BIT_MASK(32);
++
+ static int __init etnaviv_init(void)
+ {
+ 	int ret;
+@@ -713,10 +713,16 @@ static int __init etnaviv_init(void)
+ 	 * the DRM platform device.
+ 	 */
+ 	for_each_compatible_node(np, NULL, "vivante,gc") {
++		struct platform_device *pdev;
++
+ 		if (!of_device_is_available(np))
+ 			continue;
+ 
+-		platform_device_register_simple("etnaviv", -1, NULL, 0);
++		pdev = platform_device_register_simple("etnaviv", -1, NULL, 0);
++		pdev->dev.dma_mask = &etnaviv_dmamask;
++		pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
++		arch_setup_dma_ops(&pdev->dev, 0, 0x100000000, NULL, false);
++
+ 		of_node_put(np);
+ 		break;
+ 	}

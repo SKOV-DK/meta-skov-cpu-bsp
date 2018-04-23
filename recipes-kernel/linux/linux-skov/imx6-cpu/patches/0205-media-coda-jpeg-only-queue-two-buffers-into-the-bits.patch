@@ -1,0 +1,37 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 9 Jul 2015 11:36:14 +0200
+Subject: [PATCH] [media] coda: jpeg: only queue two buffers into the bitstream
+ for JPEG on CODA7541
+
+Padding the bitstream buffer is not enough to reliably avoid prefetch
+failures.  Picture runs with the next buffer's header already visible to
+the CODA7541 succeed much more reliably, so always queue two JPEG frames
+into the bitstream buffer.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 86bd9f9fa73c..f5d909f44e66 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -260,12 +260,13 @@ void coda_fill_bitstream(struct coda_ctx *ctx, struct list_head *buffer_list)
+ 
+ 	while (v4l2_m2m_num_src_bufs_ready(ctx->fh.m2m_ctx) > 0) {
+ 		/*
+-		 * Only queue a single JPEG into the bitstream buffer, except
+-		 * to increase payload over 512 bytes or if in hold state.
++		 * Only queue two JPEGs into the bitstream buffer to keep
++		 * latency low. We need at least one complete buffer and the
++		 * header of another buffer (for prescan) in the bitstream.
+ 		 */
+ 		if (ctx->codec->src_fourcc == V4L2_PIX_FMT_JPEG &&
+-		    (coda_get_bitstream_payload(ctx) >= 512) && !ctx->hold)
+-			break;
++		    ctx->num_metas > 1)
++				break;
+ 
+ 		src_buf = v4l2_m2m_next_src_buf(ctx->fh.m2m_ctx);
+ 

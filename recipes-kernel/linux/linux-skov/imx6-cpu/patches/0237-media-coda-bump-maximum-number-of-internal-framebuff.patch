@@ -1,0 +1,31 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 4 Jan 2018 12:29:25 +0100
+Subject: [PATCH] media: coda: bump maximum number of internal framebuffers to
+ 19
+
+While the h.264 standard only allows up to 16 reference frames, the CODA
+firmware needs two more buffers: one to hold the currently decoded frame
+and one for the display frame. Adding the framebuffer needed by the
+driver for VDOA operation brings the total to a maximum of 19 internal
+framebuffers.
+Lift the current maximum of 17 internal framebuffers to allow playback
+of high profile streams that require more than 14 reference frames.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
+index e191b304ae68..247fd3b12a92 100644
+--- a/drivers/media/platform/coda/coda.h
++++ b/drivers/media/platform/coda/coda.h
+@@ -28,7 +28,7 @@
+ 
+ #include "coda_regs.h"
+ 
+-#define CODA_MAX_FRAMEBUFFERS	17
++#define CODA_MAX_FRAMEBUFFERS	19
+ #define FMO_SLICE_SAVE_BUF_SIZE	(32)
+ 
+ enum {
