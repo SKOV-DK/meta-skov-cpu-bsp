@@ -13,5 +13,6 @@ SRC_URI += "file://patches/0501-rtc-pcf85063-stop-validating.patch"
 SRC_URI += "file://patches/0502-rtd-pcf85063-remove-useless.patch"
 SRC_URI += "file://patches/0503-rtc-pcf85063-fix-clearing-bits.patch"
 SRC_URI += "file://patches/0510-rtc-pcf85063-fix-so-ctrl1-setup-is-kept.patch"
+SRC_URI += "file://patches/0520-logic-panel.patch"
 # Version tag
 SRC_URI += "file://patches/Release-4.9-customers-skov-imx6-version.patch"
