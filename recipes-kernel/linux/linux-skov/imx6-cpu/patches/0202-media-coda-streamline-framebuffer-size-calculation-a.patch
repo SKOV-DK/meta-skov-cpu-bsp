@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 6 Jul 2017 15:11:45 +0200
-Subject: [PATCH] [media] coda: streamline framebuffer size calculation a bit
+Subject: [PATCH] media: coda: streamline framebuffer size calculation a bit
 
 Remove the intermediate width and height variables, the calculation is
 simple enough.
@@ -11,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 5 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index d2afe6d7d9e7..3688d53b56ca 100644
+index aae8183e1ccc..86e618c10221 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -388,7 +388,6 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
+@@ -389,7 +389,6 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
  				   struct coda_q_data *q_data, u32 fourcc)
  {
  	struct coda_dev *dev = ctx->dev;
@@ -22,7 +22,7 @@ index d2afe6d7d9e7..3688d53b56ca 100644
  	unsigned int ysize, ycbcr_size;
  	int ret;
  	int i;
-@@ -396,14 +395,11 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
+@@ -397,14 +396,11 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
  	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264 ||
  	    ctx->codec->dst_fourcc == V4L2_PIX_FMT_H264 ||
  	    ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG4 ||

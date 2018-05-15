@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 7 Oct 2014 15:06:31 +0200
-Subject: [PATCH] [media] coda: jpeg: decode JPEG header in buf_queue to decide
+Subject: [PATCH] media: coda: jpeg: decode JPEG header in buf_queue to decide
  chroma subsampling format
 
 When queuing the first JPEG into the driver before STREAMON, scan the
@@ -16,10 +16,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 32 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index dcaee50866d6..dec155b23e7c 100644
+index c15c1450449c..2966dc8e9473 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -625,12 +625,21 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,
+@@ -640,12 +640,21 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,
  
  	/*
  	 * If the source format is already fixed, only allow the same output
@@ -42,7 +42,7 @@ index dcaee50866d6..dec155b23e7c 100644
  	}
  
  	f->fmt.pix.colorspace = ctx->colorspace;
-@@ -1461,6 +1470,12 @@ static void coda_buf_queue(struct vb2_buffer *vb)
+@@ -1476,6 +1485,12 @@ static void coda_buf_queue(struct vb2_buffer *vb)
  
  	q_data = get_q_data(ctx, vb->vb2_queue->type);
  
@@ -105,10 +105,10 @@ index 86c7bd5aa9f2..c5640e37a0f4 100644
  		v4l2_err(&dev->v4l2_dev, "failed to decode JPEG header: %d\n",
  			 ret);
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
-index 4b162dcf1364..5a51cd05db74 100644
+index ac9f815a5bc6..e8d6e325570e 100644
 --- a/drivers/media/platform/coda/coda.h
 +++ b/drivers/media/platform/coda/coda.h
-@@ -123,6 +123,7 @@ struct coda_params {
+@@ -124,6 +124,7 @@ struct coda_params {
  	u8			mpeg4_inter_qp;
  	u8			gop_size;
  	int			intra_refresh;
@@ -116,7 +116,7 @@ index 4b162dcf1364..5a51cd05db74 100644
  	u8			jpeg_quality;
  	u8			jpeg_restart_interval;
  	u8			jpeg_comp_id[3];
-@@ -313,6 +314,7 @@ int coda_sps_fixup(struct coda_ctx *ctx, int width, int height, char *buf,
+@@ -314,6 +315,7 @@ int coda_sps_fixup(struct coda_ctx *ctx, int width, int height, char *buf,
  		   int *size, int max_size);
  
  bool coda_jpeg_check_buffer(struct coda_ctx *ctx, struct vb2_buffer *vb);

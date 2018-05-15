@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 25 Apr 2018 16:44:58 +0200
-Subject: [PATCH] Release 4.16/customers/skov/imx6/20180425-1
+Date: Tue, 15 May 2018 11:32:06 +0200
+Subject: [PATCH] Release 4.17/customers/skov/imx6/20180515-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,15 +11,15 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index d51175192ac1..654025eb6569 100644
+index ba3106b36597..06dc51af43a6 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 4
- PATCHLEVEL = 16
- SUBLEVEL = 4
--EXTRAVERSION =
-+EXTRAVERSION =-20180425-1
- NAME = Fearless Coyote
+ PATCHLEVEL = 17
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc5
++EXTRAVERSION = -rc5-20180515-1
+ NAME = Merciless Moray
  
  # *DOCUMENTATION*

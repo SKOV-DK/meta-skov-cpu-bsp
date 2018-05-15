@@ -3,20 +3,20 @@ inherit kernel
 SECTION = "kernel"
 
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
+LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "4.16.4"
+LINUX_VERSION = "4.17-rc5"
 
-SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
+SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
 SRC_URI += "file://defconfig"
 
 require linux-skov/${MACHINE}/patches/series.inc
 
-SRC_URI[md5sum] = "4f8469f8d10bcf7876edf7cd708d5790"
-SRC_URI[sha256sum] = "9ab56da21230da8d9455aaf108f0e9c95fa9213bc2bd5d3b9aceaf1dea26896c"
+SRC_URI[md5sum] = "c2dbbd686d2e8ea1ea5cbcefaace3dd1"
+SRC_URI[sha256sum] = "b38757939201684a8ed86697b889049472b619d45569058780049865911e1dce"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 

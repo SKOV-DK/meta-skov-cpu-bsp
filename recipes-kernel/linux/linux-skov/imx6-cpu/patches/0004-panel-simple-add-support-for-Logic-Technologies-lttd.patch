@@ -28,10 +28,10 @@ index 000000000000..c65b715faed0
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 1517edbd4d28..218ad543246f 100644
+index 110f0817f71b..23453d5e728b 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -1388,6 +1388,38 @@ static const struct panel_desc logic_techno_lttd800480070_l2rt = {
+@@ -1435,6 +1435,38 @@ static const struct panel_desc logic_techno_lttd800480070_l2rt = {
  	.bus_flags = DRM_BUS_FLAG_PIXDATA_POSEDGE,
  };
  
@@ -70,7 +70,7 @@ index 1517edbd4d28..218ad543246f 100644
  static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
  	.clock = 30400,
  	.hdisplay = 800,
-@@ -2176,6 +2208,9 @@ static const struct of_device_id platform_of_match[] = {
+@@ -2228,6 +2260,9 @@ static const struct of_device_id platform_of_match[] = {
  	}, {
  		.compatible = "logictechnologies,lttd800480070-l2rt",
  		.data = &logic_techno_lttd800480070_l2rt,

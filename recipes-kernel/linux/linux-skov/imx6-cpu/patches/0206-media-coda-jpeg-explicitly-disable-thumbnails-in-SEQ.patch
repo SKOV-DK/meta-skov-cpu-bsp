@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 7 Oct 2014 14:49:55 +0200
-Subject: [PATCH] [media] coda: jpeg: Explicitly disable thumbnails in SEQ_INIT
+Subject: [PATCH] media: coda: jpeg: explicitly disable thumbnails in SEQ_INIT
 
 Explicitly clear DEC_SEQ_JPG_THUMB_EN during sequence initialization.
 Not clearing the register does not cause problems, since the only other
@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 3 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index f5d909f44e66..ed36e66cd1d6 100644
+index b4a99e1fe340..502027a54a1d 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -1683,6 +1683,8 @@ static int __coda_start_decoding(struct coda_ctx *ctx)
+@@ -1702,6 +1702,8 @@ static int __coda_start_decoding(struct coda_ctx *ctx)
  			coda_write(dev, 512, CODA_CMD_DEC_SEQ_SPP_CHUNK_SIZE);
  		}
  	}

@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 6 Jul 2017 15:09:47 +0200
-Subject: [PATCH] [media] coda: move framebuffer size calculation out of loop
+Subject: [PATCH] media: coda: move framebuffer size calculation out of loop
 
 All internal YCbCr frame buffers are the same size, calculate ycbcr_size
 once before the allocation loop.
@@ -11,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 7 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 9fe113cb901f..d2afe6d7d9e7 100644
+index 68ed2a564ad1..aae8183e1ccc 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -389,7 +389,7 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
+@@ -390,7 +390,7 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
  {
  	struct coda_dev *dev = ctx->dev;
  	int width, height;
@@ -23,7 +23,7 @@ index 9fe113cb901f..d2afe6d7d9e7 100644
  	int ret;
  	int i;
  
-@@ -405,15 +405,16 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
+@@ -406,15 +406,16 @@ static int coda_alloc_framebuffers(struct coda_ctx *ctx,
  	}
  	ysize = width * height;
  

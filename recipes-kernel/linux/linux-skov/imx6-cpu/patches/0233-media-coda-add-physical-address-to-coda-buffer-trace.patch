@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 22 Feb 2016 14:58:14 +0100
-Subject: [PATCH] [media] coda: add physical address to coda buffer traces
+Subject: [PATCH] media: coda: add physical address to coda buffer traces
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---

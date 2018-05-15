@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 9 Jul 2015 11:36:14 +0200
-Subject: [PATCH] [media] coda: jpeg: only queue two buffers into the bitstream
+Subject: [PATCH] media: coda: jpeg: only queue two buffers into the bitstream
  for JPEG on CODA7541
 
 Padding the bitstream buffer is not enough to reliably avoid prefetch
@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 86bd9f9fa73c..f5d909f44e66 100644
+index c4a4300bd1de..b4a99e1fe340 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -260,12 +260,13 @@ void coda_fill_bitstream(struct coda_ctx *ctx, struct list_head *buffer_list)
+@@ -261,12 +261,13 @@ void coda_fill_bitstream(struct coda_ctx *ctx, struct list_head *buffer_list)
  
  	while (v4l2_m2m_num_src_bufs_ready(ctx->fh.m2m_ctx) > 0) {
  		/*

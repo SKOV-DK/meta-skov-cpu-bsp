@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 20 Jan 2015 13:01:17 +0100
-Subject: [PATCH] [media] coda: hold back decoder jobs until we have at least
+Subject: [PATCH] media: coda: hold back decoder jobs until we have at least
  3*256 bytes beyond the current buffer
 
 This should make sure we don't run into timeouts if userspace does not supply
@@ -12,10 +12,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 16 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index e351becd4d0b..8a1411544ae4 100644
+index fcc4550f6588..16576203bab7 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -1206,6 +1206,8 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1221,6 +1221,8 @@ static int coda_job_ready(void *m2m_priv)
  		bool stream_end = ctx->bit_stream_param &
  				  CODA_BIT_STREAM_END_FLAG;
  		int num_metas = ctx->num_metas;
@@ -24,7 +24,7 @@ index e351becd4d0b..8a1411544ae4 100644
  		unsigned int count;
  
  		count = hweight32(ctx->frm_dis_flg);
-@@ -1226,11 +1228,24 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1241,11 +1243,24 @@ static int coda_job_ready(void *m2m_priv)
  
  		if (!stream_end && (num_metas + src_bufs) < 2) {
  			v4l2_dbg(1, coda_debug, &ctx->dev->v4l2_dev,

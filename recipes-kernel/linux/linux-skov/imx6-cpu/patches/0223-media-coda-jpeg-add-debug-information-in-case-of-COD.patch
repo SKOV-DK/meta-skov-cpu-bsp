@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 29 Sep 2014 14:04:28 +0200
-Subject: [PATCH] [media] coda: jpeg: add debug information in case of CODA960
+Subject: [PATCH] media: coda: jpeg: add debug information in case of CODA960
  JPEG error
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>

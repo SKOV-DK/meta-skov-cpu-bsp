@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 1 Feb 2016 21:27:57 +0100
-Subject: [PATCH] [media] coda: jpeg: limit enum_formats to same chroma
+Subject: [PATCH] media: coda: jpeg: limit enum_formats to same chroma
  subsampling
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
@@ -9,10 +9,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 26 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index dec155b23e7c..2098c4b66875 100644
+index 2966dc8e9473..d6bd430ec49a 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -422,6 +422,12 @@ static int coda_querycap(struct file *file, void *priv,
+@@ -437,6 +437,12 @@ static int coda_querycap(struct file *file, void *priv,
  	return 0;
  }
  
@@ -25,7 +25,7 @@ index dec155b23e7c..2098c4b66875 100644
  static int coda_enum_fmt(struct file *file, void *priv,
  			 struct v4l2_fmtdesc *f)
  {
-@@ -432,9 +438,27 @@ static int coda_enum_fmt(struct file *file, void *priv,
+@@ -447,9 +453,27 @@ static int coda_enum_fmt(struct file *file, void *priv,
  
  	if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT)
  		formats = cvd->src_formats;

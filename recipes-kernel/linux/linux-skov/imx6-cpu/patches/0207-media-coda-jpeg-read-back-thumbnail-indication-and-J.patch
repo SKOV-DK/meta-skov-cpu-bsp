@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 7 Oct 2014 14:49:55 +0200
-Subject: [PATCH] [media] coda: jpeg: read back thumbnail indication and JPEG
+Subject: [PATCH] media: coda: jpeg: read back thumbnail indication and JPEG
  format
 
 Make sure that thumbnailing is disabled and report the JPEG source
@@ -12,10 +12,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index ed36e66cd1d6..378eee630213 100644
+index 502027a54a1d..74f234c11377 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -1761,6 +1761,16 @@ static int __coda_start_decoding(struct coda_ctx *ctx)
+@@ -1780,6 +1780,16 @@ static int __coda_start_decoding(struct coda_ctx *ctx)
  					  (top_bottom & 0x3ff);
  	}
  

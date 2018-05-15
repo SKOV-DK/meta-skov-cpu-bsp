@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 21 Jul 2014 20:00:54 +0200
-Subject: [PATCH] [media] coda: add BIT register dump after PIC_RUN timeout
+Subject: [PATCH] media: coda: add BIT register dump after PIC_RUN timeout
 
 This patch causes the driver to dump the register space used for
 communication with the BIT processor after a PIC_RUN timeout for
@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 51 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 2e5cdb475d79..9372788d5778 100644
+index 74e583c47577..14f5ba8a673c 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -373,6 +373,46 @@ void coda_bit_stream_end_flag(struct coda_ctx *ctx)
+@@ -374,6 +374,46 @@ void coda_bit_stream_end_flag(struct coda_ctx *ctx)
  	}
  }
  
@@ -65,10 +65,10 @@ index 2e5cdb475d79..9372788d5778 100644
  {
  	struct coda_dev *dev = ctx->dev;
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 2229dd2559ad..682809ce4a9f 100644
+index c36fe36997a7..4b2d1bab7e73 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -1251,14 +1251,19 @@ static void coda_pic_run_work(struct work_struct *work)
+@@ -1266,14 +1266,19 @@ static void coda_pic_run_work(struct work_struct *work)
  
  	if (!wait_for_completion_timeout(&ctx->completion,
  					 msecs_to_jiffies(coda_timeout_msec))) {
@@ -94,10 +94,10 @@ index 2229dd2559ad..682809ce4a9f 100644
  		ctx->ops->finish_run(ctx);
  	}
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
-index f2dd16acc6a1..01f5891ea385 100644
+index c2c92dd1b81b..7b2811b90934 100644
 --- a/drivers/media/platform/coda/coda.h
 +++ b/drivers/media/platform/coda/coda.h
-@@ -301,6 +301,7 @@ static inline unsigned int coda_get_bitstream_payload(struct coda_ctx *ctx)
+@@ -302,6 +302,7 @@ static inline unsigned int coda_get_bitstream_payload(struct coda_ctx *ctx)
  }
  
  void coda_bit_stream_end_flag(struct coda_ctx *ctx);

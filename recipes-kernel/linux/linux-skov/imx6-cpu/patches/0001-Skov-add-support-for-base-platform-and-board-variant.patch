@@ -64,10 +64,10 @@ index 000000000000..ed05dc15cb97
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
-index ae850d6c0ad3..bbc3f5de57f8 100644
+index a38d8bfae19c..16f508183407 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.txt
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
-@@ -197,6 +197,7 @@ linaro	Linaro Limited
+@@ -199,6 +199,7 @@ linaro	Linaro Limited
  linksys	Belkin International, Inc. (Linksys)
  linux	Linux-specific binding
  lltc	Linear Technology Corporation
@@ -76,10 +76,10 @@ index ae850d6c0ad3..bbc3f5de57f8 100644
  lwn	Liebherr-Werk Nenzing GmbH
  macnica	Macnica Americas
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index ade7a38543dc..d969c73801b9 100644
+index 7e2424957809..1433e57c1fbb 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -473,6 +473,7 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -482,6 +482,7 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6q-sabresd.dtb \
  	imx6q-savageboard.dtb \
  	imx6q-sbc6x.dtb \
@@ -891,10 +891,10 @@ index 000000000000..97284a974c1c
 +	regulator-boot-on;
 +};
 diff --git a/drivers/Kconfig b/drivers/Kconfig
-index 879dc0604cba..f82e81602ab5 100644
+index 95b9ccc08165..ad8d8b8a111c 100644
 --- a/drivers/Kconfig
 +++ b/drivers/Kconfig
-@@ -219,4 +219,6 @@ source "drivers/siox/Kconfig"
+@@ -217,4 +217,6 @@ source "drivers/siox/Kconfig"
  
  source "drivers/slimbus/Kconfig"
  
@@ -911,10 +911,10 @@ index 24cd47014657..68864931e1c4 100644
  obj-$(CONFIG_SIOX)		+= siox/
 +obj-y				+= skov/
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 5591984a392b..1517edbd4d28 100644
+index cbf1ab404ee7..110f0817f71b 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -1356,6 +1356,38 @@ static const struct panel_desc lg_lp129qe = {
+@@ -1403,6 +1403,38 @@ static const struct panel_desc lg_lp129qe = {
  	},
  };
  
@@ -953,7 +953,7 @@ index 5591984a392b..1517edbd4d28 100644
  static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
  	.clock = 30400,
  	.hdisplay = 800,
-@@ -2141,6 +2173,9 @@ static const struct of_device_id platform_of_match[] = {
+@@ -2193,6 +2225,9 @@ static const struct of_device_id platform_of_match[] = {
  	}, {
  		.compatible = "lg,lp129qe",
  		.data = &lg_lp129qe,
@@ -964,7 +964,7 @@ index 5591984a392b..1517edbd4d28 100644
  		.compatible = "mitsubishi,aa070mc01-ca1",
  		.data = &mitsubishi_aa070mc01,
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index a06dff994c83..5ebd70e21593 100644
+index 49bcbb3d4a69..9e05e813bb72 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
 @@ -27,8 +27,11 @@
@@ -979,7 +979,7 @@ index a06dff994c83..5ebd70e21593 100644
  
  #define PCF85063_REG_SC			0x04 /* datetime */
  #define PCF85063_REG_SC_OS		0x80
-@@ -187,6 +190,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+@@ -179,6 +182,39 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
  	.set_time	= pcf85063_rtc_set_time
  };
  
@@ -1019,7 +1019,7 @@ index a06dff994c83..5ebd70e21593 100644
  static int pcf85063_probe(struct i2c_client *client,
  				const struct i2c_device_id *id)
  {
-@@ -204,6 +240,10 @@ static int pcf85063_probe(struct i2c_client *client,
+@@ -196,6 +232,10 @@ static int pcf85063_probe(struct i2c_client *client,
  		return err;
  	}
  

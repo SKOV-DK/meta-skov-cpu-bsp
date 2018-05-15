@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 15 Jan 2015 14:50:39 +0100
-Subject: [PATCH] [media] coda: add start decoding debug info
+Subject: [PATCH] media: coda: add start decoding debug info
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
@@ -8,10 +8,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 7 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 234204868cac..5aa0e203e25c 100644
+index fdedd81db1ee..d910c600cfee 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -1190,6 +1190,13 @@ static int coda_start_encoding(struct coda_ctx *ctx)
+@@ -1207,6 +1207,13 @@ static int coda_start_encoding(struct coda_ctx *ctx)
  		goto out;
  	}
  

@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 7 Jul 2015 17:18:55 +0200
-Subject: [PATCH] [media] coda: warn about too small payload in start_streaming
+Subject: [PATCH] media: coda: warn about too small payload in start_streaming
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
@@ -8,10 +8,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 9b8f10cda5f7..46cc327546c7 100644
+index 1474278367d4..b4a43b37a514 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -1607,6 +1607,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -1622,6 +1622,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  			mutex_unlock(&ctx->bitstream_mutex);
  
  			if (coda_get_bitstream_payload(ctx) < 512) {

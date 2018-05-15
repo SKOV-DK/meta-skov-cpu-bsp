@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 21 Jul 2014 19:49:19 +0200
-Subject: [PATCH] [media] coda: jpeg: add JPEG register definitions for CODA960
+Subject: [PATCH] media: coda: jpeg: add JPEG register definitions for CODA960
 
 The CODA960 JPEG codec is controlled directly from the host, there is no
 support in the BIT processor firmware. This patch adds the necessary

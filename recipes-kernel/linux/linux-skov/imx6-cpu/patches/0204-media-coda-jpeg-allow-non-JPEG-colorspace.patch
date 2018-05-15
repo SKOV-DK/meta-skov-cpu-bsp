@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 22 May 2017 16:20:28 +0200
-Subject: [PATCH] [media] coda: jpeg: allow non-JPEG colorspace
+Subject: [PATCH] media: coda: jpeg: allow non-JPEG colorspace
 
 The hardware codec is not colorspace aware. We should trust userspace to
 set the correct colorimetry information on the OUTPUT queue and mirror
@@ -17,10 +17,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index e8a7554a61d2..e351becd4d0b 100644
+index 04e35d70ce2e..fcc4550f6588 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -554,8 +554,6 @@ static int coda_try_fmt(struct coda_ctx *ctx, const struct coda_codec *codec,
+@@ -569,8 +569,6 @@ static int coda_try_fmt(struct coda_ctx *ctx, const struct coda_codec *codec,
  					f->fmt.pix.height * 2;
  		break;
  	case V4L2_PIX_FMT_JPEG:

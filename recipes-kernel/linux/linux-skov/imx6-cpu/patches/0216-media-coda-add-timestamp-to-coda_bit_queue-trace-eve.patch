@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 9 Feb 2015 14:08:13 +0100
-Subject: [PATCH] [media] coda: add timestamp to coda_bit_queue trace event
+Subject: [PATCH] media: coda: add timestamp to coda_bit_queue trace event
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---

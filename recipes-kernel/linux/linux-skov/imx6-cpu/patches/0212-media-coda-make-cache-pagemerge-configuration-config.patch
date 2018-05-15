@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Wed, 1 Mar 2017 11:00:16 +0100
-Subject: [PATCH] [media] coda: make cache pagemerge configuration configurable
+Subject: [PATCH] media: coda: make cache pagemerge configuration configurable
  from userspace
 
 The page merge setting has a significant influence on the burst length
@@ -13,7 +13,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 30df75f5c715..82b51a3acb6d 100644
+index fe10b2d0fa71..cae4753f276f 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -42,6 +42,10 @@
@@ -27,7 +27,7 @@ index 30df75f5c715..82b51a3acb6d 100644
  static int disable_encoder_cache = 0;
  module_param(disable_encoder_cache, int, 0644);
  MODULE_PARM_DESC(disable_encoder_cache, "Disable 2D cache for encoder");
-@@ -817,7 +821,8 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
+@@ -830,7 +834,8 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
  		 * artifacts in the interleaved chroma plane when decoding.
  		 */
  		cache_size = 0x02440224;

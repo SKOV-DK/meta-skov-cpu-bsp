@@ -1,0 +1,48 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 19 Apr 2018 17:53:25 +0200
+Subject: [PATCH] media: coda: set colorimetry on coded queue
+
+Do not set context colorimetry on the raw (OUTPUT) queue for encoders.
+Always set colorimetry on the coded queue (CAPTURE for encoders, OUTPUT
+for decoders).
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 6b7ce1c43ff4..f9b6d07de4ad 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -857,7 +857,19 @@ static int coda_s_fmt_vid_cap(struct file *file, void *priv,
+ 	r.width = q_data_src->width;
+ 	r.height = q_data_src->height;
+ 
+-	return coda_s_fmt(ctx, f, &r);
++	ret = coda_s_fmt(ctx, f, &r);
++	if (ret)
++		return ret;
++
++	if (ctx->inst_type != CODA_INST_ENCODER)
++		return 0;
++
++	ctx->colorspace = f->fmt.pix.colorspace;
++	ctx->xfer_func = f->fmt.pix.xfer_func;
++	ctx->ycbcr_enc = f->fmt.pix.ycbcr_enc;
++	ctx->quantization = f->fmt.pix.quantization;
++
++	return 0;
+ }
+ 
+ static int coda_s_fmt_vid_out(struct file *file, void *priv,
+@@ -876,6 +888,9 @@ static int coda_s_fmt_vid_out(struct file *file, void *priv,
+ 	if (ret)
+ 		return ret;
+ 
++	if (ctx->inst_type != CODA_INST_DECODER)
++		return 0;
++
+ 	ctx->colorspace = f->fmt.pix.colorspace;
+ 	ctx->xfer_func = f->fmt.pix.xfer_func;
+ 	ctx->ycbcr_enc = f->fmt.pix.ycbcr_enc;

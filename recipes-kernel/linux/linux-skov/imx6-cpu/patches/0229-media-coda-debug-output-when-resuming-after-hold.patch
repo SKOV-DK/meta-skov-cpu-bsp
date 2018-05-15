@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 22 Jul 2014 10:31:35 +0200
-Subject: [PATCH] [media] coda: debug output when resuming after hold
+Subject: [PATCH] media: coda: debug output when resuming after hold
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
@@ -8,10 +8,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index e6776390f8f8..2e5cdb475d79 100644
+index fd69fb705992..74e583c47577 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -256,6 +256,8 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+@@ -257,6 +257,8 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
  	if (ctx == v4l2_m2m_get_curr_priv(ctx->dev->m2m_dev))
  		coda_kfifo_sync_to_device_write(ctx);
  

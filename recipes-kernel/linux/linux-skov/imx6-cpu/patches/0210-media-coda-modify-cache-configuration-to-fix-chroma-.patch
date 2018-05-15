@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 19 Mar 2015 11:47:36 +0100
-Subject: [PATCH] [media] coda: modify cache configuration to fix chroma while
+Subject: [PATCH] media: coda: modify cache configuration to fix chroma while
  decoding in tiled mode
 
 This might be a suboptimal cache setting, but unfortunately the original
@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index e7e66466f9cb..282ee2081e8b 100644
+index a06cc51736d8..bc93d55b094d 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -801,9 +801,13 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
+@@ -814,9 +814,13 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
  		cache_size = 0x20262024;
  		cache_config = 2 << CODA9_CACHE_PAGEMERGE_OFFSET;
  	} else {

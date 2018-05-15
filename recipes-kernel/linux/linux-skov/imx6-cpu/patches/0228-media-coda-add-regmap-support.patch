@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 22 Jul 2014 11:01:22 +0200
-Subject: [PATCH] [media] coda: add regmap support
+Subject: [PATCH] media: coda: add regmap support
 
 This patch changes the driver to use regmap for CODA register access,
 allowing to use regmap tracing and debugfs register dump features.
@@ -12,7 +12,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 58 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 6fbb767be86c..2229dd2559ad 100644
+index 69a9ba41cb9c..c36fe36997a7 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -25,6 +25,7 @@
@@ -40,7 +40,7 @@ index 6fbb767be86c..2229dd2559ad 100644
  	v4l2_dbg(2, coda_debug, &dev->v4l2_dev,
  		 "%s: data=0x%x, reg=0x%x\n", __func__, data, reg);
  	return data;
-@@ -2552,6 +2553,48 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+@@ -2571,6 +2572,48 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
  	pm_runtime_put_sync(&pdev->dev);
  }
  
@@ -88,8 +88,8 @@ index 6fbb767be86c..2229dd2559ad 100644
 +
  enum coda_platform {
  	CODA_IMX27,
- 	CODA_IMX53,
-@@ -2645,6 +2688,7 @@ static int coda_probe(struct platform_device *pdev)
+ 	CODA_IMX51,
+@@ -2681,6 +2724,7 @@ static int coda_probe(struct platform_device *pdev)
  	const struct platform_device_id *pdev_id;
  	struct coda_platform_data *pdata = pdev->dev.platform_data;
  	struct device_node *np = pdev->dev.of_node;
@@ -97,7 +97,7 @@ index 6fbb767be86c..2229dd2559ad 100644
  	struct gen_pool *pool;
  	struct coda_dev *dev;
  	struct resource *res;
-@@ -2681,9 +2725,17 @@ static int coda_probe(struct platform_device *pdev)
+@@ -2717,9 +2761,17 @@ static int coda_probe(struct platform_device *pdev)
  
  	/* Get  memory for physical registers */
  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -119,10 +119,10 @@ index 6fbb767be86c..2229dd2559ad 100644
  	/* IRQ */
  	irq = platform_get_irq_byname(pdev, "bit");
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
-index 5a51cd05db74..f2dd16acc6a1 100644
+index e8d6e325570e..c2c92dd1b81b 100644
 --- a/drivers/media/platform/coda/coda.h
 +++ b/drivers/media/platform/coda/coda.h
-@@ -77,7 +77,7 @@ struct coda_dev {
+@@ -78,7 +78,7 @@ struct coda_dev {
  	int			firmware;
  	struct vdoa_data	*vdoa;
  

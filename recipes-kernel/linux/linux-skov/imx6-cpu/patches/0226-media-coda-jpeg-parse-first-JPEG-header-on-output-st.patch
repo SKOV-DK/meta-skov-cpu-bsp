@@ -1,7 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Fri, 29 Apr 2016 14:48:09 +0200
-Subject: [PATCH] [media] coda: jpeg: parse first JPEG header on output
- streamon
+Subject: [PATCH] media: coda: jpeg: parse first JPEG header on output streamon
 
 This allows to properly limit the capture formats to either 4:2:0 or
 4:2:2 chroma subsampled formats.
@@ -12,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 37 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 2098c4b66875..f0790275ef4f 100644
+index d6bd430ec49a..83b9f285f01c 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -455,8 +455,10 @@ static int coda_enum_fmt(struct file *file, void *priv,
+@@ -470,8 +470,10 @@ static int coda_enum_fmt(struct file *file, void *priv,
  		    vb2_is_streaming(src_vq)) {
  			if (ctx->params.jpeg_format == 0)
  				formats = coda_formats_420;
@@ -28,7 +27,7 @@ index 2098c4b66875..f0790275ef4f 100644
  		}
  	} else
  		return -EINVAL;
-@@ -1494,12 +1496,6 @@ static void coda_buf_queue(struct vb2_buffer *vb)
+@@ -1509,12 +1511,6 @@ static void coda_buf_queue(struct vb2_buffer *vb)
  
  	q_data = get_q_data(ctx, vb->vb2_queue->type);
  
@@ -41,7 +40,7 @@ index 2098c4b66875..f0790275ef4f 100644
  	/*
  	 * In the decoder case, immediately try to copy the buffer into the
  	 * bitstream ringbuffer and mark it as ready to be dequeued.
-@@ -1606,6 +1602,39 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -1621,6 +1617,39 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  			}
  		}
  

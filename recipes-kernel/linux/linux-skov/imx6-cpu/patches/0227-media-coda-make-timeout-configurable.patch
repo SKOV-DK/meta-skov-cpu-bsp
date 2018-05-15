@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 27 Nov 2014 10:35:01 +0100
-Subject: [PATCH] [media] coda: make timeout configurable
+Subject: [PATCH] media: coda: make timeout configurable
 
 Keep the default at 1 second, but make it configurable via a module
 parameter.
@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index f0790275ef4f..6fbb767be86c 100644
+index 83b9f285f01c..69a9ba41cb9c 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -64,6 +64,10 @@ int coda_debug;
@@ -25,7 +25,7 @@ index f0790275ef4f..6fbb767be86c 100644
  static int disable_tiling;
  module_param(disable_tiling, int, 0644);
  MODULE_PARM_DESC(disable_tiling, "Disable tiled frame buffers");
-@@ -1245,7 +1249,7 @@ static void coda_pic_run_work(struct work_struct *work)
+@@ -1260,7 +1264,7 @@ static void coda_pic_run_work(struct work_struct *work)
  	}
  
  	if (!wait_for_completion_timeout(&ctx->completion,

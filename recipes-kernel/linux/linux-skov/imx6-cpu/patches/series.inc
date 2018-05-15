@@ -1,56 +1,41 @@
-# umpf-base: v4.16.4
-# umpf-name: 4.16/customers/skov/imx6
-# umpf-version: 4.16/customers/skov/imx6/20180425-1
-# umpf-topic: v4.16/customers/skov/imx6
-# umpf-hashinfo: 0857aa47ab7df177da66776da01e66c780a20cfb
-# umpf-topic-range: b42b71cd28f213cf4688b9891e66b57bdb6eefe8..25526574fe55b53df656e3b3a9cc3a4fc9e937f8
+# umpf-base: v4.17-rc5
+# umpf-name: 4.17/customers/skov/imx6
+# umpf-version: 4.17/customers/skov/imx6/20180515-1
+# umpf-topic: v4.17/customers/skov/imx6
+# umpf-hashinfo: 8a4581944cd2043ab224c8ce87829d17cbc34a55
+# umpf-topic-range: 67b8d5c7081221efa252e111cd52532ec6d4266f..d35cedda08dd236b0c9662d56ac920671995211e
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov_version-add-support-for-board-21-22.patch \
   file://patches/0003-devicetree-restructure-skov-files-and-add-support-fo.patch \
   file://patches/0004-panel-simple-add-support-for-Logic-Technologies-lttd.patch \
+  file://patches/0005-rtc-pcf85063-fix-so-ctrl1-setup-is-kept.patch \
   "
-# umpf-topic: v4.16/topic/etnaviv
-# umpf-hashinfo: 7db6f497642401212a92f11b99707b7af53c3c96
-# umpf-topic-range: 25526574fe55b53df656e3b3a9cc3a4fc9e937f8..b4e4c999a941b8fe13725a6307672410bba1bdaa
+# umpf-topic: v4.17/topic/etnaviv
+# umpf-hashinfo: 24781ed494d7a5ae5ae8bc10489cee780de186ce
+# umpf-topic-range: d35cedda08dd236b0c9662d56ac920671995211e..bbe5b44ded247d4f026034f41baa972d9210ef6d
 SRC_URI += "\
-  file://patches/0101-drm-etnaviv-track-fences-by-IDR-instead-of-seqno.patch \
-  file://patches/0102-drm-etnaviv-don-t-fail-to-build-on-arches-without-PH.patch \
-  file://patches/0103-drm-etnaviv-add-missing-major-features-field-to-debu.patch \
-  file://patches/0104-drm-etnaviv-hook-up-DRM-GPU-scheduler.patch \
-  file://patches/0105-drm-etnaviv-move-dependency-handling-to-scheduler.patch \
-  file://patches/0106-drm-etnaviv-lock-BOs-after-all-other-submit-work-is-.patch \
-  file://patches/0107-drm-etnaviv-replace-hangcheck-with-scheduler-timeout.patch \
-  file://patches/0108-drm-etnaviv-remove-the-need-for-a-gpu-subsystem-DT-n.patch \
-  file://patches/0109-ARM-dts-imx6-remove-GPU-subsystem-nodes.patch \
-  file://patches/0110-dt-bindings-etnaviv-add-slave-interface-clock.patch \
-  file://patches/0111-drm-etnaviv-use-correct-format-specifier-for-size_t.patch \
-  file://patches/0112-drm-etnaviv-split-out-and-optimize-MMU-fault-dumping.patch \
-  file://patches/0113-drm-etnaviv-add-support-for-slave-interface-clock.patch \
-  file://patches/0114-drm-etnaviv-update-hardware-headers-from-rnndb.patch \
-  file://patches/0115-drm-etnaviv-add-more-minor-features-fields.patch \
-  file://patches/0116-drm-etnaviv-add-hardware-database.patch \
-  file://patches/0117-drm-etnaviv-add-security-handling-mode-enum.patch \
-  file://patches/0118-drm-etnaviv-handle-security-states.patch \
-  file://patches/0119-drm-etnaviv-add-function-to-load-the-initial-PTA-sta.patch \
-  file://patches/0120-drm-etnaviv-add-PTA-handling-to-MMUv2.patch \
-  file://patches/0121-drm-etnaviv-correct-timeout-calculation.patch \
-  file://patches/0122-drm-etnaviv-init-DMA-ops-for-virtual-master-device.patch \
-  file://patches/0123-drm-etnaviv-add-GC7000-sensitive-states.patch \
-  file://patches/0124-drm-etnaviv-support-relocations-to-BOs.patch \
-  file://patches/0125-drm-etnaviv-remove-cycling-through-MMU-address-space.patch \
-  file://patches/0126-drm-etnaviv-bump-HW-job-limit-to-4.patch \
+  file://patches/0101-drm-etnaviv-correct-timeout-calculation.patch \
+  file://patches/0102-drm-etnaviv-remove-cycling-through-MMU-address-space.patch \
+  file://patches/0103-drm-etnaviv-init-DMA-ops-for-virtual-master-device.patch \
+  file://patches/0104-drm-etnaviv-add-GC7000-sensitive-states.patch \
+  file://patches/0105-drm-etnaviv-support-relocations-to-BOs.patch \
+  file://patches/0106-drm-etnaviv-switch-MMU-page-tables-to-writecombine-m.patch \
+  file://patches/0107-drm-etnaviv-mmuv2-allocate-2nd-level-page-tables-on-.patch \
+  file://patches/0108-drm-etnaviv-remove-register-logging.patch \
+  file://patches/0109-drm-etnaviv-mmuv2-support-40-bit-phys-address.patch \
+  file://patches/0110-drm-etnaviv-replace-license-text-with-SPDX-tags.patch \
   "
-# umpf-topic: v4.16/topic/coda
-# umpf-hashinfo: b5e90368e63f6cb4007cee4faa55ed0bf5a0b6c6
-# umpf-topic-range: b4e4c999a941b8fe13725a6307672410bba1bdaa..9406f0e002cad7f4dee9b69a467606e6644e1858
+# umpf-topic: v4.17/topic/coda
+# umpf-hashinfo: e00e6486fdc2e997efa580608b5e25a0997a90fc
+# umpf-topic-range: bbe5b44ded247d4f026034f41baa972d9210ef6d..f7efbd0ee9210882ee373ba892733ae1909c346f
 SRC_URI += "\
   file://patches/0201-media-coda-move-framebuffer-size-calculation-out-of-.patch \
   file://patches/0202-media-coda-streamline-framebuffer-size-calculation-a.patch \
   file://patches/0203-media-coda-add-SPS-fixup-code-for-frame-sizes-that-a.patch \
   file://patches/0204-media-coda-jpeg-allow-non-JPEG-colorspace.patch \
   file://patches/0205-media-coda-jpeg-only-queue-two-buffers-into-the-bits.patch \
-  file://patches/0206-media-coda-jpeg-Explicitly-disable-thumbnails-in-SEQ.patch \
+  file://patches/0206-media-coda-jpeg-explicitly-disable-thumbnails-in-SEQ.patch \
   file://patches/0207-media-coda-jpeg-read-back-thumbnail-indication-and-J.patch \
   file://patches/0208-media-coda-mark-CODA960-firmware-version-2.1.9-as-su.patch \
   file://patches/0209-media-dt-bindings-coda-fsl-imx6dl-vpu.patch \
@@ -81,15 +66,15 @@ SRC_URI += "\
   file://patches/0234-media-HACK-coda-use-writecombine-instead-of-noncache.patch \
   file://patches/0235-media-coda-dump-metas-to-the-log-and-bitstream-into-.patch \
   file://patches/0236-media-coda-clear-hold-flag-on-streamoff.patch \
-  file://patches/0237-media-coda-bump-maximum-number-of-internal-framebuff.patch \
-  file://patches/0238-media-coda-Add-i.MX51-CodaHx4-support.patch \
-  file://patches/0239-media-coda-reduce-minimum-frame-size-to-single-macro.patch \
-  file://patches/0240-media-coda-do-not-try-to-propagate-format-if-capture.patch \
-  file://patches/0241-media-coda-improve-queue-busy-error-message.patch \
+  file://patches/0237-media-coda-reduce-minimum-frame-size-to-single-macro.patch \
+  file://patches/0238-media-coda-reuse-coda_s_fmt_vid_cap-to-propagate-for.patch \
+  file://patches/0239-media-coda-do-not-try-to-propagate-format-if-capture.patch \
+  file://patches/0240-media-coda-improve-queue-busy-error-message.patch \
+  file://patches/0241-media-coda-set-colorimetry-on-coded-queue.patch \
   "
-# umpf-release: 4.16/customers/skov/imx6/20180425-1
-# umpf-topic-range: 9406f0e002cad7f4dee9b69a467606e6644e1858..b8211e79b912d6d065c4b28689e56ef652796619
+# umpf-release: 4.17/customers/skov/imx6/20180515-1
+# umpf-topic-range: f7efbd0ee9210882ee373ba892733ae1909c346f..03085f6d0f025db94b66f3bd8513e02dd0ae4fb5
 SRC_URI += "\
-  file://patches/0301-Release-4.16-customers-skov-imx6-20180425-1.patch \
+  file://patches/0301-Release-4.17-customers-skov-imx6-20180515-1.patch \
   "
 # umpf-end

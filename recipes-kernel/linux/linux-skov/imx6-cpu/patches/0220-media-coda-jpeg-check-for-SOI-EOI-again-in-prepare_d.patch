@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Wed, 8 Oct 2014 17:49:08 +0200
-Subject: [PATCH] [media] coda: jpeg: check for SOI/EOI again in prepare_decode
+Subject: [PATCH] media: coda: jpeg: check for SOI/EOI again in prepare_decode
 
 Warn if the buffer queued into the bitstream buffer does not start with
 SOI and end with EOI. This can help debugging in case of CODA7541 JPEG
@@ -12,10 +12,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 5aa0e203e25c..e6776390f8f8 100644
+index d910c600cfee..fd69fb705992 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -1985,6 +1985,7 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+@@ -2006,6 +2006,7 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
  					struct coda_buffer_meta, list);
  
  	if (meta && ctx->codec->src_fourcc == V4L2_PIX_FMT_JPEG) {
@@ -23,7 +23,7 @@ index 5aa0e203e25c..e6776390f8f8 100644
  
  		/* If this is the last buffer in the bitstream, add padding */
  		if (meta->end == (ctx->bitstream_fifo.kfifo.in &
-@@ -1999,6 +2000,15 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+@@ -2020,6 +2021,15 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
  
  			kfifo_in(&ctx->bitstream_fifo, buf, pad);
  		}

@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 30 Sep 2014 11:18:59 +0200
-Subject: [PATCH] [media] coda: jpeg: add CODA960 JPEG support
+Subject: [PATCH] media: coda: jpeg: add CODA960 JPEG support
 
 This patch adds JPEG encoding and decoding support for CODA960, handling
 the JPEG hardware directly. Separate JPEG encoder and decoder video
@@ -25,10 +25,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  4 files changed, 1452 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b61938ada5b5..dcaee50866d6 100644
+index f46d265e5799..c15c1450449c 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -151,9 +151,11 @@ static const struct coda_codec coda7_codecs[] = {
+@@ -159,9 +159,11 @@ static const struct coda_codec coda7_codecs[] = {
  static const struct coda_codec coda9_codecs[] = {
  	CODA_CODEC(CODA9_MODE_ENCODE_H264, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_H264,   1920, 1088),
  	CODA_CODEC(CODA9_MODE_ENCODE_MP4,  V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_MPEG4,  1920, 1088),
@@ -40,7 +40,7 @@ index b61938ada5b5..dcaee50866d6 100644
  };
  
  struct coda_video_device {
-@@ -231,6 +233,38 @@ static const struct coda_video_device coda_bit_jpeg_decoder = {
+@@ -239,6 +241,38 @@ static const struct coda_video_device coda_bit_jpeg_decoder = {
  	},
  };
  
@@ -79,7 +79,7 @@ index b61938ada5b5..dcaee50866d6 100644
  static const struct coda_video_device *codadx6_video_devices[] = {
  	&coda_bit_encoder,
  };
-@@ -243,6 +277,8 @@ static const struct coda_video_device *coda7_video_devices[] = {
+@@ -256,6 +290,8 @@ static const struct coda_video_device *coda7_video_devices[] = {
  };
  
  static const struct coda_video_device *coda9_video_devices[] = {
@@ -88,7 +88,7 @@ index b61938ada5b5..dcaee50866d6 100644
  	&coda_bit_encoder,
  	&coda_bit_decoder,
  };
-@@ -713,13 +749,14 @@ static int coda_s_fmt(struct coda_ctx *ctx, struct v4l2_format *f,
+@@ -728,13 +764,14 @@ static int coda_s_fmt(struct coda_ctx *ctx, struct v4l2_format *f,
  		ctx->tiled_map_type = GDI_TILED_FRAME_MB_RASTER_MAP;
  		break;
  	case V4L2_PIX_FMT_NV12:
@@ -104,7 +104,7 @@ index b61938ada5b5..dcaee50866d6 100644
  		ctx->tiled_map_type = GDI_LINEAR_FRAME_MAP;
  		break;
  	default:
-@@ -1759,6 +1796,30 @@ static int coda_s_ctrl(struct v4l2_ctrl *ctrl)
+@@ -1774,6 +1811,30 @@ static int coda_s_ctrl(struct v4l2_ctrl *ctrl)
  	case V4L2_CID_JPEG_RESTART_INTERVAL:
  		ctx->params.jpeg_restart_interval = ctrl->val;
  		break;
@@ -135,7 +135,7 @@ index b61938ada5b5..dcaee50866d6 100644
  	case V4L2_CID_MPEG_VIDEO_VBV_DELAY:
  		ctx->params.vbv_delay = ctrl->val;
  		break;
-@@ -2568,6 +2629,23 @@ static int coda_probe(struct platform_device *pdev)
+@@ -2604,6 +2665,23 @@ static int coda_probe(struct platform_device *pdev)
  		return ret;
  	}
  
@@ -1550,10 +1550,10 @@ index 9f899a6cefed..38b417f9c6bc 100644
 +	return IRQ_HANDLED;
 +}
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
-index defdd1515671..4b162dcf1364 100644
+index 9dac14e8b3cf..ac9f815a5bc6 100644
 --- a/drivers/media/platform/coda/coda.h
 +++ b/drivers/media/platform/coda/coda.h
-@@ -71,7 +71,7 @@ struct coda_aux_buf {
+@@ -72,7 +72,7 @@ struct coda_aux_buf {
  
  struct coda_dev {
  	struct v4l2_device	v4l2_dev;
@@ -1562,7 +1562,7 @@ index defdd1515671..4b162dcf1364 100644
  	struct platform_device	*plat_dev;
  	const struct coda_devtype *devtype;
  	int			firmware;
-@@ -125,7 +125,13 @@ struct coda_params {
+@@ -126,7 +126,13 @@ struct coda_params {
  	int			intra_refresh;
  	u8			jpeg_quality;
  	u8			jpeg_restart_interval;
@@ -1576,7 +1576,7 @@ index defdd1515671..4b162dcf1364 100644
  	int			codec_mode;
  	int			codec_mode_aux;
  	enum v4l2_mpeg_video_multi_slice_mode slice_mode;
-@@ -216,6 +222,7 @@ struct coda_ctx {
+@@ -217,6 +223,7 @@ struct coda_ctx {
  	struct v4l2_fh			fh;
  	int				gopcounter;
  	int				runcounter;
@@ -1584,7 +1584,7 @@ index defdd1515671..4b162dcf1364 100644
  	char				vpu_header[3][64];
  	int				vpu_header_size[3];
  	struct kfifo			bitstream_fifo;
-@@ -311,7 +318,10 @@ void coda_set_jpeg_compression_quality(struct coda_ctx *ctx, int quality);
+@@ -312,7 +319,10 @@ void coda_set_jpeg_compression_quality(struct coda_ctx *ctx, int quality);
  
  extern const struct coda_context_ops coda_bit_encode_ops;
  extern const struct coda_context_ops coda_bit_decode_ops;

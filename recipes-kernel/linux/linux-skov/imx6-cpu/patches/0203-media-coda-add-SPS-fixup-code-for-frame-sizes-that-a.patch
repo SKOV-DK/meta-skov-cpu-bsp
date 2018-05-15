@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 22 Jul 2014 10:43:55 +0200
-Subject: [PATCH] [media] coda: add SPS fixup code for frame sizes that are not
+Subject: [PATCH] media: coda: add SPS fixup code for frame sizes that are not
  multiples of 16
 
 This adds RBSP parsing code and a SPS fixup routine to replace the cropping
@@ -15,10 +15,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 314 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 3688d53b56ca..86bd9f9fa73c 100644
+index 86e618c10221..c4a4300bd1de 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -1177,6 +1177,16 @@ static int coda_start_encoding(struct coda_ctx *ctx)
+@@ -1194,6 +1194,16 @@ static int coda_start_encoding(struct coda_ctx *ctx)
  		if (ret < 0)
  			goto out;
  
@@ -346,10 +346,10 @@ index 0e27412e01f5..8ec5a5d076c0 100644
 +	return 0;
 +}
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
-index c5f504d8cf67..defdd1515671 100644
+index c70cfab2433f..9dac14e8b3cf 100644
 --- a/drivers/media/platform/coda/coda.h
 +++ b/drivers/media/platform/coda/coda.h
-@@ -302,6 +302,8 @@ int coda_h264_padding(int size, char *p);
+@@ -303,6 +303,8 @@ int coda_h264_padding(int size, char *p);
  int coda_h264_profile(int profile_idc);
  int coda_h264_level(int level_idc);
  int coda_sps_parse_profile(struct coda_ctx *ctx, struct vb2_buffer *vb);

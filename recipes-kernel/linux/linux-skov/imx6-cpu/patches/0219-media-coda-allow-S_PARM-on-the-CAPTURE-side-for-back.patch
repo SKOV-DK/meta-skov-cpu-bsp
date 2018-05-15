@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 23 Feb 2015 16:45:23 +0100
-Subject: [PATCH] [media] coda: allow S_PARM on the CAPTURE side for backwards
+Subject: [PATCH] media: coda: allow S_PARM on the CAPTURE side for backwards
  compatibility
 
 gst-plugins-good before commit ce5c0b8f9271 ("v4l2object: set streamparm
@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 20 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index acd4498954e2..b61938ada5b5 100644
+index 49dc5cab61d4..f46d265e5799 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -985,11 +985,19 @@ static int coda_g_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
+@@ -1000,11 +1000,19 @@ static int coda_g_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
  	struct coda_ctx *ctx = fh_to_ctx(fh);
  	struct v4l2_fract *tpf;
  
@@ -40,7 +40,7 @@ index acd4498954e2..b61938ada5b5 100644
  	tpf->denominator = ctx->params.framerate & CODA_FRATE_RES_MASK;
  	tpf->numerator = 1 + (ctx->params.framerate >>
  			      CODA_FRATE_DIV_OFFSET);
-@@ -1068,10 +1076,17 @@ static int coda_s_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
+@@ -1083,10 +1091,17 @@ static int coda_s_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
  	struct coda_ctx *ctx = fh_to_ctx(fh);
  	struct v4l2_fract *tpf;
  

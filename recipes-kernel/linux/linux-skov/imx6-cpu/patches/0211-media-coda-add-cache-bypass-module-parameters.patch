@@ -1,6 +1,6 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Mon, 16 Mar 2015 15:19:29 +0100
-Subject: [PATCH] [media] coda: add cache bypass module parameters
+Subject: [PATCH] media: coda: add cache bypass module parameters
 
 Allow to disable the cache for encoding and decoding via the
 disable_encoder_cache and disable_decoder_cache module parameters.
@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 16 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 282ee2081e8b..30df75f5c715 100644
+index bc93d55b094d..fe10b2d0fa71 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -16,6 +16,7 @@
@@ -37,7 +37,7 @@ index 282ee2081e8b..30df75f5c715 100644
  static void coda_free_bitstream_buffer(struct coda_ctx *ctx);
  
  static inline int coda_is_initialized(struct coda_dev *dev)
-@@ -795,6 +804,7 @@ int coda_check_firmware(struct coda_dev *dev)
+@@ -808,6 +817,7 @@ int coda_check_firmware(struct coda_dev *dev)
  static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
  {
  	u32 cache_size, cache_config;
@@ -45,7 +45,7 @@ index 282ee2081e8b..30df75f5c715 100644
  
  	if (ctx->tiled_map_type == GDI_LINEAR_FRAME_MAP) {
  		/* Luma 2x0 page, 2x6 cache, chroma 2x0 page, 2x4 cache size */
-@@ -819,6 +829,12 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
+@@ -832,6 +842,12 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)
  				8 << CODA9_CACHE_CR_BUFFER_SIZE_OFFSET |
  				8 << CODA9_CACHE_CB_BUFFER_SIZE_OFFSET;
  	}
