@@ -24,3 +24,4 @@ do_install () {
 
 FILES_${PN} += "${bindir}/* \
 "
+TARGET_CC_ARCH += "${LDFLAGS}" 
