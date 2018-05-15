@@ -12,6 +12,7 @@ BUGTRACKER = "https://github.com/linux4sam/at91bootstrap/issues"
 SECTION = "bootloaders"
 LICENSE = "ATMEL"
 LIC_FILES_CHKSUM = "file://main.c;endline=27;md5=a2a70db58191379e2550cbed95449fbd"
+DEPENDS += "bc-native"
 
 inherit cml1 deploy
 
