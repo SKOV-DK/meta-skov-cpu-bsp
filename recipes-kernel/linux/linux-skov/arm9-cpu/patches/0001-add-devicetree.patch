@@ -1,9 +1,8 @@
  arch/arm/boot/dts/arm9-cpu.dts | 278 +++++++++++++++++++++++++++++++++++++++++
- arch/arm/tools/mach-types      |   1 +
- 2 files changed, 279 insertions(+)
+ 1 file changed, 278 insertions(+)
 diff --git a/arch/arm/boot/dts/arm9-cpu.dts b/arch/arm/boot/dts/arm9-cpu.dts
 new file mode 100644
-index 0000000..c068634
+index 0000000..9b28709
 --- /dev/null
 +++ b/arch/arm/boot/dts/arm9-cpu.dts
 @@ -0,0 +1,278 @@
@@ -151,7 +150,7 @@ index 0000000..c068634
 +			};
 +		};
 +
-+		fb0: fb@0x00700000 {
++		fb0: fb@700000 {
 +			display = <&display0>;
 +			status = "okay";
 +
@@ -183,7 +182,7 @@ index 0000000..c068634
 +			};
 +		};
 +
-+		usb0: ohci@00a00000 {
++		usb0: ohci@a00000 {
 +			num-ports = <2>;
 +			status = "okay";
 +			atmel,vbus-gpio = <&pioA 24 GPIO_ACTIVE_HIGH
@@ -286,8 +285,10 @@ index 0000000..c068634
 +};
 +*/
 \ No newline at end of file
+ arch/arm/tools/mach-types | 1 +
+ 1 file changed, 1 insertion(+)
 diff --git a/arch/arm/tools/mach-types b/arch/arm/tools/mach-types
-index a9313b6..b18c657 100644
+index 4eac94c..6136f87 100644
 --- a/arch/arm/tools/mach-types
 +++ b/arch/arm/tools/mach-types
 @@ -230,6 +230,7 @@ vstms			MACH_VSTMS		VSTMS			1140
