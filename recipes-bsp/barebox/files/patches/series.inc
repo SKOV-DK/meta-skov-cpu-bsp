@@ -19,3 +19,10 @@ SRC_URI += "\
   file://patches/0101-Release-2018.04.0-customers-skov-imx6-20180418-1.patch \
   "
 # umpf-end
+
+# ARM9-CPU patches
+SRC_URI += "\
+  file://patches/0600-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
+  file://patches/0601-skovarm9cpu-initial-support.patch \
+"
+
