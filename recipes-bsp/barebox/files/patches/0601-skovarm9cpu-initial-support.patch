@@ -1,0 +1,855 @@
+From 2fb9c1b1652c66961685810a1a05a5fdede2ac5e Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Fri, 29 Dec 2017 10:01:36 +0100
+Subject: [PATCH 601/601] skovarm9cpu: initial support
+
+TODO:
+- display does not work.
+  - Seiko display timings are bogus, needs an update
+- pwm is not correct
+- booting the kernel is not tested
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/boards/Makefile                           |   2 +
+ arch/arm/boards/skovarm9cpu/Makefile               |   3 +
+ arch/arm/boards/skovarm9cpu/env/boot/mci0          |   7 +
+ arch/arm/boards/skovarm9cpu/env/init/automount     |   5 +
+ arch/arm/boards/skovarm9cpu/env/init/splash        |  15 +
+ arch/arm/boards/skovarm9cpu/env/nv/boot.default    |   1 +
+ .../skovarm9cpu/env/nv/linux.bootargs.console      |   1 +
+ arch/arm/boards/skovarm9cpu/lowlevel_init.c        | 130 ++++++++
+ arch/arm/boards/skovarm9cpu/of_init.c              | 104 ++++++
+ arch/arm/configs/skovarm9cpu_defconfig             |  82 +++++
+ arch/arm/dts/Makefile                              |   2 +
+ arch/arm/dts/skovarm9cpu.dts                       | 351 +++++++++++++++++++++
+ arch/arm/mach-at91/Kconfig                         |  10 +
+ images/Makefile.at91                               |   4 +
+ 14 files changed, 717 insertions(+)
+ create mode 100644 arch/arm/boards/skovarm9cpu/Makefile
+ create mode 100644 arch/arm/boards/skovarm9cpu/env/boot/mci0
+ create mode 100644 arch/arm/boards/skovarm9cpu/env/init/automount
+ create mode 100644 arch/arm/boards/skovarm9cpu/env/init/splash
+ create mode 100644 arch/arm/boards/skovarm9cpu/env/nv/boot.default
+ create mode 100644 arch/arm/boards/skovarm9cpu/env/nv/linux.bootargs.console
+ create mode 100644 arch/arm/boards/skovarm9cpu/lowlevel_init.c
+ create mode 100644 arch/arm/boards/skovarm9cpu/of_init.c
+ create mode 100644 arch/arm/configs/skovarm9cpu_defconfig
+ create mode 100644 arch/arm/dts/skovarm9cpu.dts
+
+diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
+index ca187ccb8..541c367e4 100644
+--- a/arch/arm/boards/Makefile
++++ b/arch/arm/boards/Makefile
+@@ -150,3 +150,5 @@ obj-$(CONFIG_MACH_WARP7)			+= element14-warp7/
+ obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
+ obj-$(CONFIG_MACH_ZII_RDU2)			+= zii-imx6q-rdu2/
+ obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
++
++obj-$(CONFIG_MACH_SKOVARM9CPU)			+= skovarm9cpu/
+diff --git a/arch/arm/boards/skovarm9cpu/Makefile b/arch/arm/boards/skovarm9cpu/Makefile
+new file mode 100644
+index 000000000..5b7c8a6cb
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/Makefile
+@@ -0,0 +1,3 @@
++obj-y += of_init.o
++
++lwl-y += lowlevel_init.o
+diff --git a/arch/arm/boards/skovarm9cpu/env/boot/mci0 b/arch/arm/boards/skovarm9cpu/env/boot/mci0
+new file mode 100644
+index 000000000..afad7bf2c
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/env/boot/mci0
+@@ -0,0 +1,7 @@
++#!/bin/sh
++
++global.bootm.image="/mnt/disk0.1/boot/zImage"
++
++bootargs-ip
++
++global.linux.bootargs.dyn.root="root=/dev/disk0.1 rw rootwait"
+diff --git a/arch/arm/boards/skovarm9cpu/env/init/automount b/arch/arm/boards/skovarm9cpu/env/init/automount
+new file mode 100644
+index 000000000..270327d5d
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/env/init/automount
+@@ -0,0 +1,5 @@
++#!/bin/sh
++
++# SD card slot, first partition
++mkdir -p /mnt/disk0.1
++automount -d /mnt/disk0.1 'mount /dev/disk0.1 /mnt/disk0.1'
+diff --git a/arch/arm/boards/skovarm9cpu/env/init/splash b/arch/arm/boards/skovarm9cpu/env/init/splash
+new file mode 100644
+index 000000000..f3d417e35
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/env/init/splash
+@@ -0,0 +1,15 @@
++#!/bin/sh
++
++PATH=/env/bin
++export PATH
++
++. /env/config
++
++splash=/env/splash.png
++
++if [ -f ${splash} -a -e /dev/fb0 ]; then
++	splash -o ${splash}
++	fb0.enable=1
++fi
++
++exit 1
+diff --git a/arch/arm/boards/skovarm9cpu/env/nv/boot.default b/arch/arm/boards/skovarm9cpu/env/nv/boot.default
+new file mode 100644
+index 000000000..b4b419a08
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/env/nv/boot.default
+@@ -0,0 +1 @@
++mci0
+diff --git a/arch/arm/boards/skovarm9cpu/env/nv/linux.bootargs.console b/arch/arm/boards/skovarm9cpu/env/nv/linux.bootargs.console
+new file mode 100644
+index 000000000..476b1fbe4
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/env/nv/linux.bootargs.console
+@@ -0,0 +1 @@
++console=ttyS0,115200
+diff --git a/arch/arm/boards/skovarm9cpu/lowlevel_init.c b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
+new file mode 100644
+index 000000000..1c7f4708f
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
+@@ -0,0 +1,130 @@
++/*
++ * Copyright (C) 2018 Sam Ravnborg <sam@ravnborg.org>
++ *
++ * Under GPLv2
++ */
++
++#include <linux/sizes.h>
++
++#include <asm/barebox-arm.h>
++
++#include <mach/at91sam926x_board_init.h>
++#include <mach/at91sam9263_matrix.h>
++
++#define MASTER_PLL_MUL		171
++#define MASTER_PLL_DIV		14
++
++static void __bare_init skovarm9cpu_board_config(struct at91sam926x_board_cfg *cfg)
++{
++	/* Disable Watchdog */
++	cfg->wdt_mr =
++		AT91_WDT_WDIDLEHLT | AT91_WDT_WDDBGHLT |
++		AT91_WDT_WDV |
++		AT91_WDT_WDDIS |
++		AT91_WDT_WDD;
++
++	/* define PDC[31:16] as DATA[31:16] */
++	cfg->ebi_pio_pdr = 0xFFFF0000;
++	/* no pull-up for D[31:16] */
++	cfg->ebi_pio_ppudr = 0xFFFF0000;
++	/* EBI0_CSA, CS1 SDRAM, CS3 NAND Flash, 3.3V memories */
++	cfg->ebi_csa =
++		AT91_MATRIX_EBI0_DBPUC | AT91_MATRIX_EBI0_VDDIOMSEL_3_3V |
++		AT91_MATRIX_EBI0_CS1A_SDRAMC;
++
++	cfg->smc_cs = 0;
++	cfg->smc_mode =
++		AT91_SMC_READMODE | AT91_SMC_WRITEMODE |
++		AT91_SMC_DBW_16 |
++		AT91_SMC_TDFMODE |
++		AT91_SMC_TDF_(6);
++	cfg->smc_cycle =
++		AT91_SMC_NWECYCLE_(22) | AT91_SMC_NRDCYCLE_(22);
++	cfg->smc_pulse =
++		AT91_SMC_NWEPULSE_(11) | AT91_SMC_NCS_WRPULSE_(11) |
++		AT91_SMC_NRDPULSE_(11) | AT91_SMC_NCS_RDPULSE_(11);
++	cfg->smc_setup =
++		AT91_SMC_NWESETUP_(10) | AT91_SMC_NCS_WRSETUP_(10) |
++		AT91_SMC_NRDSETUP_(10) | AT91_SMC_NCS_RDSETUP_(10);
++
++	cfg->pmc_mor =
++		AT91_PMC_MOSCEN |
++		(255 << 8);		/* Main Oscillator Start-up Time */
++	cfg->pmc_pllar =
++		AT91_PMC_PLLA_WR_ERRATA | /* Bit 29 must be 1 when prog */
++		AT91_PMC_OUT |
++		AT91_PMC_PLLCOUNT |	/* PLL Counter */
++		(2 << 28) |		/* PLL Clock Frequency Range */
++		((MASTER_PLL_MUL - 1) << 16) | (MASTER_PLL_DIV);
++	/* PCK/2 = MCK Master Clock from PLLA */
++	cfg->pmc_mckr1 =
++		AT91_PMC_CSS_SLOW |
++		AT91_PMC_PRES_1 |
++		AT91SAM9_PMC_MDIV_2 |
++		AT91_PMC_PDIV_1;
++	/* PCK/2 = MCK Master Clock from PLLA */
++	cfg->pmc_mckr2 =
++		AT91_PMC_CSS_PLLA |
++		AT91_PMC_PRES_1 |
++		AT91SAM9_PMC_MDIV_2 |
++		AT91_PMC_PDIV_1;
++
++	/* SDRAM */
++	/* SDRAMC_TR - Refresh Timer register */
++	cfg->sdrc_tr1 = 0x13C;
++	/* SDRAMC_CR - Configuration register*/
++	cfg->sdrc_cr =
++		AT91_SDRAMC_NC_9 |
++		AT91_SDRAMC_NR_13 |
++		AT91_SDRAMC_NB_4 |
++		AT91_SDRAMC_CAS_3 |
++		AT91_SDRAMC_DBW_32 |
++		(1 <<  8) |		/* Write Recovery Delay */
++		(7 << 12) |		/* Row Cycle Delay */
++		(2 << 16) |		/* Row Precharge Delay */
++		(2 << 20) |		/* Row to Column Delay */
++		(5 << 24) |		/* Active to Precharge Delay */
++		(1 << 28);		/* Exit Self Refresh to Active Delay */
++
++	/* Memory Device Register -> SDRAM */
++	cfg->sdrc_mdr = AT91_SDRAMC_MD_SDRAM;
++	/* SDRAM_TR */
++	cfg->sdrc_tr2 = 1200;
++
++	/* user reset enable */
++	cfg->rstc_rmr =
++		AT91_RSTC_KEY |
++		AT91_RSTC_PROCRST |
++		AT91_RSTC_RSTTYP_WAKEUP |
++		AT91_RSTC_RSTTYP_WATCHDOG;
++}
++
++static void __bare_init skovarm9cpu_init(void *fdt)
++{
++	struct at91sam926x_board_cfg cfg;
++
++	cfg.pio = IOMEM(AT91SAM9263_BASE_PIOD);
++	cfg.sdramc = IOMEM(AT91SAM9263_BASE_SDRAMC0);
++	cfg.ebi_pio_is_peripha = true;
++	cfg.matrix_csa = AT91_MATRIX_EBI0CSA;
++
++	skovarm9cpu_board_config(&cfg);
++	at91sam926x_board_init(&cfg);
++
++	barebox_arm_entry(AT91_CHIPSELECT_1, at91_get_sdram_size(cfg.sdramc),
++			  fdt);
++}
++
++extern char __dtb_skovarm9cpu_start[];
++
++ENTRY_FUNCTION(start_skovarm9cpu, r0, r1, r2)
++{
++	void *fdt;
++
++	arm_cpu_lowlevel_init();
++
++	arm_setup_stack(AT91SAM9263_SRAM0_BASE + AT91SAM9263_SRAM0_SIZE - 16);
++	fdt = __dtb_skovarm9cpu_start - get_runtime_offset();
++
++	skovarm9cpu_init(fdt);
++}
+diff --git a/arch/arm/boards/skovarm9cpu/of_init.c b/arch/arm/boards/skovarm9cpu/of_init.c
+new file mode 100644
+index 000000000..2e991a719
+--- /dev/null
++++ b/arch/arm/boards/skovarm9cpu/of_init.c
+@@ -0,0 +1,104 @@
++/*
++ * Copyright (C) 2017 Sam Ravnborg <sam@ravnborg.org>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <common.h>
++#include <envfs.h>
++#include <init.h>
++#include <gpio.h>
++
++#include <mach/at91sam9263_matrix.h>
++#include <mach/at91sam9_smc.h>
++#include <mach/hardware.h>
++#include <mach/iomux.h>
++#include <mach/io.h>
++
++static int check_fdt(void)
++{
++	return of_machine_is_compatible("skov,arm9-cpu");
++}
++
++static int add_smc_devices(void)
++{
++	if (!check_fdt())
++		return 1;
++
++	add_generic_device("at91sam9-smc", 0, NULL, AT91SAM9263_BASE_SMC0, 0x200,
++			   IORESOURCE_MEM, NULL);
++	add_generic_device("at91sam9-smc", 1, NULL, AT91SAM9263_BASE_SMC1, 0x200,
++			   IORESOURCE_MEM, NULL);
++
++	return 0;
++}
++coredevice_initcall(add_smc_devices);
++
++static struct sam9_smc_config ek_nand_smc_config = {
++	.ncs_read_setup		= 0,
++	.nrd_setup		= 1,
++	.ncs_write_setup	= 0,
++	.nwe_setup		= 1,
++
++	.ncs_read_pulse		= 3,
++	.nrd_pulse		= 3,
++	.ncs_write_pulse	= 3,
++	.nwe_pulse		= 3,
++
++	.read_cycle		= 5,
++	.write_cycle		= 5,
++
++	.mode			= AT91_SMC_READMODE | AT91_SMC_WRITEMODE | AT91_SMC_EXNWMODE_DISABLE,
++	.tdf_cycles		= 2,
++};
++
++/*
++ * Initialize of SMC must come after we
++ * probe the at91sam9_smc_driver.
++ * But is required before we start the other drives.
++ * Use device_initcall() to maintain this order.
++ */
++static int at91sam9263_smc_init(void)
++{
++	unsigned long csa;
++
++	if (!check_fdt())
++		return 1;
++
++	/* setup bus-width (8 or 16) */
++#if defined(CONFIG_MTD_NAND_ATMEL_BUSWIDTH_16)
++	ek_nand_smc_config.mode |= AT91_SMC_DBW_16;
++#else
++	ek_nand_smc_config.mode |= AT91_SMC_DBW_8;
++#endif
++
++	csa = at91_sys_read(AT91_MATRIX_EBI0CSA);
++	csa |= AT91_MATRIX_EBI0_CS3A_SMC_SMARTMEDIA;
++	at91_sys_write(AT91_MATRIX_EBI0CSA, csa);
++
++	/* configure chip-select 3 (NAND) */
++	sam9_smc_configure(0, 3, &ek_nand_smc_config);
++
++	return 0;
++}
++device_initcall(at91sam9263_smc_init);
++
++static int skovarm9cpu_env_init(void)
++{
++	if (!check_fdt())
++		return 1;
++
++	if (IS_ENABLED(CONFIG_DEFAULT_ENVIRONMENT_GENERIC))
++		defaultenv_append_directory(defaultenv_skovarm9cpu);
++
++	return 0;
++}
++late_initcall(skovarm9cpu_env_init);
+diff --git a/arch/arm/configs/skovarm9cpu_defconfig b/arch/arm/configs/skovarm9cpu_defconfig
+new file mode 100644
+index 000000000..6b7a9f9c6
+--- /dev/null
++++ b/arch/arm/configs/skovarm9cpu_defconfig
+@@ -0,0 +1,82 @@
++CONFIG_ARCH_AT91SAM9263=y
++CONFIG_AT91_MULTI_BOARDS=y
++CONFIG_MACH_SKOVARM9CPU=y
++CONFIG_BAREBOX_MAX_IMAGE_SIZE=0x40000
++CONFIG_ARM_OPTIMZED_STRING_FUNCTIONS=y
++CONFIG_MMU=y
++CONFIG_EXPERIMENTAL=y
++CONFIG_MALLOC_TLSF=y
++CONFIG_RELOCATABLE=y
++CONFIG_HUSH_FANCY_PROMPT=y
++CONFIG_CMDLINE_EDITING=y
++CONFIG_AUTO_COMPLETE=y
++CONFIG_BOOTM_SHOW_TYPE=y
++CONFIG_BOOTM_INITRD=y
++CONFIG_BOOTM_OFTREE=y
++CONFIG_BOOTM_OFTREE_UIMAGE=y
++CONFIG_CONSOLE_ACTIVATE_ALL=y
++CONFIG_DEFAULT_ENVIRONMENT_GENERIC_NEW=y
++CONFIG_DEFAULT_ENVIRONMENT_PATH=" .yocto-defaultenv"
++# CONFIG_CMD_ARM_CPUINFO is not set
++CONFIG_LONGHELP=y
++CONFIG_CMD_IOMEM=y
++CONFIG_CMD_MEMINFO=y
++# CONFIG_CMD_BOOTU is not set
++CONFIG_CMD_GO=y
++CONFIG_CMD_LOADB=y
++CONFIG_CMD_RESET=y
++CONFIG_CMD_UIMAGE=y
++CONFIG_CMD_PARTITION=y
++CONFIG_CMD_EXPORT=y
++CONFIG_CMD_PRINTENV=y
++CONFIG_CMD_MAGICVAR=y
++CONFIG_CMD_MAGICVAR_HELP=y
++CONFIG_CMD_SAVEENV=y
++CONFIG_CMD_SLEEP=y
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_TFTP=y
++CONFIG_CMD_EDIT=y
++CONFIG_CMD_SPLASH=y
++CONFIG_CMD_FBTEST=y
++CONFIG_CMD_READLINE=y
++CONFIG_CMD_TIMEOUT=y
++CONFIG_CMD_CRC=y
++CONFIG_CMD_CRC_CMP=y
++CONFIG_CMD_MEMTEST=y
++CONFIG_CMD_CLK=y
++CONFIG_CMD_FLASH=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_LED=y
++CONFIG_CMD_LED_TRIGGER=y
++CONFIG_CMD_OF_DISPLAY_TIMINGS=y
++CONFIG_CMD_OF_FIXUP_STATUS=y
++CONFIG_CMD_OFTREE=y
++CONFIG_NET=y
++CONFIG_NET_NFS=y
++CONFIG_OF_BAREBOX_DRIVERS=y
++CONFIG_DRIVER_NET_MACB=y
++# CONFIG_SPI is not set
++CONFIG_MTD=y
++# CONFIG_MTD_OOB_DEVICE is not set
++CONFIG_DRIVER_CFI=y
++# CONFIG_DRIVER_CFI_INTEL is not set
++# CONFIG_DRIVER_CFI_BANK_WIDTH_4 is not set
++CONFIG_VIDEO=y
++CONFIG_DRIVER_VIDEO_ATMEL=y
++CONFIG_MCI=y
++CONFIG_MCI_MMC_BOOT_PARTITIONS=y
++CONFIG_MCI_ATMEL=y
++CONFIG_SRAM=y
++CONFIG_LED=y
++CONFIG_LED_GPIO=y
++CONFIG_LED_GPIO_OF=y
++CONFIG_LED_TRIGGERS=y
++CONFIG_KEYBOARD_GPIO=y
++CONFIG_FS_EXT4=y
++CONFIG_FS_TFTP=y
++CONFIG_FS_NFS=y
++CONFIG_FS_FAT=y
++CONFIG_FS_FAT_WRITE=y
++CONFIG_FS_FAT_LFN=y
++CONFIG_PNG=y
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 0526a6f40..2496838c4 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -107,4 +107,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
+ pbl-dtb-$(CONFIG_MACH_AT91SAM9263EK_DT) += at91sam9263ek.dtb.o
+ pbl-dtb-$(CONFIG_MACH_AT91SAM9X5EK) += at91sam9x5ek.dtb.o
+ 
++pbl-dtb-$(CONFIG_MACH_SKOVARM9CPU) += skovarm9cpu.dtb.o
++
+ clean-files := *.dtb *.dtb.S .*.dtc .*.pre .*.dts *.dtb.lzo
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+new file mode 100644
+index 000000000..9e12c78bc
+--- /dev/null
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -0,0 +1,351 @@
++/*
++ * Device Tree file for SKOV ARM9 CPU board with 128 MB RAM and Logic Technology Display
++ *
++ *  Copyright (C) 2018 Sam Ravnborg <sam@ravnborg.org>
++ *
++ * Licensed under GPLv2 only
++ */
++/dts-v1/;
++#include "arm/at91sam9263.dtsi"
++
++/ {
++	model = "SKOV ARM9 CPU";
++	compatible = "skov,arm9-cpu", "atmel,at91sam9263", "atmel,at91sam9";
++
++	chosen {
++		bootargs = "mem=128M root=/dev/mtdblock5 rw rootfstype=ubifs";
++		stdout-path = "serial0:115200n8";
++
++		environment@0 {
++			compatible = "barebox,environment";
++			device-path = &flash, "partname:bareboxenv";
++		};
++	};
++
++	memory {
++		reg = <0x20000000 0x8000000>;
++	};
++
++	clocks {
++		slow_xtal {
++			clock-frequency = <32768>;
++		};
++
++		main_xtal {
++			clock-frequency = <16000000>;
++		};
++	};
++
++	ahb {
++		apb {
++			dbgu: serial@ffffee00 {
++				status = "okay";
++			};
++
++			usart0: serial@fff8c000 {
++				pinctrl-0 = <
++					&pinctrl_usart0
++					&pinctrl_usart0_rts
++					&pinctrl_usart0_cts>;
++				status = "okay";
++			};
++
++			macb0: ethernet@fffbc000 {
++				phy-mode = "rmii";
++				status = "okay";
++/*			
++				ethernet-phy@0 {
++					reg = <0x1>;
++					interrupt-parent = <&pioE>;
++					interrupts = <31 IRQ_TYPE_LEVEL_LOW>;
++				};
++*/
++			};
++
++			mmc1: mmc@fff84000 {
++				pinctrl-0 = <
++					&pinctrl_board_mmc1
++					&pinctrl_mmc1_clk
++					&pinctrl_mmc1_slot0_cmd_dat0
++					&pinctrl_mmc1_slot0_dat1_3>;
++				cd-gpios = <&pioE 18 GPIO_ACTIVE_HIGH>;
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioE 18 GPIO_ACTIVE_HIGH>;
++					wp-gpios = <&pioE 19 GPIO_ACTIVE_HIGH>;
++				};
++			};
++
++			pinctrl@fffff200 {
++				mmc1 {
++					pinctrl_board_mmc1: mmc1-board {
++						atmel,pins =
++							<AT91_PIOE 18 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP_DEGLITCH 	/* PE18 gpio CD pin pull up and deglitch */
++							 AT91_PIOE 19 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP>;	/* PE19 gpio WP pin pull up */
++					};
++				};
++
++				inputs {
++					pinctrl_disp_type: disp_type-0 {
++						atmel,pins =
++							<AT91_PIOD 2 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;    	      	/* PD2 gpio DISP_TYPE (Seiko or Logic) */
++					};
++					pinctrl_logic_type: logic_type-0 {
++						atmel,pins =
++							<AT91_PIOB 8 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;                /* PB8 gpio LOGIC_TYPE (l2 or l6) */
++					};
++				};
++				/* clk appear not to be ready at first probe.
++				 * so this hangs barebox if enabled
++				 * pioD: gpio@fffff800 {
++				 *	DISP_TYPE {
++				 *		gpio-hog;
++				 *		input;
++				 *		gpios = <&pioD 2>;
++				 *		line-name = "DISP_TYPE";
++				 *	};
++				 * };
++				 *
++				 */
++
++				pioB: gpio@fffff400 {
++					/* Enable the 50MHz oscillator for Ethernet PHY */
++					phy_50mhz {
++						gpio-hog;
++						gpios = <27 GPIO_ACTIVE_LOW>;
++						output-high;
++						line-name = "PHY 50 MHz oscillator";
++					};
++
++					LOGIC_TYPE {
++						gpio-hog;
++						input;
++						gpios = <&pioB 8>;
++						line-name = "LOGIC_TYPE";
++					};
++				};
++				fb {
++					pinctrl_board_fb: fb-0 {
++						atmel,pins =
++						       <AT91_PIOC 0  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDVSYNC */
++							AT91_PIOC 1  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDHSYNC */
++							AT91_PIOC 2  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDDOTCK */
++							AT91_PIOC 3  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDDEN */
++							AT91_PIOB 9  AT91_PERIPH_B AT91_PINCTRL_NONE    /* LCDCC */
++							AT91_PIOC 6  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD2 */
++							AT91_PIOC 7  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD3 */
++							AT91_PIOC 8  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD4 */
++							AT91_PIOC 9  AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD5 */
++							AT91_PIOC 10 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD6 */
++							AT91_PIOC 11 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD7 */
++							AT91_PIOC 14 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD10 */
++							AT91_PIOC 15 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD11 */
++							AT91_PIOC 16 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD12 */
++							AT91_PIOC 12 AT91_PERIPH_B AT91_PINCTRL_NONE    /* LCDD13 */
++							AT91_PIOC 18 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD14 */
++							AT91_PIOC 19 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD15 */
++							AT91_PIOC 22 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD18 */
++							AT91_PIOC 23 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD19 */
++							AT91_PIOC 24 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD20 */
++							AT91_PIOC 17 AT91_PERIPH_B AT91_PINCTRL_NONE    /* LCDD21 */
++							AT91_PIOC 26 AT91_PERIPH_A AT91_PINCTRL_NONE    /* LCDD22 */
++							AT91_PIOC 27 AT91_PERIPH_A AT91_PINCTRL_NONE>;  /* LCDD23 */
++					};
++				};
++			};
++
++			spi0: spi@fffa4000 {
++				status = "okay";
++				cs-gpios = <0>, <&pioA 3 0>, <0>, <&pioB 11 0>;
++
++				mcp3002@0 {
++					compatible = "microchip,mcp3002";
++					reg = <1>;
++					spi-max-frequency = <1000000>;
++				};
++
++				tsc2046@0 {
++					reg = <3>;
++					compatible = "ti,tsc2046";
++					interrupts-extended = <&pioA 15 IRQ_TYPE_EDGE_BOTH>;
++					spi-max-frequency = <1000000>;
++					pendown-gpio = <&pioA 15 GPIO_ACTIVE_LOW>;
++
++					ti,x-min = /bits/ 16 <800>;
++					ti,x-max = /bits/ 16 <3830>;
++					ti,y-min = /bits/ 16 <500>;
++					ti,y-max = /bits/ 16 <3830>;
++					ti,vref-delay-usecs = /bits/ 16 <300>;
++					ti,x-plate-ohms = /bits/ 16 <642>;
++					ti,y-plate-ohms = /bits/ 16 <295>;
++					ti,pressure-max = /bits/ 16 <1500>;
++					ti,debounce-rep = /bits/ 16 <8>;
++					ti,debounce-tol = /bits/ 16 <(~0)>;
++					ti,debounce-max = /bits/ 16 <100>;
++
++					wakeup-source;
++				};
++			};
++
++			watchdog@fffffd40 {
++				status = "okay";
++			};
++		};
++
++		fb0: fb@700000 {
++			display = <&display0>;
++			status = "okay";
++
++			display0: display {
++				bits-per-pixel = <16>;
++				atmel,lcdcon-backlight;
++				atmel,dmacon = <0x1>;
++				atmel,lcdcon2 = <0x80008002>;
++				atmel,guard-time = <1>;
++				atmel,lcd-wiring-mode = "BGR";
++				pinctrl-names = "default";
++				pinctrl-0 = <&pinctrl_board_fb>;
++				atmel,power-control-gpio = <&pioA 30 GPIO_ACTIVE_HIGH>;
++
++				display-timings {
++					native-mode = <&l2rt>;
++					l2rt: l2rt {
++						clock-frequency = <33000000>;
++						hactive = <800>;
++						vactive = <480>;
++						hback-porch = <85>;
++						hfront-porch = <112>;
++						vback-porch = <29>;
++						vfront-porch = <38>;
++						hsync-len = <3>;
++						vsync-len = <3>;
++						pixelclk-active = <1>;
++						hsync-active = <0>;
++						vsync-active = <0>;
++						de-active = <1>;
++					};
++					l6rt: l6rt {
++						clock-frequency = <33000000>;
++						hactive = <800>;
++						vactive = <480>;
++						hback-porch = <43>;
++						hfront-porch = <154>;
++						vback-porch = <20>;
++						vfront-porch = <47>;
++						hsync-len = <3>;
++						vsync-len = <3>;
++						pixelclk-active = <1>;
++						hsync-active = <0>;
++						vsync-active = <0>;
++						de-active = <1>;
++					};
++					/* TODO - not updated */
++					seiko: seiko {
++						clock-frequency = <33000000>;
++						hactive = <800>;
++						vactive = <480>;
++						hback-porch = <43>;
++						hfront-porch = <154>;
++						vback-porch = <20>;
++						vfront-porch = <47>;
++						hsync-len = <3>;
++						vsync-len = <3>;
++						pixelclk-active = <1>;
++						hsync-active = <0>;
++						vsync-active = <0>;
++						de-active = <1>;
++					};
++				};
++			};
++		};
++
++		usb0: ohci@a00000 {
++			num-ports = <2>;
++			status = "okay";
++			atmel,vbus-gpio = <&pioA 24 GPIO_ACTIVE_HIGH
++					   &pioA 21 GPIO_ACTIVE_HIGH
++					  >;
++		};
++
++		flash: nor_flash@10000000 {
++			compatible = "cfi-flash";
++			reg = <0x10000000 0x8000000>;
++			linux,mtd-name = "physmap-flash.0";
++			bank-width = <2>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			barebox@0 {
++				label = "barebox";
++				reg = <0x00000 0x40000>;
++			};
++
++			bareboxenv@40000 {
++				label = "bareboxenv";
++				reg = <0x40000 0x10000>;
++			};
++
++			kernel@50000 {
++				label = "kernel";
++				reg = <0x50000 0x300000>;
++			};
++
++			root@350000  {
++				label = "root";
++				reg = <0x350000 0x4B0000>;
++			};
++		};
++
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		D0 {
++			label = "D0";
++			gpios = <&pioD 0 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "heartbeat";
++		};
++
++		D1 {
++			label = "D1";
++			gpios = <&pioD 1 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "mmc0";
++		};
++
++		D2 {
++			label = "D2";
++			gpios = <&pioD 7 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	gpio_keys {
++		compatible = "gpio-keys";
++
++		boot_mode_select {
++			label = "boot mode";
++			gpios = <&pioB 3 GPIO_ACTIVE_LOW>;
++			linux,code = <272>;
++		};
++	};
++
++	inputs {
++		compatible = "atmel,at91sam9x5-pinctrl, atmel,at91rm9200-pinctrl", "simple-bus";
++		pinctrl-names = "default";
++		pinctrl-0 = <
++			&pinctrl_disp_type
++			&pinctrl_logic_type>;
++	};
++
++	i2c-gpio-0 {
++		status = "okay";
++
++		24c512@50 {
++			compatible = "24c512";
++			reg = <0x50>;
++			pagesize = <128>;
++		};
++	};
++};
+diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
+index 0a9cf3ad1..81f2050fa 100644
+--- a/arch/arm/mach-at91/Kconfig
++++ b/arch/arm/mach-at91/Kconfig
+@@ -531,6 +531,16 @@ config AT91_MULTI_BOARDS
+ 
+ if AT91_MULTI_BOARDS
+ 
++config MACH_SKOVARM9CPU
++	bool "SKOV ARM9 CPU"
++	select OFDEVICE
++	select COMMON_CLK_OF_PROVIDER
++	select HAVE_AT91_USB_CLK
++	select HAVE_AT91_BOOTSTRAP
++	select AT91SAM926X_BOARD_INIT
++	help
++	  Say y here if you are using SKOV's ARM9 CPU board
++
+ config MACH_AT91SAM9263EK
+ 	bool "Atmel AT91SAM9263-EK"
+ 	depends on ARCH_AT91SAM9263
+diff --git a/images/Makefile.at91 b/images/Makefile.at91
+index c7d86563a..4288cfe7a 100644
+--- a/images/Makefile.at91
++++ b/images/Makefile.at91
+@@ -9,3 +9,7 @@ image-$(CONFIG_MACH_AT91SAM9X5EK) += barebox-at91sam9x5ek.img
+ pblx-$(CONFIG_MACH_AT91SAM9263EK) += start_at91sam9263ek
+ FILE_barebox-at91sam9263ek.img = start_at91sam9263ek.pblx
+ image-$(CONFIG_MACH_AT91SAM9263EK) += barebox-at91sam9263ek.img
++
++pblx-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
++FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblx
++image-$(CONFIG_MACH_SKOVARM9CPU) += barebox-skovarm9cpu.img
+-- 
+2.12.0
+
