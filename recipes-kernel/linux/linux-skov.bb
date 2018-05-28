@@ -25,4 +25,4 @@ S = "${WORKDIR}/linux-${LINUX_VERSION}"
 COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu"
 
 # do not install kernel images to the rootfs
-RDEPENDS_kernel-base = ""
+RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
