@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# SD card slot, first partition
+mkdir -p /mnt/disk0.0
+automount -d /mnt/disk0.0 'detect mci0 && [ -e /dev/disk0.0 ] && mount /dev/disk0.0 /mnt/disk0.0'
+
