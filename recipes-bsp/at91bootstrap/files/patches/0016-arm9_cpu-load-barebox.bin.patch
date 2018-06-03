@@ -19,6 +19,6 @@ index 30d87b4..0af138f 100644
  CONFIG_SDCARD=y
  CONFIG_AT91_MCI1=y
  CONFIG_JUMP_ADDR="0x23800000"
-+CONFIG_IMAGE_NAME="barebox-skovarm9cpu.img"
++CONFIG_IMAGE_NAME="barebox.bin"
 -- 
 2.12.0

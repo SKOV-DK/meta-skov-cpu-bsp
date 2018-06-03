@@ -44,7 +44,7 @@ do_compile() {
 	oe_runmake REVISION=${REVISION}
 }
 
-AT91BOOTSTRAP_BINARY = "arm9_cpu-flashboot-bareboxskovarm9cpu-${PV}-${REVISION}.bin"
+AT91BOOTSTRAP_BINARY = "arm9_cpu-flashboot-barebox-${PV}-${REVISION}.bin"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}
