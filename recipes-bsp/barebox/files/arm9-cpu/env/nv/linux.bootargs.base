@@ -1,1 +1,1 @@
-root=/dev/disk0.1 rootfstype=ext4 rw rootwait
+root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait earlyprintk init=/usr/bin/system-init.sh
