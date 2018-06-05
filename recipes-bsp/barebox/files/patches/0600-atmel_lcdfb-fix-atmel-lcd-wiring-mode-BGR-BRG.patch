@@ -1,0 +1,92 @@
+From 5022e49a625b5c6004bed08869394087421d6260 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Tue, 5 Jun 2018 12:07:36 +0200
+Subject: [PATCH 600/602] atmel_lcdfb: fix atmel,lcd-wiring-mode; BGR => BRG
+
+Fix spelling error that prevented us from getting
+the atmel,lcd-wiring-mode
+
+The Bindings mandate the use of BRG.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ drivers/video/atmel_lcdfb_core.c | 14 +++++++-------
+ include/video/atmel_lcdc.h       |  4 ++--
+ 2 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/video/atmel_lcdfb_core.c b/drivers/video/atmel_lcdfb_core.c
+index c6ece5b78..6d6665cbd 100644
+--- a/drivers/video/atmel_lcdfb_core.c
++++ b/drivers/video/atmel_lcdfb_core.c
+@@ -132,7 +132,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+ 			= info->bits_per_pixel;
+ 		break;
+ 	case 16:
+-		/* Older SOCs use BGR:555 rather than BGR:565. */
++		/* Older SOCs use BRG:555 rather than BRG:565. */
+ 		if (sinfo->have_intensity_bit)
+ 			info->green.length = 5;
+ 		else
+@@ -142,7 +142,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+ 			info->red.offset = info->green.length + 5;
+ 			info->blue.offset = 0;
+ 		} else {
+-			/* BGR:5X5 mode */
++			/* BRG:5X5 mode */
+ 			info->red.offset = 0;
+ 			info->blue.offset = info->green.length + 5;
+ 		}
+@@ -159,7 +159,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+ 			info->red.offset = 16;
+ 			info->blue.offset = 0;
+ 		} else {
+-			/* BGR:888 mode */
++			/* BRG:888 mode */
+ 			info->red.offset = 0;
+ 			info->blue.offset = 16;
+ 		}
+@@ -282,7 +282,7 @@ static int power_control_init(struct device_d *dev,
+ }
+ 
+ /*
+- * Syntax: atmel,lcd-wiring-mode: lcd wiring mode "RGB", "BGR"
++ * Syntax: atmel,lcd-wiring-mode: lcd wiring mode "RGB", "BRG"
+  */
+ static int of_get_wiring_mode(struct device_node *np,
+ 			      struct atmel_lcdfb_info *sinfo)
+@@ -293,12 +293,12 @@ static int of_get_wiring_mode(struct device_node *np,
+ 	ret = of_property_read_string(np, "atmel,lcd-wiring-mode", &mode);
+ 	if (ret < 0) {
+ 		/* Not present, use defaults */
+-		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_BGR;
++		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_BRG;
+ 		return 0;
+ 	}
+ 
+-	if (!strcasecmp(mode, "BGR")) {
+-		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_BGR;
++	if (!strcasecmp(mode, "BRG")) {
++		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_BRG;
+ 	} else if (!strcasecmp(mode, "RGB")) {
+ 		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_RGB;
+ 	} else {
+diff --git a/include/video/atmel_lcdc.h b/include/video/atmel_lcdc.h
+index 07a30e2e6..7e3f95873 100644
+--- a/include/video/atmel_lcdc.h
++++ b/include/video/atmel_lcdc.h
+@@ -23,10 +23,10 @@
+ #define __ATMEL_LCDC_H__
+ 
+ /* Way LCD wires are connected to the chip:
+- * Some Atmel chips use BGR color mode (instead of standard RGB)
++ * Some Atmel chips use BRG color mode (instead of standard RGB)
+  * A swapped wiring onboard can bring to RGB mode.
+  */
+-#define ATMEL_LCDC_WIRING_BGR	0
++#define ATMEL_LCDC_WIRING_BRG	0
+ #define ATMEL_LCDC_WIRING_RGB	1
+ #define ATMEL_LCDC_WIRING_RGB555	2
+ 
+-- 
+2.12.0
+
