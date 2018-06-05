@@ -1,4 +1,4 @@
-From cf47728f632bae1aa7f104002418ffc9105d955c Mon Sep 17 00:00:00 2001
+From 4dcd27f111f851b50857e5c100e9ebb934330693 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Fri, 29 Dec 2017 10:01:36 +0100
 Subject: [PATCH 601/601] skovarm9cpu: initial support
@@ -12,14 +12,14 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
  arch/arm/boards/Makefile                    |   2 +
  arch/arm/boards/skovarm9cpu/Makefile        |   3 +
- arch/arm/boards/skovarm9cpu/lowlevel_init.c | 130 +++++++++++
+ arch/arm/boards/skovarm9cpu/lowlevel_init.c | 130 ++++++++++
  arch/arm/boards/skovarm9cpu/of_init.c       | 101 ++++++++
- arch/arm/configs/skovarm9cpu_defconfig      |  83 +++++++
+ arch/arm/configs/skovarm9cpu_defconfig      |  86 +++++++
  arch/arm/dts/Makefile                       |   2 +
- arch/arm/dts/skovarm9cpu.dts                | 351 ++++++++++++++++++++++++++++
+ arch/arm/dts/skovarm9cpu.dts                | 354 ++++++++++++++++++++++++++++
  arch/arm/mach-at91/Kconfig                  |  10 +
  images/Makefile.at91                        |   4 +
- 9 files changed, 686 insertions(+)
+ 9 files changed, 692 insertions(+)
  create mode 100644 arch/arm/boards/skovarm9cpu/Makefile
  create mode 100644 arch/arm/boards/skovarm9cpu/lowlevel_init.c
  create mode 100644 arch/arm/boards/skovarm9cpu/of_init.c
@@ -290,10 +290,10 @@ index 000000000..e0e922a53
 +late_initcall(skovarm9cpu_env_init);
 diff --git a/arch/arm/configs/skovarm9cpu_defconfig b/arch/arm/configs/skovarm9cpu_defconfig
 new file mode 100644
-index 000000000..bee506795
+index 000000000..79c614638
 --- /dev/null
 +++ b/arch/arm/configs/skovarm9cpu_defconfig
-@@ -0,0 +1,83 @@
+@@ -0,0 +1,86 @@
 +CONFIG_ARCH_AT91SAM9263=y
 +CONFIG_AT91_MULTI_BOARDS=y
 +CONFIG_MACH_SKOVARM9CPU=y
@@ -307,7 +307,7 @@ index 000000000..bee506795
 +CONFIG_CMDLINE_EDITING=y
 +CONFIG_AUTO_COMPLETE=y
 +CONFIG_BOOTM_SHOW_TYPE=y
-+CONFIG_BOOTM_INITRD=y
++CONFIG_BOOTM_VERBOSE=y
 +CONFIG_BOOTM_OFTREE=y
 +CONFIG_BOOTM_OFTREE_UIMAGE=y
 +CONFIG_CONSOLE_ACTIVATE_ALL=y
@@ -321,13 +321,13 @@ index 000000000..bee506795
 +CONFIG_CMD_GO=y
 +CONFIG_CMD_LOADB=y
 +CONFIG_CMD_RESET=y
-+CONFIG_CMD_UIMAGE=y
 +CONFIG_CMD_PARTITION=y
 +CONFIG_CMD_EXPORT=y
 +CONFIG_CMD_PRINTENV=y
 +CONFIG_CMD_MAGICVAR=y
 +CONFIG_CMD_MAGICVAR_HELP=y
 +CONFIG_CMD_SAVEENV=y
++CONFIG_CMD_MSLEEP=y
 +CONFIG_CMD_SLEEP=y
 +CONFIG_CMD_DHCP=y
 +CONFIG_CMD_PING=y
@@ -346,9 +346,12 @@ index 000000000..bee506795
 +CONFIG_CMD_GPIO=y
 +CONFIG_CMD_LED=y
 +CONFIG_CMD_LED_TRIGGER=y
++CONFIG_CMD_OF_NODE=y
++CONFIG_CMD_OF_PROPERTY=y
 +CONFIG_CMD_OF_DISPLAY_TIMINGS=y
 +CONFIG_CMD_OF_FIXUP_STATUS=y
 +CONFIG_CMD_OFTREE=y
++CONFIG_CMD_TIME=y
 +CONFIG_NET=y
 +CONFIG_NET_NFS=y
 +CONFIG_OF_BAREBOX_DRIVERS=y
@@ -390,10 +393,10 @@ index 0526a6f40..2496838c4 100644
  clean-files := *.dtb *.dtb.S .*.dtc .*.pre .*.dts *.dtb.lzo
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
 new file mode 100644
-index 000000000..9e12c78bc
+index 000000000..7723031a6
 --- /dev/null
 +++ b/arch/arm/dts/skovarm9cpu.dts
-@@ -0,0 +1,351 @@
+@@ -0,0 +1,354 @@
 +/*
 + * Device Tree file for SKOV ARM9 CPU board with 128 MB RAM and Logic Technology Display
 + *
@@ -508,19 +511,22 @@ index 000000000..9e12c78bc
 +
 +				pioB: gpio@fffff400 {
 +					/* Enable the 50MHz oscillator for Ethernet PHY */
-+					phy_50mhz {
-+						gpio-hog;
-+						gpios = <27 GPIO_ACTIVE_LOW>;
-+						output-high;
-+						line-name = "PHY 50 MHz oscillator";
-+					};
-+
-+					LOGIC_TYPE {
-+						gpio-hog;
-+						input;
-+						gpios = <&pioB 8>;
-+						line-name = "LOGIC_TYPE";
-+					};
++					/*
++					 * Will cause null pointer exception in the kernel
++					 *phy_50mhz {
++					 *	gpio-hog;
++					 *	gpios = <27 GPIO_ACTIVE_LOW>;
++					 *	output-high;
++					 *	line-name = "PHY 50 MHz oscillator";
++					 *};
++					 *
++					 *LOGIC_TYPE {
++					 *	gpio-hog;
++					 *	input;
++					 *	gpios = <&pioB 8>;
++					 *	line-name = "LOGIC_TYPE";
++					 *};
++					 */
 +				};
 +				fb {
 +					pinctrl_board_fb: fb-0 {
@@ -594,19 +600,19 @@ index 000000000..9e12c78bc
 +			display = <&display0>;
 +			status = "okay";
 +
-+			display0: display {
++			display0: display0 {
 +				bits-per-pixel = <16>;
 +				atmel,lcdcon-backlight;
 +				atmel,dmacon = <0x1>;
 +				atmel,lcdcon2 = <0x80008002>;
 +				atmel,guard-time = <1>;
-+				atmel,lcd-wiring-mode = "BGR";
++				atmel,lcd-wiring-mode = "BRG";
 +				pinctrl-names = "default";
 +				pinctrl-0 = <&pinctrl_board_fb>;
 +				atmel,power-control-gpio = <&pioA 30 GPIO_ACTIVE_HIGH>;
 +
 +				display-timings {
-+					native-mode = <&l2rt>;
++					native-mode = <&l6rt>;
 +					l2rt: l2rt {
 +						clock-frequency = <33000000>;
 +						hactive = <800>;
