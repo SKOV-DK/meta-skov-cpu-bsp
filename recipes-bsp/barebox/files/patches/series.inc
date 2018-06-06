@@ -21,8 +21,6 @@ SRC_URI += "\
 # umpf-end
 
 # ARM9-CPU patches
-SRC_URI += "\
-  file://patches/0600-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
-  file://patches/0601-skovarm9cpu-initial-support.patch \
-"
-
+SRC_URI += "file://patches/0600-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch"
+SRC_URI += "file://patches/0601-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch"
+SRC_URI += "file://patches/0602-skovarm9cpu-initial-support.patch"
