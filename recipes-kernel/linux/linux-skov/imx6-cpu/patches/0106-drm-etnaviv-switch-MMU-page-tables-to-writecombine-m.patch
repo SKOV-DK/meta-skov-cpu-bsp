@@ -10,8 +10,8 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
 v2: use shorter _wc function names.
 ---
- drivers/gpu/drm/etnaviv/etnaviv_iommu.c    | 34 +++++-----
- drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c | 74 ++++++++++------------
+ drivers/gpu/drm/etnaviv/etnaviv_iommu.c    | 34 +++++++-------
+ drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c | 74 +++++++++++++-----------------
  2 files changed, 49 insertions(+), 59 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_iommu.c b/drivers/gpu/drm/etnaviv/etnaviv_iommu.c

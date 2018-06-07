@@ -1,0 +1,38 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 15 May 2018 16:09:15 +0200
+Subject: [PATCH] drm/etnaviv: mmuv2: use memset32 to init scratch page
+
+Replace the open-coded scratch page initialization loop with memset32
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
+index 71fbc1f96cb6..f1c88d8ad5ba 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
+@@ -119,8 +119,7 @@ static size_t etnaviv_iommuv2_unmap(struct etnaviv_iommu_domain *domain,
+ 
+ static int etnaviv_iommuv2_init(struct etnaviv_iommuv2_domain *etnaviv_domain)
+ {
+-	u32 *p;
+-	int ret, i;
++	int ret;
+ 
+ 	/* allocate scratch page */
+ 	etnaviv_domain->base.bad_page_cpu =
+@@ -131,9 +130,9 @@ static int etnaviv_iommuv2_init(struct etnaviv_iommuv2_domain *etnaviv_domain)
+ 		ret = -ENOMEM;
+ 		goto fail_mem;
+ 	}
+-	p = etnaviv_domain->base.bad_page_cpu;
+-	for (i = 0; i < SZ_4K / 4; i++)
+-		*p++ = 0xdead55aa;
++
++	memset32(etnaviv_domain->base.bad_page_cpu, 0xdead55aa,
++		 SZ_4K / sizeof(u32));
+ 
+ 	etnaviv_domain->pta_cpu = dma_alloc_wc(etnaviv_domain->base.dev,
+ 					       SZ_4K, &etnaviv_domain->pta_dma,

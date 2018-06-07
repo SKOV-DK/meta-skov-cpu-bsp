@@ -7,8 +7,8 @@ the patch opens up security hole by leaking GPU addresses to userspace.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
- drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c | 60 ++++++++++++++++++++
- include/uapi/drm/etnaviv_drm.h               | 11 +++-
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c | 60 ++++++++++++++++++++++++++++
+ include/uapi/drm/etnaviv_drm.h               | 11 ++++-
  2 files changed, 70 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c

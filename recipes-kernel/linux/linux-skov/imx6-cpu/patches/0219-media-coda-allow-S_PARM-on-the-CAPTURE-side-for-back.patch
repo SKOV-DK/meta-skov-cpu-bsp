@@ -10,7 +10,7 @@ compatiblity with GStreamer versions older than 1.12.0.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 25 ++++++++++++++++++-----
+ drivers/media/platform/coda/coda-common.c | 25 ++++++++++++++++++++-----
  1 file changed, 20 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c

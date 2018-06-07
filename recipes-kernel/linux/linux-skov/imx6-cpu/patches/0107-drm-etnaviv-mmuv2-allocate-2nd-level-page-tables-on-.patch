@@ -16,14 +16,14 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
 v2: fill MTLB for unpopulated STLBs with PTE_EXCEPTION
 ---
- drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c | 63 ++++++++++++----------
- 1 file changed, 34 insertions(+), 29 deletions(-)
+ drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c | 61 ++++++++++++++++--------------
+ 1 file changed, 33 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
-index 47785d61cd95..2d9d09608bc2 100644
+index 47785d61cd95..6336fdc70433 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
-@@ -47,8 +47,9 @@ struct etnaviv_iommuv2_domain {
+@@ -47,8 +47,8 @@ struct etnaviv_iommuv2_domain {
  	u32 *mtlb_cpu;
  	dma_addr_t mtlb_dma;
  	/* S(lave) TLB aka second level pagetable */
@@ -31,11 +31,10 @@ index 47785d61cd95..2d9d09608bc2 100644
 -	dma_addr_t stlb_dma[1024];
 +	u32 *stlb_cpu[MMUv2_MAX_STLB_ENTRIES];
 +	dma_addr_t stlb_dma[MMUv2_MAX_STLB_ENTRIES];
-+	DECLARE_BITMAP(stlb_allocated, MMUv2_MAX_STLB_ENTRIES);
  };
  
  static struct etnaviv_iommuv2_domain *
-@@ -57,13 +58,35 @@ to_etnaviv_domain(struct etnaviv_iommu_domain *domain)
+@@ -57,13 +57,36 @@ to_etnaviv_domain(struct etnaviv_iommu_domain *domain)
  	return container_of(domain, struct etnaviv_iommuv2_domain, base);
  }
  
@@ -43,19 +42,20 @@ index 47785d61cd95..2d9d09608bc2 100644
 +etnaviv_iommuv2_ensure_stlb(struct etnaviv_iommuv2_domain *etnaviv_domain,
 +			    int stlb)
 +{
-+	if (test_bit(stlb, etnaviv_domain->stlb_allocated))
++	if (etnaviv_domain->stlb_cpu[stlb])
 +		return 0;
 +
 +	etnaviv_domain->stlb_cpu[stlb] =
-+			dma_alloc_writecombine(etnaviv_domain->base.dev,
-+					       SZ_4K,
-+					       &etnaviv_domain->stlb_dma[stlb],
-+					       GFP_KERNEL);
++			dma_alloc_wc(etnaviv_domain->base.dev, SZ_4K,
++				     &etnaviv_domain->stlb_dma[stlb],
++				     GFP_KERNEL);
 +
 +	if (!etnaviv_domain->stlb_cpu[stlb])
 +		return -ENOMEM;
 +
-+	__set_bit(stlb, etnaviv_domain->stlb_allocated);
++	memset32(etnaviv_domain->stlb_cpu[stlb], MMUv2_PTE_EXCEPTION,
++		 SZ_4K / sizeof(u32));
++
 +	etnaviv_domain->mtlb_cpu[stlb] = etnaviv_domain->stlb_dma[stlb] |
 +						      MMUv2_PTE_PRESENT;
 +	return 0;
@@ -132,12 +132,3 @@ index 47785d61cd95..2d9d09608bc2 100644
  	return ret;
  }
  
-@@ -193,7 +198,7 @@ static void etnaviv_iommuv2_domain_free(struct etnaviv_iommu_domain *domain)
- 		    etnaviv_domain->mtlb_cpu, etnaviv_domain->mtlb_dma);
- 
- 	for (i = 0; i < MMUv2_MAX_STLB_ENTRIES; i++) {
--		if (etnaviv_domain->stlb_cpu[i])
-+		if (test_bit(i, etnaviv_domain->stlb_allocated))
- 			dma_free_wc(etnaviv_domain->base.dev, SZ_4K,
- 				    etnaviv_domain->stlb_cpu[i],
- 				    etnaviv_domain->stlb_dma[i]);

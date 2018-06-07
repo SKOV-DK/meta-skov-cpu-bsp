@@ -7,7 +7,7 @@ allowing to use regmap tracing and debugfs register dump features.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 62 +++++++++++++++++++++--
+ drivers/media/platform/coda/coda-common.c | 62 ++++++++++++++++++++++++++++---
  drivers/media/platform/coda/coda.h        |  2 +-
  2 files changed, 58 insertions(+), 6 deletions(-)
 

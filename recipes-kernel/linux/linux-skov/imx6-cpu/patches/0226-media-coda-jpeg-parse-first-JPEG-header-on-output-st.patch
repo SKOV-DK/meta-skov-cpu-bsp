@@ -7,7 +7,7 @@ This allows to properly limit the capture formats to either 4:2:0 or
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 45 +++++++++++++++++++----
+ drivers/media/platform/coda/coda-common.c | 45 +++++++++++++++++++++++++------
  1 file changed, 37 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c

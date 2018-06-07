@@ -8,7 +8,7 @@ register definitions.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda_regs.h | 83 +++++++++++++++++++++++++
+ drivers/media/platform/coda/coda_regs.h | 83 +++++++++++++++++++++++++++++++++
  1 file changed, 83 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda_regs.h b/drivers/media/platform/coda/coda_regs.h

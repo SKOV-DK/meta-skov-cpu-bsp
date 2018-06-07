@@ -9,9 +9,9 @@ adds to the code size.
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 Reviewed-by: Christian Gmeiner <christian.gmeiner@gmail.com>
 ---
- drivers/gpu/drm/etnaviv/Kconfig       |  8 -----
- drivers/gpu/drm/etnaviv/etnaviv_drv.c | 51 ---------------------------
- drivers/gpu/drm/etnaviv/etnaviv_drv.h |  5 ---
+ drivers/gpu/drm/etnaviv/Kconfig       |  8 ------
+ drivers/gpu/drm/etnaviv/etnaviv_drv.c | 51 -----------------------------------
+ drivers/gpu/drm/etnaviv/etnaviv_drv.h |  5 ----
  drivers/gpu/drm/etnaviv/etnaviv_gpu.c |  4 ++-
  drivers/gpu/drm/etnaviv/etnaviv_gpu.h |  4 +--
  5 files changed, 5 insertions(+), 67 deletions(-)

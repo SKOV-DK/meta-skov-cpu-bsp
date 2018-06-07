@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Tue, 15 May 2018 11:32:06 +0200
-Subject: [PATCH] Release 4.17/customers/skov/imx6/20180515-1
+Date: Thu, 7 Jun 2018 12:46:54 +0200
+Subject: [PATCH] Release 4.17/customers/skov/imx6/20180607-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index ba3106b36597..06dc51af43a6 100644
+index 554dcaddbce4..56eb31baf130 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -19,7 +19,7 @@ index ba3106b36597..06dc51af43a6 100644
  PATCHLEVEL = 17
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION = 20180605-1
++EXTRAVERSION =-20180607-1
  NAME = Merciless Moray
  
  # *DOCUMENTATION*

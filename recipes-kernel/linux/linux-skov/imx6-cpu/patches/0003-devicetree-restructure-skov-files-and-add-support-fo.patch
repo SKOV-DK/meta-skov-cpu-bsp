@@ -16,14 +16,14 @@ Signed-off-by: Sam Ravnborg <srn@skov.dk>
  arch/arm/boot/dts/Makefile                   |   5 +-
  arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts  |  23 -
  arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts   |  23 +
- arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 +
+ arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 ++
  arch/arm/boot/dts/imx6q-skov-imx6-revC.dts   |  36 --
  arch/arm/boot/dts/imx6q-skov-revc-lt2.dts    |  36 ++
  arch/arm/boot/dts/imx6q-skov-revc-lt6.dts    |  40 ++
- arch/arm/boot/dts/imx6qdl-cpu.dtsi           | 640 -------------------
- arch/arm/boot/dts/imx6qdl-cpuC.dtsi          |  80 ---
- arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi |  80 +++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 640 +++++++++++++++++++
+ arch/arm/boot/dts/imx6qdl-cpu.dtsi           | 640 ---------------------------
+ arch/arm/boot/dts/imx6qdl-cpuC.dtsi          |  80 ----
+ arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi |  80 ++++
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 640 +++++++++++++++++++++++++++
  11 files changed, 850 insertions(+), 780 deletions(-)
  delete mode 100644 arch/arm/boot/dts/imx6dl-skov-imx6-revC.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
