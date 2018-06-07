@@ -5,7 +5,7 @@ Subject: [PATCH] media: coda: jpeg: limit enum_formats to same chroma
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 28 +++++++++++++++++++++--
+ drivers/media/platform/coda/coda-common.c | 28 ++++++++++++++++++++++++++--
  1 file changed, 26 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c

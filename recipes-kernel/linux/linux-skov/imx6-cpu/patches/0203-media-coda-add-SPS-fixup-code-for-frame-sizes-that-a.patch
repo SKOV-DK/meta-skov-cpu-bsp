@@ -9,8 +9,8 @@ or to add the missing cropping information, or to add it when missing.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-bit.c  |  10 +
- drivers/media/platform/coda/coda-h264.c | 302 ++++++++++++++++++++++++
+ drivers/media/platform/coda/coda-bit.c  |  10 ++
+ drivers/media/platform/coda/coda-h264.c | 302 ++++++++++++++++++++++++++++++++
  drivers/media/platform/coda/coda.h      |   2 +
  3 files changed, 314 insertions(+)
 

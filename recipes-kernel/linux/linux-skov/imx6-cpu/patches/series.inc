@@ -1,9 +1,9 @@
-# umpf-base: v4.17-rc5
+# umpf-base: v4.17
 # umpf-name: 4.17/customers/skov/imx6
-# umpf-version: 4.17/customers/skov/imx6/20180515-1
+# umpf-version: 4.17/customers/skov/imx6/20180607-1
 # umpf-topic: v4.17/customers/skov/imx6
 # umpf-hashinfo: 8a4581944cd2043ab224c8ce87829d17cbc34a55
-# umpf-topic-range: 67b8d5c7081221efa252e111cd52532ec6d4266f..d35cedda08dd236b0c9662d56ac920671995211e
+# umpf-topic-range: 29dcea88779c856c7dc92040a0c01233263101d4..5ee11634d624e9ac43d9e68adb7d13f5054cc19b
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov_version-add-support-for-board-21-22.patch \
@@ -12,8 +12,8 @@ SRC_URI += "\
   file://patches/0005-rtc-pcf85063-fix-so-ctrl1-setup-is-kept.patch \
   "
 # umpf-topic: v4.17/topic/etnaviv
-# umpf-hashinfo: 24781ed494d7a5ae5ae8bc10489cee780de186ce
-# umpf-topic-range: d35cedda08dd236b0c9662d56ac920671995211e..bbe5b44ded247d4f026034f41baa972d9210ef6d
+# umpf-hashinfo: 18ab289c64a101dc14ad5f9d908a384f88a859dd
+# umpf-topic-range: 5ee11634d624e9ac43d9e68adb7d13f5054cc19b..bba8d9022d89405194aa53657a7f71a0ccfadf41
 SRC_URI += "\
   file://patches/0101-drm-etnaviv-correct-timeout-calculation.patch \
   file://patches/0102-drm-etnaviv-remove-cycling-through-MMU-address-space.patch \
@@ -25,10 +25,15 @@ SRC_URI += "\
   file://patches/0108-drm-etnaviv-remove-register-logging.patch \
   file://patches/0109-drm-etnaviv-mmuv2-support-40-bit-phys-address.patch \
   file://patches/0110-drm-etnaviv-replace-license-text-with-SPDX-tags.patch \
+  file://patches/0111-drm-etnaviv-mmuv2-use-memset32-to-init-scratch-page.patch \
+  file://patches/0112-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
+  file://patches/0113-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
+  file://patches/0114-drm-etnaviv-protect-sched-job-submission-with-fence-.patch \
+  file://patches/0115-drm-etnaviv-change-return-type-to-vm_fault_t.patch \
   "
 # umpf-topic: v4.17/topic/coda
-# umpf-hashinfo: e00e6486fdc2e997efa580608b5e25a0997a90fc
-# umpf-topic-range: bbe5b44ded247d4f026034f41baa972d9210ef6d..f7efbd0ee9210882ee373ba892733ae1909c346f
+# umpf-hashinfo: ebb963adc3dbc37f86362fcefcba2c1cb73b30d1
+# umpf-topic-range: bba8d9022d89405194aa53657a7f71a0ccfadf41..4ed211fc9dfee3a03b2b4352e771989a33c30d6f
 SRC_URI += "\
   file://patches/0201-media-coda-move-framebuffer-size-calculation-out-of-.patch \
   file://patches/0202-media-coda-streamline-framebuffer-size-calculation-a.patch \
@@ -71,10 +76,11 @@ SRC_URI += "\
   file://patches/0239-media-coda-do-not-try-to-propagate-format-if-capture.patch \
   file://patches/0240-media-coda-improve-queue-busy-error-message.patch \
   file://patches/0241-media-coda-set-colorimetry-on-coded-queue.patch \
+  file://patches/0242-media-coda-add-h.264-level-4.2.patch \
   "
-# umpf-release: 4.17/customers/skov/imx6/20180515-1
-# umpf-topic-range: f7efbd0ee9210882ee373ba892733ae1909c346f..03085f6d0f025db94b66f3bd8513e02dd0ae4fb5
+# umpf-release: 4.17/customers/skov/imx6/20180607-1
+# umpf-topic-range: 4ed211fc9dfee3a03b2b4352e771989a33c30d6f..4c7c4f8304fb0483df264e5b33a7285fd52657db
 SRC_URI += "\
-  file://patches/0301-Release-4.17-customers-skov-imx6-20180515-1.patch \
+  file://patches/0301-Release-4.17-customers-skov-imx6-20180607-1.patch \
   "
 # umpf-end

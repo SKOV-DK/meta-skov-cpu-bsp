@@ -19,7 +19,7 @@ decoding with the CODA960 JPEG codec:
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/media/platform/coda/coda-common.c |   80 +-
- drivers/media/platform/coda/coda-jpeg.c   | 1352 +++++++++++++++++++++
+ drivers/media/platform/coda/coda-jpeg.c   | 1352 +++++++++++++++++++++++++++++
  drivers/media/platform/coda/coda.h        |   12 +-
  drivers/media/platform/coda/trace.h       |   10 +
  4 files changed, 1452 insertions(+), 2 deletions(-)

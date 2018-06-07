@@ -10,7 +10,7 @@ bitstream into a device coredump for debugging purposes.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 34 +++++++++++++++++++++--
+ drivers/media/platform/coda/coda-common.c | 34 +++++++++++++++++++++++++++++--
  1 file changed, 32 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c

@@ -8,8 +8,8 @@ debugging purposes, but only for BIT processor contexts.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-bit.c    | 40 +++++++++++++++++++++++
- drivers/media/platform/coda/coda-common.c | 15 ++++++---
+ drivers/media/platform/coda/coda-bit.c    | 40 +++++++++++++++++++++++++++++++
+ drivers/media/platform/coda/coda-common.c | 15 ++++++++----
  drivers/media/platform/coda/coda.h        |  1 +
  3 files changed, 51 insertions(+), 5 deletions(-)
 

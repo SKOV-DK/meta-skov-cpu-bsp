@@ -10,13 +10,13 @@ PV = "${LINUX_VERSION}"
 
 LINUX_VERSION = "4.17"
 
-SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
+SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig"
 
 require linux-skov/${MACHINE}/patches/series.inc
 
-SRC_URI[md5sum] = "8b26398577c73ce9f4ea739abc4c4a22"
-SRC_URI[sha256sum] = "123956b43b652d20dee03421cdc212fe63dd6d01a15491288b37005a806a8afd"
+SRC_URI[md5sum] = "5bb13a03274b66b56c85b26682e407d7"
+SRC_URI[sha256sum] = "9faa1dd896eaea961dc6e886697c0b3301277102e5bc976b2758f9a62d3ccd13"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 

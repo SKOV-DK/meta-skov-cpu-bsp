@@ -425,7 +425,7 @@ index 01d59bf70d78..b279404ce91a 100644
  
  #ifndef __ETNAVIV_IOMMU_H__
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
-index f2e4fa773e22..26a5b9964e83 100644
+index 72bd0107a00c..71fbc1f96cb6 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_iommu_v2.c
 @@ -1,17 +1,6 @@
