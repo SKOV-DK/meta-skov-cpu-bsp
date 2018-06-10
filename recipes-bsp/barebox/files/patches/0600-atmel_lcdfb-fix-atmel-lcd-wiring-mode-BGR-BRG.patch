@@ -1,7 +1,7 @@
 From 5022e49a625b5c6004bed08869394087421d6260 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 5 Jun 2018 12:07:36 +0200
-Subject: [PATCH 600/602] atmel_lcdfb: fix atmel,lcd-wiring-mode; BGR => BRG
+Subject: [PATCH 600/603] atmel_lcdfb: fix atmel,lcd-wiring-mode; BGR => BRG
 
 Fix spelling error that prevented us from getting
 the atmel,lcd-wiring-mode
