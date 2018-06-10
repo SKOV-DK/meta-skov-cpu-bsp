@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ -e /env/splash.png ]; then
+    splash -f /dev/fb0 -b 28 /env/splash.png
+fi

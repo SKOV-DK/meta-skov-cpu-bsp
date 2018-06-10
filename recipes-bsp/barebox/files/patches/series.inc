@@ -24,3 +24,4 @@ SRC_URI += "\
 SRC_URI += "file://patches/0600-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch"
 SRC_URI += "file://patches/0601-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch"
 SRC_URI += "file://patches/0602-skovarm9cpu-initial-support.patch"
+SRC_URI += "file://patches/0603-skovarm9cpu-fix-DT-tree.patch"

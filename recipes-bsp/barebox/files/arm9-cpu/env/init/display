@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Determine display type and register a fixup for display
+# timing, so the kernel uses correct display timing
+
+# If PD 2 == HIGH then it is a seiko display, otherwise logic display
+# If PB 8 == LOW then it is a logic l6whrt, otherwise a logic l2rt
+
+gpio_get_value 98
+seiko=$?
+
+gpio_get_value 40
+logic=$?
+
+if [ $seiko = 1 ]; then
+    echo "display: seiko"
+    of_display_timings -S /ahb/fb@700000/display0/display-timings/seiko
+else
+    if [ $logic = 0 ]; then
+        echo "display: logic l6whrt"
+        of_display_timings -S /ahb/fb@700000/display0/display-timings/l6whrt
+    else
+        echo "display: logic l2rt"
+        of_display_timings -S /ahb/fb@700000/display0/display-timings/l2rt
+    fi
+fi

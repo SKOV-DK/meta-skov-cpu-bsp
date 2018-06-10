@@ -1,7 +1,7 @@
 From ac5e4e9b4a1142dbfb4923ab2e551929d5d5df64 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Fri, 29 Dec 2017 10:01:36 +0100
-Subject: [PATCH 602/602] skovarm9cpu: initial support
+Subject: [PATCH 602/603] skovarm9cpu: initial support
 
 TODO:
 - display does not work.
