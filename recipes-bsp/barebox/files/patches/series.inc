@@ -30,3 +30,6 @@ SRC_URI += "\
   file://patches/0201-Release-2018.04.0-customers-skov-imx6-20180717-1.patch \
   "
 # umpf-end
+
+# ARM9-CPU patches
+SRC_URI += "file://patches/0604-skovarm9cpu-updated-seiko-timing-parameters.patch"

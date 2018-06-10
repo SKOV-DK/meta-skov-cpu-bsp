@@ -1,0 +1,36 @@
+From e53057f69ba8834d9414cf427e41663e0f49c9bb Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sun, 10 Jun 2018 22:08:37 +0200
+Subject: [PATCH 604/604] skovarm9cpu: updated seiko timing parameters
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/dts/skovarm9cpu.dts | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+index 2055c68df..60d5ca758 100644
+--- a/arch/arm/dts/skovarm9cpu.dts
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -224,12 +224,12 @@
+ 						clock-frequency = <33000000>;
+ 						hactive = <800>;
+ 						vactive = <480>;
+-						hback-porch = <43>;
+-						hfront-porch = <154>;
+-						vback-porch = <20>;
+-						vfront-porch = <47>;
+-						hsync-len = <3>;
+-						vsync-len = <3>;
++						hback-porch = <0>;
++						hfront-porch = <256>;
++						vback-porch = <45>;
++						vfront-porch = <0>;
++						hsync-len = <0>;
++						vsync-len = <0>;
+ 						pixelclk-active = <1>;
+ 						hsync-active = <0>;
+ 						vsync-active = <0>;
+-- 
+2.12.0
+
