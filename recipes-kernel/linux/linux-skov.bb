@@ -13,7 +13,7 @@ LINUX_VERSION = "4.17.6"
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig"
 
-require linux-skov/${MACHINE}/patches/series.inc
+require linux-skov/patches/series.inc
 
 SRC_URI[md5sum] = "6e520aa397ffe1ec5e8a3a9d7539166a"
 SRC_URI[sha256sum] = "259dd689d19888936005d8dd75946902842b7e5734dc343061f951c9d2996395"
