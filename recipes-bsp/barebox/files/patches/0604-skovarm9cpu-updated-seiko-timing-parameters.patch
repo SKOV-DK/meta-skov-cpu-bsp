@@ -1,7 +1,7 @@
 From e53057f69ba8834d9414cf427e41663e0f49c9bb Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 10 Jun 2018 22:08:37 +0200
-Subject: [PATCH 604/604] skovarm9cpu: updated seiko timing parameters
+Subject: [PATCH 604/605] skovarm9cpu: updated seiko timing parameters
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---

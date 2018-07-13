@@ -1,0 +1,28 @@
+From 32d2d2fe72125d98d3dc34021b632487212a11ea Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 14 Jul 2018 00:11:50 +0200
+Subject: [PATCH 605/605] skovarm9cpu: fix logic display detection
+
+Init the correct GPIO pin for detecting logic display
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/dts/skovarm9cpu.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+index 60d5ca758..b1d807507 100644
+--- a/arch/arm/dts/skovarm9cpu.dts
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -96,7 +96,7 @@
+ 					pinctrl_logic_type: logic_type-0 {
+ 						/* Pull-down (LOW) if l6whrt display, otherwise l2rt display */
+ 						atmel,pins =
+-							<AT91_PIOB 8 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP>;
++							<AT91_PIOC 28 AT91_PERIPH_GPIO AT91_PINCTRL_PULL_UP>;
+ 					};
+ 				};
+ 
+-- 
+2.12.0
+

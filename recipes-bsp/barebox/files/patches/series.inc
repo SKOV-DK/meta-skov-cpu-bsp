@@ -33,3 +33,4 @@ SRC_URI += "\
 
 # ARM9-CPU patches
 SRC_URI += "file://patches/0604-skovarm9cpu-updated-seiko-timing-parameters.patch"
+SRC_URI += "file://patches/0605-skovarm9cpu-fix-logic-display-detection.patch"
