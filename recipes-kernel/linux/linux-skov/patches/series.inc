@@ -88,3 +88,5 @@ SRC_URI += "\
   file://patches/0301-Release-4.17-customers-skov-imx6-20180713-1.patch \
   "
 # umpf-end
+
+SRC_URI += "file://patches/0601-atmel_lcdfb-support-native-mode-display-timings.patch"
