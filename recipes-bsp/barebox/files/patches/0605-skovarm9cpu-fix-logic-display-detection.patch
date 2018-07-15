@@ -1,4 +1,4 @@
-From 32d2d2fe72125d98d3dc34021b632487212a11ea Mon Sep 17 00:00:00 2001
+From 02b05443067a7f7f2c1f9ee0acf4bf6825f5c32f Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 14 Jul 2018 00:11:50 +0200
 Subject: [PATCH 605/605] skovarm9cpu: fix logic display detection
@@ -11,7 +11,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 60d5ca758..b1d807507 100644
+index 7dacbf1c2..72f95fb0b 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -96,7 +96,7 @@
