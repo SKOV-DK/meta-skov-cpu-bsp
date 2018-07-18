@@ -1,7 +1,6 @@
-From 192d90861c393217b4779b982184dc7e03b57d13 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 26 May 2018 10:55:39 +0200
-Subject: [PATCH 601/603] pwm: add pwm-atmel from Linux kernel 4.14
+Subject: [PATCH] pwm: add pwm-atmel from Linux kernel 4.14
 
 This add the pwm-atmel.c file from kernel 4.14,
 modified for barebox use.
@@ -20,7 +19,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 drivers/pwm/pwm-atmel.c
 
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 97c3deff1..5242c35e9 100644
+index 97c3deff107b..5242c35e93ad 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
 @@ -16,6 +16,12 @@ config PWM_PXA
@@ -37,7 +36,7 @@ index 97c3deff1..5242c35e9 100644
  	bool "i.MX PWM Support"
  	depends on ARCH_IMX
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index 46865a24e..d2ae19b9a 100644
+index 46865a24eeb4..d2ae19b9aa50 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
 @@ -1,4 +1,5 @@
@@ -48,7 +47,7 @@ index 46865a24e..d2ae19b9a 100644
  obj-$(CONFIG_PWM_MXS)		+= pwm-mxs.o
 diff --git a/drivers/pwm/pwm-atmel.c b/drivers/pwm/pwm-atmel.c
 new file mode 100644
-index 000000000..7fa394934
+index 000000000000..7fa394934a76
 --- /dev/null
 +++ b/drivers/pwm/pwm-atmel.c
 @@ -0,0 +1,289 @@
@@ -341,6 +340,3 @@ index 000000000..7fa394934
 +MODULE_AUTHOR("Bo Shen <voice.shen@atmel.com>");
 +MODULE_DESCRIPTION("Atmel PWM driver");
 +MODULE_LICENSE("GPL v2");
--- 
-2.12.0
-

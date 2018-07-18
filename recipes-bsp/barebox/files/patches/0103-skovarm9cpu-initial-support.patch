@@ -1,7 +1,6 @@
-From ac5e4e9b4a1142dbfb4923ab2e551929d5d5df64 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Fri, 29 Dec 2017 10:01:36 +0100
-Subject: [PATCH 602/603] skovarm9cpu: initial support
+Subject: [PATCH] skovarm9cpu: initial support
 
 TODO:
 - display does not work.
@@ -27,10 +26,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/dts/skovarm9cpu.dts
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index ca187ccb8..541c367e4 100644
+index 924f67e637e4..31c0b87b05b4 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -150,3 +150,5 @@ obj-$(CONFIG_MACH_WARP7)			+= element14-warp7/
+@@ -151,3 +151,5 @@ obj-$(CONFIG_MACH_WARP7)			+= element14-warp7/
  obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
  obj-$(CONFIG_MACH_ZII_RDU2)			+= zii-imx6q-rdu2/
  obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
@@ -38,7 +37,7 @@ index ca187ccb8..541c367e4 100644
 +obj-$(CONFIG_MACH_SKOVARM9CPU)			+= skovarm9cpu/
 diff --git a/arch/arm/boards/skovarm9cpu/Makefile b/arch/arm/boards/skovarm9cpu/Makefile
 new file mode 100644
-index 000000000..5b7c8a6cb
+index 000000000000..5b7c8a6cbf3c
 --- /dev/null
 +++ b/arch/arm/boards/skovarm9cpu/Makefile
 @@ -0,0 +1,3 @@
@@ -47,7 +46,7 @@ index 000000000..5b7c8a6cb
 +lwl-y += lowlevel_init.o
 diff --git a/arch/arm/boards/skovarm9cpu/lowlevel_init.c b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 new file mode 100644
-index 000000000..1c7f4708f
+index 000000000000..1c7f4708fea4
 --- /dev/null
 +++ b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 @@ -0,0 +1,130 @@
@@ -183,7 +182,7 @@ index 000000000..1c7f4708f
 +}
 diff --git a/arch/arm/boards/skovarm9cpu/of_init.c b/arch/arm/boards/skovarm9cpu/of_init.c
 new file mode 100644
-index 000000000..e0e922a53
+index 000000000000..e0e922a539df
 --- /dev/null
 +++ b/arch/arm/boards/skovarm9cpu/of_init.c
 @@ -0,0 +1,101 @@
@@ -290,7 +289,7 @@ index 000000000..e0e922a53
 +late_initcall(skovarm9cpu_env_init);
 diff --git a/arch/arm/configs/skovarm9cpu_defconfig b/arch/arm/configs/skovarm9cpu_defconfig
 new file mode 100644
-index 000000000..79c614638
+index 000000000000..79c6146382d1
 --- /dev/null
 +++ b/arch/arm/configs/skovarm9cpu_defconfig
 @@ -0,0 +1,86 @@
@@ -381,10 +380,10 @@ index 000000000..79c614638
 +CONFIG_FS_FAT_LFN=y
 +CONFIG_PNG=y
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 0526a6f40..2496838c4 100644
+index 73e18450a77a..eb58f5d9d077 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -107,4 +107,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
+@@ -108,4 +108,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
  pbl-dtb-$(CONFIG_MACH_AT91SAM9263EK_DT) += at91sam9263ek.dtb.o
  pbl-dtb-$(CONFIG_MACH_AT91SAM9X5EK) += at91sam9x5ek.dtb.o
  
@@ -393,7 +392,7 @@ index 0526a6f40..2496838c4 100644
  clean-files := *.dtb *.dtb.S .*.dtc .*.pre .*.dts *.dtb.lzo
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
 new file mode 100644
-index 000000000..7723031a6
+index 000000000000..7723031a6866
 --- /dev/null
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -0,0 +1,354 @@
@@ -752,7 +751,7 @@ index 000000000..7723031a6
 +	};
 +};
 diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
-index 0a9cf3ad1..81f2050fa 100644
+index 0a9cf3ad137f..81f2050fafd1 100644
 --- a/arch/arm/mach-at91/Kconfig
 +++ b/arch/arm/mach-at91/Kconfig
 @@ -531,6 +531,16 @@ config AT91_MULTI_BOARDS
@@ -773,7 +772,7 @@ index 0a9cf3ad1..81f2050fa 100644
  	bool "Atmel AT91SAM9263-EK"
  	depends on ARCH_AT91SAM9263
 diff --git a/images/Makefile.at91 b/images/Makefile.at91
-index c7d86563a..4288cfe7a 100644
+index c7d86563a7ae..4288cfe7ac3f 100644
 --- a/images/Makefile.at91
 +++ b/images/Makefile.at91
 @@ -9,3 +9,7 @@ image-$(CONFIG_MACH_AT91SAM9X5EK) += barebox-at91sam9x5ek.img
@@ -784,6 +783,3 @@ index c7d86563a..4288cfe7a 100644
 +pblx-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
 +FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblx
 +image-$(CONFIG_MACH_SKOVARM9CPU) += barebox-skovarm9cpu.img
--- 
-2.12.0
-

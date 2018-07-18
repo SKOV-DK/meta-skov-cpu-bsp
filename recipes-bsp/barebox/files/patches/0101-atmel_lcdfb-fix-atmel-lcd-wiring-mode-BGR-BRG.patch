@@ -1,7 +1,6 @@
-From 5022e49a625b5c6004bed08869394087421d6260 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 5 Jun 2018 12:07:36 +0200
-Subject: [PATCH 600/603] atmel_lcdfb: fix atmel,lcd-wiring-mode; BGR => BRG
+Subject: [PATCH] atmel_lcdfb: fix atmel,lcd-wiring-mode; BGR => BRG
 
 Fix spelling error that prevented us from getting
 the atmel,lcd-wiring-mode
@@ -15,7 +14,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  2 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/video/atmel_lcdfb_core.c b/drivers/video/atmel_lcdfb_core.c
-index c6ece5b78..6d6665cbd 100644
+index c6ece5b785df..6d6665cbd360 100644
 --- a/drivers/video/atmel_lcdfb_core.c
 +++ b/drivers/video/atmel_lcdfb_core.c
 @@ -132,7 +132,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
@@ -71,7 +70,7 @@ index c6ece5b78..6d6665cbd 100644
  		sinfo->lcd_wiring_mode = ATMEL_LCDC_WIRING_RGB;
  	} else {
 diff --git a/include/video/atmel_lcdc.h b/include/video/atmel_lcdc.h
-index 07a30e2e6..7e3f95873 100644
+index 07a30e2e6f68..7e3f95873c33 100644
 --- a/include/video/atmel_lcdc.h
 +++ b/include/video/atmel_lcdc.h
 @@ -23,10 +23,10 @@
@@ -87,6 +86,3 @@ index 07a30e2e6..7e3f95873 100644
  #define ATMEL_LCDC_WIRING_RGB	1
  #define ATMEL_LCDC_WIRING_RGB555	2
  
--- 
-2.12.0
-

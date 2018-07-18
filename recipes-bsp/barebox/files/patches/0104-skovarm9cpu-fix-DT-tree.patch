@@ -1,7 +1,6 @@
-From fb29b7543a1a73d21887b683e3a9a517adddd648 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 10 Jun 2018 11:19:42 +0200
-Subject: [PATCH 603/603] skovarm9cpu: fix DT tree
+Subject: [PATCH] skovarm9cpu: fix DT tree
 
 - Fix pincntrl for display selection
 - Drop unused boot mode as key
@@ -13,7 +12,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 13 insertions(+), 55 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 7723031a6..2055c68df 100644
+index 7723031a6866..2055c68dfe4a 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -87,48 +87,19 @@
@@ -122,6 +121,3 @@ index 7723031a6..2055c68df 100644
  
  	i2c-gpio-0 {
  		status = "okay";
--- 
-2.12.0
-

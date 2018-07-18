@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 18 Apr 2018 13:54:10 +0200
-Subject: [PATCH] Release 2018.04.0/customers/skov/imx6/20180418-1
+Date: Tue, 17 Jul 2018 07:55:32 +0200
+Subject: [PATCH] Release 2018.04.0/customers/skov/imx6/20180717-1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index e298c7d53e9c..369138314387 100644
+index e298c7d53e9c..1bd599e431c0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -19,7 +19,7 @@ index e298c7d53e9c..369138314387 100644
  PATCHLEVEL = 04
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20180418-1
++EXTRAVERSION =-20180717-1
  NAME = None
  
  # *DOCUMENTATION*

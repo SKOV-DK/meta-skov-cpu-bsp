@@ -174,7 +174,7 @@ index 278c2c944f2c..fea84cb4986b 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index f17d910608b0..3de79248d516 100644
+index 896324f145a2..90ecfbe8738c 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -9,6 +9,8 @@
@@ -186,7 +186,7 @@ index f17d910608b0..3de79248d516 100644
  / {
  	aliases {
  		state = &state;
-@@ -131,6 +133,101 @@
+@@ -129,6 +131,101 @@
  			};
  		};
  	};
@@ -202,7 +202,7 @@ index f17d910608b0..3de79248d516 100644
 +		status = "okay";
 +	};
 +
-+	display@di0 {
++	display {
 +		status = "okay";
 +		compatible = "fsl,imx-parallel-display";
 +		pinctrl-names = "default";
@@ -288,7 +288,7 @@ index f17d910608b0..3de79248d516 100644
  };
  
  &iomuxc {
-@@ -229,6 +326,66 @@
+@@ -227,6 +324,66 @@
  			MX6QDL_PAD_NANDF_D7__NAND_DATA07 0xb0b1
  		>;
  	};

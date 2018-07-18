@@ -1,0 +1,26 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 27 Jun 2018 17:29:09 +0200
+Subject: [PATCH] media: coda: add h.264 levels 5.0 and 5.1
+
+This enables reordering support for h.264 main profile level 5.0
+and 5.1 streams. Even though we likely can't play back such streams
+at full speed, we should still recognize them correctly.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-h264.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-h264.c b/drivers/media/platform/coda/coda-h264.c
+index 80ec24ffc5b1..e81f143a0d39 100644
+--- a/drivers/media/platform/coda/coda-h264.c
++++ b/drivers/media/platform/coda/coda-h264.c
+@@ -109,6 +109,8 @@ int coda_h264_level(int level_idc)
+ 	case 40: return V4L2_MPEG_VIDEO_H264_LEVEL_4_0;
+ 	case 41: return V4L2_MPEG_VIDEO_H264_LEVEL_4_1;
+ 	case 42: return V4L2_MPEG_VIDEO_H264_LEVEL_4_2;
++	case 50: return V4L2_MPEG_VIDEO_H264_LEVEL_5_0;
++	case 51: return V4L2_MPEG_VIDEO_H264_LEVEL_5_1;
+ 	default: return -EINVAL;
+ 	}
+ }

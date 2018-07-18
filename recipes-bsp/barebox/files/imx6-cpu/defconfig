@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Barebox/arm 2018.04.0-20180418-1 Configuration
+# Barebox/arm 2018.04.0-20180717-1 Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_LINUX=y

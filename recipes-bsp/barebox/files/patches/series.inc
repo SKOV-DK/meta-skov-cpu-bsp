@@ -1,27 +1,32 @@
 # umpf-base: v2018.04.0
 # umpf-name: 2018.04.0/customers/skov/imx6
-# umpf-version: 2018.04.0/customers/skov/imx6/20180418-1
+# umpf-version: 2018.04.0/customers/skov/imx6/20180717-1
 # umpf-topic: v2018.04.0/customers/skov/imx6
-# umpf-hashinfo: 53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca
-# umpf-topic-range: bd9ad3a602295fb9aa8882fbf27c54288b150d5f..53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca
+# umpf-hashinfo: 6ba46e299c8b01fd19b51a0b15613b1a00fe293f
+# umpf-topic-range: bd9ad3a602295fb9aa8882fbf27c54288b150d5f..0bd56a681fb8a99c230310e41c76c5ad87ad1ff4
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov-add-support-for-video-output-to-the-barebox-DTS.patch \
   file://patches/0003-skov-set-backlight-brightness-from-state.patch \
-  file://patches/0004-mtd-nand_mxs-fix-NAND-error-when-change-clk-rate.patch \
+  file://patches/0004-mtd-gpmi-nand-Make-sure-clock-is-disabled-during-rat.patch \
   file://patches/0005-skov-choose-environment-depending-on-bootsource.patch \
   file://patches/0006-fs-fix-error-path-in-__canonicalize_path.patch \
   file://patches/0007-fs-remove-shortcut-in-canonicalizing-filenames.patch \
+  file://patches/0008-video-edid-increase-number-of-retries-to-request-EDI.patch \
+  file://patches/0009-commands-of_property-add-option-to-apply-changes-as-.patch \
   "
-# umpf-release: 2018.04.0/customers/skov/imx6/20180418-1
-# umpf-topic-range: 53932e2bb74f1ef19ebb39ac9cf75ca8542cb4ca..d4ccd9e9582c69f6140abc2fc576688fe9170b9d
+# umpf-topic: v2018.04.0/customers/skov/arm9
+# umpf-hashinfo: 1c9c2f1796d84bacf1b2560ea8c6b9c7f7acd4c0
+# umpf-topic-range: 0bd56a681fb8a99c230310e41c76c5ad87ad1ff4..4d9e406e3f5f6231de8d1bf65cb85a23d922be82
 SRC_URI += "\
-  file://patches/0101-Release-2018.04.0-customers-skov-imx6-20180418-1.patch \
+  file://patches/0101-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch \
+  file://patches/0102-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
+  file://patches/0103-skovarm9cpu-initial-support.patch \
+  file://patches/0104-skovarm9cpu-fix-DT-tree.patch \
+  "
+# umpf-release: 2018.04.0/customers/skov/imx6/20180717-1
+# umpf-topic-range: 4d9e406e3f5f6231de8d1bf65cb85a23d922be82..e69d667ad18341e441f92182d58241f676a8b4ed
+SRC_URI += "\
+  file://patches/0201-Release-2018.04.0-customers-skov-imx6-20180717-1.patch \
   "
 # umpf-end
-
-# ARM9-CPU patches
-SRC_URI += "file://patches/0600-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch"
-SRC_URI += "file://patches/0601-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch"
-SRC_URI += "file://patches/0602-skovarm9cpu-initial-support.patch"
-SRC_URI += "file://patches/0603-skovarm9cpu-fix-DT-tree.patch"

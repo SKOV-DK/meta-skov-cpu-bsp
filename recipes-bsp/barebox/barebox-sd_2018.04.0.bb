@@ -1,5 +1,9 @@
 require barebox-skov.inc
 
+SRC_URI += "\
+  file://env/init/permit_fusing_ocotp \
+  "
+
 PROVIDES_remove = "virtual/bootloader"
 COMPATIBLE_MACHINE = "imx6-cpu"
 

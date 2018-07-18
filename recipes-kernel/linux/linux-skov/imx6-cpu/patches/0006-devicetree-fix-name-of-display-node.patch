@@ -1,0 +1,32 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Thu, 12 Jul 2018 20:04:08 +0200
+Subject: [PATCH] devicetree: fix name of display node
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In barebox starting with DT compiler version 1.4.6 (included since v2018.07.0)
+one gets the warning
+
+  /display@di0: node has a unit name, but no reg property
+
+Fix it analogously to barebox' devicetree.
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
+index 441c2ce8ab2f..d985b11b2525 100644
+--- a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
+@@ -180,7 +180,7 @@
+ 		};
+ 	};
+ 
+-	display@di0 {
++	display {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
