@@ -1,3 +1,4 @@
 #!/bin/sh
 
 global.bootm.image="/mnt/disk0.0/zImage"
+global.linux.bootargs.base="root=/dev/mmcblk0p2 rootfstype=ext4 rw rootwait init=/usr/bin/system-init.sh"

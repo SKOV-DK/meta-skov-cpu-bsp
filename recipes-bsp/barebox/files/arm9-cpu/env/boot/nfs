@@ -1,0 +1,10 @@
+#!/bin/sh
+
+nfsdir="/mnt/nfs"
+
+global.bootm.image="${nfsdir}/boot/zImage"
+
+nfsroot="192.168.86.201:/nfsboot/arm9"
+
+global.linux.bootargs.base="rw rootwait init=/usr/bin/system-init.sh ip=dhcp"
+global.linux.bootargs.dyn.root="root=/dev/nfs nfsroot=${nfsroot},v3,tcp"
