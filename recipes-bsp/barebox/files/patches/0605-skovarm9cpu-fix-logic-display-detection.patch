@@ -1,7 +1,7 @@
 From 02b05443067a7f7f2c1f9ee0acf4bf6825f5c32f Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 14 Jul 2018 00:11:50 +0200
-Subject: [PATCH 605/605] skovarm9cpu: fix logic display detection
+Subject: [PATCH 605/610] skovarm9cpu: fix logic display detection
 
 Init the correct GPIO pin for detecting logic display
 

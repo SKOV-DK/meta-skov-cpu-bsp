@@ -1,7 +1,7 @@
 From b421434215cc6e9282ccf272bace902d3a5a2732 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 10 Jun 2018 22:08:37 +0200
-Subject: [PATCH 604/605] skovarm9cpu: updated display timing parameters
+Subject: [PATCH 604/610] skovarm9cpu: updated display timing parameters
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---

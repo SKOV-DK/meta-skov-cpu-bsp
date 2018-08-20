@@ -1,6 +1,6 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 10 Jun 2018 11:19:42 +0200
-Subject: [PATCH 603/605] skovarm9cpu: fix DT tree
+Subject: [PATCH 603/610] skovarm9cpu: fix DT tree
 
 - Fix pincntrl for display selection
 - Drop unused boot mode as key

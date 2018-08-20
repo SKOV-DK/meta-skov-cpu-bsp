@@ -1,0 +1,64 @@
+From 4bf3b9a69ecacd6458179f5ee8f0962ddf02ef15 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Wed, 8 Aug 2018 21:02:55 +0200
+Subject: [PATCH 608/610] at91sam9263ek: add PHY, miitool etc. to config
+
+Added Davicom phy to the config now it is supported.
+Add miitool to show the phy info.
+Also add a bunch of extra commands that can be useful
+when handling the evaluation board.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/configs/at91sam9263ek_defconfig | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/configs/at91sam9263ek_defconfig b/arch/arm/configs/at91sam9263ek_defconfig
+index e8ad841fa..45c6f79de 100644
+--- a/arch/arm/configs/at91sam9263ek_defconfig
++++ b/arch/arm/configs/at91sam9263ek_defconfig
+@@ -18,7 +18,7 @@ CONFIG_BOOTM_OFTREE=y
+ CONFIG_BOOTM_OFTREE_UIMAGE=y
+ CONFIG_CONSOLE_ACTIVATE_ALL=y
+ CONFIG_DEFAULT_ENVIRONMENT_GENERIC=y
+-# CONFIG_CMD_ARM_CPUINFO is not set
++CONFIG_CMD_DMESG=y
+ CONFIG_LONGHELP=y
+ CONFIG_CMD_IOMEM=y
+ CONFIG_CMD_MEMINFO=y
+@@ -33,22 +33,32 @@ CONFIG_CMD_PRINTENV=y
+ CONFIG_CMD_SAVEENV=y
+ CONFIG_CMD_SLEEP=y
+ CONFIG_CMD_DHCP=y
++CONFIG_CMD_HOST=y
++CONFIG_NET_CMD_IFUP=y
++CONFIG_CMD_MIITOOL=y
+ CONFIG_CMD_PING=y
+ CONFIG_CMD_TFTP=y
+ CONFIG_CMD_EDIT=y
+ CONFIG_CMD_SPLASH=y
++CONFIG_CMD_FBTEST=y
+ CONFIG_CMD_READLINE=y
+ CONFIG_CMD_TIMEOUT=y
+ CONFIG_CMD_CLK=y
++CONFIG_CMD_DETECT=y
+ CONFIG_CMD_FLASH=y
+ CONFIG_CMD_GPIO=y
+ CONFIG_CMD_LED=y
+ CONFIG_CMD_LED_TRIGGER=y
++CONFIG_CMD_OF_NODE=y
++CONFIG_CMD_OF_PROPERTY=y
++CONFIG_CMD_OF_DISPLAY_TIMINGS=y
++CONFIG_CMD_OF_FIXUP_STATUS=y
+ CONFIG_CMD_OFTREE=y
+ CONFIG_NET=y
+ CONFIG_NET_NFS=y
+ CONFIG_OF_BAREBOX_DRIVERS=y
+ CONFIG_DRIVER_NET_MACB=y
++CONFIG_DAVICOM_PHY=y
+ # CONFIG_SPI is not set
+ CONFIG_MTD=y
+ # CONFIG_MTD_OOB_DEVICE is not set
+-- 
+2.12.0
+

@@ -1,6 +1,6 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 26 May 2018 10:55:39 +0200
-Subject: [PATCH 601/605] pwm: add pwm-atmel from Linux kernel 4.14
+Subject: [PATCH 601/610] pwm: add pwm-atmel from Linux kernel 4.14
 
 This add the pwm-atmel.c file from kernel 4.14,
 modified for barebox use.

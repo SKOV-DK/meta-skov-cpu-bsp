@@ -34,3 +34,10 @@ SRC_URI += "\
 # ARM9-CPU patches
 SRC_URI += "file://patches/0604-skovarm9cpu-updated-display-timing-parameters.patch"
 SRC_URI += "file://patches/0605-skovarm9cpu-fix-logic-display-detection.patch"
+SRC_URI += "file://patches/0606-phylib-add-Davicom-PHY-support.patch"
+SRC_URI += "file://patches/0607-phylib-add-support-for-reset-gpios.patch"
+SRC_URI += "file://patches/0608-at91sam9263ek-add-PHY-miitool-etc.-to-config.patch"
+SRC_URI += "file://patches/0609-skovarm9cpu-add-reset-gpios-to-macb-to-fix-network.patch"
+SRC_URI += "file://patches/0610-skovarm9cpu-include-davicom-PHY-and-miitools-in-conf.patch"
+
+# SRC_URI += "file://patches/diff.patch"
