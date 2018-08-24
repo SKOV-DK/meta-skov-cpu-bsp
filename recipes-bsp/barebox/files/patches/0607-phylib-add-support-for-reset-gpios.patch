@@ -1,7 +1,7 @@
-From 055c5851cab170e1f6c669c082ba8ef3742f41cc Mon Sep 17 00:00:00 2001
+From 31504471708478285955981c197bfadab1f60304 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:57:57 +0200
-Subject: [PATCH 607/610] phylib: add support for reset-gpios
+Subject: [PATCH 607/613] phylib: add support for reset-gpios
 
 Add minimal support for reset-gpios in the PHY node.
 
@@ -38,16 +38,16 @@ with the ethernet node as argument.
 The logic to determine if a child node is a PHY node
 is a simpler version compared to the one used in the kernel.
 The kernel have a whitelist of compatible strings
-and will also recognize compatible = ethernet-phy-idAAAA.BBBB.
-If these are required then they can be added later.
+that is not included in the barebox version.
+They can be added later if needed.
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
- drivers/net/phy/mdio_bus.c | 82 ++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 82 insertions(+)
+ drivers/net/phy/mdio_bus.c | 96 +++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 95 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
-index d209716a1..c479c25bd 100644
+index d209716a1..636bdd1db 100644
 --- a/drivers/net/phy/mdio_bus.c
 +++ b/drivers/net/phy/mdio_bus.c
 @@ -17,14 +17,19 @@
@@ -70,12 +70,13 @@ index d209716a1..c479c25bd 100644
  LIST_HEAD(mii_bus_list);
  
  int mdiobus_detect(struct device_d *dev)
-@@ -82,6 +87,76 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio, struct device_node *chi
+@@ -82,6 +87,82 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio, struct device_node *chi
  	return 0;
  }
  
 +/*
 + * Node is considered a PHY node if:
++ * o Compatible string of "ethernet-phy-idX.X"
 + * o Compatible string of "ethernet-phy-ieee802.3-c45"
 + * o Compatible string of "ethernet-phy-ieee802.3-c22"
 + * o No compatibility string
@@ -85,6 +86,14 @@ index d209716a1..c479c25bd 100644
 + */
 +static bool of_mdiobus_child_is_phy(struct device_node *np)
 +{
++	struct property *prop;
++	const char *cp;
++
++	of_property_for_each_string(np, "compatible", prop, cp) {
++                if (!strncmp(cp, "ethernet-phy-id", strlen("ethernet-phy-id")))
++			return true;
++        }
++
 +	if (of_device_is_compatible(np, "ethernet-phy-ieee802.3-c45"))
 +		return true;
 +
@@ -103,7 +112,7 @@ index d209716a1..c479c25bd 100644
 + * If np is a phy node, and the phy node contains a reset-gpios property
 + * then reset the phy.
 + */
-+static void of_reset_phy(struct mii_bus *bus, struct device_node *np)
++static void of_mdiobus_reset_phy(struct mii_bus *bus, struct device_node *np)
 +{
 +	enum of_gpio_flags of_flags;
 +	u32 reset_deassert_delay;
@@ -111,9 +120,6 @@ index d209716a1..c479c25bd 100644
 +	unsigned long flags;
 +	int gpio;
 +	int ret;
-+
-+	if (!of_mdiobus_child_is_phy(np))
-+		return;
 +
 +	gpio = of_get_named_gpio_flags(np, "reset-gpios", 0, &of_flags);
 +	if (!gpio_is_valid(gpio))
@@ -147,27 +153,36 @@ index d209716a1..c479c25bd 100644
  /**
   * of_mdiobus_register - Register mii_bus and create PHYs from the device tree
   * @mdio: pointer to mii_bus structure
-@@ -111,6 +186,8 @@ static int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
+@@ -111,6 +192,10 @@ static int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
  			continue;
  		}
  
-+		of_reset_phy(mdio, child);
++		if (!of_mdiobus_child_is_phy(child))
++			continue;
 +
++		of_mdiobus_reset_phy(mdio, child);
  		of_mdiobus_register_phy(mdio, child, addr);
  	}
  
-@@ -154,6 +231,11 @@ int mdiobus_register(struct mii_bus *bus)
+@@ -154,8 +239,17 @@ int mdiobus_register(struct mii_bus *bus)
  
  	pr_info("%s: probed\n", dev_name(&bus->dev));
  
-+	/* register PHY's as child node to the ethernet node */
-+	if (bus->parent->device_node)
-+		of_mdiobus_register(bus, bus->parent->device_node);
-+
-+	/* register PHY's as child node to mdio node */
- 	if (bus->dev.device_node)
+-	if (bus->dev.device_node)
++	if (bus->dev.device_node) {
++		/* Register PHY's as child node to mdio node */
  		of_mdiobus_register(bus, bus->dev.device_node);
++	}
++	else if (bus->parent->device_node) {
++		/*
++		 * Register PHY's as child node to the ethernet node,
++		 * if there was no mdio node
++		 */
++		of_mdiobus_register(bus, bus->parent->device_node);
++	}
  
+ 	return 0;
+ }
 -- 
 2.12.0
 

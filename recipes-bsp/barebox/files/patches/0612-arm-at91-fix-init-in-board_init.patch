@@ -1,0 +1,86 @@
+From 1ea1fd4ad0568c661efecbd4994c534060bb90ce Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 25 Aug 2018 00:12:11 +0200
+Subject: [PATCH 612/613] arm: at91: fix init in board_init
+
+Revert part of previous commit that confused parameters to __raw_writel.
+
+The value and the base address was mixed up.
+
+This was found while looking for an urelated bug and this
+fix has no visible effect during my testing as at91bootstrap have
+already done all the low-level init.
+But this is an obvious bug that needs fixing and may have positive
+impact when trying to use barebox as first stage bootloader.
+
+Fixes: e739663535 (arm: at91: code cleanup in at91sam926x_board_init)
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ .../mach-at91/include/mach/at91sam926x_board_init.h | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h b/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
+index 70ae90337..c595c86b1 100644
+--- a/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
++++ b/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
+@@ -48,6 +48,9 @@ struct at91sam926x_board_cfg {
+ };
+ 
+ 
++#define at91_sdramc_write(field, value) \
++	__raw_writel((value), cfg->sdramc + (field))
++
+ static void __always_inline access_sdram(void)
+ {
+ 	writel(0x00000000, AT91_SDRAM_BASE);
+@@ -82,38 +85,38 @@ static void __always_inline at91sam926x_sdramc_init(struct at91sam926x_board_cfg
+ 		return;
+ 
+ 	/* SDRAMC_MR : Normal Mode */
+-	__raw_writel(AT91_SDRAMC_MR, cfg->sdramc + AT91_SDRAMC_MODE_NORMAL);
++	at91_sdramc_write(AT91_SDRAMC_MR, AT91_SDRAMC_MODE_NORMAL);
+ 
+ 	/* SDRAMC_TR - Refresh Timer register */
+-	__raw_writel(AT91_SDRAMC_TR, cfg->sdramc + cfg->sdrc_tr1);
++	at91_sdramc_write(AT91_SDRAMC_TR, cfg->sdrc_tr1);
+ 
+ 	/* SDRAMC_CR - Configuration register*/
+-	__raw_writel(AT91_SDRAMC_CR, cfg->sdramc + cfg->sdrc_cr);
++	at91_sdramc_write(AT91_SDRAMC_CR, cfg->sdrc_cr);
+ 
+ 	/* Memory Device Type */
+-	__raw_writel(AT91_SDRAMC_MDR, cfg->sdramc + cfg->sdrc_mdr);
++	at91_sdramc_write(AT91_SDRAMC_MDR, cfg->sdrc_mdr);
+ 
+ 	/* SDRAMC_MR : Precharge All */
+-	__raw_writel(AT91_SDRAMC_MR, cfg->sdramc + AT91_SDRAMC_MODE_PRECHARGE);
++	at91_sdramc_write(AT91_SDRAMC_MR, AT91_SDRAMC_MODE_PRECHARGE);
+ 	access_sdram();
+ 
+ 	/* SDRAMC_MR : refresh */
+-	__raw_writel(AT91_SDRAMC_MR, cfg->sdramc + AT91_SDRAMC_MODE_REFRESH);
++	at91_sdramc_write(AT91_SDRAMC_MR, AT91_SDRAMC_MODE_REFRESH);
+ 
+ 	/* access SDRAM 8 times */
+ 	for (i = 0; i < 8; i++)
+ 		access_sdram();
+ 
+ 	/* SDRAMC_MR : Load Mode Register */
+-	__raw_writel(AT91_SDRAMC_MR, cfg->sdramc + AT91_SDRAMC_MODE_LMR);
++	at91_sdramc_write(AT91_SDRAMC_MR, AT91_SDRAMC_MODE_LMR);
+ 	access_sdram();
+ 
+ 	/* SDRAMC_MR : Normal Mode */
+-	__raw_writel(AT91_SDRAMC_MR, cfg->sdramc + AT91_SDRAMC_MODE_NORMAL);
++	at91_sdramc_write(AT91_SDRAMC_MR, AT91_SDRAMC_MODE_NORMAL);
+ 	access_sdram();
+ 
+ 	/* SDRAMC_TR : Refresh Timer Counter */
+-	__raw_writel(AT91_SDRAMC_TR, cfg->sdramc + cfg->sdrc_tr2);
++	at91_sdramc_write(AT91_SDRAMC_TR, cfg->sdrc_tr2);
+ 	access_sdram();
+ }
+ 
+-- 
+2.12.0
+

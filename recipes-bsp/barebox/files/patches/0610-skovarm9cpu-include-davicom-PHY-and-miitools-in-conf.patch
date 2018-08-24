@@ -1,7 +1,7 @@
-From a0588aa5e4a3e61cb47cf62fa2ef61a301c7566a Mon Sep 17 00:00:00 2001
+From b1ec71a22b33bc37f4427a94896b4e1d2cbd7b8c Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:55:55 +0200
-Subject: [PATCH 610/610] skovarm9cpu: include davicom PHY and miitools in
+Subject: [PATCH 610/613] skovarm9cpu: include davicom PHY and miitools in
  config
 
 Also add a few more tools as well.

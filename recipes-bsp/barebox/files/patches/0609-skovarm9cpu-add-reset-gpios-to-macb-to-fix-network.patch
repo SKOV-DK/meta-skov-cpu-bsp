@@ -1,7 +1,7 @@
-From f0ca76a81b1a1da2ef562ea8a0646d70f4df6704 Mon Sep 17 00:00:00 2001
+From d3b2e08a83b66453a476c738dc76aa244977b8b8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:53:03 +0200
-Subject: [PATCH 609/610] skovarm9cpu: add reset-gpios to macb to fix network
+Subject: [PATCH 609/613] skovarm9cpu: add reset-gpios to macb to fix network
 
 The Davicom PHY on the ARM9 CPU require a reset cycle
 to work properly.

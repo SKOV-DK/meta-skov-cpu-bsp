@@ -39,5 +39,8 @@ SRC_URI += "file://patches/0607-phylib-add-support-for-reset-gpios.patch"
 SRC_URI += "file://patches/0608-at91sam9263ek-add-PHY-miitool-etc.-to-config.patch"
 SRC_URI += "file://patches/0609-skovarm9cpu-add-reset-gpios-to-macb-to-fix-network.patch"
 SRC_URI += "file://patches/0610-skovarm9cpu-include-davicom-PHY-and-miitools-in-conf.patch"
+SRC_URI += "file://patches/0611-skovarm9cpu-Default-128MiB-in-lowlevel-init.patch"
+SRC_URI += "file://patches/0612-arm-at91-fix-init-in-board_init.patch"
+SRC_URI += "file://patches/0613-skovarm9cpu-add-board.mem-global-variable.patch"
 
 # SRC_URI += "file://patches/diff.patch"

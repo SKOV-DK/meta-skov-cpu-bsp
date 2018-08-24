@@ -1,7 +1,7 @@
 From 209c5de340c10b71aea36dab4aac85d1ff4f9830 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 5 Aug 2018 22:53:50 +0200
-Subject: [PATCH 606/610] phylib: add Davicom PHY support
+Subject: [PATCH 606/613] phylib: add Davicom PHY support
 
 Based on driver from Linux kernel 4.18.0-rc4
 

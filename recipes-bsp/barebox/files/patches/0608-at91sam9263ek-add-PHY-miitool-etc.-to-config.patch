@@ -1,7 +1,7 @@
-From 4bf3b9a69ecacd6458179f5ee8f0962ddf02ef15 Mon Sep 17 00:00:00 2001
+From ed4336552d6ef7dc28583a4f8da7ead468d931fd Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Wed, 8 Aug 2018 21:02:55 +0200
-Subject: [PATCH 608/610] at91sam9263ek: add PHY, miitool etc. to config
+Subject: [PATCH 608/613] at91sam9263ek: add PHY, miitool etc. to config
 
 Added Davicom phy to the config now it is supported.
 Add miitool to show the phy info.

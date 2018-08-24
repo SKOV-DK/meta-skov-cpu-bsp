@@ -1,0 +1,32 @@
+From 0beb2f2c34eb7cdb3707847b25ed225ddc86c884 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 25 Aug 2018 00:06:46 +0200
+Subject: [PATCH 611/613] skovarm9cpu: Default 128MiB in lowlevel init
+
+Fix so the default configuration is 128MiB, like we do in
+at91bootstrap. We can later add code to check and go back to 64MiB.
+
+For now this code is unused as the low-level init is done
+by at91bootstrap, so this is just a preparation for later.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/boards/skovarm9cpu/lowlevel_init.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boards/skovarm9cpu/lowlevel_init.c b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
+index 1c7f4708f..bb2231176 100644
+--- a/arch/arm/boards/skovarm9cpu/lowlevel_init.c
++++ b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
+@@ -74,7 +74,7 @@ static void __bare_init skovarm9cpu_board_config(struct at91sam926x_board_cfg *c
+ 	cfg->sdrc_tr1 = 0x13C;
+ 	/* SDRAMC_CR - Configuration register*/
+ 	cfg->sdrc_cr =
+-		AT91_SDRAMC_NC_9 |
++		AT91_SDRAMC_NC_10 |	/* Assume 128MiB */
+ 		AT91_SDRAMC_NR_13 |
+ 		AT91_SDRAMC_NB_4 |
+ 		AT91_SDRAMC_CAS_3 |
+-- 
+2.12.0
+
