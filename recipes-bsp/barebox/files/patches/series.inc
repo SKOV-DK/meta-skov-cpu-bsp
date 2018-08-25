@@ -42,5 +42,8 @@ SRC_URI += "file://patches/0610-skovarm9cpu-include-davicom-PHY-and-miitools-in-
 SRC_URI += "file://patches/0611-skovarm9cpu-Default-128MiB-in-lowlevel-init.patch"
 SRC_URI += "file://patches/0612-arm-at91-fix-init-in-board_init.patch"
 SRC_URI += "file://patches/0613-skovarm9cpu-add-board.mem-global-variable.patch"
+SRC_URI += "file://patches/0614-skovarm9cpu-fix-SPI-frequency-in-DT.patch"
+SRC_URI += "file://patches/0615-skovarmcpu-fix-partition-layout.patch"
+SRC_URI += "file://patches/0616-skovarmcpu-add-support-for-rotary-encoder-in-DT.patch"
 
 # SRC_URI += "file://patches/diff.patch"

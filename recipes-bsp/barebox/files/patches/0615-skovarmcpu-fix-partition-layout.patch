@@ -1,0 +1,62 @@
+From cd064bd3f2f30f70403c62a577c354254c40a79d Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 25 Aug 2018 11:40:26 +0200
+Subject: [PATCH 615/616] skovarmcpu: fix partition layout
+
+Let partition layout match arm-sdk 3.24 to support recovery
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/dts/skovarm9cpu.dts | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+index b24c37f11..80aa7a33f 100644
+--- a/arch/arm/dts/skovarm9cpu.dts
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -261,30 +261,30 @@
+ 
+ 		flash: nor_flash@10000000 {
+ 			compatible = "cfi-flash";
+-			reg = <0x10000000 0x8000000>;
++			reg = <0x10000000 0x4000000>;
+ 			linux,mtd-name = "physmap-flash.0";
+ 			bank-width = <2>;
+ 			#address-cells = <1>;
+ 			#size-cells = <1>;
+ 
+ 			barebox@0 {
+-				label = "barebox";
+-				reg = <0x00000 0x40000>;
++				label = "uboot";
++				reg = <0x00000 0x80000>;
+ 			};
+ 
+-			bareboxenv@40000 {
+-				label = "bareboxenv";
+-				reg = <0x40000 0x10000>;
++			env@80000 {
++				label = "Env";
++				reg = <0x80000 0x20000>;
+ 			};
+ 
+-			kernel@50000 {
+-				label = "kernel";
+-				reg = <0x50000 0x300000>;
++			linux@A0000 {
++				label = "Linux";
++				reg = <0xA0000 0x2A0000>;
+ 			};
+ 
+-			root@350000  {
+-				label = "root";
+-				reg = <0x350000 0x4B0000>;
++			rootfs@340000  {
++				label = "rootfs";
++				reg = <0x340000 0x3CC0000>;
+ 			};
+ 		};
+ 
+-- 
+2.12.0
+

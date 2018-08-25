@@ -1,0 +1,43 @@
+From 1bd89544ac7fc9ddfc9a3232d068d26e65b01561 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 25 Aug 2018 12:19:29 +0200
+Subject: [PATCH 616/616] skovarmcpu: add support for rotary encoder in DT
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/dts/skovarm9cpu.dts | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+index 80aa7a33f..3832685b4 100644
+--- a/arch/arm/dts/skovarm9cpu.dts
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -321,4 +321,25 @@
+ 			pagesize = <128>;
+ 		};
+ 	};
++
++	rotary@0 {
++		compatible = "rotary-encoder";
++		gpios = <&pioB 19 GPIO_ACTIVE_LOW>, <&pioB 20 GPIO_ACTIVE_LOW>;
++		linux,axis = <0>; /* REL_X */
++		rotary-encoder,steps-per-period = <4>;
++		rotary-encoder,relative-axis;
++	};
++
++	gpio_keys {
++		compatible = "gpio-keys";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		rotary_button {
++			label = "rotary_button";
++			gpios = <&pioB 15 GPIO_ACTIVE_LOW>;
++			debounce-interval = <10>;
++			linux,code = <28>; /* enter */
++		};
++	};
+ };
+-- 
+2.12.0
+
