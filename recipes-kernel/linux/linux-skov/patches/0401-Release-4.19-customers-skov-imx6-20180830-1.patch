@@ -1,0 +1,22 @@
+From: Michael Tretter <m.tretter@pengutronix.de>
+Date: Thu, 30 Aug 2018 14:30:13 +0200
+Subject: [PATCH] Release 4.19/customers/skov/imx6/20180830-1
+
+Signed-off-by: Michael Tretter <m.tretter@pengutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 2b458801ba74..23554f5dd353 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 4
+ PATCHLEVEL = 19
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc1
++EXTRAVERSION = -rc1-20180830-1
+ NAME = Merciless Moray
+ 
+ # *DOCUMENTATION*

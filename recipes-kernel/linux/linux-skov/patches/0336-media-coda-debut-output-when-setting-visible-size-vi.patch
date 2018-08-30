@@ -1,0 +1,24 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 14 Aug 2018 10:20:20 +0200
+Subject: [PATCH] media: coda: debut output when setting visible size via crop
+ selection
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 7909b7110257..ab8256b5c3f2 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1040,6 +1040,9 @@ static int coda_s_selection(struct file *file, void *fh,
+ 
+ 		q_data->rect = s->r;
+ 
++		coda_dbg(1, ctx, "Setting crop rectangle: %dx%d\n",
++			 s->r.width, s->r.height);
++
+ 		return 0;
+ 	}
+ 
