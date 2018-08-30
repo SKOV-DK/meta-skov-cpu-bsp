@@ -1,7 +1,6 @@
-From 1ea1fd4ad0568c661efecbd4994c534060bb90ce Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 25 Aug 2018 00:12:11 +0200
-Subject: [PATCH 612/613] arm: at91: fix init in board_init
+Subject: [PATCH] arm: at91: fix init in board_init
 
 Revert part of previous commit that confused parameters to __raw_writel.
 
@@ -20,7 +19,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 12 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h b/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
-index 70ae90337..c595c86b1 100644
+index 70ae9033742c..c595c86b109d 100644
 --- a/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
 +++ b/arch/arm/mach-at91/include/mach/at91sam926x_board_init.h
 @@ -48,6 +48,9 @@ struct at91sam926x_board_cfg {
@@ -81,6 +80,3 @@ index 70ae90337..c595c86b1 100644
  	access_sdram();
  }
  
--- 
-2.12.0
-

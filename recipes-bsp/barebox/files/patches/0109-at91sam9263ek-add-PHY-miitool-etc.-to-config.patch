@@ -1,7 +1,6 @@
-From ed4336552d6ef7dc28583a4f8da7ead468d931fd Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Wed, 8 Aug 2018 21:02:55 +0200
-Subject: [PATCH 608/613] at91sam9263ek: add PHY, miitool etc. to config
+Subject: [PATCH] at91sam9263ek: add PHY, miitool etc. to config
 
 Added Davicom phy to the config now it is supported.
 Add miitool to show the phy info.
@@ -14,7 +13,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/configs/at91sam9263ek_defconfig b/arch/arm/configs/at91sam9263ek_defconfig
-index e8ad841fa..45c6f79de 100644
+index e8ad841fa1f4..45c6f79de40b 100644
 --- a/arch/arm/configs/at91sam9263ek_defconfig
 +++ b/arch/arm/configs/at91sam9263ek_defconfig
 @@ -18,7 +18,7 @@ CONFIG_BOOTM_OFTREE=y
@@ -59,6 +58,3 @@ index e8ad841fa..45c6f79de 100644
  # CONFIG_SPI is not set
  CONFIG_MTD=y
  # CONFIG_MTD_OOB_DEVICE is not set
--- 
-2.12.0
-

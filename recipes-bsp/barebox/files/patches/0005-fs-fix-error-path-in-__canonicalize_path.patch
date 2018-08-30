@@ -13,7 +13,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/fs/fs.c b/fs/fs.c
-index 5135112c8b81..7c818eca024f 100644
+index 8a49e32b5c60..c76ef47956f8 100644
 --- a/fs/fs.c
 +++ b/fs/fs.c
 @@ -202,8 +202,11 @@ static char *__canonicalize_path(const char *_pathname, int level)

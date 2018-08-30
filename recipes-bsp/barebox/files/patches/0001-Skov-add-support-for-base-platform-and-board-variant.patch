@@ -37,9 +37,9 @@ e9a1f3cbaf5f]
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
  arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 333 ++++++++++
  arch/arm/mach-imx/Kconfig                          |   5 +
- common/blspec.c                                    |  22 +-
+ common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1408 insertions(+), 9 deletions(-)
+ 15 files changed, 1407 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -52,10 +52,10 @@ e9a1f3cbaf5f]
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index ca187ccb8998..924f67e637e4 100644
+index 0c21002e9146..f332a21952b6 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -104,6 +104,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
+@@ -107,6 +107,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
@@ -145,7 +145,7 @@ index 000000000000..400a87015425
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..d1b3d0d10328
+index 000000000000..4da39b9b4be2
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
 @@ -0,0 +1,695 @@
@@ -805,7 +805,7 @@ index 000000000000..d1b3d0d10328
 +	int cpu_type = __imx6_cpu_type();
 +	unsigned board_variant = skov_imx6_get_version(cpu_type);
 +
-+	if (get_pc() <= MX6_MMDC_PORT0_BASE_ADDR) {
++	if (get_pc() <= MX6_MMDC_PORT01_BASE_ADDR) {
 +		/* first call: do the lowlevel things first */
 +		init_backlight_gpios(cpu_type, board_variant);
 +		setup_leds(cpu_type);
@@ -1108,10 +1108,10 @@ index 000000000000..7f6651011d7c
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 0526a6f40724..73e18450a77a 100644
+index 7ec10bf200c6..31e1b3cbe9bc 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -68,6 +68,7 @@ pbl-dtb-$(CONFIG_MACH_RPI) += bcm2835-rpi.dtb.o
+@@ -73,6 +73,7 @@ pbl-dtb-$(CONFIG_MACH_RPI) += bcm2835-rpi.dtb.o
  pbl-dtb-$(CONFIG_MACH_RPI2) += bcm2836-rpi-2.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
@@ -1519,12 +1519,12 @@ index 000000000000..896324f145a2
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index eb135c3f534c..5aa54309a3c2 100644
+index 73b7ea1b666c..c60e18fb3b65 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -420,6 +420,11 @@ config MACH_NXP_IMX6ULL_EVK
- 	bool "NXP i.MX6ull EVK Board"
- 	select ARCH_IMX6UL
+@@ -462,6 +462,11 @@ config MACH_NXP_IMX8MQ_EVK
+ 	select ARCH_IMX8MQ
+ 	select FIRMWARE_IMX_LPDDR4_PMU_TRAIN
  
 +config MACH_SKOV_IMX6
 +	bool "Skov IMX6"
@@ -1535,7 +1535,7 @@ index eb135c3f534c..5aa54309a3c2 100644
  
  # ----------------------------------------------------------
 diff --git a/common/blspec.c b/common/blspec.c
-index 6171461a721c..ce81da54781c 100644
+index 2c682e199017..712d06ce1874 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -370,14 +370,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
@@ -1565,20 +1565,13 @@ index 6171461a721c..ce81da54781c 100644
  
  	if (entry->rootpath)
  		abspath = entry->rootpath;
-@@ -756,4 +760,4 @@ static int blspec_init(void)
- {
- 	return bootentry_register_provider(blspec_bootentry_provider);
- }
--device_initcall(blspec_init);
-\ No newline at end of file
-+device_initcall(blspec_init);
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index 5e0043f1f014..2e5107d1dd0c 100644
+index aefc52af4967..0f1036c89fb1 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -455,6 +455,11 @@ CFG_start_phytec_phycore_imx6ull_som_256mb.pblx.imximg = $(board)/phytec-som-imx
- FILE_barebox-phytec-phycore-imx6ull-256mb.img = start_phytec_phycore_imx6ull_som_256mb.pblx.imximg
- image-$(CONFIG_MACH_PHYTEC_SOM_IMX6) += barebox-phytec-phycore-imx6ull-256mb.img
+@@ -495,6 +495,11 @@ CFG_start_imx6dl_samx6i.pblx.imximg = $(board)/kontron-samx6i/flash-header-samx6
+ FILE_barebox-imx6dl-samx6i.img = start_imx6dl_samx6i.pblx.imximg
+ image-$(CONFIG_MACH_KONTRON_SAMX6I) += barebox-imx6dl-samx6i.img
  
 +pblx-$(CONFIG_MACH_SKOV_IMX6) += start_imx6_skov_imx6
 +CFG_start_imx6_skov_imx6.imx-sram-img = $(board)/skov-imx6/flash-header-mx6-skov-imx6.imxcfg

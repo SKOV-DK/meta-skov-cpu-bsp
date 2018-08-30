@@ -1,7 +1,6 @@
-From 31504471708478285955981c197bfadab1f60304 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:57:57 +0200
-Subject: [PATCH 607/613] phylib: add support for reset-gpios
+Subject: [PATCH] phylib: add support for reset-gpios
 
 Add minimal support for reset-gpios in the PHY node.
 
@@ -47,7 +46,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 95 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
-index d209716a1..636bdd1db 100644
+index 5d4218f7c078..02e47f6a1431 100644
 --- a/drivers/net/phy/mdio_bus.c
 +++ b/drivers/net/phy/mdio_bus.c
 @@ -17,14 +17,19 @@
@@ -183,6 +182,3 @@ index d209716a1..636bdd1db 100644
  
  	return 0;
  }
--- 
-2.12.0
-

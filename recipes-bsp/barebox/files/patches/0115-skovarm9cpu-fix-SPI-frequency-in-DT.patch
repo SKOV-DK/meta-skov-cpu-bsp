@@ -1,7 +1,6 @@
-From b477684e938f399f4a669c30e0b9aa89ae5e3d7d Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 25 Aug 2018 11:39:12 +0200
-Subject: [PATCH 614/616] skovarm9cpu: fix SPI frequency in DT
+Subject: [PATCH] skovarm9cpu: fix SPI frequency in DT
 
 The SKOV design does not support full speed SPI communication.
 Reduce speed to match the actual HW design
@@ -12,7 +11,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 7e127ee2c..b24c37f11 100644
+index bc89ce246a8a..d1e95e3cafd2 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -139,14 +139,14 @@
@@ -32,6 +31,3 @@ index 7e127ee2c..b24c37f11 100644
  					pendown-gpio = <&pioA 15 GPIO_ACTIVE_LOW>;
  
  					ti,x-min = /bits/ 16 <800>;
--- 
-2.12.0
-

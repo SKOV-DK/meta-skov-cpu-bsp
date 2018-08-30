@@ -1,7 +1,6 @@
-From d3b2e08a83b66453a476c738dc76aa244977b8b8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:53:03 +0200
-Subject: [PATCH 609/613] skovarm9cpu: add reset-gpios to macb to fix network
+Subject: [PATCH] skovarm9cpu: add reset-gpios to macb to fix network
 
 The Davicom PHY on the ARM9 CPU require a reset cycle
 to work properly.
@@ -15,7 +14,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 72f95fb0b..7e127ee2c 100644
+index 59e83b3d8dea..bc89ce246a8a 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -52,14 +52,16 @@
@@ -41,6 +40,3 @@ index 72f95fb0b..7e127ee2c 100644
  			};
  
  			mmc1: mmc@fff84000 {
--- 
-2.12.0
-

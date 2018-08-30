@@ -1,7 +1,6 @@
-From b421434215cc6e9282ccf272bace902d3a5a2732 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sun, 10 Jun 2018 22:08:37 +0200
-Subject: [PATCH 604/610] skovarm9cpu: updated display timing parameters
+Subject: [PATCH] skovarm9cpu: updated display timing parameters
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
@@ -9,7 +8,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 21 insertions(+), 11 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 2055c68df..7dacbf1c2 100644
+index 2055c68dfe4a..6930b6cde2b9 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -190,14 +190,24 @@
@@ -22,7 +21,7 @@ index 2055c68df..7dacbf1c2 100644
  						hactive = <800>;
  						vactive = <480>;
 +						/* Atmel calculation
-+						 * Horizontal = 
++						 * Horizontal =
 +						 * Hsync + left marging + picture + right_margin + 1
 +						 * (3+85+800+0+1=889)
 +						 */
@@ -66,6 +65,3 @@ index 2055c68df..7dacbf1c2 100644
  						pixelclk-active = <1>;
  						hsync-active = <0>;
  						vsync-active = <0>;
--- 
-2.12.0
-

@@ -1,7 +1,6 @@
-From 1bd89544ac7fc9ddfc9a3232d068d26e65b01561 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 25 Aug 2018 12:19:29 +0200
-Subject: [PATCH 616/616] skovarmcpu: add support for rotary encoder in DT
+Subject: [PATCH] skovarmcpu: add support for rotary encoder in DT
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
@@ -9,7 +8,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 21 insertions(+)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 80aa7a33f..3832685b4 100644
+index 7ea55a3a49b8..5cbaeb0b3363 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -321,4 +321,25 @@
@@ -38,6 +37,3 @@ index 80aa7a33f..3832685b4 100644
 +		};
 +	};
  };
--- 
-2.12.0
-

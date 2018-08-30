@@ -18,7 +18,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 10 deletions(-)
 
 diff --git a/fs/fs.c b/fs/fs.c
-index 7c818eca024f..b2da0a62a29d 100644
+index c76ef47956f8..7bdad21babd2 100644
 --- a/fs/fs.c
 +++ b/fs/fs.c
 @@ -144,7 +144,6 @@ char *normalise_path(const char *pathname)

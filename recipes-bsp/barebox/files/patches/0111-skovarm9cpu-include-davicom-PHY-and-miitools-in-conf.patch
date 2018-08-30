@@ -1,8 +1,6 @@
-From b1ec71a22b33bc37f4427a94896b4e1d2cbd7b8c Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Tue, 7 Aug 2018 22:55:55 +0200
-Subject: [PATCH 610/613] skovarm9cpu: include davicom PHY and miitools in
- config
+Subject: [PATCH] skovarm9cpu: include davicom PHY and miitools in config
 
 Also add a few more tools as well.
 Adding Davicom PHY allows us to enable network in barebox.
@@ -13,13 +11,13 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/configs/skovarm9cpu_defconfig b/arch/arm/configs/skovarm9cpu_defconfig
-index 79c614638..5efaa59e6 100644
+index 9463f809e074..74dce0778891 100644
 --- a/arch/arm/configs/skovarm9cpu_defconfig
 +++ b/arch/arm/configs/skovarm9cpu_defconfig
-@@ -17,9 +17,10 @@ CONFIG_BOOTM_OFTREE_UIMAGE=y
+@@ -16,9 +16,10 @@ CONFIG_BOOTM_OFTREE=y
+ CONFIG_BOOTM_OFTREE_UIMAGE=y
  CONFIG_CONSOLE_ACTIVATE_ALL=y
  CONFIG_DEFAULT_ENVIRONMENT_GENERIC_NEW=y
- CONFIG_DEFAULT_ENVIRONMENT_PATH=" .yocto-defaultenv"
 -# CONFIG_CMD_ARM_CPUINFO is not set
 +CONFIG_CMD_DMESG=y
  CONFIG_LONGHELP=y
@@ -28,7 +26,7 @@ index 79c614638..5efaa59e6 100644
  CONFIG_CMD_MEMINFO=y
  # CONFIG_CMD_BOOTU is not set
  CONFIG_CMD_GO=y
-@@ -27,13 +28,19 @@ CONFIG_CMD_LOADB=y
+@@ -26,13 +27,19 @@ CONFIG_CMD_LOADB=y
  CONFIG_CMD_RESET=y
  CONFIG_CMD_PARTITION=y
  CONFIG_CMD_EXPORT=y
@@ -48,7 +46,7 @@ index 79c614638..5efaa59e6 100644
  CONFIG_CMD_PING=y
  CONFIG_CMD_TFTP=y
  CONFIG_CMD_EDIT=y
-@@ -49,6 +56,7 @@ CONFIG_CMD_DETECT=y
+@@ -48,6 +55,7 @@ CONFIG_CMD_DETECT=y
  CONFIG_CMD_FLASH=y
  CONFIG_CMD_GPIO=y
  CONFIG_CMD_LED=y
@@ -56,7 +54,7 @@ index 79c614638..5efaa59e6 100644
  CONFIG_CMD_LED_TRIGGER=y
  CONFIG_CMD_OF_NODE=y
  CONFIG_CMD_OF_PROPERTY=y
-@@ -60,6 +68,7 @@ CONFIG_NET=y
+@@ -59,6 +67,7 @@ CONFIG_NET=y
  CONFIG_NET_NFS=y
  CONFIG_OF_BAREBOX_DRIVERS=y
  CONFIG_DRIVER_NET_MACB=y
@@ -64,12 +62,9 @@ index 79c614638..5efaa59e6 100644
  # CONFIG_SPI is not set
  CONFIG_MTD=y
  # CONFIG_MTD_OOB_DEVICE is not set
-@@ -83,4 +92,4 @@ CONFIG_FS_NFS=y
+@@ -82,4 +91,4 @@ CONFIG_FS_NFS=y
  CONFIG_FS_FAT=y
  CONFIG_FS_FAT_WRITE=y
  CONFIG_FS_FAT_LFN=y
 -CONFIG_PNG=y
 +CONFIG_ZLIB=y
--- 
-2.12.0
-

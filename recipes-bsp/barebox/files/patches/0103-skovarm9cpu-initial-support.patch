@@ -1,6 +1,6 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Fri, 29 Dec 2017 10:01:36 +0100
-Subject: [PATCH 602/610] skovarm9cpu: initial support
+Subject: [PATCH] skovarm9cpu: initial support
 
 TODO:
 - display does not work.
@@ -13,12 +13,12 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  arch/arm/boards/skovarm9cpu/Makefile        |   3 +
  arch/arm/boards/skovarm9cpu/lowlevel_init.c | 130 ++++++++++
  arch/arm/boards/skovarm9cpu/of_init.c       | 101 ++++++++
- arch/arm/configs/skovarm9cpu_defconfig      |  86 +++++++
+ arch/arm/configs/skovarm9cpu_defconfig      |  85 +++++++
  arch/arm/dts/Makefile                       |   2 +
  arch/arm/dts/skovarm9cpu.dts                | 354 ++++++++++++++++++++++++++++
  arch/arm/mach-at91/Kconfig                  |  10 +
  images/Makefile.at91                        |   4 +
- 9 files changed, 692 insertions(+)
+ 9 files changed, 691 insertions(+)
  create mode 100644 arch/arm/boards/skovarm9cpu/Makefile
  create mode 100644 arch/arm/boards/skovarm9cpu/lowlevel_init.c
  create mode 100644 arch/arm/boards/skovarm9cpu/of_init.c
@@ -26,11 +26,11 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/dts/skovarm9cpu.dts
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 924f67e637e4..31c0b87b05b4 100644
+index f332a21952b6..56f174ea56db 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -151,3 +151,5 @@ obj-$(CONFIG_MACH_WARP7)			+= element14-warp7/
- obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
+@@ -155,3 +155,5 @@ obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
+ obj-$(CONFIG_MACH_ZII_RDU1)			+= zii-imx51-rdu1/
  obj-$(CONFIG_MACH_ZII_RDU2)			+= zii-imx6q-rdu2/
  obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
 +
@@ -289,10 +289,10 @@ index 000000000000..e0e922a539df
 +late_initcall(skovarm9cpu_env_init);
 diff --git a/arch/arm/configs/skovarm9cpu_defconfig b/arch/arm/configs/skovarm9cpu_defconfig
 new file mode 100644
-index 000000000000..79c6146382d1
+index 000000000000..9463f809e074
 --- /dev/null
 +++ b/arch/arm/configs/skovarm9cpu_defconfig
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,85 @@
 +CONFIG_ARCH_AT91SAM9263=y
 +CONFIG_AT91_MULTI_BOARDS=y
 +CONFIG_MACH_SKOVARM9CPU=y
@@ -311,7 +311,6 @@ index 000000000000..79c6146382d1
 +CONFIG_BOOTM_OFTREE_UIMAGE=y
 +CONFIG_CONSOLE_ACTIVATE_ALL=y
 +CONFIG_DEFAULT_ENVIRONMENT_GENERIC_NEW=y
-+CONFIG_DEFAULT_ENVIRONMENT_PATH=" .yocto-defaultenv"
 +# CONFIG_CMD_ARM_CPUINFO is not set
 +CONFIG_LONGHELP=y
 +CONFIG_CMD_IOMEM=y
@@ -380,10 +379,10 @@ index 000000000000..79c6146382d1
 +CONFIG_FS_FAT_LFN=y
 +CONFIG_PNG=y
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 73e18450a77a..eb58f5d9d077 100644
+index 31e1b3cbe9bc..ba2b61c78797 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -108,4 +108,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
+@@ -115,4 +115,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
  pbl-dtb-$(CONFIG_MACH_AT91SAM9263EK_DT) += at91sam9263ek.dtb.o
  pbl-dtb-$(CONFIG_MACH_AT91SAM9X5EK) += at91sam9x5ek.dtb.o
  

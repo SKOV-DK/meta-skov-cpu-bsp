@@ -1,7 +1,6 @@
-From 02b05443067a7f7f2c1f9ee0acf4bf6825f5c32f Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 14 Jul 2018 00:11:50 +0200
-Subject: [PATCH 605/610] skovarm9cpu: fix logic display detection
+Subject: [PATCH] skovarm9cpu: fix logic display detection
 
 Init the correct GPIO pin for detecting logic display
 
@@ -11,7 +10,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index 7dacbf1c2..72f95fb0b 100644
+index 6930b6cde2b9..59e83b3d8dea 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -96,7 +96,7 @@
@@ -23,6 +22,3 @@ index 7dacbf1c2..72f95fb0b 100644
  					};
  				};
  
--- 
-2.12.0
-

@@ -1,7 +1,6 @@
-From cd064bd3f2f30f70403c62a577c354254c40a79d Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 25 Aug 2018 11:40:26 +0200
-Subject: [PATCH 615/616] skovarmcpu: fix partition layout
+Subject: [PATCH] skovarmcpu: fix partition layout
 
 Let partition layout match arm-sdk 3.24 to support recovery
 
@@ -11,7 +10,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index b24c37f11..80aa7a33f 100644
+index d1e95e3cafd2..7ea55a3a49b8 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -261,30 +261,30 @@
@@ -57,6 +56,3 @@ index b24c37f11..80aa7a33f 100644
  			};
  		};
  
--- 
-2.12.0
-
