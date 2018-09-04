@@ -176,7 +176,7 @@ index 000000000000..1c7f4708fea4
 +	arm_cpu_lowlevel_init();
 +
 +	arm_setup_stack(AT91SAM9263_SRAM0_BASE + AT91SAM9263_SRAM0_SIZE - 16);
-+	fdt = __dtb_skovarm9cpu_start - get_runtime_offset();
++	fdt = __dtb_skovarm9cpu_start + get_runtime_offset();
 +
 +	skovarm9cpu_init(fdt);
 +}
