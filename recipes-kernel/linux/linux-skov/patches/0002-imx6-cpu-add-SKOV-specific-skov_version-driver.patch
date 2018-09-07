@@ -1,0 +1,394 @@
+From 1773490585df96966111dd02c6c1456a454619b5 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Thu, 6 Sep 2018 22:09:57 +0200
+Subject: [PATCH 2/2] imx6-cpu: add SKOV specific skov_version driver
+
+The skov_version driver provide access
+to the actual HW version in sysfs.
+The version is found readign external resistors.
+
+The driver is SKOV specific and not considered upstream material.
+
+Include plugging to the build infrastructure.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ drivers/Kconfig             |   2 +
+ drivers/Makefile            |   1 +
+ drivers/skov/Kconfig        |  12 ++
+ drivers/skov/Makefile       |   1 +
+ drivers/skov/skov_version.c | 315 ++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 331 insertions(+)
+ create mode 100644 drivers/skov/Kconfig
+ create mode 100644 drivers/skov/Makefile
+ create mode 100644 drivers/skov/skov_version.c
+
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index ab4d43923c4d..1ff9344873f0 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -219,4 +219,6 @@ source "drivers/siox/Kconfig"
+ 
+ source "drivers/slimbus/Kconfig"
+ 
++source "drivers/skov/Kconfig"
++
+ endmenu
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 578f469f72fb..c2d443843154 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -186,3 +186,4 @@ obj-$(CONFIG_MULTIPLEXER)	+= mux/
+ obj-$(CONFIG_UNISYS_VISORBUS)	+= visorbus/
+ obj-$(CONFIG_SIOX)		+= siox/
+ obj-$(CONFIG_GNSS)		+= gnss/
++obj-y				+= skov/
+diff --git a/drivers/skov/Kconfig b/drivers/skov/Kconfig
+new file mode 100644
+index 000000000000..c7d0b7e0c32a
+--- /dev/null
++++ b/drivers/skov/Kconfig
+@@ -0,0 +1,12 @@
++menu "SKOV specific drivers"
++
++config SKOV_VERSION
++        tristate "SKOV Vesion"
++        default y
++        help
++          Driver for the version Input pins.
++          This driver has a database over the various SKOV HW
++          configurations. If it shows unknown the kernel is too old and a
++          newer kernel with an updated database need to be installed.
++
++endmenu
+diff --git a/drivers/skov/Makefile b/drivers/skov/Makefile
+new file mode 100644
+index 000000000000..d6068949425b
+--- /dev/null
++++ b/drivers/skov/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_SKOV_VERSION)      += skov_version.o
+diff --git a/drivers/skov/skov_version.c b/drivers/skov/skov_version.c
+new file mode 100644
+index 000000000000..2e7613eae0bd
+--- /dev/null
++++ b/drivers/skov/skov_version.c
+@@ -0,0 +1,315 @@
++/*
++ * Skov version driver
++ *
++ * Copyright (C) 2013 Søren Andersen <san@rosetechnology.dk>
++ * Copyright (C) 2015-2016 Søren Andersen <san@skov.dk> Skov A/S.
++ *
++ * Various SKOV boards and there version control configuration
++ * Resistors    - Version -         		Rev - Ram    - Flash
++ * 00000000     - High Performance   	 	 A    1024MB -  1024MB
++ * 00000001     - Low Cost           	 	 A    512 MB -  256 MB
++ * 00000100     - Low Cost           	 	 A    512 MB -  256 MB
++ * 00000010	- High Performance   	 	 A    1024MB -  512 MB
++ * 00001000	- High Performance   	 	 A    1024MB -  512 MB
++ * 00001001	- Minium Cost	     	 	 B    256 MB -   16 MB
++ * 00001010	- Low Cost	     	 	 B    256 MB -  256 MB
++ * 00001011	- High Performance   	 	 B    1024MB -  256 MB
++ * 00001100	- Max  Performance   	 	 B    2028MB - 16384MB
++ * 00001101	- Low Cost	     	 	 C    256 MB -  256 MB
++ * 00001110	- High Performance   	 	 C    1024MB -  256 MB
++ * 00001111	- Middle Performance		 C    512 MB -  256 MB
++ * 00010000	- i.MX6 CPU SoloCore		 C    512 MB -  4096MB
++ * 00010001	- i.MX6 CPU QuadCore		 C    2048MB -  8192MB
++ * 00010010	- i.MX6 CPU QuadCore+		 C    4192MB - 16384MB
++ * 00010011	- i.MX6 CPU SoloCore		 C    512 MB -  2048MB
++ * 00010100	- i.MX6 CPU QuadCore		 C    1024MB -  4096MB
++ * 00010101    - i.MX6 CPU SoloCore             C    512 MB -  2048MB
++ * 00010110    - i.MX6 CPU QuadCore             C    1024MB -  4096MB
++ */
++#include <linux/err.h>
++#include <linux/clk.h>
++#include <linux/kobject.h>
++#include <linux/string.h>
++#include <linux/sysfs.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/gpio.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_gpio.h>
++#include <linux/platform_device.h>
++
++struct skov_version_platform_data {
++	unsigned int vc0;
++	unsigned int vc1;
++	unsigned int vc2;
++	unsigned int vc3;
++	unsigned int vc4;
++	unsigned int vc5;
++	unsigned int vc6;
++	unsigned int vc7;
++	unsigned int var;
++};
++
++struct pltfm_imx_data {
++	struct clk *clk_per;
++	struct skov_version_platform_data boarddata;
++	const struct skov_version_data *socdata;
++};
++
++static const char *description[] = {
++	"Minimum Cost",
++	"Low Cost",
++	"High Performance",
++	"Maximum Performance",
++	"Middle Performance",
++	"i.MX6 CPU SoloCore",
++	"i.MX6 CPU QuadCore",
++	"i.MX6 CPU QuadCore+"
++};
++
++static const unsigned int mem[] = {
++	256,
++	512,
++	1024,
++	2048,
++	3840,
++	0
++};
++
++static const char *rev[] = {
++	"A",
++	"B",
++	"C",
++	"D",
++	"E",
++	"F",
++	"G",
++	"H",
++	"I",
++	"J",
++	"K",
++};
++
++static const unsigned int nand[] = {
++	16,
++	32,
++	64,
++	128,
++	256,
++	512,
++	1024,
++	2048,
++	4096,
++	8192,
++	16384,
++	32768
++};
++
++/*
++ *
++ */
++static ssize_t show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	struct skov_version_platform_data *svpd = dev_get_drvdata(dev);
++
++	if (strcmp(attr->attr.name, "mem") == 0) {
++		switch(svpd->var ) {
++		case 19:
++		case 21:
++			return sprintf(buf, "%u\n", mem[1]);
++		case 20:
++		case 22:
++			return sprintf(buf, "%u\n", mem[2]);
++		default:
++			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
++		}
++	} else if (strcmp(attr->attr.name, "rev") == 0) {
++		switch(svpd->var){
++		case 19:
++		case 20:
++		case 21:
++		case 22:
++			return sprintf(buf, "%s\n", rev[2]);
++		default:
++			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
++		}
++	} else if (strcmp(attr->attr.name, "description") == 0) {
++		switch(svpd->var) {
++		case 19:
++		case 21:
++			return sprintf(buf, "%s\n", description[5]);
++		case 20:
++		case 22:
++			return sprintf(buf, "%s\n", description[6]);
++		default:
++			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
++		}
++	} else if (strcmp(attr->attr.name, "nand") == 0) {
++		switch(svpd->var) {
++		case 19:
++		case 21:
++			return sprintf(buf, "%u\n", nand[7]);
++		case 20:
++		case 22:
++			return sprintf(buf, "%u\n", nand[8]);
++		default:
++			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
++		}
++	} else if (strcmp(attr->attr.name, "raw") == 0) {
++		return sprintf(buf, "%u\n", svpd->var);
++
++	} else { /* Try to read Undefined sysfs file */
++		return sprintf(buf, "%s\n", "Requested file not found");
++	}
++
++	return sprintf(buf, "%u\n", svpd->var);
++}
++
++static struct device_attribute mem_attribute = __ATTR(mem, 0444, show, NULL);
++static struct device_attribute rev_attribute = __ATTR(rev, 0444, show, NULL);
++static struct device_attribute raw_attribute = __ATTR(raw, 0444, show, NULL);
++static struct device_attribute nand_attribute = __ATTR(nand, 0444, show, NULL);
++static struct device_attribute description_attribute =
++                                        __ATTR(description, 0444, show, NULL);
++
++/*
++ * Create a group of attributes so that we can create and destory them all
++ * at once.
++*/
++
++static struct attribute *attrs[] = {
++	&mem_attribute.attr,
++	&rev_attribute.attr,
++	&raw_attribute.attr,
++	&description_attribute.attr,
++	&nand_attribute.attr,
++	NULL,   /* need to NULL terminate the list of attributes */
++};
++
++/*
++ * An unnamed attribute group will put all of the attributes directly in
++ * the kobject directory.  If we specify a name, a subdirectory will be
++ * created for the attributes with the directory being the name of the
++ * attribute group.
++ */
++
++static struct attribute_group attr_group = {
++	.attrs = attrs,
++};
++
++static const struct of_device_id skov_version_dt_ids[] = {
++	{ .compatible = "skov-version" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, skov_version_dt_ids);
++
++#ifdef CONFIG_OF
++static int skov_version_probe_dt(struct platform_device *pdev,
++			struct skov_version_platform_data *boarddata)
++{
++	struct device_node *np = pdev->dev.of_node;
++
++	if (!np)
++		return -ENODEV;
++
++	boarddata->vc0 = of_get_named_gpio(np, "v0-gpio", 0);
++	boarddata->vc1 = of_get_named_gpio(np, "v1-gpio", 0);
++	boarddata->vc2 = of_get_named_gpio(np, "v2-gpio", 0);
++	boarddata->vc3 = of_get_named_gpio(np, "v3-gpio", 0);
++	boarddata->vc4 = of_get_named_gpio(np, "v4-gpio", 0);
++	boarddata->vc5 = of_get_named_gpio(np, "v5-gpio", 0);
++	boarddata->vc6 = of_get_named_gpio(np, "v6-gpio", 0);
++	boarddata->vc7 = of_get_named_gpio(np, "v7-gpio", 0);
++
++	return 0;
++}
++#else
++static inline int skov_version_probe_dt(struct platform_device *pdev,
++					struct skov_version_data *boarddata)
++{
++	return -ENODEV;
++}
++#endif
++
++static int skov_version_probe(struct platform_device *pdev)
++{
++	int retval = 0;
++	int var = 0;
++	int err;
++	const struct of_device_id *of_id =
++		of_match_device(skov_version_dt_ids, &pdev->dev);
++	struct skov_version_platform_data *boarddata;
++	struct pltfm_imx_data *imx_data;
++
++	imx_data = devm_kzalloc(&pdev->dev, sizeof(*imx_data), GFP_KERNEL);
++	if (!imx_data) {
++		err = -ENOMEM;
++		goto free_skov_ver;
++	}
++	imx_data->socdata = of_id ? of_id->data : (struct skov_version_data *)
++                                                    pdev->id_entry->driver_data;
++
++	boarddata = &imx_data->boarddata;
++	skov_version_probe_dt(pdev, boarddata);
++
++	gpio_request(boarddata->vc0, "VERSION0");
++	gpio_request(boarddata->vc1, "VERSION1");
++	gpio_request(boarddata->vc2, "VERSION2");
++	gpio_request(boarddata->vc3, "VERSION3");
++	gpio_request(boarddata->vc4, "VERSION4");
++	gpio_request(boarddata->vc5, "VERSION5");
++	gpio_request(boarddata->vc6, "VERSION6");
++	gpio_request(boarddata->vc7, "VERSION7");
++
++	gpio_direction_input(boarddata->vc0);
++	gpio_direction_input(boarddata->vc1);
++	gpio_direction_input(boarddata->vc2);
++	gpio_direction_input(boarddata->vc3);
++	gpio_direction_input(boarddata->vc4);
++	gpio_direction_input(boarddata->vc5);
++	gpio_direction_input(boarddata->vc6);
++	gpio_direction_input(boarddata->vc7);
++
++	var = (!gpio_get_value(boarddata->vc0));
++	var |= (!gpio_get_value(boarddata->vc1) << 1);
++	var |= (!gpio_get_value(boarddata->vc2) << 2);
++	var |= (!gpio_get_value(boarddata->vc3) << 3);
++	var |= (!gpio_get_value(boarddata->vc4) << 4);
++	var |= (!gpio_get_value(boarddata->vc5) << 5);
++	var |= (!gpio_get_value(boarddata->vc6) << 6);
++	var |= (!gpio_get_value(boarddata->vc7) << 7);
++
++	boarddata->var = var;
++	platform_set_drvdata(pdev, boarddata);
++
++	retval = sysfs_create_group(&pdev->dev.kobj, &attr_group);
++
++	return retval;
++
++free_skov_ver:
++	return err;
++}
++
++static int skov_version_remove(struct platform_device *pdev)
++{
++	sysfs_remove_group(&pdev->dev.kobj, &attr_group);
++
++	return 0;
++}
++
++static struct platform_driver skov_version_driver = {
++	.driver = {
++		.name = "skov_version",
++		.owner = THIS_MODULE,
++		.of_match_table = skov_version_dt_ids,
++	},
++	.probe = skov_version_probe,
++	.remove = skov_version_remove,
++};
++
++module_platform_driver(skov_version_driver);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Søren Andersen <san@rosetechnology.dk");
++MODULE_DESCRIPTION("Version Control");
+-- 
+2.12.0
+

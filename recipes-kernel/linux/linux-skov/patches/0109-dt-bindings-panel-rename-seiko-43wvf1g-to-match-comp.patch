@@ -1,0 +1,27 @@
+From 27432b6880f4420e860e096aa4d365af468ab83b Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 8 Sep 2018 11:16:46 +0200
+Subject: [PATCH 109/110] dt-bindings: panel: rename seiko,43wvf1g to match
+ compatible
+
+It is common practice to name the files according
+to their compatible.
+So rename the binding file to match the sii,43wvf1g
+compatible string.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Cc: Thierry Reding <thierry.reding@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+---
+ .../bindings/display/panel/{seiko,43wvf1g.txt => sii,43wvf1g.txt}         | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rename Documentation/devicetree/bindings/display/panel/{seiko,43wvf1g.txt => sii,43wvf1g.txt} (100%)
+
+diff --git a/Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt b/Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt
+similarity index 100%
+rename from Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt
+rename to Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt
+-- 
+2.12.0
+

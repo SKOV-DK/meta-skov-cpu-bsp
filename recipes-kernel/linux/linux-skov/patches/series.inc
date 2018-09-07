@@ -1,23 +1,26 @@
+SRC_URI += "\
+  file://patches/0001-imx6-cpu-add-device-tree-files.patch \
+  file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
+  "
+
+SRC_URI += "\
+  file://patches/0100-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
+  file://patches/0101-panel-simple-add-LOGIC-Technologies-panels.patch \
+  file://patches/0102-dt-binding-rtc-pcf8523-add-binding-with-quartz_load-.patch \
+  file://patches/0103-dt-binding-rtc-pcf85063-add-binding-with-quartz-load.patch \
+  file://patches/0104-dts-add-nxp-quartz_load_12.5pf-to-all-pcf8523-nodes.patch \
+  file://patches/0105-rtc-pcf8523-add-quartz-load-configuration-from-DT.patch \
+  file://patches/0106-rtc-pcf85063-add-quartz-load-configuration-from-DT.patch \
+  file://patches/0107-atmel_lcdfb-support-native-mode-display-timings.patch \
+  file://patches/0108-dt-binding-panel-add-Seiko-70WVW2T-7-panel.patch \
+  file://patches/0109-dt-bindings-panel-rename-seiko-43wvf1g-to-match-comp.patch \
+  file://patches/0110-drm-panel-add-Seiko-70WVW2T-7-simple-panel.patch \
+  "
+
 # umpf-base: v4.19-rc1
 # umpf-name: 4.19/customers/skov/imx6
 # umpf-version: 4.19/customers/skov/imx6/20180830-1
-# umpf-topic: v4.19/customers/skov/imx6
-# umpf-hashinfo: 0c42cf1ff82e83987473caf215a53c25d275b1ed
-# umpf-topic-range: 5b394b2ddf0347bef56e50c69a58773c94343ff3..f97f2ecb908f4834994c5a489758173b47257e0d
-SRC_URI += "\
-  file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
-  file://patches/0002-skov_version-add-support-for-board-21-22.patch \
-  file://patches/0003-devicetree-restructure-skov-files-and-add-support-fo.patch \
-  file://patches/0004-panel-simple-add-support-for-Logic-Technologies-lttd.patch \
-  file://patches/0005-devicetree-fix-name-of-display-node.patch \
-  file://patches/0006-devicetree-switch-OCOTP-to-be-read-only.patch \
-  "
-# umpf-topic: v4.19/customers/skov/arm9
-# umpf-hashinfo: 97b656a84ef167aef1758e470fa42260a7b7fd8d
-# umpf-topic-range: f97f2ecb908f4834994c5a489758173b47257e0d..4dae38f6cc0d773180e89847295f465360a04f01
-SRC_URI += "\
-  file://patches/0101-atmel_lcdfb-support-native-mode-display-timings.patch \
-  "
+
 # umpf-topic: v4.19/topic/etnaviv
 # umpf-hashinfo: eb6c4f4b7457e5717f8fca233507292f63ad1e67
 # umpf-topic-range: 4dae38f6cc0d773180e89847295f465360a04f01..4d62c8ac8b2ab762126be8c74dc2e867144726dc

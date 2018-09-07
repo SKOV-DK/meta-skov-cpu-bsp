@@ -1,6 +1,7 @@
+From 462c64a39408d0ed9293da16df6a4a96231be6a8 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
-Date: Sat, 14 Jul 2018 22:17:18 +0200
-Subject: [PATCH] atmel_lcdfb: support native-mode display-timings
+Date: Sat, 25 Aug 2018 20:23:20 +0200
+Subject: [PATCH 107/110] atmel_lcdfb: support native-mode display-timings
 
 When a device tree set a display-timing using native-mode
 then according to the bindings doc this should:
@@ -105,3 +106,6 @@ index 076d24afbd72..4ed55e6bbb84 100644
  put_display_node:
  	of_node_put(display_np);
  	return ret;
+-- 
+2.12.0
+

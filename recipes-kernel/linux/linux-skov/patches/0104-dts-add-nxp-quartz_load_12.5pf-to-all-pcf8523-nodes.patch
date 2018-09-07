@@ -1,0 +1,125 @@
+From c4c09fc4967c35bd5877e13b4cf4980476f479d4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
+Date: Thu, 6 Sep 2018 22:42:22 +0200
+Subject: [PATCH 104/110] dts: add nxp,quartz_load_12.5pf to all pcf8523 nodes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add "nxp,quartz_load_12.5pf" to all pcf8523 nodes.
+
+The device tree binding for the pcf8523 now includes
+a property "nxp,quartz_load_12.5pf" to specify
+that the connected x-tal has an internal capacitance
+of 12.5 pF.
+Add this to all pcf8523 nodes, because this was implicit before,
+at least in the Linux kernel where the driver was hardcoded
+to set the rtc to use 12.5 pF.
+
+Signed-off-by: Søren Andersen <san@skov.dk>
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Joel Stanley <joel@jms.id.au>
+Cc: Andrew Jeffery <andrew@aj.id.au>
+Cc: Shawn Guo <shawnguo@kernel.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Fabio Estevam <fabio.estevam@nxp.com>
+Cc: Russell King <linux@armlinux.org.uk>
+---
+ arch/arm/boot/dts/aspeed-bmc-opp-lanyang.dts | 1 +
+ arch/arm/boot/dts/aspeed-bmc-opp-zaius.dts   | 1 +
+ arch/arm/boot/dts/imx6q-h100.dts             | 1 +
+ arch/arm/boot/dts/imx6q-novena.dts           | 1 +
+ arch/arm/boot/dts/imx6qdl-cubox-i.dtsi       | 1 +
+ arch/arm/boot/dts/imx6qdl-hummingboard.dtsi  | 1 +
+ arch/arm/boot/dts/imx6qdl-hummingboard2.dtsi | 1 +
+ 7 files changed, 7 insertions(+)
+
+diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-lanyang.dts b/arch/arm/boot/dts/aspeed-bmc-opp-lanyang.dts
+index d598b6391362..d1a0e3521e2b 100644
+--- a/arch/arm/boot/dts/aspeed-bmc-opp-lanyang.dts
++++ b/arch/arm/boot/dts/aspeed-bmc-opp-lanyang.dts
+@@ -200,6 +200,7 @@
+ 	rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	tmp75@48 {
+diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-zaius.dts b/arch/arm/boot/dts/aspeed-bmc-opp-zaius.dts
+index 2c5aa90a546d..b5088414e610 100644
+--- a/arch/arm/boot/dts/aspeed-bmc-opp-zaius.dts
++++ b/arch/arm/boot/dts/aspeed-bmc-opp-zaius.dts
+@@ -201,6 +201,7 @@
+ 	rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	ucd90160@64 {
+diff --git a/arch/arm/boot/dts/imx6q-h100.dts b/arch/arm/boot/dts/imx6q-h100.dts
+index 714e09e04dcb..3b6116069b11 100644
+--- a/arch/arm/boot/dts/imx6q-h100.dts
++++ b/arch/arm/boot/dts/imx6q-h100.dts
+@@ -173,6 +173,7 @@
+ 	rtc: pcf8523@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	sgtl5000: sgtl5000@a {
+diff --git a/arch/arm/boot/dts/imx6q-novena.dts b/arch/arm/boot/dts/imx6q-novena.dts
+index fcd824dc485b..6a2eaaa6e220 100644
+--- a/arch/arm/boot/dts/imx6q-novena.dts
++++ b/arch/arm/boot/dts/imx6q-novena.dts
+@@ -257,6 +257,7 @@
+ 	rtc: pcf8523@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	sbs_battery: bq20z75@b {
+diff --git a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
+index 9332a31e6c8b..e0f601bce3d3 100644
+--- a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
+@@ -143,6 +143,7 @@
+ 	rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx6qdl-hummingboard.dtsi b/arch/arm/boot/dts/imx6qdl-hummingboard.dtsi
+index 0e64016e765f..7848b818078e 100644
+--- a/arch/arm/boot/dts/imx6qdl-hummingboard.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-hummingboard.dtsi
+@@ -189,6 +189,7 @@
+ 	rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	/* Pro baseboard model */
+diff --git a/arch/arm/boot/dts/imx6qdl-hummingboard2.dtsi b/arch/arm/boot/dts/imx6qdl-hummingboard2.dtsi
+index c413f9c3540f..7bc264234085 100644
+--- a/arch/arm/boot/dts/imx6qdl-hummingboard2.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-hummingboard2.dtsi
+@@ -222,6 +222,7 @@
+ 	pcf8523: rtc@68 {
+ 		compatible = "nxp,pcf8523";
+ 		reg = <0x68>;
++		nxp,quartz_load_12.5pf;
+ 	};
+ 
+ 	sgtl5000: codec@a {
+-- 
+2.12.0
+

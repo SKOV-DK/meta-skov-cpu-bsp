@@ -1,0 +1,71 @@
+From 7ebb3904b861480fd21821614233eba4fd6e5ccb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
+Date: Thu, 6 Sep 2018 22:24:32 +0200
+Subject: [PATCH 100/110] dt-bindings: panel: add LOGIC Technologies panels
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for the following panels from LOGIC Technologies, Inc:
+- LTTD800480070-L2RT
+- LTTD800480070-L6WH-RT
+
+Include a new vendor prefix for LOGIC Technologies Inc.
+
+The LTTD800480 L2RT is discontinued, but it may be in
+use by existing products.
+
+Signed-off-by: Søren Andersen <san@skov.dk>
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Cc: Thierry Reding <thierry.reding@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+---
+ .../display/panel/logictechnologies,lttd800480070-l2rt.txt         | 7 +++++++
+ .../display/panel/logictechnologies,lttd800480070-l6wh-rt.txt      | 7 +++++++
+ Documentation/devicetree/bindings/vendor-prefixes.txt              | 1 +
+ 3 files changed, 15 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l2rt.txt
+ create mode 100644 Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l6wh-rt.txt
+
+diff --git a/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l2rt.txt b/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l2rt.txt
+new file mode 100644
+index 000000000000..4e9a888e8045
+--- /dev/null
++++ b/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l2rt.txt
+@@ -0,0 +1,7 @@
++LOGIC Technologies Inc. LTTD800x480 L2RT 7" (800x480 pixels) TFT LCD panel
++
++Required properties:
++- compatible: should be "logictechnologies,lttd800480070-l2rt"
++
++This binding is compatible with the simple-panel binding, which is specified
++in simple-panel.txt in this directory.
+diff --git a/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l6wh-rt.txt b/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l6wh-rt.txt
+new file mode 100644
+index 000000000000..211f0dffcf16
+--- /dev/null
++++ b/Documentation/devicetree/bindings/display/panel/logictechnologies,lttd800480070-l6wh-rt.txt
+@@ -0,0 +1,7 @@
++LOGIC Technologies Inc. LTTD800x480 Lw6H-RT 7" (800x480 pixels) TFT LCD panel
++
++Required properties:
++- compatible: should be "logictechnologies,lttd800480070-l6wh-rt"
++
++This binding is compatible with the simple-panel binding, which is specified
++in simple-panel.txt in this directory.
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
+index 2c3fc512e746..de11bf5b7dba 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.txt
++++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
+@@ -215,6 +215,7 @@ linux	Linux-specific binding
+ linx	Linx Technologies
+ lltc	Linear Technology Corporation
+ logicpd	Logic PD, Inc.
++logictechnologies	LOGIC Technologies, Inc.
+ lsi	LSI Corp. (LSI Logic)
+ lwn	Liebherr-Werk Nenzing GmbH
+ macnica	Macnica Americas
+-- 
+2.12.0
+
