@@ -1,0 +1,2 @@
+norparts="384k(u-boot),128k(Env),2048k(Linux),768k(Bmp_image),-(Rootfs1)"
+global linux.mtdparts.nor_flash="physmap-flash.0:$norparts"
