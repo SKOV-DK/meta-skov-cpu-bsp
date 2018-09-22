@@ -41,3 +41,7 @@ SRC_URI += "\
   file://patches/0201-Release-2018.08.1-customers-skov-imx6-20180903-1.patch \
   "
 # umpf-end
+
+SRC_URI += "\
+  file://patches/0601-skovarm9cpu-add-matrix-keyboard-and-folio-leds.patch \
+  "

@@ -1,0 +1,170 @@
+From f272c01747d664f348beabd6bf2510b7c877dcc3 Mon Sep 17 00:00:00 2001
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Fri, 21 Sep 2018 22:59:02 +0200
+Subject: [PATCH 1/1] skovarm9cpu: add matrix keyboard and folio leds
+
+Add support in DT for matrix keyboard in folio
+- For example used by BD505
+
+Add support for LEDs in folio
+- For example used by BD505
+
+Deleted wrong gpio assignments to USB0.
+This was copied from at91sam9263ek - but there is no way
+to turn off power on the SKOV board
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ arch/arm/dts/skovarm9cpu.dts | 124 +++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 121 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
+index 5cbaeb0b3..34e4d93cd 100644
+--- a/arch/arm/dts/skovarm9cpu.dts
++++ b/arch/arm/dts/skovarm9cpu.dts
+@@ -254,9 +254,6 @@
+ 		usb0: ohci@a00000 {
+ 			num-ports = <2>;
+ 			status = "okay";
+-			atmel,vbus-gpio = <&pioA 24 GPIO_ACTIVE_HIGH
+-					   &pioA 21 GPIO_ACTIVE_HIGH
+-					  >;
+ 		};
+ 
+ 		flash: nor_flash@10000000 {
+@@ -309,6 +306,45 @@
+ 			label = "D2";
+ 			gpios = <&pioD 7 GPIO_ACTIVE_LOW>;
+ 		};
++		led_0 {
++			label = "led_0";
++			gpios = <&pioB 14 GPIO_ACTIVE_LOW>;
++		};
++
++		led_1 {
++			label = "led_1";
++			gpios = <&pioB 23 GPIO_ACTIVE_LOW>;
++		};
++
++		led_2 {
++			label = "led_2";
++			gpios = <&pioB 18 GPIO_ACTIVE_LOW>;
++		};
++
++		led_3 {
++			label = "led_3";
++			gpios = <&pioB 22 GPIO_ACTIVE_LOW>;
++		};
++
++		led_4 {
++			label = "led_4";
++			gpios = <&pioA 22 GPIO_ACTIVE_LOW>;
++		};
++
++		led_5 {
++			label = "led_5";
++			gpios = <&pioA 23 GPIO_ACTIVE_LOW>;
++		};
++
++		led_6 {
++			label = "led_6";
++			gpios = <&pioA 24 GPIO_ACTIVE_LOW>;
++		};
++
++		led_7 {
++			label = "led_7";
++			gpios = <&pioA 20 GPIO_ACTIVE_LOW>;
++		};
+ 	};
+ 
+ 
+@@ -342,4 +378,86 @@
+ 			linux,code = <28>; /* enter */
+ 		};
+ 	};
++
++	matrix_keypad_6x5 {
++		compatible = "gpio-matrix-keypad";
++		debounce-delay-ms = <10>;
++		col-scan-delay-us = <10>;
++
++		row-gpios = <&pioB 25 GPIO_ACTIVE_HIGH    /* 1 */
++			     &pioB 21 GPIO_ACTIVE_HIGH    /* 2 */
++			     &pioB 16 GPIO_ACTIVE_HIGH    /* 3 */
++			     &pioB 24 GPIO_ACTIVE_HIGH    /* 4 */
++			     &pioB 12 GPIO_ACTIVE_HIGH>;  /* 5 */
++
++		col-gpios = <&pioB 13 GPIO_ACTIVE_HIGH    /* 1 */
++			     &pioB 17 GPIO_ACTIVE_HIGH    /* 2 */
++			     &pioA 25 GPIO_ACTIVE_HIGH    /* 3 */
++			     &pioA 21 GPIO_ACTIVE_HIGH    /* 4 */
++			     &pioA 19 GPIO_ACTIVE_HIGH    /* 5 */
++			     &pioA 18 GPIO_ACTIVE_HIGH>;  /* 6 */
++
++
++		linux,keymap = <
++				/* col0 row0 KEY_W */
++				0x00000011
++				/* col0 row1 KEY_F */
++				0x01000021
++				/* col0 row2 KEY_N */
++				0x02000031
++				/* col0 row3 KEY_F7 */
++				0x03000041
++				/* col0 row4 KEY_KP3 */
++				0x04000051
++				/* col1 row0 KEY_E */
++				0x00010012
++				/* col1 row1 KEY_G */
++				0x01010022
++				/* col1 row2 KEY_M */
++				0x02010032
++				/* col1 row3 KEY_F8 */
++				0x03010042
++				/* col1 row4 KEY_KP0 */
++				0x04010052
++				/* col2 row0 KEY_R */
++				0x00020013
++				/* col2 row1 KEY_H */
++				0x01020023
++				/* col2 row2 KEY_COMMA */
++				0x02020033
++				/* col2 row3 KEY_F9 */
++				0x03020043
++				/* col2 row4 KEY_F9 */
++				0x04020053
++				/* col3 row0 KEY_T */
++				0x00030014
++				/* col3 row1 KEY_J */
++				0x01030024
++				/* col3 row2 KEY_DOT */
++				0x02030034
++				/* col3 row3 KEY_NUMLOCK */
++				0x03030044
++				/* col3 row4 */
++				0x04030054
++				/* col4 row0 KEY_Y */
++				0x00040015
++				/* col4 row1 KEY_K */
++				0x01040025
++				/* col4 row2 KEY_SLASH */
++				0x02040035
++				/* col4 row3 KEY_NUMLOCK */
++				0x03040045
++				/* col4 row4 KEY_ZENKAKUHANKAKU */
++				0x04040055
++				/* col5 row0 KEY_U */
++				0x00050016
++				/* col5 row1 KEY_L */
++				0x01050026
++				/* col5 row2 KEY_RIGH_SHIFT */
++				0x02050036
++				/* col5 row3 KEY_SCROLLLOCK */
++				0x03050046
++				/* col5 row4 KEY_102ND */
++				0x04050056>;
++	};
+ };
+-- 
+2.12.0
+
