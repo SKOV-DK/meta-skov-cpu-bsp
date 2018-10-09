@@ -44,4 +44,5 @@ SRC_URI += "\
 
 SRC_URI += "\
   file://patches/0601-skovarm9cpu-add-matrix-keyboard-and-folio-leds.patch \
+  file://patches/0603-skovarm9cpu-add-pwm0.patch \
   "
