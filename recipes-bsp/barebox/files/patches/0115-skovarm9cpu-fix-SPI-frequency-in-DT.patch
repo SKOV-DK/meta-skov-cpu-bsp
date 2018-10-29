@@ -27,7 +27,7 @@ index bc89ce246a8a..d1e95e3cafd2 100644
  					compatible = "ti,tsc2046";
  					interrupts-extended = <&pioA 15 IRQ_TYPE_EDGE_BOTH>;
 -					spi-max-frequency = <1000000>;
-+					spi-max-frequency = <750000>;
++					spi-max-frequency = <500000>;
  					pendown-gpio = <&pioA 15 GPIO_ACTIVE_LOW>;
  
  					ti,x-min = /bits/ 16 <800>;
