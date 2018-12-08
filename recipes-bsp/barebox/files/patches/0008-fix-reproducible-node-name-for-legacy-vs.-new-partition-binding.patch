@@ -1,0 +1,45 @@
+the of_reproducible_name mechanism is used to find a partition node
+from the barebox devicetree in the Linux devicetree. Unfortunately
+we have two different partition bindings. In the legacy one the partition
+nodes are directly under the hardware devicenode whereas in the new
+binding the partitions are under an additional partitions subnode.
+This means we get two different (not so) reproducible names when
+the barebox devicetree uses the legacy binding and the Linux devicetree
+uses the new binding (or the other way round). To get the same
+name then for these cases we drop the partitions subnode from the
+reproducible name.
+
+This makes the partition fixup in barebox-state work when the barebox
+devicetree uses another binding than the Linux devicetree.
+
+Signed-off-by: Sascha Hauer <s.hauer@xxxxxxxxxxxxxx>
+Tested-by: Ulrich Ölmann <u.oelmann@xxxxxxxxxxxxxx>
+---
+ drivers/of/base.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/drivers/of/base.c b/drivers/of/base.c
+index fc01a99ef2..f9b1c3c4cb 100644
+--- a/drivers/of/base.c
++++ b/drivers/of/base.c
+@@ -2274,6 +2274,18 @@ char *of_get_reproducible_name(struct device_node *node)
+ 		return basprintf("[0x%llx]", addr);
+ 	}
+ 
++	/*
++	 * Special workaround for the of partition binding. In the old binding
++	 * the partitions are directly under the hardware devicenode whereas in
++	 * the new binding the partitions are in an extra subnode with
++	 * "fixed-partitions" compatible. We skip this extra subnode from the
++	 * reproducible name to get the same name for both bindings.
++	 */
++	if (node->parent &&
++	    of_device_is_compatible(node->parent, "fixed-partitions")) {
++		node = node->parent;
++	}
++
+ 	na = of_n_addr_cells(node);
+ 
+ 	offset = of_read_number(reg, na);
+-- 
+2.19.0

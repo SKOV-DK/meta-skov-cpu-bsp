@@ -12,6 +12,7 @@ SRC_URI += "\
   file://patches/0005-fs-fix-error-path-in-__canonicalize_path.patch \
   file://patches/0006-fs-remove-shortcut-in-canonicalizing-filenames.patch \
   file://patches/0007-video-edid-increase-number-of-retries-to-request-EDI.patch \
+  file://patches/0008-fix-reproducible-node-name-for-legacy-vs.-new-partition-binding.patch \
   "
 # umpf-topic: v2018.08.0/customers/skov/arm9
 # umpf-hashinfo: 99d5cf177ab8463b66f5ba017a9792554a39c406
