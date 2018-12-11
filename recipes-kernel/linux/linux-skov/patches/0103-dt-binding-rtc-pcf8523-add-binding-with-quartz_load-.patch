@@ -1,7 +1,6 @@
-From 7fdba7344a9804a1a9d779c9393ca075a9fe9340 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Thu, 6 Sep 2018 22:28:27 +0200
-Subject: [PATCH 102/110] dt-binding: rtc-pcf8523: add binding with quartz_load
+Subject: [PATCH] dt-binding: rtc-pcf8523: add binding with quartz_load
  property
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -66,6 +65,3 @@ index 763a2808a95c..297dc82b67ad 100644
  nxp,pcf8563		Real-time clock/calendar
  nxp,pcf85063		Tiny Real-Time Clock
  oki,ml86v7667		OKI ML86V7667 video decoder
--- 
-2.12.0
-

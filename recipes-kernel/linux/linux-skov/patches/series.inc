@@ -1,29 +1,32 @@
+# umpf-base: v4.19-rc1
+# umpf-name: 4.19/customers/skov/imx6
+# umpf-version: 4.19/customers/skov/imx6/20181211-1
+# umpf-topic: v4.19/customers/skov/imx6_project_specific
+# umpf-hashinfo: a0caf01a592773548f6fde3a1b8b4b8a24aabb3a
+# umpf-topic-range: 5b394b2ddf0347bef56e50c69a58773c94343ff3..a0caf01a592773548f6fde3a1b8b4b8a24aabb3a
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   "
-
+# umpf-topic: v4.19/customers/skov/imx6_suitable_for_upstream
+# umpf-hashinfo: 7adc4b31464d517d12bd7f3d405cb83f5983fce8
+# umpf-topic-range: a0caf01a592773548f6fde3a1b8b4b8a24aabb3a..fc641fc74dccc755d466daa754075dafa8c39869
 SRC_URI += "\
-  file://patches/0100-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
-  file://patches/0101-panel-simple-add-LOGIC-Technologies-panels.patch \
-  file://patches/0102-dt-binding-rtc-pcf8523-add-binding-with-quartz_load-.patch \
-  file://patches/0103-dt-binding-rtc-pcf85063-add-binding-with-quartz-load.patch \
-  file://patches/0104-dts-add-nxp-quartz_load_12.5pf-to-all-pcf8523-nodes.patch \
-  file://patches/0105-rtc-pcf8523-add-quartz-load-configuration-from-DT.patch \
-  file://patches/0106-rtc-pcf85063-add-quartz-load-configuration-from-DT.patch \
-  file://patches/0107-atmel_lcdfb-support-native-mode-display-timings.patch \
-  file://patches/0108-dt-binding-panel-add-Seiko-70WVW2T-7-panel.patch \
-  file://patches/0109-dt-bindings-panel-rename-seiko-43wvf1g-to-match-comp.patch \
-  file://patches/0110-drm-panel-add-Seiko-70WVW2T-7-simple-panel.patch \
+  file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
+  file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
+  file://patches/0103-dt-binding-rtc-pcf8523-add-binding-with-quartz_load-.patch \
+  file://patches/0104-dt-binding-rtc-pcf85063-add-binding-with-quartz-load.patch \
+  file://patches/0105-dts-add-nxp-quartz_load_12.5pf-to-all-pcf8523-nodes.patch \
+  file://patches/0106-rtc-pcf8523-add-quartz-load-configuration-from-DT.patch \
+  file://patches/0107-rtc-pcf85063-add-quartz-load-configuration-from-DT.patch \
+  file://patches/0108-atmel_lcdfb-support-native-mode-display-timings.patch \
+  file://patches/0109-dt-binding-panel-add-Seiko-70WVW2T-7-panel.patch \
+  file://patches/0110-dt-bindings-panel-rename-seiko-43wvf1g-to-match-comp.patch \
+  file://patches/0111-drm-panel-add-Seiko-70WVW2T-7-simple-panel.patch \
   "
-
-# umpf-base: v4.19-rc1
-# umpf-name: 4.19/customers/skov/imx6
-# umpf-version: 4.19/customers/skov/imx6/20180830-1
-
 # umpf-topic: v4.19/topic/etnaviv
 # umpf-hashinfo: eb6c4f4b7457e5717f8fca233507292f63ad1e67
-# umpf-topic-range: 4dae38f6cc0d773180e89847295f465360a04f01..4d62c8ac8b2ab762126be8c74dc2e867144726dc
+# umpf-topic-range: fc641fc74dccc755d466daa754075dafa8c39869..add565e6b418f374db9c4ecad648908a4bad0a57
 SRC_URI += "\
   file://patches/0201-drm-etnaviv-init-DMA-ops-for-virtual-master-device.patch \
   file://patches/0202-drm-etnaviv-add-GC7000-sensitive-states.patch \
@@ -33,7 +36,7 @@ SRC_URI += "\
   "
 # umpf-topic: v4.19/topic/coda
 # umpf-hashinfo: 708edcdb3752aa8424574ef56b4d6eb2f3b461ae
-# umpf-topic-range: 4d62c8ac8b2ab762126be8c74dc2e867144726dc..629894f3e7133e73bacd3f6a4be77ceeb7c2f8d3
+# umpf-topic-range: add565e6b418f374db9c4ecad648908a4bad0a57..3f502cd0d995713dab97e5ce05966cbc0b1cd396
 SRC_URI += "\
   file://patches/0301-media-coda-reduce-minimum-frame-size-to-48x16-pixels.patch \
   file://patches/0302-media-coda-hold-back-decoder-jobs-until-we-have-at-l.patch \
@@ -72,9 +75,9 @@ SRC_URI += "\
   file://patches/0335-media-coda-don-t-overwrite-h.264-profile_idc-on-deco.patch \
   file://patches/0336-media-coda-debut-output-when-setting-visible-size-vi.patch \
   "
-# umpf-release: 4.19/customers/skov/imx6/20180830-1
-# umpf-topic-range: 629894f3e7133e73bacd3f6a4be77ceeb7c2f8d3..fdeb5cb33f401267ea26c84094a597eb8b82ca8c
+# umpf-release: 4.19/customers/skov/imx6/20181211-1
+# umpf-topic-range: 3f502cd0d995713dab97e5ce05966cbc0b1cd396..e474ca5606851fa37c1498bf01cd541462aea557
 SRC_URI += "\
-  file://patches/0401-Release-4.19-customers-skov-imx6-20180830-1.patch \
+  file://patches/0401-Release-4.19-customers-skov-imx6-20181211-1.patch \
   "
 # umpf-end

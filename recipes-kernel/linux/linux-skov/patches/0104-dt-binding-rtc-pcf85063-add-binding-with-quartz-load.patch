@@ -1,8 +1,7 @@
-From 872a97933936a8240808159f1e004affe40fa06a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Thu, 6 Sep 2018 22:39:59 +0200
-Subject: [PATCH 103/110] dt-binding: rtc-pcf85063: add binding with quartz
- load property
+Subject: [PATCH] dt-binding: rtc-pcf85063: add binding with quartz load
+ property
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -66,6 +65,3 @@ index 297dc82b67ad..440632682e31 100644
  oki,ml86v7667		OKI ML86V7667 video decoder
  ovti,ov5642		OV5642: Color CMOS QSXGA (5-megapixel) Image Sensor with OmniBSI and Embedded TrueFocus
  pericom,pt7c4338	Real-time Clock Module
--- 
-2.12.0
-

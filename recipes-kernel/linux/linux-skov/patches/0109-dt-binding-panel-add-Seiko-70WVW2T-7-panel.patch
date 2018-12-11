@@ -1,7 +1,6 @@
-From 6ff9669c1b0c7424c27ab6b5013703278ea1407c Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 8 Sep 2018 11:11:04 +0200
-Subject: [PATCH 108/110] dt-binding: panel: add Seiko 70WVW2T 7" panel
+Subject: [PATCH] dt-binding: panel: add Seiko 70WVW2T 7" panel
 
 Add bindings for Seiko Instruments 7" TFT LCD
 Include new sii vendor prefix.
@@ -57,6 +56,3 @@ index de11bf5b7dba..bc92d4c64278 100644
  semtech	Semtech Corporation
  sensirion	Sensirion AG
  sff	Small Form Factor Committee
--- 
-2.12.0
-

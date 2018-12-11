@@ -1,7 +1,6 @@
-From c4c09fc4967c35bd5877e13b4cf4980476f479d4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Thu, 6 Sep 2018 22:42:22 +0200
-Subject: [PATCH 104/110] dts: add nxp,quartz_load_12.5pf to all pcf8523 nodes
+Subject: [PATCH] dts: add nxp,quartz_load_12.5pf to all pcf8523 nodes
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -120,6 +119,3 @@ index c413f9c3540f..7bc264234085 100644
  	};
  
  	sgtl5000: codec@a {
--- 
-2.12.0
-

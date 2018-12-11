@@ -1,7 +1,6 @@
-From 7ebb3904b861480fd21821614233eba4fd6e5ccb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Thu, 6 Sep 2018 22:24:32 +0200
-Subject: [PATCH 100/110] dt-bindings: panel: add LOGIC Technologies panels
+Subject: [PATCH] dt-bindings: panel: add LOGIC Technologies panels
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -66,6 +65,3 @@ index 2c3fc512e746..de11bf5b7dba 100644
  lsi	LSI Corp. (LSI Logic)
  lwn	Liebherr-Werk Nenzing GmbH
  macnica	Macnica Americas
--- 
-2.12.0
-

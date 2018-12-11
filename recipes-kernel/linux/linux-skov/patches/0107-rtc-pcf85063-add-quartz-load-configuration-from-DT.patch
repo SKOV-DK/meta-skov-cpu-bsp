@@ -1,7 +1,6 @@
-From ee8dea787b7faeff37f637468356e9fad8a738f6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Fri, 7 Sep 2018 06:58:38 +0200
-Subject: [PATCH 106/110] rtc: pcf85063: add quartz load configuration from DT
+Subject: [PATCH] rtc: pcf85063: add quartz load configuration from DT
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -77,6 +76,3 @@ index 283c2335b01b..38163446664f 100644
  	rtc = devm_rtc_device_register(&client->dev,
  				       pcf85063_driver.driver.name,
  				       &pcf85063_rtc_ops, THIS_MODULE);
--- 
-2.12.0
-

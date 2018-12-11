@@ -1,7 +1,6 @@
-From a0542e6c1c7e290d04be6d87a84ceea91787a349 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Sat, 8 Sep 2018 11:22:24 +0200
-Subject: [PATCH 110/110] drm: panel: add Seiko 70WVW2T 7" simple panel
+Subject: [PATCH] drm: panel: add Seiko 70WVW2T 7" simple panel
 
 The Seiko 70WVW2T is a discontinued product,
 but may be used somewhere.
@@ -48,16 +47,13 @@ index 8f396afea918..295c33a10ced 100644
  static const struct drm_display_mode starry_kr122ea0sra_mode = {
  	.clock = 147000,
  	.hdisplay = 1920,
-@@ -2605,6 +2630,9 @@ static const struct of_device_id platform_of_match[] = {
+@@ -2604,6 +2629,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
  		.compatible = "shelly,sca07010-bfn-lnn",
  		.data = &shelly_sca07010_bfn_lnn,
- 	}, {
++	}, {
 +		.compatible = "sii,70wvw2t",
 +		.data = &sii_70wvw2t,
-+	}, {
+ 	}, {
  		.compatible = "starry,kr122ea0sra",
  		.data = &starry_kr122ea0sra,
- 	}, {
--- 
-2.12.0
-

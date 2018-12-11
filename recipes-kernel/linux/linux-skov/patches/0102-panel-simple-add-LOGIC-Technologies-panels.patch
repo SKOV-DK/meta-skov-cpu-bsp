@@ -1,7 +1,6 @@
-From 1cc5585373f31c1fbdc232b4ac40ac47f5b70f7c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Thu, 6 Sep 2018 22:28:27 +0200
-Subject: [PATCH 101/110] panel-simple: add LOGIC Technologies panels
+Subject: [PATCH] panel-simple: add LOGIC Technologies panels
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -95,19 +94,16 @@ index 97964f7f2ace..8f396afea918 100644
  static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
  	.clock = 30400,
  	.hdisplay = 800,
-@@ -2472,6 +2536,12 @@ static const struct of_device_id platform_of_match[] = {
+@@ -2471,6 +2535,12 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
  		.compatible = "lg,lp129qe",
  		.data = &lg_lp129qe,
- 	}, {
++	}, {
 +		.compatible = "logictechnologies,lttd800480070-l2rt",
 +		.data = &logic_techno_lttd800480070_l2rt,
 +	}, {
 +		.compatible = "logictechnologies,lttd800480070-l6wh-rt",
 +		.data = &logic_techno_lttd800480070_l6wh_rt,
-+	}, {
+ 	}, {
  		.compatible = "mitsubishi,aa070mc01-ca1",
  		.data = &mitsubishi_aa070mc01,
- 	}, {
--- 
-2.12.0
-

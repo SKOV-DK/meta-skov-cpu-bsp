@@ -1,7 +1,6 @@
-From 7d52b8cb0cd5b414287c91a76df2a9112bdbaacb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
 Date: Fri, 7 Sep 2018 06:55:07 +0200
-Subject: [PATCH 105/110] rtc: pcf8523: add quartz load configuration from DT
+Subject: [PATCH] rtc: pcf8523: add quartz load configuration from DT
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -55,6 +54,3 @@ index 453615f8ac9a..3c19b4d21a2d 100644
  	if (err < 0)
  		return err;
  
--- 
-2.12.0
-

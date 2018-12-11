@@ -1,0 +1,78 @@
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sat, 8 Sep 2018 11:16:46 +0200
+Subject: [PATCH] dt-bindings: panel: rename seiko,43wvf1g to match compatible
+
+It is common practice to name the files according
+to their compatible.
+So rename the binding file to match the sii,43wvf1g
+compatible string.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Cc: Thierry Reding <thierry.reding@gmail.com>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+---
+ .../bindings/display/panel/seiko,43wvf1g.txt       | 23 ----------------------
+ .../bindings/display/panel/sii,43wvf1g.txt         | 23 ++++++++++++++++++++++
+ 2 files changed, 23 insertions(+), 23 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt
+ create mode 100644 Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt
+
+diff --git a/Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt b/Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt
+deleted file mode 100644
+index aae57ef36cdd..000000000000
+--- a/Documentation/devicetree/bindings/display/panel/seiko,43wvf1g.txt
++++ /dev/null
+@@ -1,23 +0,0 @@
+-Seiko Instruments Inc. 4.3" WVGA (800 x RGB x 480) TFT with Touch-Panel
+-
+-Required properties:
+-- compatible: should be "sii,43wvf1g".
+-- "dvdd-supply": 3v3 digital regulator.
+-- "avdd-supply": 5v analog regulator.
+-
+-Optional properties:
+-- backlight: phandle for the backlight control.
+-
+-Example:
+-
+-	panel {
+-		compatible = "sii,43wvf1g";
+-		backlight = <&backlight_display>;
+-		dvdd-supply = <&reg_lcd_3v3>;
+-		avdd-supply = <&reg_lcd_5v>;
+-		port {
+-			panel_in: endpoint {
+-				remote-endpoint = <&display_out>;
+-			};
+-		};
+-	};
+diff --git a/Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt b/Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt
+new file mode 100644
+index 000000000000..aae57ef36cdd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/display/panel/sii,43wvf1g.txt
+@@ -0,0 +1,23 @@
++Seiko Instruments Inc. 4.3" WVGA (800 x RGB x 480) TFT with Touch-Panel
++
++Required properties:
++- compatible: should be "sii,43wvf1g".
++- "dvdd-supply": 3v3 digital regulator.
++- "avdd-supply": 5v analog regulator.
++
++Optional properties:
++- backlight: phandle for the backlight control.
++
++Example:
++
++	panel {
++		compatible = "sii,43wvf1g";
++		backlight = <&backlight_display>;
++		dvdd-supply = <&reg_lcd_3v3>;
++		avdd-supply = <&reg_lcd_5v>;
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&display_out>;
++			};
++		};
++	};

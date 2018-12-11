@@ -1,0 +1,25 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 11 Dec 2018 15:18:58 +0100
+Subject: [PATCH] Release 4.19/customers/skov/imx6/20181211-1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 2b458801ba74..dd911ccbf343 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 4
+ PATCHLEVEL = 19
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc1
++EXTRAVERSION = -rc1-20181211-1
+ NAME = Merciless Moray
+ 
+ # *DOCUMENTATION*

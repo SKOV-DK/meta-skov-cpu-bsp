@@ -1,7 +1,6 @@
-From 1773490585df96966111dd02c6c1456a454619b5 Mon Sep 17 00:00:00 2001
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Thu, 6 Sep 2018 22:09:57 +0200
-Subject: [PATCH 2/2] imx6-cpu: add SKOV specific skov_version driver
+Subject: [PATCH] imx6-cpu: add SKOV specific skov_version driver
 
 The skov_version driver provide access
 to the actual HW version in sysfs.
@@ -389,6 +388,3 @@ index 000000000000..2e7613eae0bd
 +MODULE_LICENSE("GPL");
 +MODULE_AUTHOR("Søren Andersen <san@rosetechnology.dk");
 +MODULE_DESCRIPTION("Version Control");
--- 
-2.12.0
-
