@@ -1,16 +1,16 @@
 # umpf-base: v4.19.8
 # umpf-name: 4.19/customers/skov/imx6
-# umpf-version: 4.19/customers/skov/imx6/20181212-1
+# umpf-version: 4.19/customers/skov/imx6/20181212-2
 # umpf-topic: v4.19/customers/skov/imx6_project_specific
 # umpf-hashinfo: b5010bb1e250a336ed822bbdf748fdf4e6f06142
-# umpf-topic-range: 178574b66509c9ff7df4ad26c84a8884567e93b4..a641d02ff7dfada141755d6597d4cd6a4a0cb336
+# umpf-topic-range: 178574b66509c9ff7df4ad26c84a8884567e93b4..44c8027baa5309aa809287562ca776b1542de687
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   "
 # umpf-topic: v4.19/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: d9940c21073bc07816ab532cda39237a49d260a4
-# umpf-topic-range: a641d02ff7dfada141755d6597d4cd6a4a0cb336..27235743e174dcd77ee3062ab31ce6207b7f9182
+# umpf-topic-range: 44c8027baa5309aa809287562ca776b1542de687..9a10dd770ef3102bbcba78740f52475b9bb2ccc4
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -26,7 +26,7 @@ SRC_URI += "\
   "
 # umpf-topic: v4.19/topic/etnaviv
 # umpf-hashinfo: f3a03093edf8fe8ca01ee44956feaeb5a03032f2
-# umpf-topic-range: 27235743e174dcd77ee3062ab31ce6207b7f9182..3777d2e900b78fbbf25b7bc742e0a00d576ffbc3
+# umpf-topic-range: 9a10dd770ef3102bbcba78740f52475b9bb2ccc4..716eaa545a5de2e13aee2bd9c2c989b189b00a1a
 SRC_URI += "\
   file://patches/0201-drm-etnaviv-kill-active-fence-tracking.patch \
   file://patches/0202-drm-etnaviv-consolidate-hardware-fence-handling-in-e.patch \
@@ -52,7 +52,7 @@ SRC_URI += "\
   "
 # umpf-topic: v4.19/topic/coda
 # umpf-hashinfo: f041edbef475826a9d6ba160f4e2ce957b8ffd2b
-# umpf-topic-range: 3777d2e900b78fbbf25b7bc742e0a00d576ffbc3..e16405d9864819110bd1319ee4cb5093d45e50f3
+# umpf-topic-range: 716eaa545a5de2e13aee2bd9c2c989b189b00a1a..092404671334b4d3e82c5ae3638d7cb6844f85f6
 SRC_URI += "\
   file://patches/0301-media-coda-reduce-minimum-frame-size-to-48x16-pixels.patch \
   file://patches/0302-media-coda-hold-back-decoder-jobs-until-we-have-at-l.patch \
@@ -110,9 +110,17 @@ SRC_URI += "\
   file://patches/0354-media-coda-use-macroblock-tiling-on-CODA960-only.patch \
   file://patches/0355-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   "
-# umpf-release: 4.19/customers/skov/imx6/20181212-1
-# umpf-topic-range: e16405d9864819110bd1319ee4cb5093d45e50f3..35f3fb5457f9e4dee54eb26656cdbe7c5e18980f
+# umpf-topic: v4.19/topic/drm-sched-accounting
+# umpf-hashinfo: 02230e2fa9afbad0bede6a712e5a51523d968202
+# umpf-topic-range: 092404671334b4d3e82c5ae3638d7cb6844f85f6..4aa82dee8c42afc4373797b77bff0d2386fccaa6
 SRC_URI += "\
-  file://patches/0401-Release-4.19-customers-skov-imx6-20181212-1.patch \
+  file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
+  file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
+  file://patches/0403-drm-sched-make-fence-ops-static.patch \
+  "
+# umpf-release: 4.19/customers/skov/imx6/20181212-2
+# umpf-topic-range: 4aa82dee8c42afc4373797b77bff0d2386fccaa6..d2f79fb48843d0f639a70c1c3ba17d746c7c196f
+SRC_URI += "\
+  file://patches/0501-Release-4.19-customers-skov-imx6-20181212-2.patch \
   "
 # umpf-end

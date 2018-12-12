@@ -1,6 +1,6 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 12 Dec 2018 11:40:45 +0100
-Subject: [PATCH] Release 4.19/customers/skov/imx6/20181212-1
+Date: Wed, 12 Dec 2018 14:18:26 +0100
+Subject: [PATCH] Release 4.19/customers/skov/imx6/20181212-2
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -11,7 +11,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 34bc4c752c49..4b4cca8f0a42 100644
+index 34bc4c752c49..5f9863423022 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -19,7 +19,7 @@ index 34bc4c752c49..4b4cca8f0a42 100644
  PATCHLEVEL = 19
  SUBLEVEL = 8
 -EXTRAVERSION =
-+EXTRAVERSION =-20181212-1
++EXTRAVERSION =-20181212-2
  NAME = "People's Front"
  
  # *DOCUMENTATION*
