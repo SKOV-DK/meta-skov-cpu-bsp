@@ -8,7 +8,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 77a70e8fc175..58cccec4d6fd 100644
+index 00595dcb3502..fe0519cfa713 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -1360,7 +1360,7 @@ static int coda_job_ready(void *m2m_priv)

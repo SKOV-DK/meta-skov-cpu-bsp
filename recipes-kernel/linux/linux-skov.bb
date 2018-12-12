@@ -8,15 +8,15 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "4.19-rc1"
+LINUX_VERSION = "4.19.8"
 
-SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
+SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig"
 
 require linux-skov/patches/series.inc
 
-SRC_URI[md5sum] = "efe2a53ff4b045387a7ebf0059862e0a"
-SRC_URI[sha256sum] = "e5f1311b0be8ab5779923515cfea3e71f9d5f6495a3533626e5982add3eb8991"
+SRC_URI[md5sum] = "52f552cea1863c928cb8b9dd09cdaf29"
+SRC_URI[sha256sum] = "d540d066f307f13f0cfe7e097373cd1af2cc4866b5e36a503775b4e69167e171"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 

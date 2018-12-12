@@ -11,7 +11,7 @@ Signed-off-by: Michael Tretter <m.tretter@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index c4cdcf64765c..926cc751f9d6 100644
+index b86e8f00b40a..bbe6b99769b2 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -1810,7 +1810,7 @@ static int __coda_start_decoding(struct coda_ctx *ctx)

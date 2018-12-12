@@ -1,0 +1,120 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 15 Oct 2018 16:08:45 +0200
+Subject: [PATCH] drm/etnaviv: replace MMU flush marker with flush sequence
+
+If a MMU is shared between multiple GPUs, all of them need to flush their
+TLBs, so a single marker that gets reset on the first flush won't do.
+Replace the flush marker with a sequence number, so that it's possible to
+check if the TLB is in sync with the current page table state for each GPU.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_buffer.c | 9 +++++----
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h    | 1 +
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.c    | 6 +++---
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.h    | 2 +-
+ 4 files changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_buffer.c b/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
+index 401adf905d95..d52c01c195bd 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
+@@ -313,6 +313,7 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 	u32 return_target, return_dwords;
+ 	u32 link_target, link_dwords;
+ 	bool switch_context = gpu->exec_state != exec_state;
++	bool need_flush = gpu->flush_seq != gpu->mmu->flush_seq;
+ 
+ 	lockdep_assert_held(&gpu->lock);
+ 
+@@ -327,14 +328,14 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 	 * need to append a mmu flush load state, followed by a new
+ 	 * link to this buffer - a total of four additional words.
+ 	 */
+-	if (gpu->mmu->need_flush || switch_context) {
++	if (need_flush || switch_context) {
+ 		u32 target, extra_dwords;
+ 
+ 		/* link command */
+ 		extra_dwords = 1;
+ 
+ 		/* flush command */
+-		if (gpu->mmu->need_flush) {
++		if (need_flush) {
+ 			if (gpu->mmu->version == ETNAVIV_IOMMU_V1)
+ 				extra_dwords += 1;
+ 			else
+@@ -347,7 +348,7 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 
+ 		target = etnaviv_buffer_reserve(gpu, buffer, extra_dwords);
+ 
+-		if (gpu->mmu->need_flush) {
++		if (need_flush) {
+ 			/* Add the MMU flush */
+ 			if (gpu->mmu->version == ETNAVIV_IOMMU_V1) {
+ 				CMD_LOAD_STATE(buffer, VIVS_GL_FLUSH_MMU,
+@@ -367,7 +368,7 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 					SYNC_RECIPIENT_PE);
+ 			}
+ 
+-			gpu->mmu->need_flush = false;
++			gpu->flush_seq = gpu->mmu->flush_seq;
+ 		}
+ 
+ 		if (switch_context) {
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index 263d033d3532..9136b0190a89 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -136,6 +136,7 @@ struct etnaviv_gpu {
+ 	int irq;
+ 
+ 	struct etnaviv_iommu *mmu;
++	unsigned int flush_seq;
+ 
+ 	/* Power Control: */
+ 	struct clk *clk_bus;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+index 070509a1f949..c4092c8def4f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+@@ -261,7 +261,7 @@ int etnaviv_iommu_map_gem(struct etnaviv_iommu *mmu,
+ 	}
+ 
+ 	list_add_tail(&mapping->mmu_node, &mmu->mappings);
+-	mmu->need_flush = true;
++	mmu->flush_seq++;
+ unlock:
+ 	mutex_unlock(&mmu->lock);
+ 
+@@ -280,7 +280,7 @@ void etnaviv_iommu_unmap_gem(struct etnaviv_iommu *mmu,
+ 		etnaviv_iommu_remove_mapping(mmu, mapping);
+ 
+ 	list_del(&mapping->mmu_node);
+-	mmu->need_flush = true;
++	mmu->flush_seq++;
+ 	mutex_unlock(&mmu->lock);
+ }
+ 
+@@ -365,7 +365,7 @@ int etnaviv_iommu_get_suballoc_va(struct etnaviv_iommu *mmu,
+ 	}
+ 
+ 	list_add_tail(&mapping->mmu_node, &mmu->mappings);
+-	mmu->need_flush = true;
++	mmu->flush_seq++;
+ unlock:
+ 	mutex_unlock(&mmu->lock);
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+index fe1c9d6b9334..34afe25df9ca 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+@@ -48,7 +48,7 @@ struct etnaviv_iommu {
+ 	struct mutex lock;
+ 	struct list_head mappings;
+ 	struct drm_mm mm;
+-	bool need_flush;
++	unsigned int flush_seq;
+ };
+ 
+ struct etnaviv_gem_object;

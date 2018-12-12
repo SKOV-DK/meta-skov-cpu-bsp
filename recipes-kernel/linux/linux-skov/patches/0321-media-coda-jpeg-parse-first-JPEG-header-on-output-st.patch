@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 37 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 6c976584063c..461fd1b0b6f3 100644
+index efb2b4770de6..55b8bb1fcf5b 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -470,8 +470,10 @@ static int coda_enum_fmt(struct file *file, void *priv,

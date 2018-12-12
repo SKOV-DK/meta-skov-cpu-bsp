@@ -8,7 +8,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index d9fa2b2c19b2..d8866a2703aa 100644
+index 48046a2dbdcf..81b39cd9c3da 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -257,6 +257,8 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,

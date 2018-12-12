@@ -1,0 +1,43 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 28 Nov 2018 11:24:17 +0100
+Subject: [PATCH] media: v4l2: clarify H.264 loop filter offset controls
+
+The venus and s5p-mfc drivers add the loop filter alpha/beta offset
+controls V4L2_CID_MPEG_VIDEO_H264_LOOP_FILTER_ALPHA/BETA with a range of
+-6 to +6, inclusive. This is exactly the range specified for the slice
+header fields slice_alpha_c0_offset_div2 and slice_beta_offset_div2,
+which store half the actual filter offsets FilterOffsetA/B.
+
+Clarify that this control contains the halved offsets.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+I assume that the venus and s5p-mfc drivers use the loop filter control
+values directly as halved filter offsets, because of the ranges. If this
+is not the case, the documentation should be changed to clarify that the
+control values correspond to FilterOffsetA/B directly, instead.
+---
+ Documentation/media/uapi/v4l/extended-controls.rst | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/Documentation/media/uapi/v4l/extended-controls.rst b/Documentation/media/uapi/v4l/extended-controls.rst
+index 9f7312bf3365..fba86598e1ad 100644
+--- a/Documentation/media/uapi/v4l/extended-controls.rst
++++ b/Documentation/media/uapi/v4l/extended-controls.rst
+@@ -1110,10 +1110,16 @@ enum v4l2_mpeg_video_h264_loop_filter_mode -
+ 
+ ``V4L2_CID_MPEG_VIDEO_H264_LOOP_FILTER_ALPHA (integer)``
+     Loop filter alpha coefficient, defined in the H264 standard.
++    This value corresponds to the slice_alpha_c0_offset_div2 slice header
++    field, and should be in the range of -6 to +6, inclusive. The actual alpha
++    offset FilterOffsetA is twice this value.
+     Applicable to the H264 encoder.
+ 
+ ``V4L2_CID_MPEG_VIDEO_H264_LOOP_FILTER_BETA (integer)``
+     Loop filter beta coefficient, defined in the H264 standard.
++    This corresponds to the slice_beta_offset_div2 slice header field, and
++    should be in the range of -6 to +6, inclusive. The actual beta offset
++    FilterOffsetB is twice this value.
+     Applicable to the H264 encoder.
+ 
+ .. _v4l2-mpeg-video-h264-entropy-mode:

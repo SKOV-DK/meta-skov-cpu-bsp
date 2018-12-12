@@ -1,0 +1,67 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 1 Nov 2018 14:21:33 +0100
+Subject: [PATCH] media: coda: implement ENUM_FRAMEINTERVALS
+
+v4l2-compliance complains about S_PARM being supported, but not
+ENUM_FRAMEINTERVALS.
+Report a continuous frame interval even though the hardware only
+supports 16-bit numerator and denominator, with min/max values
+that can be programmed into the mailbox registers.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 34 +++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index f44cf7f9e9b7..62ae909ad479 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1144,6 +1144,38 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 	return ret;
+ }
+ 
++static int coda_enum_frameintervals(struct file *file, void *fh,
++				    struct v4l2_frmivalenum *f)
++{
++	struct coda_ctx *ctx = fh_to_ctx(fh);
++	int i;
++
++	if (f->index)
++		return -EINVAL;
++
++	/* Disallow YUYV if the vdoa is not available */
++	if (!ctx->vdoa && f->pixel_format == V4L2_PIX_FMT_YUYV)
++		return -EINVAL;
++
++	for (i = 0; i < CODA_MAX_FORMATS; i++) {
++		if (f->pixel_format == ctx->cvd->src_formats[i] ||
++		    f->pixel_format == ctx->cvd->dst_formats[i])
++			break;
++	}
++	if (i == CODA_MAX_FORMATS)
++		return -EINVAL;
++
++	f->type = V4L2_FRMIVAL_TYPE_CONTINUOUS;
++	f->stepwise.min.numerator = 1;
++	f->stepwise.min.denominator = 65535;
++	f->stepwise.max.numerator = 65536;
++	f->stepwise.max.denominator = 1;
++	f->stepwise.step.numerator = 1;
++	f->stepwise.step.denominator = 1;
++
++	return 0;
++}
++
+ static int coda_g_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
+ {
+ 	struct coda_ctx *ctx = fh_to_ctx(fh);
+@@ -1306,6 +1338,8 @@ static const struct v4l2_ioctl_ops coda_ioctl_ops = {
+ 	.vidioc_g_parm		= coda_g_parm,
+ 	.vidioc_s_parm		= coda_s_parm,
+ 
++	.vidioc_enum_frameintervals = coda_enum_frameintervals,
++
+ 	.vidioc_subscribe_event = coda_subscribe_event,
+ 	.vidioc_unsubscribe_event = v4l2_event_unsubscribe,
+ };

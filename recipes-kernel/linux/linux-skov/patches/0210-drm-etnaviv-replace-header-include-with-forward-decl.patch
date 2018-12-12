@@ -1,0 +1,53 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 15 Oct 2018 12:49:07 +0200
+Subject: [PATCH] drm/etnaviv: replace header include with forward declaration
+
+The etnaviv_gpu header only needs to know about the pointer types, so
+replace by a forward declaration and only include the headers where needed.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 2 ++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h | 5 ++---
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 49a62322f5c7..61eb1dc997fd 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -3,10 +3,12 @@
+  * Copyright (C) 2015-2018 Etnaviv Project
+  */
+ 
++#include <linux/clk.h>
+ #include <linux/component.h>
+ #include <linux/dma-fence.h>
+ #include <linux/moduleparam.h>
+ #include <linux/of_device.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/thermal.h>
+ 
+ #include "etnaviv_cmdbuf.h"
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index 5a01743bfee0..30b3edc85b03 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -6,9 +6,6 @@
+ #ifndef __ETNAVIV_GPU_H__
+ #define __ETNAVIV_GPU_H__
+ 
+-#include <linux/clk.h>
+-#include <linux/regulator/consumer.h>
+-
+ #include "etnaviv_cmdbuf.h"
+ #include "etnaviv_drv.h"
+ 
+@@ -88,6 +85,8 @@ struct etnaviv_event {
+ 
+ struct etnaviv_cmdbuf_suballoc;
+ struct etnaviv_cmdbuf;
++struct regulator;
++struct clk;
+ 
+ #define ETNA_NR_EVENTS 30
+ 

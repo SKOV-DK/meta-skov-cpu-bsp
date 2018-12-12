@@ -1,0 +1,81 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 1 Nov 2018 15:34:57 +0100
+Subject: [PATCH] media: coda: fail S_SELECTION for read-only targets
+
+v4l2-compose complains if S_SELECTION returns 0 for read-only targets.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 53 +++++++++++++++++--------------
+ 1 file changed, 30 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index c42212de5ffe..f0e36d28fa39 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1018,35 +1018,42 @@ static int coda_s_selection(struct file *file, void *fh,
+ 	struct coda_ctx *ctx = fh_to_ctx(fh);
+ 	struct coda_q_data *q_data;
+ 
+-	if (ctx->inst_type == CODA_INST_ENCODER &&
+-	    s->type == V4L2_BUF_TYPE_VIDEO_OUTPUT &&
+-	    s->target == V4L2_SEL_TGT_CROP) {
+-		q_data = get_q_data(ctx, s->type);
+-		if (!q_data)
+-			return -EINVAL;
++	switch (s->target) {
++	case V4L2_SEL_TGT_CROP:
++		if (ctx->inst_type == CODA_INST_ENCODER &&
++		    s->type == V4L2_BUF_TYPE_VIDEO_OUTPUT) {
++			q_data = get_q_data(ctx, s->type);
++			if (!q_data)
++				return -EINVAL;
+ 
+-		s->r.left = 0;
+-		s->r.top = 0;
+-		s->r.width = clamp(s->r.width, 2U, q_data->width);
+-		s->r.height = clamp(s->r.height, 2U, q_data->height);
++			s->r.left = 0;
++			s->r.top = 0;
++			s->r.width = clamp(s->r.width, 2U, q_data->width);
++			s->r.height = clamp(s->r.height, 2U, q_data->height);
+ 
+-		if (s->flags & V4L2_SEL_FLAG_LE) {
+-			s->r.width = round_up(s->r.width, 2);
+-			s->r.height = round_up(s->r.height, 2);
+-		} else {
+-			s->r.width = round_down(s->r.width, 2);
+-			s->r.height = round_down(s->r.height, 2);
+-		}
++			if (s->flags & V4L2_SEL_FLAG_LE) {
++				s->r.width = round_up(s->r.width, 2);
++				s->r.height = round_up(s->r.height, 2);
++			} else {
++				s->r.width = round_down(s->r.width, 2);
++				s->r.height = round_down(s->r.height, 2);
++			}
+ 
+-		q_data->rect = s->r;
++			q_data->rect = s->r;
+ 
+-		coda_dbg(1, ctx, "Setting crop rectangle: %dx%d\n",
+-			 s->r.width, s->r.height);
++			coda_dbg(1, ctx, "Setting crop rectangle: %dx%d\n",
++				 s->r.width, s->r.height);
+ 
+-		return 0;
++			return 0;
++		}
++		/* else fall through */
++	case V4L2_SEL_TGT_NATIVE_SIZE:
++	case V4L2_SEL_TGT_COMPOSE:
++		return coda_g_selection(file, fh, s);
++	default:
++		/* v4l2-compose expects S_SELECTION to fail for read-only targets */
++		return -EINVAL;
+ 	}
+-
+-	return coda_g_selection(file, fh, s);
+ }
+ 
+ static int coda_try_encoder_cmd(struct file *file, void *fh,

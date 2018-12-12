@@ -9,7 +9,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 26 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index c8153dc94ba1..6c976584063c 100644
+index f40e1a18c0af..efb2b4770de6 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -437,6 +437,12 @@ static int coda_querycap(struct file *file, void *priv,

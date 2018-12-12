@@ -1,0 +1,67 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 23 Nov 2018 16:26:04 +0100
+Subject: [PATCH] drm/etnaviv: move job context pointer to etnaviv_gem_submit
+
+The context isn't really related to the cmdbuf, but is a property of
+the job. This has been missed when moving to a properly refcounted
+etnaviv_gem_submit.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h     | 2 --
+ drivers/gpu/drm/etnaviv/etnaviv_gem.h        | 1 +
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c | 2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_sched.c      | 2 +-
+ 4 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
+index acb68c698363..4d5d1a77eb2a 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
+@@ -15,8 +15,6 @@ struct etnaviv_perfmon_request;
+ struct etnaviv_cmdbuf {
+ 	/* suballocator this cmdbuf is allocated from */
+ 	struct etnaviv_cmdbuf_suballoc *suballoc;
+-	/* user context key, must be unique between all active users */
+-	struct etnaviv_file_private *ctx;
+ 	/* cmdbuf properties */
+ 	int suballoc_offset;
+ 	void *vaddr;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.h b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+index 76079c2291f8..f0abb744ef95 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -95,6 +95,7 @@ struct etnaviv_gem_submit_bo {
+ struct etnaviv_gem_submit {
+ 	struct drm_sched_job sched_job;
+ 	struct kref refcount;
++	struct etnaviv_file_private *ctx;
+ 	struct etnaviv_gpu *gpu;
+ 	struct dma_fence *out_fence, *in_fence;
+ 	int out_fence_id;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+index e7b3cba08b09..ae0531460571 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+@@ -560,7 +560,7 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 	if (ret)
+ 		goto err_submit_objects;
+ 
+-	submit->cmdbuf.ctx = file->driver_priv;
++	submit->ctx = file->driver_priv;
+ 	submit->exec_state = args->exec_state;
+ 	submit->flags = args->flags;
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+index d34f63c31242..a66f5fbdd3de 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -150,7 +150,7 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+ 	mutex_lock(&submit->gpu->sched_lock);
+ 
+ 	ret = drm_sched_job_init(&submit->sched_job, sched_entity,
+-				 submit->cmdbuf.ctx);
++				 submit->ctx);
+ 	if (ret)
+ 		goto out_unlock;
+ 

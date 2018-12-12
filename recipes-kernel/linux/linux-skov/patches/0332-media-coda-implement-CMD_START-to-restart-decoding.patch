@@ -14,7 +14,7 @@ Signed-off-by: Michael Tretter <m.tretter@pengutronix.de>
  1 file changed, 29 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index d92a3bb0da2c..a63fa958af44 100644
+index 9c87ec97b4fe..e171a05bf629 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -1091,14 +1091,17 @@ static int coda_encoder_cmd(struct file *file, void *fh,

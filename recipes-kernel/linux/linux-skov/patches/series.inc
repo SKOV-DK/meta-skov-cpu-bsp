@@ -1,16 +1,16 @@
-# umpf-base: v4.19-rc1
+# umpf-base: v4.19.8
 # umpf-name: 4.19/customers/skov/imx6
-# umpf-version: 4.19/customers/skov/imx6/20181211-1
+# umpf-version: 4.19/customers/skov/imx6/20181212-1
 # umpf-topic: v4.19/customers/skov/imx6_project_specific
-# umpf-hashinfo: a0caf01a592773548f6fde3a1b8b4b8a24aabb3a
-# umpf-topic-range: 5b394b2ddf0347bef56e50c69a58773c94343ff3..a0caf01a592773548f6fde3a1b8b4b8a24aabb3a
+# umpf-hashinfo: b5010bb1e250a336ed822bbdf748fdf4e6f06142
+# umpf-topic-range: 178574b66509c9ff7df4ad26c84a8884567e93b4..a641d02ff7dfada141755d6597d4cd6a4a0cb336
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   "
 # umpf-topic: v4.19/customers/skov/imx6_suitable_for_upstream
-# umpf-hashinfo: 7adc4b31464d517d12bd7f3d405cb83f5983fce8
-# umpf-topic-range: a0caf01a592773548f6fde3a1b8b4b8a24aabb3a..fc641fc74dccc755d466daa754075dafa8c39869
+# umpf-hashinfo: d9940c21073bc07816ab532cda39237a49d260a4
+# umpf-topic-range: a641d02ff7dfada141755d6597d4cd6a4a0cb336..27235743e174dcd77ee3062ab31ce6207b7f9182
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -25,18 +25,34 @@ SRC_URI += "\
   file://patches/0111-drm-panel-add-Seiko-70WVW2T-7-simple-panel.patch \
   "
 # umpf-topic: v4.19/topic/etnaviv
-# umpf-hashinfo: eb6c4f4b7457e5717f8fca233507292f63ad1e67
-# umpf-topic-range: fc641fc74dccc755d466daa754075dafa8c39869..add565e6b418f374db9c4ecad648908a4bad0a57
+# umpf-hashinfo: f3a03093edf8fe8ca01ee44956feaeb5a03032f2
+# umpf-topic-range: 27235743e174dcd77ee3062ab31ce6207b7f9182..3777d2e900b78fbbf25b7bc742e0a00d576ffbc3
 SRC_URI += "\
-  file://patches/0201-drm-etnaviv-init-DMA-ops-for-virtual-master-device.patch \
-  file://patches/0202-drm-etnaviv-add-GC7000-sensitive-states.patch \
-  file://patches/0203-drm-etnaviv-support-relocations-to-BOs.patch \
+  file://patches/0201-drm-etnaviv-kill-active-fence-tracking.patch \
+  file://patches/0202-drm-etnaviv-consolidate-hardware-fence-handling-in-e.patch \
+  file://patches/0203-drm-etnaviv-remove-unnecessary-local-irq-state-save-.patch \
   file://patches/0204-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0205-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
+  file://patches/0206-drm-etnaviv-add-GC7000-sensitive-states.patch \
+  file://patches/0207-drm-etnaviv-support-relocations-to-BOs.patch \
+  file://patches/0208-drm-etnaviv-avoid-false-sharing-of-fence-spinlock.patch \
+  file://patches/0209-drm-etnaviv-avoid-false-sharing-on-fence-lock.patch \
+  file://patches/0210-drm-etnaviv-replace-header-include-with-forward-decl.patch \
+  file://patches/0211-drm-etnaviv-remove-lastctx-member-from-gpu-struct.patch \
+  file://patches/0212-drm-etnaviv-move-job-context-pointer-to-etnaviv_gem_.patch \
+  file://patches/0213-drm-etnaviv-mmuv2-don-t-map-zero-page.patch \
+  file://patches/0214-drm-etnaviv-split-out-cmdbuf-mapping-into-address-sp.patch \
+  file://patches/0215-drm-etnaviv-share-a-single-cmdbuf-suballoc-region-ac.patch \
+  file://patches/0216-drm-etnaviv-replace-MMU-flush-marker-with-flush-sequ.patch \
+  file://patches/0217-drm-etnaviv-rework-MMU-handling.patch \
+  file://patches/0218-drm-etnaviv-split-out-starting-of-FE-idle-loop.patch \
+  file://patches/0219-drm-etnaviv-provide-MMU-context-to-etnaviv_gem_mappi.patch \
+  file://patches/0220-drm-etnaviv-implement-per-process-address-spaces-on-.patch \
+  file://patches/0221-drm-etnaviv-dump-only-failing-submit.patch \
   "
 # umpf-topic: v4.19/topic/coda
-# umpf-hashinfo: 708edcdb3752aa8424574ef56b4d6eb2f3b461ae
-# umpf-topic-range: add565e6b418f374db9c4ecad648908a4bad0a57..3f502cd0d995713dab97e5ce05966cbc0b1cd396
+# umpf-hashinfo: f041edbef475826a9d6ba160f4e2ce957b8ffd2b
+# umpf-topic-range: 3777d2e900b78fbbf25b7bc742e0a00d576ffbc3..e16405d9864819110bd1319ee4cb5093d45e50f3
 SRC_URI += "\
   file://patches/0301-media-coda-reduce-minimum-frame-size-to-48x16-pixels.patch \
   file://patches/0302-media-coda-hold-back-decoder-jobs-until-we-have-at-l.patch \
@@ -72,12 +88,31 @@ SRC_URI += "\
   file://patches/0332-media-coda-implement-CMD_START-to-restart-decoding.patch \
   file://patches/0333-media-coda-normalise-debug-output.patch \
   file://patches/0334-media-coda-jpeg-normalise-JPEG-debug-output.patch \
-  file://patches/0335-media-coda-don-t-overwrite-h.264-profile_idc-on-deco.patch \
-  file://patches/0336-media-coda-debut-output-when-setting-visible-size-vi.patch \
+  file://patches/0335-media-coda-debut-output-when-setting-visible-size-vi.patch \
+  file://patches/0336-media-coda-store-unmasked-fifo-position-in-meta.patch \
+  file://patches/0337-media-coda-improve-bitstream-payload-ready-check.patch \
+  file://patches/0338-media-coda-limit-queueing-into-internal-bitstream-bu.patch \
+  file://patches/0339-media-add-v4l2-stats-to-collect-simple-time-based-ac.patch \
+  file://patches/0340-media-coda-track-activity-using-v4l2-stats.patch \
+  file://patches/0341-media-coda-don-t-disable-IRQs-across-buffer-meta-han.patch \
+  file://patches/0342-media-coda-fix-memory-corruption-in-case-more-than-3.patch \
+  file://patches/0343-media-coda-set-V4L2_CAP_TIMEPERFRAME-flag-in-coda_s_.patch \
+  file://patches/0344-media-coda-implement-ENUM_FRAMEINTERVALS.patch \
+  file://patches/0345-media-coda-never-set-infinite-timeperframe.patch \
+  file://patches/0346-media-coda-fail-S_SELECTION-for-read-only-targets.patch \
+  file://patches/0347-media-coda-remove-unused-instances-list.patch \
+  file://patches/0348-media-v4l2-clarify-H.264-loop-filter-offset-controls.patch \
+  file://patches/0349-media-coda-fix-H.264-deblocking-filter-controls.patch \
+  file://patches/0350-media-v4l2-ctrl-Add-control-to-enable-h.264-constrai.patch \
+  file://patches/0351-media-v4l2-ctrl-Add-control-for-h.264-chroma-qp-offs.patch \
+  file://patches/0352-media-coda-Add-control-for-h.264-constrained-intra-p.patch \
+  file://patches/0353-media-coda-Add-control-for-h.264-chroma-qp-index-off.patch \
+  file://patches/0354-media-coda-use-macroblock-tiling-on-CODA960-only.patch \
+  file://patches/0355-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   "
-# umpf-release: 4.19/customers/skov/imx6/20181211-1
-# umpf-topic-range: 3f502cd0d995713dab97e5ce05966cbc0b1cd396..e474ca5606851fa37c1498bf01cd541462aea557
+# umpf-release: 4.19/customers/skov/imx6/20181212-1
+# umpf-topic-range: e16405d9864819110bd1319ee4cb5093d45e50f3..35f3fb5457f9e4dee54eb26656cdbe7c5e18980f
 SRC_URI += "\
-  file://patches/0401-Release-4.19-customers-skov-imx6-20181211-1.patch \
+  file://patches/0401-Release-4.19-customers-skov-imx6-20181212-1.patch \
   "
 # umpf-end

@@ -1,0 +1,212 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 10 Sep 2018 15:45:29 +0200
+Subject: [PATCH] media: coda: track activity using v4l2-stats
+
+Add simple time based activity tracking using v4l2-stats for the
+BIT processor, JPEG encoder/decoder, and VDOA units.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c    |  3 +++
+ drivers/media/platform/coda/coda-common.c | 15 +++++++++++++++
+ drivers/media/platform/coda/coda-jpeg.c   |  3 +++
+ drivers/media/platform/coda/coda.h        | 19 +++++++++++++++++++
+ drivers/media/platform/coda/imx-vdoa.c    | 20 ++++++++++++++++++++
+ 5 files changed, 60 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index c2e7595b68d9..3abf30513fa7 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -106,6 +106,7 @@ static void coda_command_async(struct coda_ctx *ctx, int cmd)
+ 	coda_write(dev, ctx->params.codec_mode_aux, CODA7_REG_BIT_RUN_AUX_STD);
+ 
+ 	trace_coda_bit_run(ctx, cmd);
++	coda_stats_run(&dev->bit_stats);
+ 
+ 	coda_write(dev, cmd, CODA_REG_BIT_RUN_COMMAND);
+ }
+@@ -118,6 +119,7 @@ static int coda_command_sync(struct coda_ctx *ctx, int cmd)
+ 	coda_command_async(ctx, cmd);
+ 	ret = coda_wait_timeout(dev);
+ 	trace_coda_bit_done(ctx);
++	coda_stats_done(&dev->bit_stats);
+ 
+ 	return ret;
+ }
+@@ -2416,6 +2418,7 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+ 	}
+ 
+ 	trace_coda_bit_done(ctx);
++	coda_stats_done(&dev->bit_stats);
+ 
+ 	if (ctx->aborting) {
+ 		coda_dbg(1, ctx, "task has been aborted\n");
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 160ff37566bd..36bd71924cd6 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -2746,12 +2746,24 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+ 		}
+ 	}
+ 
++	ret = v4l2_register_stats(&dev->bit_stats, "coda-bit");
++	if (ret)
++		goto rel_vfd;
++
++	if (dev->devtype->product == CODA_960) {
++		ret = v4l2_register_stats(&dev->jpeg_stats, "coda-jpeg");
++		if (ret)
++			goto unreg_bit;
++	}
++
+ 	v4l2_info(&dev->v4l2_dev, "codec registered as /dev/video[%d-%d]\n",
+ 		  dev->vfd[0].num, dev->vfd[i - 1].num);
+ 
+ 	pm_runtime_put_sync(&pdev->dev);
+ 	return;
+ 
++unreg_bit:
++	v4l2_unregister_stats(&dev->bit_stats);
+ rel_vfd:
+ 	while (--i >= 0)
+ 		video_unregister_device(&dev->vfd[i]);
+@@ -3094,6 +3106,9 @@ static int coda_remove(struct platform_device *pdev)
+ 	struct coda_dev *dev = platform_get_drvdata(pdev);
+ 	int i;
+ 
++	if (dev->devtype->product == CODA_960)
++		v4l2_unregister_stats(&dev->jpeg_stats);
++	v4l2_unregister_stats(&dev->bit_stats);
+ 	for (i = 0; i < ARRAY_SIZE(dev->vfd); i++) {
+ 		if (video_get_drvdata(&dev->vfd[i]))
+ 			video_unregister_device(&dev->vfd[i]);
+diff --git a/drivers/media/platform/coda/coda-jpeg.c b/drivers/media/platform/coda/coda-jpeg.c
+index 69aa984c9a0f..b52e74bea426 100644
+--- a/drivers/media/platform/coda/coda-jpeg.c
++++ b/drivers/media/platform/coda/coda-jpeg.c
+@@ -1299,6 +1299,7 @@ static int coda9_jpeg_prepare_encode(struct coda_ctx *ctx)
+ 	coda_write(dev, 0, CODA9_GDI_WPROT_RGN_EN);
+ 
+ 	trace_coda_jpeg_run(ctx, src_buf);
++	coda_stats_run(&dev->jpeg_stats);
+ 
+ 	coda_write(dev, 1, CODA9_REG_JPEG_PIC_START);
+ 
+@@ -1616,6 +1617,8 @@ v4l2_err(&dev->v4l2_dev, "word_ptr = %d bit_ptr = %d\n",
+ 		return IRQ_HANDLED;
+ 	}
+ 
++	coda_stats_done(&dev->jpeg_stats);
++
+ 	complete(&ctx->completion);
+ 
+ 	return IRQ_HANDLED;
+diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
+index 12175a986d20..b19ee52a4b3c 100644
+--- a/drivers/media/platform/coda/coda.h
++++ b/drivers/media/platform/coda/coda.h
+@@ -19,6 +19,7 @@
+ #include <linux/irqreturn.h>
+ #include <linux/mutex.h>
+ #include <linux/kfifo.h>
++#include <linux/timekeeping.h>
+ #include <linux/videodev2.h>
+ 
+ #include <media/v4l2-ctrls.h>
+@@ -97,6 +98,10 @@ struct coda_dev {
+ 	struct list_head	instances;
+ 	unsigned long		instance_mask;
+ 	struct dentry		*debugfs_root;
++
++	struct v4l2_stats	bit_stats;
++	struct v4l2_stats	jpeg_stats;
++	struct v4l2_stats	vdoa_stats;
+ };
+ 
+ struct coda_codec {
+@@ -350,4 +355,18 @@ extern const struct coda_context_ops coda9_jpeg_decode_ops;
+ irqreturn_t coda_irq_handler(int irq, void *data);
+ irqreturn_t coda9_jpeg_irq_handler(int irq, void *data);
+ 
++static inline void coda_stats_run(struct v4l2_stats *stats)
++{
++	__v4l2_stats_start(stats, ktime_get());
++}
++
++static inline void coda_stats_done(struct v4l2_stats *stats)
++{
++	ktime_t now = ktime_get();
++
++	spin_lock(&stats->lock);
++	__v4l2_stats_stop(stats, now);
++	spin_unlock(&stats->lock);
++}
++
+ #endif /* __CODA_H__ */
+diff --git a/drivers/media/platform/coda/imx-vdoa.c b/drivers/media/platform/coda/imx-vdoa.c
+index 96ab4b61669a..e4f6a37f20d9 100644
+--- a/drivers/media/platform/coda/imx-vdoa.c
++++ b/drivers/media/platform/coda/imx-vdoa.c
+@@ -24,6 +24,8 @@
+ #include <linux/videodev2.h>
+ #include <linux/slab.h>
+ 
++#include <media/v4l2-dev.h>
++
+ #include "imx-vdoa.h"
+ 
+ #define VDOA_NAME "imx-vdoa"
+@@ -87,6 +89,7 @@ struct vdoa_data {
+ 	struct device		*dev;
+ 	struct clk		*vdoa_clk;
+ 	void __iomem		*regs;
++	struct v4l2_stats	stats;
+ };
+ 
+ struct vdoa_q_data {
+@@ -130,6 +133,11 @@ static irqreturn_t vdoa_irq_handler(int irq, void *data)
+ 		dev_warn(vdoa->dev, "Spurious interrupt\n");
+ 	}
+ 	curr_ctx->completed_job++;
++
++	spin_lock(&vdoa->stats.lock);
++	__v4l2_stats_stop(&vdoa->stats, ktime_get());
++	spin_unlock(&vdoa->stats.lock);
++
+ 	complete(&curr_ctx->completion);
+ 
+ 	return IRQ_HANDLED;
+@@ -198,6 +206,10 @@ void vdoa_device_run(struct vdoa_ctx *ctx, dma_addr_t dst, dma_addr_t src)
+ 	val = round_up(src_q_data->bytesperline * src_q_data->height, 4096);
+ 	writel(val, vdoa->regs + VDOAVUBO);
+ 
++	spin_lock(&vdoa->stats.lock);
++	__v4l2_stats_start(&vdoa->stats, ktime_get());
++	spin_unlock(&vdoa->stats.lock);
++
+ 	/* Enable interrupts and start transfer */
+ 	writel(VDOAIE_EITERR | VDOAIE_EIEOT, vdoa->regs + VDOAIE);
+ 	writel(VDOASRR_START, vdoa->regs + VDOASRR);
+@@ -325,6 +337,10 @@ static int vdoa_probe(struct platform_device *pdev)
+ 		return ret;
+ 	}
+ 
++	ret = v4l2_register_stats(&vdoa->stats, "vdoa");
++	if (ret < 0)
++		return ret;
++
+ 	platform_set_drvdata(pdev, vdoa);
+ 
+ 	return 0;
+@@ -332,6 +348,10 @@ static int vdoa_probe(struct platform_device *pdev)
+ 
+ static int vdoa_remove(struct platform_device *pdev)
+ {
++	struct vdoa_data *vdoa = platform_get_drvdata(pdev);
++
++	v4l2_unregister_stats(&vdoa->stats);
++
+ 	return 0;
+ }
+ 

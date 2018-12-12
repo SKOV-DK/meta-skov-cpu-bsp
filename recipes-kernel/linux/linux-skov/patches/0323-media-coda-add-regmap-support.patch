@@ -12,7 +12,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 58 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 49a668f8ccbc..4fc0ee7f8795 100644
+index 9234ab6fa90a..9948fb30c279 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -25,6 +25,7 @@
@@ -40,7 +40,7 @@ index 49a668f8ccbc..4fc0ee7f8795 100644
  	v4l2_dbg(2, coda_debug, &dev->v4l2_dev,
  		 "%s: data=0x%x, reg=0x%x\n", __func__, data, reg);
  	return data;
-@@ -2720,6 +2721,48 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+@@ -2721,6 +2722,48 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
  	pm_runtime_put_sync(&pdev->dev);
  }
  
@@ -89,7 +89,7 @@ index 49a668f8ccbc..4fc0ee7f8795 100644
  enum coda_platform {
  	CODA_IMX27,
  	CODA_IMX51,
-@@ -2830,6 +2873,7 @@ static int coda_probe(struct platform_device *pdev)
+@@ -2831,6 +2874,7 @@ static int coda_probe(struct platform_device *pdev)
  	const struct platform_device_id *pdev_id;
  	struct coda_platform_data *pdata = pdev->dev.platform_data;
  	struct device_node *np = pdev->dev.of_node;
@@ -97,7 +97,7 @@ index 49a668f8ccbc..4fc0ee7f8795 100644
  	struct gen_pool *pool;
  	struct coda_dev *dev;
  	struct resource *res;
-@@ -2866,9 +2910,17 @@ static int coda_probe(struct platform_device *pdev)
+@@ -2867,9 +2911,17 @@ static int coda_probe(struct platform_device *pdev)
  
  	/* Get  memory for physical registers */
  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);

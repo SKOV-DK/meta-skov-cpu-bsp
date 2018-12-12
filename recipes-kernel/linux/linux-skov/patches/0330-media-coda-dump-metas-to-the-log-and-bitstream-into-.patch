@@ -10,11 +10,11 @@ bitstream into a device coredump for debugging purposes.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/media/platform/coda/coda-common.c | 34 +++++++++++++++++++++++++++++--
- 1 file changed, 32 insertions(+), 2 deletions(-)
+ drivers/media/platform/coda/coda-common.c | 37 +++++++++++++++++++++++++++++--
+ 1 file changed, 35 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index ab721bcb2c6e..d92a3bb0da2c 100644
+index 71e8c2ca4911..9c87ec97b4fe 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -14,6 +14,7 @@
@@ -25,7 +25,7 @@ index ab721bcb2c6e..d92a3bb0da2c 100644
  #include <linux/firmware.h>
  #include <linux/gcd.h>
  #include <linux/genalloc.h>
-@@ -1702,6 +1703,31 @@ void coda_free_aux_buf(struct coda_dev *dev,
+@@ -1702,6 +1703,34 @@ void coda_free_aux_buf(struct coda_dev *dev,
  	}
  }
  
@@ -36,11 +36,14 @@ index ab721bcb2c6e..d92a3bb0da2c 100644
 +	void *dump;
 +
 +	list_for_each_entry(meta, &ctx->buffer_meta_list, list) {
-+		char *buf = ctx->bitstream.vaddr + meta->start;
++		unsigned int mask = ctx->bitstream_fifo.kfifo.mask;
++		unsigned int meta_start = meta->start & mask;
++		unsigned int meta_end = meta->end & mask;
++		char *buf = ctx->bitstream.vaddr + meta_start;
 +
 +		v4l2_err(v4l2_dev,
 +			 "\tmeta %d: %u - %u (%02x %02x %02x %02x %02x)\n",
-+			 meta->sequence, meta->start, meta->end,
++			 meta->sequence, meta_start, meta_end,
 +			 buf[0], buf[1], buf[2], buf[3], buf[4]);
 +	}
 +
@@ -57,7 +60,7 @@ index ab721bcb2c6e..d92a3bb0da2c 100644
  static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  {
  	struct coda_ctx *ctx = vb2_get_drv_priv(q);
-@@ -1709,6 +1735,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -1709,6 +1738,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  	struct coda_q_data *q_data_src, *q_data_dst;
  	struct v4l2_m2m_buffer *m2m_buf, *tmp;
  	struct vb2_v4l2_buffer *buf;
@@ -65,7 +68,7 @@ index ab721bcb2c6e..d92a3bb0da2c 100644
  	struct list_head list;
  	int ret = 0;
  
-@@ -1725,8 +1752,11 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -1725,8 +1755,11 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  			coda_fill_bitstream(ctx, &list);
  			mutex_unlock(&ctx->bitstream_mutex);
  

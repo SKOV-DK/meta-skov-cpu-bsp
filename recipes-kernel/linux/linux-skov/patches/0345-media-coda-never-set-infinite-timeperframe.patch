@@ -1,0 +1,29 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 1 Nov 2018 14:49:20 +0100
+Subject: [PATCH] media: coda: never set infinite timeperframe
+
+v4l2-compliance complains if G_PARM returns 0 in the denominator.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 62ae909ad479..c42212de5ffe 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1220,10 +1220,10 @@ static void coda_approximate_timeperframe(struct v4l2_fract *timeperframe)
+ 		return;
+ 	}
+ 
+-	/* Upper bound is 65536/1, map everything above to infinity */
++	/* Upper bound is 65536/1 */
+ 	if (s.denominator == 0 || s.numerator / s.denominator > 65536) {
+-		timeperframe->numerator = 1;
+-		timeperframe->denominator = 0;
++		timeperframe->numerator = 65536;
++		timeperframe->denominator = 1;
+ 		return;
+ 	}
+ 

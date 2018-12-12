@@ -8,7 +8,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 58cccec4d6fd..93286832da4c 100644
+index fe0519cfa713..f4171bd24037 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -1726,6 +1726,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)

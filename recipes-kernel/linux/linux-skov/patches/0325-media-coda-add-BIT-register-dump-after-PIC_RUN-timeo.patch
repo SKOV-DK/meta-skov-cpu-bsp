@@ -14,7 +14,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 51 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index d8866a2703aa..c4cdcf64765c 100644
+index 81b39cd9c3da..b86e8f00b40a 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -374,6 +374,46 @@ void coda_bit_stream_end_flag(struct coda_ctx *ctx)
@@ -65,7 +65,7 @@ index d8866a2703aa..c4cdcf64765c 100644
  {
  	struct coda_dev *dev = ctx->dev;
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 4fc0ee7f8795..77a70e8fc175 100644
+index 9948fb30c279..00595dcb3502 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -1319,14 +1319,19 @@ static void coda_pic_run_work(struct work_struct *work)

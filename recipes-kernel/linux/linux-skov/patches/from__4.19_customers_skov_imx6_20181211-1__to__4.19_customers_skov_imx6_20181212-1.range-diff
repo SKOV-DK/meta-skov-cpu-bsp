@@ -1,0 +1,168 @@
+ 1:  45d256d63fb1 =  1:  f93b50ece563 imx6-cpu: add device tree files
+ 2:  a0caf01a5927 =  2:  a641d02ff7df imx6-cpu: add SKOV specific skov_version driver
+ 3:  6df80c00fed7 =  3:  a183733c85b7 dt-bindings: panel: add LOGIC Technologies panels
+ 4:  f9064cccbbf0 =  4:  9fe7b1f42e4b panel-simple: add LOGIC Technologies panels
+ 5:  5f5293382fa3 =  5:  338c657f12fb dt-binding: rtc-pcf8523: add binding with quartz_load property
+ 6:  b275a23a819b =  6:  c3758f7c02c5 dt-binding: rtc-pcf85063: add binding with quartz load property
+ 7:  41c2e2e8a743 =  7:  4309fed14a08 dts: add nxp,quartz_load_12.5pf to all pcf8523 nodes
+ 8:  e75a60c60147 =  8:  dd4a0373bb0b rtc: pcf8523: add quartz load configuration from DT
+ 9:  af7ece63b686 =  9:  068930486dc8 rtc: pcf85063: add quartz load configuration from DT
+10:  7c82067f1b47 = 10:  8df1acd72546 atmel_lcdfb: support native-mode display-timings
+11:  984f4a3dd6a4 = 11:  c4822e161751 dt-binding: panel: add Seiko 70WVW2T 7" panel
+12:  5f28a6402d6e = 12:  36aa25ce9154 dt-bindings: panel: rename seiko,43wvf1g to match compatible
+13:  fc641fc74dcc = 13:  27235743e174 drm: panel: add Seiko 70WVW2T 7" simple panel
+14:  364b23d675db <  -:  ------------ drm/etnaviv: init DMA ops for virtual master device
+ -:  ------------ > 14:  264445c31295 drm/etnaviv: kill active fence tracking
+ -:  ------------ > 15:  af7e133cbd63 drm/etnaviv: consolidate hardware fence handling in etnaviv_gpu
+ -:  ------------ > 16:  da4a586ad193 drm/etnaviv: remove unnecessary local irq state save/restore
+17:  72ac43cf7d19 = 17:  29db3550ae61 drm: split out buffer lookup from fake VMA offset
+18:  add565e6b418 = 18:  9e5356dbb844 drm/etnaviv: properly implement mmaping of imported buffers
+15:  dc0e6ea64981 = 19:  b8f710141587 drm/etnaviv: add GC7000 sensitive states
+16:  e793fbfda604 = 20:  aece38898d22 drm/etnaviv: support relocations to BOs
+ -:  ------------ > 21:  0dbc283be685 drm/etnaviv: avoid false sharing of fence spinlock
+ -:  ------------ > 22:  3bbfbb9e5ed8 drm/etnaviv: avoid false sharing on fence lock
+ -:  ------------ > 23:  346ae4dbb062 drm/etnaviv: replace header include with forward declaration
+ -:  ------------ > 24:  e20ed38e1533 drm/etnaviv: remove lastctx member from gpu struct
+ -:  ------------ > 25:  466582dbbac1 drm/etnaviv: move job context pointer to etnaviv_gem_submit
+ -:  ------------ > 26:  e42698f0dc45 drm/etnaviv: mmuv2: don't map zero page
+ -:  ------------ > 27:  0d01d0d0d968 drm/etnaviv: split out cmdbuf mapping into address space
+ -:  ------------ > 28:  46086baafc42 drm/etnaviv: share a single cmdbuf suballoc region across all GPUs
+ -:  ------------ > 29:  67e3deae4915 drm/etnaviv: replace MMU flush marker with flush sequence
+ -:  ------------ > 30:  1db86aba5b5f drm/etnaviv: rework MMU handling
+ -:  ------------ > 31:  df6a10a6268e drm/etnaviv: split out starting of FE idle loop
+ -:  ------------ > 32:  19ce792185fd drm/etnaviv: provide MMU context to etnaviv_gem_mapping_get
+ -:  ------------ > 33:  bac42ddf0d27 drm/etnaviv: implement per-process address spaces on MMUv2
+ -:  ------------ > 34:  3777d2e900b7 drm/etnaviv: dump only failing submit
+19:  c72d71dc0b18 = 35:  b0f81d3b8a4a media: coda: reduce minimum frame size to 48x16 pixels.
+20:  c64ce060cccc = 36:  01fdd7ed9c4b media: coda: hold back decoder jobs until we have at least 3*256 bytes beyond the current buffer
+21:  b4759ab963d3 = 37:  03e5c9037dd8 media: coda: improve queue busy error message
+22:  1b90591d7c5b = 38:  8c5d0851cc9b media: coda: jpeg: read back thumbnail indication and JPEG format
+23:  fb6e2e14e9ce = 39:  5d6123d2a53d media: dt: bindings: coda: fsl,imx6dl-vpu
+24:  7706f4be8cc3 = 40:  663ffd45a606 media: coda: modify cache configuration to fix chroma while decoding in tiled mode
+25:  7023b2ccb977 = 41:  14f2aac13496 media: coda: add cache bypass module parameters
+26:  4312cdc4413f = 42:  3508f270d0f8 media: coda: make cache pagemerge configuration configurable from userspace
+27:  6d749e46e636 = 43:  526590030715 media: coda: display fourcc character values instead of decimal or hex codes
+28:  d72152e7cd6a = 44:  c1e2650ee921 media: coda: add start decoding debug info
+29:  2ed4c6339a64 = 45:  fd4a82f04f8d media: coda: add timestamp to coda_bit_queue trace event
+30:  60360e71e44b = 46:  76f65e3d0978 media: coda: reuse bitstream payload in coda_job_ready in preparation for coda_not_ready trace event
+31:  06f68c5662a8 = 47:  72a4ccf08810 media: coda: add coda_not_ready trace event
+32:  97d50f6e72c5 = 48:  fdc4e7c5b1ad media: coda: allow S_PARM on the CAPTURE side for backwards compatibility
+33:  5c907e869204 ! 49:  f57fa302ab83 media: coda: jpeg: check for SOI/EOI again in prepare_decode
+    @@ -15,6 +15,8 @@
+      					struct coda_buffer_meta, list);
+      
+      	if (meta && ctx->codec->src_fourcc == V4L2_PIX_FMT_JPEG) {
+    ++		unsigned int start;
+    ++		unsigned int end;
+     +		u16 soi, eoi;
+      
+      		/* If this is the last buffer in the bitstream, add padding */
+    @@ -24,13 +26,15 @@
+      			kfifo_in(&ctx->bitstream_fifo, buf, pad);
+      		}
+     +
+    -+		soi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + meta->start));
+    -+		eoi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + meta->end - 2));
+    ++		start = meta->start & ctx->bitstream_fifo.kfifo.mask;
+    ++		end = meta->end & ctx->bitstream_fifo.kfifo.mask;
+    ++		soi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + start));
+    ++		eoi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + end - 2));
+     +
+     +		if (soi != 0xffd8 || eoi != 0xffd9) {
+     +			v4l2_warn(&ctx->dev->v4l2_dev,
+     +				  "Invalid markers: %04x..%04x (%x - %x)\n",
+    -+				  soi, eoi, meta->start, meta->end);
+    ++				  soi, eoi, start, end);
+     +		}
+      	}
+      	spin_unlock_irqrestore(&ctx->buffer_meta_lock, flags);
+34:  e0975e259334 = 50:  ed3655c26cf7 media: coda: jpeg: add JPEG register definitions for CODA960
+35:  dc5c86e17931 ! 51:  1a7f5083d62a media: coda: jpeg: add CODA960 JPEG support
+    @@ -25,7 +25,7 @@
+      static const struct coda_codec coda9_codecs[] = {
+      	CODA_CODEC(CODA9_MODE_ENCODE_H264, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_H264,   1920, 1088),
+      	CODA_CODEC(CODA9_MODE_ENCODE_MP4,  V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_MPEG4,  1920, 1088),
+    -+	CODA_CODEC(CODA9_MODE_DECODE_MJPG, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_JPEG,   8192, 8192),
+    ++	CODA_CODEC(CODA9_MODE_ENCODE_MJPG, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_JPEG,   8192, 8192),
+      	CODA_CODEC(CODA9_MODE_DECODE_H264, V4L2_PIX_FMT_H264,   V4L2_PIX_FMT_YUV420, 1920, 1088),
+      	CODA_CODEC(CODA9_MODE_DECODE_MP2,  V4L2_PIX_FMT_MPEG2,  V4L2_PIX_FMT_YUV420, 1920, 1088),
+      	CODA_CODEC(CODA9_MODE_DECODE_MP4,  V4L2_PIX_FMT_MPEG4,  V4L2_PIX_FMT_YUV420, 1920, 1088),
+36:  be4c723d0cf8 = 52:  7271fc8095bd media: coda: jpeg: add debug information in case of CODA960 JPEG error
+37:  61593f8ee91c = 53:  149d08921d4f media: coda: jpeg: decode JPEG header in buf_queue to decide chroma subsampling format
+38:  030eaf001e2a = 54:  fdada8fc9376 media: coda: jpeg: limit enum_formats to same chroma subsampling
+39:  57f596a902f6 = 55:  457e627ba200 media: coda: jpeg: parse first JPEG header on output streamon
+40:  f8903bbadeda = 56:  c76645bda109 media: coda: make timeout configurable
+41:  3a8da0eb5fef = 57:  79d14d2c94b0 media: coda: add regmap support
+42:  f6845b39372c = 58:  74918450565f media: coda: debug output when resuming after hold
+43:  b1a1d28408fe = 59:  177c964eea83 media: coda: add BIT register dump after PIC_RUN timeout
+44:  8c0a61844a2f = 60:  259cf0b5210a media: coda: improve 'no output buffers' debug message
+45:  aedad904c23c = 61:  6abb07ae404d media: coda: warn about too small payload in start_streaming
+46:  9d1f1a292e72 = 62:  3a7d878eac48 media: coda: add physical address to coda buffer traces
+47:  4d6d6c5a9248 = 63:  6fb612310747 media: HACK: coda: use writecombine instead of noncached/coherent mappings
+48:  5dd4045d82ec ! 64:  3fb8558e7e3a media: coda: dump metas to the log and bitstream into a device coredump on small payload error
+    @@ -31,11 +31,14 @@
+     +	void *dump;
+     +
+     +	list_for_each_entry(meta, &ctx->buffer_meta_list, list) {
+    -+		char *buf = ctx->bitstream.vaddr + meta->start;
+    ++		unsigned int mask = ctx->bitstream_fifo.kfifo.mask;
+    ++		unsigned int meta_start = meta->start & mask;
+    ++		unsigned int meta_end = meta->end & mask;
+    ++		char *buf = ctx->bitstream.vaddr + meta_start;
+     +
+     +		v4l2_err(v4l2_dev,
+     +			 "\tmeta %d: %u - %u (%02x %02x %02x %02x %02x)\n",
+    -+			 meta->sequence, meta->start, meta->end,
+    ++			 meta->sequence, meta_start, meta_end,
+     +			 buf[0], buf[1], buf[2], buf[3], buf[4]);
+     +	}
+     +
+49:  ea3b42a73131 = 65:  e067621a7132 media: coda: print SEQ_INIT error code as hex value
+50:  f41e01179ce8 = 66:  258a3837615a media: coda: implement CMD_START to restart decoding
+51:  618383b00d32 = 67:  8c1e825d57db media: coda: normalise debug output
+52:  fc0fd96a4989 = 68:  48060ce728f9 media: coda: jpeg: normalise JPEG debug output
+53:  6a35d2a1793f <  -:  ------------ media: coda: don't overwrite h.264 profile_idc on decoder instance
+54:  3f502cd0d995 = 69:  9c7010ca6e2c media: coda: debut output when setting visible size via crop selection
+ -:  ------------ > 70:  c6b1ee9b73cc media: coda: store unmasked fifo position in meta
+ -:  ------------ > 71:  19983acaade1 media: coda: improve bitstream payload ready check
+ -:  ------------ > 72:  8eb821294d38 media: coda: limit queueing into internal bitstream buffer
+ -:  ------------ > 73:  dd55099ca566 media: add v4l2-stats to collect simple time based activity statistics
+ -:  ------------ > 74:  da28ca15be3c media: coda: track activity using v4l2-stats
+ -:  ------------ > 75:  c66a30f8a171 media: coda: don't disable IRQs across buffer meta handling
+ -:  ------------ > 76:  b310dc941a10 media: coda: fix memory corruption in case more than 32 instances are opened
+ -:  ------------ > 77:  d02b8e3b2660 media: coda: set V4L2_CAP_TIMEPERFRAME flag in coda_s_parm
+ -:  ------------ > 78:  b8aff95fbbee media: coda: implement ENUM_FRAMEINTERVALS
+ -:  ------------ > 79:  298412563676 media: coda: never set infinite timeperframe
+ -:  ------------ > 80:  8dccd2d48ed6 media: coda: fail S_SELECTION for read-only targets
+ -:  ------------ > 81:  d4d45135a021 media: coda: remove unused instances list
+ -:  ------------ > 82:  f6b9fd5ac4cb media: v4l2: clarify H.264 loop filter offset controls
+ -:  ------------ > 83:  cfbe1ba6a195 media: coda: fix H.264 deblocking filter controls
+ -:  ------------ > 84:  88586bc267f3 media: v4l2-ctrl: Add control to enable h.264 constrained intra prediction
+ -:  ------------ > 85:  849ab2b23231 media: v4l2-ctrl: Add control for h.264 chroma qp offset
+ -:  ------------ > 86:  9b39a11b138c media: coda: Add control for h.264 constrained intra prediction
+ -:  ------------ > 87:  88f012d7037d media: coda: Add control for h.264 chroma qp index offset
+ -:  ------------ > 88:  92847c86041e media: coda: use macroblock tiling on CODA960 only
+ -:  ------------ > 89:  e16405d98648 media: coda: increase prefetch limit to 768 bytes on CodaHx4
+55:  e474ca560685 ! 90:  35f3fb5457f9 Release 4.19/customers/skov/imx6/20181211-1
+    @@ -1,6 +1,6 @@
+     Author: Ulrich Ölmann <u.oelmann@pengutronix.de>
+     
+    -    Release 4.19/customers/skov/imx6/20181211-1
+    +    Release 4.19/customers/skov/imx6/20181212-1
+     
+         Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+     
+    @@ -10,9 +10,9 @@
+     @@
+      VERSION = 4
+      PATCHLEVEL = 19
+    - SUBLEVEL = 0
+    --EXTRAVERSION = -rc1
+    -+EXTRAVERSION = -rc1-20181211-1
+    - NAME = Merciless Moray
+    + SUBLEVEL = 8
+    +-EXTRAVERSION =
+    ++EXTRAVERSION =-20181212-1
+    + NAME = "People's Front"
+      
+      # *DOCUMENTATION*

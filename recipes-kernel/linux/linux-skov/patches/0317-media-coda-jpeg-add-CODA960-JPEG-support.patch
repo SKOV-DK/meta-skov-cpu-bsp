@@ -25,14 +25,14 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  4 files changed, 1452 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 3377dc8c67dd..2860e2cde750 100644
+index 809844e6ff04..4a93ece9d0a7 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -159,9 +159,11 @@ static const struct coda_codec coda7_codecs[] = {
  static const struct coda_codec coda9_codecs[] = {
  	CODA_CODEC(CODA9_MODE_ENCODE_H264, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_H264,   1920, 1088),
  	CODA_CODEC(CODA9_MODE_ENCODE_MP4,  V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_MPEG4,  1920, 1088),
-+	CODA_CODEC(CODA9_MODE_DECODE_MJPG, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_JPEG,   8192, 8192),
++	CODA_CODEC(CODA9_MODE_ENCODE_MJPG, V4L2_PIX_FMT_YUV420, V4L2_PIX_FMT_JPEG,   8192, 8192),
  	CODA_CODEC(CODA9_MODE_DECODE_H264, V4L2_PIX_FMT_H264,   V4L2_PIX_FMT_YUV420, 1920, 1088),
  	CODA_CODEC(CODA9_MODE_DECODE_MP2,  V4L2_PIX_FMT_MPEG2,  V4L2_PIX_FMT_YUV420, 1920, 1088),
  	CODA_CODEC(CODA9_MODE_DECODE_MP4,  V4L2_PIX_FMT_MPEG4,  V4L2_PIX_FMT_YUV420, 1920, 1088),
@@ -104,7 +104,7 @@ index 3377dc8c67dd..2860e2cde750 100644
  		ctx->tiled_map_type = GDI_LINEAR_FRAME_MAP;
  		break;
  	default:
-@@ -1879,6 +1916,30 @@ static int coda_s_ctrl(struct v4l2_ctrl *ctrl)
+@@ -1880,6 +1917,30 @@ static int coda_s_ctrl(struct v4l2_ctrl *ctrl)
  	case V4L2_CID_JPEG_RESTART_INTERVAL:
  		ctx->params.jpeg_restart_interval = ctrl->val;
  		break;
@@ -135,7 +135,7 @@ index 3377dc8c67dd..2860e2cde750 100644
  	case V4L2_CID_MPEG_VIDEO_VBV_DELAY:
  		ctx->params.vbv_delay = ctrl->val;
  		break;
-@@ -2753,6 +2814,23 @@ static int coda_probe(struct platform_device *pdev)
+@@ -2754,6 +2815,23 @@ static int coda_probe(struct platform_device *pdev)
  		return ret;
  	}
  

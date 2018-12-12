@@ -16,7 +16,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 32 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 2860e2cde750..c8153dc94ba1 100644
+index 4a93ece9d0a7..f40e1a18c0af 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -640,12 +640,21 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,

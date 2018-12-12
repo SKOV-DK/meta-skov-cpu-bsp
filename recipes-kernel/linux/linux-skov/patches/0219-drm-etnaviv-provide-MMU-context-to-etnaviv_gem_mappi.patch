@@ -1,0 +1,107 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 23 Nov 2018 14:44:36 +0100
+Subject: [PATCH] drm/etnaviv: provide MMU context to etnaviv_gem_mapping_get
+
+In preparation to having a context per process, etnaviv_gem_mapping_get
+should not use the current GPU context, but needs to be told which
+context to use.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gem.c        | 20 ++++++++++++--------
+ drivers/gpu/drm/etnaviv/etnaviv_gem.h        |  3 ++-
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c |  2 +-
+ 3 files changed, 15 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.c b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
+index 92869a5126e3..ca44695ca917 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
+@@ -275,7 +275,8 @@ void etnaviv_gem_mapping_unreference(struct etnaviv_vram_mapping *mapping)
+ }
+ 
+ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+-	struct drm_gem_object *obj, struct etnaviv_gpu *gpu)
++	struct drm_gem_object *obj, struct etnaviv_gpu *gpu,
++	struct etnaviv_iommu_context *mmu)
+ {
+ 	struct etnaviv_gem_object *etnaviv_obj = to_etnaviv_bo(obj);
+ 	struct etnaviv_vram_mapping *mapping;
+@@ -283,7 +284,7 @@ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+ 	int ret = 0;
+ 
+ 	mutex_lock(&etnaviv_obj->lock);
+-	mapping = etnaviv_gem_get_vram_mapping(etnaviv_obj, gpu->mmu);
++	mapping = etnaviv_gem_get_vram_mapping(etnaviv_obj, mmu);
+ 	if (mapping) {
+ 		/*
+ 		 * Holding the object lock prevents the use count changing
+@@ -292,12 +293,12 @@ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+ 		 * the MMU owns this mapping to close this race.
+ 		 */
+ 		if (mapping->use == 0) {
+-			mutex_lock(&gpu->mmu->lock);
+-			if (mapping->context == gpu->mmu)
++			mutex_lock(&mmu->lock);
++			if (mapping->context == mmu)
+ 				mapping->use += 1;
+ 			else
+ 				mapping = NULL;
+-			mutex_unlock(&gpu->mmu->lock);
++			mutex_unlock(&mmu->lock);
+ 			if (mapping)
+ 				goto out;
+ 		} else {
+@@ -330,10 +331,11 @@ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+ 		list_del(&mapping->obj_node);
+ 	}
+ 
+-	mapping->context = gpu->mmu;
++	kref_get(&mmu->refcount);
++	mapping->context = mmu;
+ 	mapping->use = 1;
+ 
+-	ret = etnaviv_iommu_map_gem(gpu->mmu, etnaviv_obj, gpu->memory_base,
++	ret = etnaviv_iommu_map_gem(mmu, etnaviv_obj, gpu->memory_base,
+ 				    mapping);
+ 	if (ret < 0)
+ 		kfree(mapping);
+@@ -556,8 +558,10 @@ void etnaviv_gem_free_object(struct drm_gem_object *obj)
+ 
+ 		WARN_ON(mapping->use);
+ 
+-		if (context)
++		if (context) {
+ 			etnaviv_iommu_unmap_gem(context, mapping);
++			etnaviv_iommu_context_put(context);
++		}
+ 
+ 		list_del(&mapping->obj_node);
+ 		kfree(mapping);
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.h b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+index cf94f0b24584..79a211f5ac5f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -123,7 +123,8 @@ struct page **etnaviv_gem_get_pages(struct etnaviv_gem_object *obj);
+ void etnaviv_gem_put_pages(struct etnaviv_gem_object *obj);
+ 
+ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+-	struct drm_gem_object *obj, struct etnaviv_gpu *gpu);
++	struct drm_gem_object *obj, struct etnaviv_gpu *gpu,
++	struct etnaviv_iommu_context *mmu);
+ void etnaviv_gem_mapping_reference(struct etnaviv_vram_mapping *mapping);
+ void etnaviv_gem_mapping_unreference(struct etnaviv_vram_mapping *mapping);
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+index a4f1fca445ce..7f4a1b7c9abb 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+@@ -229,7 +229,7 @@ static int submit_pin_objects(struct etnaviv_gem_submit *submit)
+ 		struct etnaviv_vram_mapping *mapping;
+ 
+ 		mapping = etnaviv_gem_mapping_get(&etnaviv_obj->base,
+-						  submit->gpu);
++						  submit->gpu, submit->gpu->mmu);
+ 		if (IS_ERR(mapping)) {
+ 			ret = PTR_ERR(mapping);
+ 			break;
