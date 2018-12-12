@@ -23,5 +23,6 @@ SRC_URI += "\
   file://env/init/display \
   file://env/init/splash \
   file://env/splash.png \
+  file://env/splash1280.png \
   "
 

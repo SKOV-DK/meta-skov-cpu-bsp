@@ -11,8 +11,9 @@ if [ -e /env/splash.png ]; then
     fb0.enable=1
     backlight0.brightness="${state.display.brightness}"
   else
-    splash -f /dev/fb3 -b 0 /env/splash.png
+    splash -f /dev/fb3 -b 0 /env/splash1280.png
     fb3.enable=1
+    sleep 1
     BRIGHTNESS=${state.display.brightness}
     if [ ${BRIGHTNESS} -gt 100 ]; then
       BRIGHTNESS=100
