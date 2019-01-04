@@ -628,7 +628,7 @@ index 000000000000..8dbbddbd0aac
 +	i2c_rtc: pcf85063@51 {
 +		compatible = "nxp,pcf85063";
 +		reg = <0x51>;
-+		quartz_load_12.5pf;
++		quartz-load-femtofarad = <12500>;
 +	};
 +};
 +
