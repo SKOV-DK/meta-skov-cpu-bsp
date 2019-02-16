@@ -122,6 +122,5 @@ SRC_URI += "\
 # umpf-topic-range: 4aa82dee8c42afc4373797b77bff0d2386fccaa6..d2f79fb48843d0f639a70c1c3ba17d746c7c196f
 SRC_URI += "\
   file://patches/0501-Release-4.19-customers-skov-imx6-20181212-2.patch \
-  file://patches/0700-Revert-can-dev__can_get_echo_skb_print_error_message.patch \
   "
 # umpf-end
