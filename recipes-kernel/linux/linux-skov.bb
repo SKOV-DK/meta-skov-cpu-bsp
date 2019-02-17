@@ -12,7 +12,6 @@ LINUX_VERSION = "4.19.20"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig \
-	    file://ajax-loader.gif \
 "
 
 require linux-skov/patches/series.inc
