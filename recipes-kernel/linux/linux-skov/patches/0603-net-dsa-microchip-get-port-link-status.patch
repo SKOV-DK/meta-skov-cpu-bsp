@@ -1,0 +1,67 @@
+From: Tristram Ha <Tristram.Ha@microchip.com>
+Date: Fri, 22 Feb 2019 16:36:49 -0800
+Subject: [PATCH] net: dsa: microchip: get port link status
+
+Get port link status to know whether to read MIB counters when the link
+is going down.
+
+Signed-off-by: Tristram Ha <Tristram.Ha@microchip.com>
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
+Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ drivers/net/dsa/microchip/ksz9477.c    |  1 +
+ drivers/net/dsa/microchip/ksz_common.c | 14 ++++++++++++++
+ drivers/net/dsa/microchip/ksz_common.h |  2 ++
+ 3 files changed, 17 insertions(+)
+
+diff --git a/drivers/net/dsa/microchip/ksz9477.c b/drivers/net/dsa/microchip/ksz9477.c
+index b36525f3c57f..7d757f531b7e 100644
+--- a/drivers/net/dsa/microchip/ksz9477.c
++++ b/drivers/net/dsa/microchip/ksz9477.c
+@@ -1195,6 +1195,7 @@ static const struct dsa_switch_ops ksz9477_switch_ops = {
+ 	.setup			= ksz9477_setup,
+ 	.phy_read		= ksz9477_phy_read16,
+ 	.phy_write		= ksz9477_phy_write16,
++	.adjust_link		= ksz_adjust_link,
+ 	.port_enable		= ksz_enable_port,
+ 	.port_disable		= ksz_disable_port,
+ 	.get_strings		= ksz9477_get_strings,
+diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
+index eecfbf30cdc2..0589fc7ad09e 100644
+--- a/drivers/net/dsa/microchip/ksz_common.c
++++ b/drivers/net/dsa/microchip/ksz_common.c
+@@ -140,6 +140,20 @@ int ksz_phy_write16(struct dsa_switch *ds, int addr, int reg, u16 val)
+ }
+ EXPORT_SYMBOL_GPL(ksz_phy_write16);
+ 
++void ksz_adjust_link(struct dsa_switch *ds, int port,
++		     struct phy_device *phydev)
++{
++	struct ksz_device *dev = ds->priv;
++	struct ksz_port *p = &dev->ports[port];
++
++	/* Read all MIB counters when the link is going down. */
++	if (!phydev->link) {
++		p->read = true;
++		schedule_work(&dev->mib_read);
++	}
++}
++EXPORT_SYMBOL_GPL(ksz_adjust_link);
++
+ int ksz_sset_count(struct dsa_switch *ds, int port, int sset)
+ {
+ 	struct ksz_device *dev = ds->priv;
+diff --git a/drivers/net/dsa/microchip/ksz_common.h b/drivers/net/dsa/microchip/ksz_common.h
+index f45a55369e4b..eb29bb076e67 100644
+--- a/drivers/net/dsa/microchip/ksz_common.h
++++ b/drivers/net/dsa/microchip/ksz_common.h
+@@ -14,6 +14,8 @@ void ksz_init_mib_timer(struct ksz_device *dev);
+ 
+ int ksz_phy_read16(struct dsa_switch *ds, int addr, int reg);
+ int ksz_phy_write16(struct dsa_switch *ds, int addr, int reg, u16 val);
++void ksz_adjust_link(struct dsa_switch *ds, int port,
++		     struct phy_device *phydev);
+ int ksz_sset_count(struct dsa_switch *ds, int port, int sset);
+ void ksz_get_ethtool_stats(struct dsa_switch *ds, int port, uint64_t *buf);
+ int ksz_port_bridge_join(struct dsa_switch *ds, int port,

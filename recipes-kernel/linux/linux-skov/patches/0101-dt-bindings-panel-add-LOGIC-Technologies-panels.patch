@@ -54,10 +54,10 @@ index 000000000000..211f0dffcf16
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.txt b/Documentation/devicetree/bindings/vendor-prefixes.txt
-index 2c3fc512e746..de11bf5b7dba 100644
+index 389508584f48..603523ca7537 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.txt
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.txt
-@@ -215,6 +215,7 @@ linux	Linux-specific binding
+@@ -221,6 +221,7 @@ linux	Linux-specific binding
  linx	Linx Technologies
  lltc	Linear Technology Corporation
  logicpd	Logic PD, Inc.

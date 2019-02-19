@@ -1,0 +1,460 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 15 Oct 2018 14:53:18 +0200
+Subject: [PATCH] drm/etnaviv: split out cmdbuf mapping into address space
+
+This allows to decouple the cmdbuf suballocator create and mapping
+the region into the GPU address space. Allowing multiple AS to share
+a single cmdbuf suballoc.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_buffer.c | 23 ++++++----
+ drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.c | 42 +++++++++--------
+ drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h | 12 ++++-
+ drivers/gpu/drm/etnaviv/etnaviv_dump.c   |  6 ++-
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c    | 26 +++++++++--
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h    |  3 +-
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.c    | 78 ++++++++++++++++++--------------
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.h    | 12 ++---
+ 8 files changed, 123 insertions(+), 79 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_buffer.c b/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
+index 160ce3c060a5..401adf905d95 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_buffer.c
+@@ -116,7 +116,8 @@ static void etnaviv_buffer_dump(struct etnaviv_gpu *gpu,
+ 	u32 *ptr = buf->vaddr + off;
+ 
+ 	dev_info(gpu->dev, "virt %p phys 0x%08x free 0x%08x\n",
+-			ptr, etnaviv_cmdbuf_get_va(buf) + off, size - len * 4 - off);
++			ptr, etnaviv_cmdbuf_get_va(buf, &gpu->cmdbuf_mapping) +
++			off, size - len * 4 - off);
+ 
+ 	print_hex_dump(KERN_INFO, "cmd ", DUMP_PREFIX_OFFSET, 16, 4,
+ 			ptr, len * 4, 0);
+@@ -149,7 +150,8 @@ static u32 etnaviv_buffer_reserve(struct etnaviv_gpu *gpu,
+ 	if (buffer->user_size + cmd_dwords * sizeof(u64) > buffer->size)
+ 		buffer->user_size = 0;
+ 
+-	return etnaviv_cmdbuf_get_va(buffer) + buffer->user_size;
++	return etnaviv_cmdbuf_get_va(buffer, &gpu->cmdbuf_mapping) +
++	       buffer->user_size;
+ }
+ 
+ u16 etnaviv_buffer_init(struct etnaviv_gpu *gpu)
+@@ -162,8 +164,8 @@ u16 etnaviv_buffer_init(struct etnaviv_gpu *gpu)
+ 	buffer->user_size = 0;
+ 
+ 	CMD_WAIT(buffer);
+-	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer) +
+-		 buffer->user_size - 4);
++	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer, &gpu->cmdbuf_mapping)
++		 + buffer->user_size - 4);
+ 
+ 	return buffer->user_size / 8;
+ }
+@@ -289,8 +291,8 @@ void etnaviv_sync_point_queue(struct etnaviv_gpu *gpu, unsigned int event)
+ 
+ 	/* Append waitlink */
+ 	CMD_WAIT(buffer);
+-	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer) +
+-			    buffer->user_size - 4);
++	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer, &gpu->cmdbuf_mapping)
++		 + buffer->user_size - 4);
+ 
+ 	/*
+ 	 * Kick off the 'sync point' command by replacing the previous
+@@ -317,7 +319,7 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 	if (drm_debug & DRM_UT_DRIVER)
+ 		etnaviv_buffer_dump(gpu, buffer, 0, 0x50);
+ 
+-	link_target = etnaviv_cmdbuf_get_va(cmdbuf);
++	link_target = etnaviv_cmdbuf_get_va(cmdbuf, &gpu->cmdbuf_mapping);
+ 	link_dwords = cmdbuf->size / 8;
+ 
+ 	/*
+@@ -410,12 +412,13 @@ void etnaviv_buffer_queue(struct etnaviv_gpu *gpu, u32 exec_state,
+ 	CMD_LOAD_STATE(buffer, VIVS_GL_EVENT, VIVS_GL_EVENT_EVENT_ID(event) |
+ 		       VIVS_GL_EVENT_FROM_PE);
+ 	CMD_WAIT(buffer);
+-	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer) +
+-			    buffer->user_size - 4);
++	CMD_LINK(buffer, 2, etnaviv_cmdbuf_get_va(buffer, &gpu->cmdbuf_mapping)
++		 + buffer->user_size - 4);
+ 
+ 	if (drm_debug & DRM_UT_DRIVER)
+ 		pr_info("stream link to 0x%08x @ 0x%08x %p\n",
+-			return_target, etnaviv_cmdbuf_get_va(cmdbuf),
++			return_target,
++			etnaviv_cmdbuf_get_va(cmdbuf, &gpu->cmdbuf_mapping),
+ 			cmdbuf->vaddr);
+ 
+ 	if (drm_debug & DRM_UT_DRIVER) {
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.c b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.c
+index a3c44f145c1d..1bc529399783 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.c
+@@ -6,9 +6,9 @@
+ #include <drm/drm_mm.h>
+ 
+ #include "etnaviv_cmdbuf.h"
++#include "etnaviv_gem.h"
+ #include "etnaviv_gpu.h"
+ #include "etnaviv_mmu.h"
+-#include "etnaviv_perfmon.h"
+ 
+ #define SUBALLOC_SIZE		SZ_256K
+ #define SUBALLOC_GRANULE	SZ_4K
+@@ -20,10 +20,6 @@ struct etnaviv_cmdbuf_suballoc {
+ 	void *vaddr;
+ 	dma_addr_t paddr;
+ 
+-	/* GPU mapping */
+-	u32 iova;
+-	struct drm_mm_node vram_node; /* only used on MMUv2 */
+-
+ 	/* allocation management */
+ 	struct mutex lock;
+ 	DECLARE_BITMAP(granule_map, SUBALLOC_GRANULES);
+@@ -47,29 +43,36 @@ etnaviv_cmdbuf_suballoc_new(struct etnaviv_gpu * gpu)
+ 
+ 	suballoc->vaddr = dma_alloc_wc(gpu->dev, SUBALLOC_SIZE,
+ 				       &suballoc->paddr, GFP_KERNEL);
+-	if (!suballoc->vaddr)
++	if (!suballoc->vaddr) {
++		ret = -ENOMEM;
+ 		goto free_suballoc;
+-
+-	ret = etnaviv_iommu_get_suballoc_va(gpu, suballoc->paddr,
+-					    &suballoc->vram_node, SUBALLOC_SIZE,
+-					    &suballoc->iova);
+-	if (ret)
+-		goto free_dma;
++	}
+ 
+ 	return suballoc;
+ 
+-free_dma:
+-	dma_free_wc(gpu->dev, SUBALLOC_SIZE, suballoc->vaddr, suballoc->paddr);
+ free_suballoc:
+ 	kfree(suballoc);
+ 
+-	return NULL;
++	return ERR_PTR(ret);
++}
++
++int etnaviv_cmdbuf_suballoc_map(struct etnaviv_cmdbuf_suballoc *suballoc,
++				struct etnaviv_iommu *mmu,
++				struct etnaviv_vram_mapping *mapping,
++				u32 memory_base)
++{
++	return etnaviv_iommu_get_suballoc_va(mmu, mapping, memory_base,
++					     suballoc->paddr, SUBALLOC_SIZE);
++}
++
++void etnaviv_cmdbuf_suballoc_unmap(struct etnaviv_iommu *mmu,
++				   struct etnaviv_vram_mapping *mapping)
++{
++	etnaviv_iommu_put_suballoc_va(mmu, mapping);
+ }
+ 
+ void etnaviv_cmdbuf_suballoc_destroy(struct etnaviv_cmdbuf_suballoc *suballoc)
+ {
+-	etnaviv_iommu_put_suballoc_va(suballoc->gpu, &suballoc->vram_node,
+-				      SUBALLOC_SIZE, suballoc->iova);
+ 	dma_free_wc(suballoc->gpu->dev, SUBALLOC_SIZE, suballoc->vaddr,
+ 		    suballoc->paddr);
+ 	kfree(suballoc);
+@@ -123,9 +126,10 @@ void etnaviv_cmdbuf_free(struct etnaviv_cmdbuf *cmdbuf)
+ 	wake_up_all(&suballoc->free_event);
+ }
+ 
+-u32 etnaviv_cmdbuf_get_va(struct etnaviv_cmdbuf *buf)
++u32 etnaviv_cmdbuf_get_va(struct etnaviv_cmdbuf *buf,
++			  struct etnaviv_vram_mapping *mapping)
+ {
+-	return buf->suballoc->iova + buf->suballoc_offset;
++	return mapping->iova + buf->suballoc_offset;
+ }
+ 
+ dma_addr_t etnaviv_cmdbuf_get_pa(struct etnaviv_cmdbuf *buf)
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
+index 4d5d1a77eb2a..11d95f05c017 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_cmdbuf.h
+@@ -9,8 +9,9 @@
+ #include <linux/types.h>
+ 
+ struct etnaviv_gpu;
++struct etnaviv_iommu;
++struct etnaviv_vram_mapping;
+ struct etnaviv_cmdbuf_suballoc;
+-struct etnaviv_perfmon_request;
+ 
+ struct etnaviv_cmdbuf {
+ 	/* suballocator this cmdbuf is allocated from */
+@@ -25,13 +26,20 @@ struct etnaviv_cmdbuf {
+ struct etnaviv_cmdbuf_suballoc *
+ etnaviv_cmdbuf_suballoc_new(struct etnaviv_gpu * gpu);
+ void etnaviv_cmdbuf_suballoc_destroy(struct etnaviv_cmdbuf_suballoc *suballoc);
++int etnaviv_cmdbuf_suballoc_map(struct etnaviv_cmdbuf_suballoc *suballoc,
++				struct etnaviv_iommu *mmu,
++				struct etnaviv_vram_mapping *mapping,
++				u32 memory_base);
++void etnaviv_cmdbuf_suballoc_unmap(struct etnaviv_iommu *mmu,
++				   struct etnaviv_vram_mapping *mapping);
+ 
+ 
+ int etnaviv_cmdbuf_init(struct etnaviv_cmdbuf_suballoc *suballoc,
+ 		struct etnaviv_cmdbuf *cmdbuf, u32 size);
+ void etnaviv_cmdbuf_free(struct etnaviv_cmdbuf *cmdbuf);
+ 
+-u32 etnaviv_cmdbuf_get_va(struct etnaviv_cmdbuf *buf);
++u32 etnaviv_cmdbuf_get_va(struct etnaviv_cmdbuf *buf,
++			  struct etnaviv_vram_mapping *mapping);
+ dma_addr_t etnaviv_cmdbuf_get_pa(struct etnaviv_cmdbuf *buf);
+ 
+ #endif /* __ETNAVIV_CMDBUF_H__ */
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_dump.c b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+index 3fbb4855396c..406895221763 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_dump.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+@@ -181,14 +181,16 @@ void etnaviv_core_dump(struct etnaviv_gpu *gpu)
+ 	etnaviv_core_dump_mmu(&iter, gpu, mmu_size);
+ 	etnaviv_core_dump_mem(&iter, ETDUMP_BUF_RING, gpu->buffer.vaddr,
+ 			      gpu->buffer.size,
+-			      etnaviv_cmdbuf_get_va(&gpu->buffer));
++			      etnaviv_cmdbuf_get_va(&gpu->buffer,
++						    &gpu->cmdbuf_mapping));
+ 
+ 	spin_lock_irqsave(&gpu->sched.job_list_lock, flags);
+ 	list_for_each_entry(s_job, &gpu->sched.ring_mirror_list, node) {
+ 		submit = to_etnaviv_submit(s_job);
+ 		etnaviv_core_dump_mem(&iter, ETDUMP_BUF_CMD,
+ 				      submit->cmdbuf.vaddr, submit->cmdbuf.size,
+-				      etnaviv_cmdbuf_get_va(&submit->cmdbuf));
++				      etnaviv_cmdbuf_get_va(&submit->cmdbuf,
++				      &gpu->cmdbuf_mapping));
+ 	}
+ 	spin_unlock_irqrestore(&gpu->sched.job_list_lock, flags);
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 1566f6091a3b..a7bdd729b492 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -685,8 +685,8 @@ static void etnaviv_gpu_hw_init(struct etnaviv_gpu *gpu)
+ 	prefetch = etnaviv_buffer_init(gpu);
+ 
+ 	gpu_write(gpu, VIVS_HI_INTR_ENBL, ~0U);
+-	etnaviv_gpu_start_fe(gpu, etnaviv_cmdbuf_get_va(&gpu->buffer),
+-			     prefetch);
++	etnaviv_gpu_start_fe(gpu, etnaviv_cmdbuf_get_va(&gpu->buffer,
++			     &gpu->cmdbuf_mapping), prefetch);
+ }
+ 
+ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+@@ -762,7 +762,15 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+ 	if (IS_ERR(gpu->cmdbuf_suballoc)) {
+ 		dev_err(gpu->dev, "Failed to create cmdbuf suballocator\n");
+ 		ret = PTR_ERR(gpu->cmdbuf_suballoc);
+-		goto fail;
++		goto destroy_iommu;
++	}
++
++	ret = etnaviv_cmdbuf_suballoc_map(gpu->cmdbuf_suballoc, gpu->mmu,
++					  &gpu->cmdbuf_mapping,
++					  gpu->memory_base);
++	if (ret) {
++		dev_err(gpu->dev, "failed to map cmdbuf suballoc\n");
++		goto destroy_suballoc;
+ 	}
+ 
+ 	/* Create buffer: */
+@@ -770,11 +778,11 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+ 				  PAGE_SIZE);
+ 	if (ret) {
+ 		dev_err(gpu->dev, "could not create command buffer\n");
+-		goto destroy_iommu;
++		goto unmap_suballoc;
+ 	}
+ 
+ 	if (gpu->mmu->version == ETNAVIV_IOMMU_V1 &&
+-	    etnaviv_cmdbuf_get_va(&gpu->buffer) > 0x80000000) {
++	    etnaviv_cmdbuf_get_va(&gpu->buffer, &gpu->cmdbuf_mapping) > 0x80000000) {
+ 		ret = -EINVAL;
+ 		dev_err(gpu->dev,
+ 			"command buffer outside valid memory window\n");
+@@ -802,6 +810,11 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+ free_buffer:
+ 	etnaviv_cmdbuf_free(&gpu->buffer);
+ 	gpu->buffer.suballoc = NULL;
++unmap_suballoc:
++	etnaviv_cmdbuf_suballoc_unmap(gpu->mmu, &gpu->cmdbuf_mapping);
++destroy_suballoc:
++	etnaviv_cmdbuf_suballoc_destroy(gpu->cmdbuf_suballoc);
++	gpu->cmdbuf_suballoc = NULL;
+ destroy_iommu:
+ 	etnaviv_iommu_destroy(gpu->mmu);
+ 	gpu->mmu = NULL;
+@@ -1679,6 +1692,9 @@ static void etnaviv_gpu_unbind(struct device *dev, struct device *master,
+ 	if (gpu->buffer.suballoc)
+ 		etnaviv_cmdbuf_free(&gpu->buffer);
+ 
++	if (gpu->cmdbuf_mapping.use == 1)
++		etnaviv_cmdbuf_suballoc_unmap(gpu->mmu, &gpu->cmdbuf_mapping);
++
+ 	if (gpu->cmdbuf_suballoc) {
+ 		etnaviv_cmdbuf_suballoc_destroy(gpu->cmdbuf_suballoc);
+ 		gpu->cmdbuf_suballoc = NULL;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index af7ab3b31055..b0b7d67f8f9d 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -7,6 +7,7 @@
+ #define __ETNAVIV_GPU_H__
+ 
+ #include "etnaviv_cmdbuf.h"
++#include "etnaviv_gem.h"
+ #include "etnaviv_drv.h"
+ 
+ struct etnaviv_gem_submit;
+@@ -84,7 +85,6 @@ struct etnaviv_event {
+ };
+ 
+ struct etnaviv_cmdbuf_suballoc;
+-struct etnaviv_cmdbuf;
+ struct regulator;
+ struct clk;
+ 
+@@ -102,6 +102,7 @@ struct etnaviv_gpu {
+ 	struct drm_gpu_scheduler sched;
+ 
+ 	/* 'ring'-buffer: */
++	struct etnaviv_vram_mapping cmdbuf_mapping;
+ 	struct etnaviv_cmdbuf buffer;
+ 	int exec_state;
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+index 8069f9f36a2e..070509a1f949 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+@@ -332,52 +332,62 @@ void etnaviv_iommu_restore(struct etnaviv_gpu *gpu)
+ 		etnaviv_iommuv2_restore(gpu);
+ }
+ 
+-int etnaviv_iommu_get_suballoc_va(struct etnaviv_gpu *gpu, dma_addr_t paddr,
+-				  struct drm_mm_node *vram_node, size_t size,
+-				  u32 *iova)
++int etnaviv_iommu_get_suballoc_va(struct etnaviv_iommu *mmu,
++				  struct etnaviv_vram_mapping *mapping,
++				  u32 memory_base, dma_addr_t paddr,
++				  size_t size)
+ {
+-	struct etnaviv_iommu *mmu = gpu->mmu;
++	struct drm_mm_node *node;
++	int ret;
+ 
+ 	if (mmu->version == ETNAVIV_IOMMU_V1) {
+-		*iova = paddr - gpu->memory_base;
++		mapping->iova = paddr - memory_base;
++		mapping->use = 1;
++		list_add_tail(&mapping->mmu_node, &mmu->mappings);
+ 		return 0;
+-	} else {
+-		int ret;
++	}
+ 
+-		mutex_lock(&mmu->lock);
+-		ret = etnaviv_iommu_find_iova(mmu, vram_node, size);
+-		if (ret < 0) {
+-			mutex_unlock(&mmu->lock);
+-			return ret;
+-		}
+-		ret = etnaviv_domain_map(mmu->domain, vram_node->start, paddr,
+-					 size, ETNAVIV_PROT_READ);
+-		if (ret < 0) {
+-			drm_mm_remove_node(vram_node);
+-			mutex_unlock(&mmu->lock);
+-			return ret;
+-		}
+-		gpu->mmu->need_flush = true;
+-		mutex_unlock(&mmu->lock);
++	node = &mapping->vram_node;
+ 
+-		*iova = (u32)vram_node->start;
+-		return 0;
++	mutex_lock(&mmu->lock);
++
++	ret = etnaviv_iommu_find_iova(mmu, node, size);
++	if (ret < 0)
++		goto unlock;
++
++	mapping->iova = node->start;
++	ret = etnaviv_domain_map(mmu->domain, node->start, paddr, size,
++				 ETNAVIV_PROT_READ);
++
++	if (ret < 0) {
++		drm_mm_remove_node(node);
++		goto unlock;
+ 	}
++
++	list_add_tail(&mapping->mmu_node, &mmu->mappings);
++	mmu->need_flush = true;
++unlock:
++	mutex_unlock(&mmu->lock);
++
++	return ret;
+ }
+ 
+-void etnaviv_iommu_put_suballoc_va(struct etnaviv_gpu *gpu,
+-				   struct drm_mm_node *vram_node, size_t size,
+-				   u32 iova)
++void etnaviv_iommu_put_suballoc_va(struct etnaviv_iommu *mmu,
++		  struct etnaviv_vram_mapping *mapping)
+ {
+-	struct etnaviv_iommu *mmu = gpu->mmu;
++	struct drm_mm_node *node = &mapping->vram_node;
+ 
+-	if (mmu->version == ETNAVIV_IOMMU_V2) {
+-		mutex_lock(&mmu->lock);
+-		etnaviv_domain_unmap(mmu->domain, iova, size);
+-		drm_mm_remove_node(vram_node);
+-		mutex_unlock(&mmu->lock);
+-	}
++	mapping->use = 0;
++
++	if (mmu->version == ETNAVIV_IOMMU_V1)
++		return;
++
++	mutex_lock(&mmu->lock);
++	etnaviv_domain_unmap(mmu->domain, node->start, node->size);
++	drm_mm_remove_node(node);
++	mutex_unlock(&mmu->lock);
+ }
++
+ size_t etnaviv_iommu_dump_size(struct etnaviv_iommu *iommu)
+ {
+ 	return iommu->domain->ops->dump_size(iommu->domain);
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+index a0db17ffb686..fe1c9d6b9334 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+@@ -59,12 +59,12 @@ int etnaviv_iommu_map_gem(struct etnaviv_iommu *mmu,
+ void etnaviv_iommu_unmap_gem(struct etnaviv_iommu *mmu,
+ 	struct etnaviv_vram_mapping *mapping);
+ 
+-int etnaviv_iommu_get_suballoc_va(struct etnaviv_gpu *gpu, dma_addr_t paddr,
+-				  struct drm_mm_node *vram_node, size_t size,
+-				  u32 *iova);
+-void etnaviv_iommu_put_suballoc_va(struct etnaviv_gpu *gpu,
+-				   struct drm_mm_node *vram_node, size_t size,
+-				   u32 iova);
++int etnaviv_iommu_get_suballoc_va(struct etnaviv_iommu *mmu,
++				  struct etnaviv_vram_mapping *mapping,
++				  u32 memory_base, dma_addr_t paddr,
++				  size_t size);
++void etnaviv_iommu_put_suballoc_va(struct etnaviv_iommu *mmu,
++				   struct etnaviv_vram_mapping *mapping);
+ 
+ size_t etnaviv_iommu_dump_size(struct etnaviv_iommu *iommu);
+ void etnaviv_iommu_dump(struct etnaviv_iommu *iommu, void *buf);

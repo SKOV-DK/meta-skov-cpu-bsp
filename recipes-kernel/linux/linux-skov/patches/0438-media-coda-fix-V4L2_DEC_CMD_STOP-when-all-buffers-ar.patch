@@ -1,0 +1,46 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Fri, 1 Mar 2019 12:09:40 +0100
+Subject: [PATCH] media: coda: fix V4L2_DEC_CMD_STOP when all buffers are
+ alread consumed
+
+When the DEC_CMD_STOP command is issued after the context has already
+consumed all the queued buffers, we need to make sure to wake the
+destination queue with last_buffer_dequeued set, to allow userspace to
+make progress in its EOS handling.
+
+As there might still be picture run workers pending at that point, we
+need to synchronize with them, so the sequence number comparison reads
+stable values.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+lst:
+- rewrite to fix to multi context use-cases
+- reworded commit message
+---
+ drivers/media/platform/coda/coda-common.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 2cc2561e2b76..d1722aebc33d 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1162,6 +1162,17 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 		coda_bit_stream_end_flag(ctx);
+ 		ctx->hold = false;
+ 		v4l2_m2m_try_schedule(ctx->fh.m2m_ctx);
++
++		flush_work(&ctx->pic_run_work);
++
++		/* If there is no buffer in flight, wake up */
++		if (!ctx->streamon_out || ctx->qsequence == ctx->osequence) {
++			dst_vq = v4l2_m2m_get_vq(ctx->fh.m2m_ctx,
++						 V4L2_BUF_TYPE_VIDEO_CAPTURE);
++			dst_vq->last_buffer_dequeued = true;
++			wake_up(&dst_vq->done_wq);
++		}
++
+ 		break;
+ 	default:
+ 		ret = -EINVAL;

@@ -23,10 +23,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index b5bd3de87c33..dc0f9e3fec5f 100644
+index bd40148a15b2..29b21f0dd5a6 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -424,6 +424,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -428,6 +428,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6dl-sabrelite.dtb \
  	imx6dl-sabresd.dtb \
  	imx6dl-savageboard.dtb \
@@ -35,7 +35,7 @@ index b5bd3de87c33..dc0f9e3fec5f 100644
  	imx6dl-ts4900.dtb \
  	imx6dl-ts7970.dtb \
  	imx6dl-tx6dl-comtft.dtb \
-@@ -500,6 +502,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -505,6 +507,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6q-sabresd.dtb \
  	imx6q-savageboard.dtb \
  	imx6q-sbc6x.dtb \

@@ -1,0 +1,102 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 26 Mar 2019 12:43:14 +0100
+Subject: [PATCH] Input: ads7846 - convert to devm_ alloc functions
+
+Convert to devm function to drop the 'no-mem' error handling path and
+strip down the remove funciton a bit.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ drivers/input/touchscreen/ads7846.c | 37 +++++++++++++++----------------------
+ 1 file changed, 15 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/input/touchscreen/ads7846.c b/drivers/input/touchscreen/ads7846.c
+index a2f45aefce08..5a7a8425d619 100644
+--- a/drivers/input/touchscreen/ads7846.c
++++ b/drivers/input/touchscreen/ads7846.c
+@@ -1283,13 +1283,17 @@ static int ads7846_probe(struct spi_device *spi)
+ 	if (err < 0)
+ 		return err;
+ 
+-	ts = kzalloc(sizeof(struct ads7846), GFP_KERNEL);
+-	packet = kzalloc(sizeof(struct ads7846_packet), GFP_KERNEL);
+-	input_dev = input_allocate_device();
+-	if (!ts || !packet || !input_dev) {
+-		err = -ENOMEM;
+-		goto err_free_mem;
+-	}
++	ts = devm_kzalloc(&spi->dev, sizeof(*ts), GFP_KERNEL);
++	if (!ts)
++		return -ENOMEM;
++
++	packet = devm_kzalloc(&spi->dev, sizeof(*packet), GFP_KERNEL);
++	if (!packet)
++		return -ENOMEM;
++
++	input_dev = devm_input_allocate_device(&spi->dev);
++	if (!input_dev)
++		return -ENOMEM;
+ 
+ 	spi_set_drvdata(spi, ts);
+ 
+@@ -1303,10 +1307,8 @@ static int ads7846_probe(struct spi_device *spi)
+ 	pdata = dev_get_platdata(&spi->dev);
+ 	if (!pdata) {
+ 		pdata = ads7846_probe_dt(&spi->dev);
+-		if (IS_ERR(pdata)) {
+-			err = PTR_ERR(pdata);
+-			goto err_free_mem;
+-		}
++		if (IS_ERR(pdata))
++			return PTR_ERR(pdata);
+ 	}
+ 
+ 	ts->model = pdata->model ? : 7846;
+@@ -1321,7 +1323,7 @@ static int ads7846_probe(struct spi_device *spi)
+ 		if (pdata->filter_init != NULL) {
+ 			err = pdata->filter_init(pdata, &ts->filter_data);
+ 			if (err < 0)
+-				goto err_free_mem;
++				return err;
+ 		}
+ 		ts->filter = pdata->filter;
+ 		ts->filter_cleanup = pdata->filter_cleanup;
+@@ -1352,7 +1354,6 @@ static int ads7846_probe(struct spi_device *spi)
+ 
+ 	input_dev->name = ts->name;
+ 	input_dev->phys = ts->phys;
+-	input_dev->dev.parent = &spi->dev;
+ 
+ 	input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+ 	input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+@@ -1451,10 +1452,7 @@ static int ads7846_probe(struct spi_device *spi)
+  err_cleanup_filter:
+ 	if (ts->filter_cleanup)
+ 		ts->filter_cleanup(ts->filter_data);
+- err_free_mem:
+-	input_free_device(input_dev);
+-	kfree(packet);
+-	kfree(ts);
++
+ 	return err;
+ }
+ 
+@@ -1467,8 +1465,6 @@ static int ads7846_remove(struct spi_device *spi)
+ 	ads7846_disable(ts);
+ 	free_irq(ts->spi->irq, ts);
+ 
+-	input_unregister_device(ts->input);
+-
+ 	ads784x_hwmon_unregister(spi, ts);
+ 
+ 	regulator_put(ts->reg);
+@@ -1484,9 +1480,6 @@ static int ads7846_remove(struct spi_device *spi)
+ 	if (ts->filter_cleanup)
+ 		ts->filter_cleanup(ts->filter_data);
+ 
+-	kfree(ts->packet);
+-	kfree(ts);
+-
+ 	dev_dbg(&spi->dev, "unregistered touchscreen\n");
+ 
+ 	return 0;

@@ -1,0 +1,29 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Fri, 1 Mar 2019 12:07:31 +0100
+Subject: [PATCH] media: coda: jpeg: fix qsequence counting
+
+Currently the ctx qsequence number is only incremented in
+coda_fill_bitstream. The CODA960 JPEG de-/encoder doesn't use the
+bitstream, so the qsequence is never incremented there. Fix this
+by explicitly checking for the !use_bit case.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+lst: Reword commit message.
+---
+ drivers/media/platform/coda/coda-common.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 1d7c75abe4fa..d2d50b0a6fe1 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1715,7 +1715,7 @@ static void coda_buf_queue(struct vb2_buffer *vb)
+ 			coda_fill_bitstream(ctx, NULL);
+ 		mutex_unlock(&ctx->bitstream_mutex);
+ 	} else {
+-		if (ctx->inst_type == CODA_INST_ENCODER &&
++		if ((ctx->inst_type == CODA_INST_ENCODER || !ctx->use_bit) &&
+ 		    vq->type == V4L2_BUF_TYPE_VIDEO_OUTPUT)
+ 			vbuf->sequence = ctx->qsequence++;
+ 		v4l2_m2m_buf_queue(ctx->fh.m2m_ctx, vbuf);

@@ -1,0 +1,44 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Wed, 19 Dec 2018 15:16:41 +0100
+Subject: [PATCH] drm/etnaviv: initialize idle mask before querying the HW db
+
+If there is a match in the HW DB, the function is left early, before
+inititalizing the idle mask. Fix this by doing the init earlier, as
+only old GPUs, not present in the HW DB need a different idle mask.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index d3b5070b0c7d..c4c237793106 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -365,6 +365,7 @@ static void etnaviv_hw_identify(struct etnaviv_gpu *gpu)
+ 	dev_info(gpu->dev, "model: GC%x, revision: %x\n",
+ 		 gpu->identity.model, gpu->identity.revision);
+ 
++	gpu->idle_mask = ~VIVS_HI_IDLE_STATE_AXI_LP;
+ 	/*
+ 	 * If there is a match in the HWDB, we aren't interested in the
+ 	 * remaining register values, as they might be wrong.
+@@ -412,7 +413,7 @@ static void etnaviv_hw_identify(struct etnaviv_gpu *gpu)
+ 	}
+ 
+ 	/* GC600 idle register reports zero bits where modules aren't present */
+-	if (gpu->identity.model == chipModel_GC600) {
++	if (gpu->identity.model == chipModel_GC600)
+ 		gpu->idle_mask = VIVS_HI_IDLE_STATE_TX |
+ 				 VIVS_HI_IDLE_STATE_RA |
+ 				 VIVS_HI_IDLE_STATE_SE |
+@@ -421,9 +422,6 @@ static void etnaviv_hw_identify(struct etnaviv_gpu *gpu)
+ 				 VIVS_HI_IDLE_STATE_PE |
+ 				 VIVS_HI_IDLE_STATE_DE |
+ 				 VIVS_HI_IDLE_STATE_FE;
+-	} else {
+-		gpu->idle_mask = ~VIVS_HI_IDLE_STATE_AXI_LP;
+-	}
+ 
+ 	etnaviv_hw_specs(gpu);
+ }

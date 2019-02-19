@@ -1,0 +1,62 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Wed, 13 Mar 2019 17:54:15 +0100
+Subject: [PATCH] drm/etnaviv: track previous gpu mmu context
+
+When scheduling a new job we take a reference on the previous GPU MMU
+context to avoid it being freed before the GPU has jumped to the
+newly scheduled MMU context.
+
+This keeps the previous context alive unit the new job has finished
+execution, while technically it could be freed at the start of the
+execution of the new job. Batching freeing of the previous context
+with new job finish simplifies tracking and doesn't need any new
+signals.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gem.h        | 2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c | 3 +++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c        | 3 +++
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.h b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+index da19e37c248d..f4a1564952df 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -97,7 +97,7 @@ struct etnaviv_gem_submit {
+ 	struct kref refcount;
+ 	struct etnaviv_file_private *ctx;
+ 	struct etnaviv_gpu *gpu;
+-	struct etnaviv_iommu_context *mmu;
++	struct etnaviv_iommu_context *mmu, *prev_mmu;
+ 	struct dma_fence *out_fence, *in_fence;
+ 	int out_fence_id;
+ 	struct list_head node; /* GPU active submit list */
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+index ab21ccea970c..f6e8262da0e3 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+@@ -414,6 +414,9 @@ static void submit_cleanup(struct kref *kref)
+ 	if (submit->mmu)
+ 		etnaviv_iommu_context_put(submit->mmu);
+ 
++	if (submit->prev_mmu)
++		etnaviv_iommu_context_put(submit->prev_mmu);
++
+ 	for (i = 0; i < submit->nr_bos; i++) {
+ 		struct etnaviv_gem_object *etnaviv_obj = submit->bos[i].obj;
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index c4c237793106..a5cfaad2ce68 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1299,6 +1299,9 @@ struct dma_fence *etnaviv_gpu_submit(struct etnaviv_gem_submit *submit)
+ 		etnaviv_iommu_context_get(submit->mmu);
+ 		gpu->mmu = submit->mmu;
+ 		etnaviv_gpu_start_fe_idleloop(gpu);
++	} else {
++		etnaviv_iommu_context_get(gpu->mmu);
++		submit->prev_mmu = gpu->mmu;
+ 	}
+ 
+ 	if (submit->nr_pmrs) {

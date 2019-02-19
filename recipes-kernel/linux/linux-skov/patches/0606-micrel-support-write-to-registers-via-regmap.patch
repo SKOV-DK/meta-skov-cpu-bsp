@@ -1,0 +1,91 @@
+From: Sam Ravnborg <srn@skov.dk>
+Date: Sat, 28 Jan 2017 16:15:26 +0100
+Subject: [PATCH] micrel: support write to registers via regmap
+
+Update the existing regmap support to support writes to
+the micrel phy registers.
+
+- Enable write support in regmap
+- in mdio-bitbang update SMI0 support
+  - Encode phy + reg from the reg parameter alone
+    With this change callers do not need to use the
+    phy parameter to specify read/write, and existing
+    helper methods can be used to read/write
+- micrel-smi updated to utilize the helper methods
+  and simplified the code in the process
+- fixed write support
+- added list of RO registers
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+ drivers/net/phy/mdio-bitbang.c | 23 +++++++++++++++++++++--
+ include/linux/phy.h            |  1 +
+ 2 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/phy/mdio-bitbang.c b/drivers/net/phy/mdio-bitbang.c
+index 34cd986269a9..7453afde4691 100644
+--- a/drivers/net/phy/mdio-bitbang.c
++++ b/drivers/net/phy/mdio-bitbang.c
+@@ -25,6 +25,10 @@
+ #define MDIO_READ 2
+ #define MDIO_WRITE 1
+ 
++#define SMI0_RW_OPCODE	0
++#define SMI0_READ_PHY	(1 << 4)
++#define SMI0_WRITE_PHY	(0 << 4)
++
+ #define MDIO_C45 (1<<15)
+ #define MDIO_C45_ADDR (MDIO_C45 | 0)
+ #define MDIO_C45_READ (MDIO_C45 | 3)
+@@ -152,6 +156,21 @@ static int mdiobb_cmd_addr(struct mdiobb_ctrl *ctrl, int phy, u32 addr)
+ 	return dev_addr;
+ }
+ 
++/* Serial Management Interface (SMI) uses the following frame format:
++ *
++ *       preamble|start|Read/Write|  PHY   |  REG  |TA|   Data bits      | Idle
++ *               |frame| OP code  |address |address|  |                  |
++ * read | 32x1´s | 01  |    00    | 1xRRR  | RRRRR |Z0| 00000000DDDDDDDD |  Z
++ * write| 32x1´s | 01  |    00    | 0xRRR  | RRRRR |10| xxxxxxxxDDDDDDDD |  Z
++ *
++ * The register number is encoded with the 5 least significant bits in REG
++ * and the 3 most significant bits in PHY
++ */
++static int smi0_phy(int reg, int rw)
++{
++	return ((reg & 0xE0) >> 5) | rw;
++}
++
+ static int mdiobb_read(struct mii_bus *bus, int phy, int reg)
+ {
+ 	struct mdiobb_ctrl *ctrl = bus->priv;
+@@ -161,7 +180,7 @@ static int mdiobb_read(struct mii_bus *bus, int phy, int reg)
+ 		reg = mdiobb_cmd_addr(ctrl, phy, reg);
+ 		mdiobb_cmd(ctrl, MDIO_C45_READ, phy, reg);
+ 	} else if (reg & MII_ADDR_SMI0) {
+-		mdiobb_cmd(ctrl, 0, phy, reg);
++		mdiobb_cmd(ctrl, SMI0_RW_OPCODE, smi0_phy(reg, SMI0_READ_PHY), reg);
+ 	} else
+ 		mdiobb_cmd(ctrl, MDIO_READ, phy, reg);
+ 
+@@ -194,7 +213,7 @@ static int mdiobb_write(struct mii_bus *bus, int phy, int reg, u16 val)
+ 		reg = mdiobb_cmd_addr(ctrl, phy, reg);
+ 		mdiobb_cmd(ctrl, MDIO_C45_WRITE, phy, reg);
+ 	} else if (reg & MII_ADDR_SMI0) {
+-		mdiobb_cmd(ctrl, 0, phy, reg);
++		mdiobb_cmd(ctrl, SMI0_RW_OPCODE, smi0_phy(reg, SMI0_WRITE_PHY), reg);
+ 	} else
+ 		mdiobb_cmd(ctrl, MDIO_WRITE, phy, reg);
+ 
+diff --git a/include/linux/phy.h b/include/linux/phy.h
+index d8b5dcaccf9d..ec6eda455c59 100644
+--- a/include/linux/phy.h
++++ b/include/linux/phy.h
+@@ -199,6 +199,7 @@ static inline const char *phy_modes(phy_interface_t interface)
+    IEEE 802.3ae clause 45 addressing mode used by 10GIGE phy chips. */
+ #define MII_ADDR_C45 (1<<30)
+ 
++/* Support for Serial Management Interface (SMI) */
+ #define MII_ADDR_SMI0 (1<<31)
+ 
+ struct device;
