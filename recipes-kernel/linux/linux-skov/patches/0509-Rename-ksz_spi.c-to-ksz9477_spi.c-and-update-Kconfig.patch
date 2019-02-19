@@ -1,0 +1,498 @@
+From: Tristram Ha <Tristram.Ha@microchip.com>
+Date: Thu, 20 Sep 2018 16:54:22 +0200
+Subject: [PATCH] Rename ksz_spi.c to ksz9477_spi.c and update Kconfig in
+ preparation to add more KSZ switch drivers.
+
+Signed-off-by: Tristram Ha <Tristram.Ha@microchip.com>
+Reviewed-by: Pavel Machek <pavel@ucw.cz>
+Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
+---
+ drivers/net/dsa/microchip/Kconfig       |  12 +-
+ drivers/net/dsa/microchip/Makefile      |   4 +-
+ drivers/net/dsa/microchip/ksz9477_spi.c | 218 ++++++++++++++++++++++++++++++++
+ drivers/net/dsa/microchip/ksz_spi.c     | 218 --------------------------------
+ 4 files changed, 226 insertions(+), 226 deletions(-)
+ create mode 100644 drivers/net/dsa/microchip/ksz9477_spi.c
+ delete mode 100644 drivers/net/dsa/microchip/ksz_spi.c
+
+diff --git a/drivers/net/dsa/microchip/Kconfig b/drivers/net/dsa/microchip/Kconfig
+index a8b8f59099ce..5a8660d9c264 100644
+--- a/drivers/net/dsa/microchip/Kconfig
++++ b/drivers/net/dsa/microchip/Kconfig
+@@ -1,12 +1,12 @@
+-menuconfig MICROCHIP_KSZ
+-	tristate "Microchip KSZ series switch support"
++menuconfig MICROCHIP_KSZ9477
++	tristate "Microchip KSZ9477 series switch support"
+ 	depends on NET_DSA
+ 	select NET_DSA_TAG_KSZ
+ 	help
+-	  This driver adds support for Microchip KSZ switch chips.
++	  This driver adds support for Microchip KSZ9477 switch chips.
+ 
+-config MICROCHIP_KSZ_SPI_DRIVER
+-	tristate "KSZ series SPI connected switch driver"
+-	depends on MICROCHIP_KSZ && SPI
++config MICROCHIP_KSZ9477_SPI_DRIVER
++	tristate "KSZ9477 series SPI connected switch driver"
++	depends on MICROCHIP_KSZ9477 && SPI
+ 	help
+ 	  Select to enable support for registering switches configured through SPI.
+diff --git a/drivers/net/dsa/microchip/Makefile b/drivers/net/dsa/microchip/Makefile
+index ed335e29fae8..5b6325b747dd 100644
+--- a/drivers/net/dsa/microchip/Makefile
++++ b/drivers/net/dsa/microchip/Makefile
+@@ -1,2 +1,2 @@
+-obj-$(CONFIG_MICROCHIP_KSZ)	        += ksz_common.o
+-obj-$(CONFIG_MICROCHIP_KSZ_SPI_DRIVER)	+= ksz_spi.o
++obj-$(CONFIG_MICROCHIP_KSZ9477)	        += ksz_common.o
++obj-$(CONFIG_MICROCHIP_KSZ9477_SPI_DRIVER)	+= ksz9477_spi.o
+diff --git a/drivers/net/dsa/microchip/ksz9477_spi.c b/drivers/net/dsa/microchip/ksz9477_spi.c
+new file mode 100644
+index 000000000000..4ef74782c64e
+--- /dev/null
++++ b/drivers/net/dsa/microchip/ksz9477_spi.c
+@@ -0,0 +1,218 @@
++/*
++ * Microchip KSZ series register access through SPI
++ *
++ * Copyright (C) 2017 Microchip Technology Inc.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <asm/unaligned.h>
++
++#include <linux/delay.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/spi/spi.h>
++
++#include "ksz_priv.h"
++
++/* SPI frame opcodes */
++#define KS_SPIOP_RD			3
++#define KS_SPIOP_WR			2
++
++#define SPI_ADDR_SHIFT			24
++#define SPI_ADDR_MASK			(BIT(SPI_ADDR_SHIFT) - 1)
++#define SPI_TURNAROUND_SHIFT		5
++
++static int ksz_spi_read_reg(struct spi_device *spi, u32 reg, u8 *val,
++			    unsigned int len)
++{
++	u32 txbuf;
++	int ret;
++
++	txbuf = reg & SPI_ADDR_MASK;
++	txbuf |= KS_SPIOP_RD << SPI_ADDR_SHIFT;
++	txbuf <<= SPI_TURNAROUND_SHIFT;
++	txbuf = cpu_to_be32(txbuf);
++
++	ret = spi_write_then_read(spi, &txbuf, 4, val, len);
++	return ret;
++}
++
++static int ksz_spi_read(struct ksz_device *dev, u32 reg, u8 *data,
++			unsigned int len)
++{
++	struct spi_device *spi = dev->priv;
++
++	return ksz_spi_read_reg(spi, reg, data, len);
++}
++
++static int ksz_spi_read8(struct ksz_device *dev, u32 reg, u8 *val)
++{
++	return ksz_spi_read(dev, reg, val, 1);
++}
++
++static int ksz_spi_read16(struct ksz_device *dev, u32 reg, u16 *val)
++{
++	int ret = ksz_spi_read(dev, reg, (u8 *)val, 2);
++
++	if (!ret)
++		*val = be16_to_cpu(*val);
++
++	return ret;
++}
++
++static int ksz_spi_read24(struct ksz_device *dev, u32 reg, u32 *val)
++{
++	int ret;
++
++	*val = 0;
++	ret = ksz_spi_read(dev, reg, (u8 *)val, 3);
++	if (!ret) {
++		*val = be32_to_cpu(*val);
++		/* convert to 24bit */
++		*val >>= 8;
++	}
++
++	return ret;
++}
++
++static int ksz_spi_read32(struct ksz_device *dev, u32 reg, u32 *val)
++{
++	int ret = ksz_spi_read(dev, reg, (u8 *)val, 4);
++
++	if (!ret)
++		*val = be32_to_cpu(*val);
++
++	return ret;
++}
++
++static int ksz_spi_write_reg(struct spi_device *spi, u32 reg, u8 *val,
++			     unsigned int len)
++{
++	u32 txbuf;
++	u8 data[12];
++	int i;
++
++	txbuf = reg & SPI_ADDR_MASK;
++	txbuf |= (KS_SPIOP_WR << SPI_ADDR_SHIFT);
++	txbuf <<= SPI_TURNAROUND_SHIFT;
++	txbuf = cpu_to_be32(txbuf);
++
++	data[0] = txbuf & 0xFF;
++	data[1] = (txbuf & 0xFF00) >> 8;
++	data[2] = (txbuf & 0xFF0000) >> 16;
++	data[3] = (txbuf & 0xFF000000) >> 24;
++	for (i = 0; i < len; i++)
++		data[i + 4] = val[i];
++
++	return spi_write(spi, &data, 4 + len);
++}
++
++static int ksz_spi_write8(struct ksz_device *dev, u32 reg, u8 value)
++{
++	struct spi_device *spi = dev->priv;
++
++	return ksz_spi_write_reg(spi, reg, &value, 1);
++}
++
++static int ksz_spi_write16(struct ksz_device *dev, u32 reg, u16 value)
++{
++	struct spi_device *spi = dev->priv;
++
++	value = cpu_to_be16(value);
++	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 2);
++}
++
++static int ksz_spi_write24(struct ksz_device *dev, u32 reg, u32 value)
++{
++	struct spi_device *spi = dev->priv;
++
++	/* make it to big endian 24bit from MSB */
++	value <<= 8;
++	value = cpu_to_be32(value);
++	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 3);
++}
++
++static int ksz_spi_write32(struct ksz_device *dev, u32 reg, u32 value)
++{
++	struct spi_device *spi = dev->priv;
++
++	value = cpu_to_be32(value);
++	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 4);
++}
++
++static const struct ksz_io_ops ksz_spi_ops = {
++	.read8 = ksz_spi_read8,
++	.read16 = ksz_spi_read16,
++	.read24 = ksz_spi_read24,
++	.read32 = ksz_spi_read32,
++	.write8 = ksz_spi_write8,
++	.write16 = ksz_spi_write16,
++	.write24 = ksz_spi_write24,
++	.write32 = ksz_spi_write32,
++};
++
++static int ksz_spi_probe(struct spi_device *spi)
++{
++	struct ksz_device *dev;
++	int ret;
++
++	dev = ksz_switch_alloc(&spi->dev, &ksz_spi_ops, spi);
++	if (!dev)
++		return -ENOMEM;
++
++	if (spi->dev.platform_data)
++		dev->pdata = spi->dev.platform_data;
++
++	ret = ksz_switch_register(dev);
++	if (ret)
++		return ret;
++
++	spi_set_drvdata(spi, dev);
++
++	return 0;
++}
++
++static int ksz_spi_remove(struct spi_device *spi)
++{
++	struct ksz_device *dev = spi_get_drvdata(spi);
++
++	if (dev)
++		ksz_switch_remove(dev);
++
++	return 0;
++}
++
++static const struct of_device_id ksz_dt_ids[] = {
++	{ .compatible = "microchip,ksz9477" },
++	{ .compatible = "microchip,ksz9897" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, ksz_dt_ids);
++
++static struct spi_driver ksz_spi_driver = {
++	.driver = {
++		.name	= "ksz9477-switch",
++		.owner	= THIS_MODULE,
++		.of_match_table = of_match_ptr(ksz_dt_ids),
++	},
++	.probe	= ksz_spi_probe,
++	.remove	= ksz_spi_remove,
++};
++
++module_spi_driver(ksz_spi_driver);
++
++MODULE_AUTHOR("Woojung Huh <Woojung.Huh@microchip.com>");
++MODULE_DESCRIPTION("Microchip KSZ Series Switch SPI access Driver");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/net/dsa/microchip/ksz_spi.c b/drivers/net/dsa/microchip/ksz_spi.c
+deleted file mode 100644
+index 4ef74782c64e..000000000000
+--- a/drivers/net/dsa/microchip/ksz_spi.c
++++ /dev/null
+@@ -1,218 +0,0 @@
+-/*
+- * Microchip KSZ series register access through SPI
+- *
+- * Copyright (C) 2017 Microchip Technology Inc.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License
+- * as published by the Free Software Foundation; either version 2
+- * of the License, or (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-#include <asm/unaligned.h>
+-
+-#include <linux/delay.h>
+-#include <linux/kernel.h>
+-#include <linux/module.h>
+-#include <linux/spi/spi.h>
+-
+-#include "ksz_priv.h"
+-
+-/* SPI frame opcodes */
+-#define KS_SPIOP_RD			3
+-#define KS_SPIOP_WR			2
+-
+-#define SPI_ADDR_SHIFT			24
+-#define SPI_ADDR_MASK			(BIT(SPI_ADDR_SHIFT) - 1)
+-#define SPI_TURNAROUND_SHIFT		5
+-
+-static int ksz_spi_read_reg(struct spi_device *spi, u32 reg, u8 *val,
+-			    unsigned int len)
+-{
+-	u32 txbuf;
+-	int ret;
+-
+-	txbuf = reg & SPI_ADDR_MASK;
+-	txbuf |= KS_SPIOP_RD << SPI_ADDR_SHIFT;
+-	txbuf <<= SPI_TURNAROUND_SHIFT;
+-	txbuf = cpu_to_be32(txbuf);
+-
+-	ret = spi_write_then_read(spi, &txbuf, 4, val, len);
+-	return ret;
+-}
+-
+-static int ksz_spi_read(struct ksz_device *dev, u32 reg, u8 *data,
+-			unsigned int len)
+-{
+-	struct spi_device *spi = dev->priv;
+-
+-	return ksz_spi_read_reg(spi, reg, data, len);
+-}
+-
+-static int ksz_spi_read8(struct ksz_device *dev, u32 reg, u8 *val)
+-{
+-	return ksz_spi_read(dev, reg, val, 1);
+-}
+-
+-static int ksz_spi_read16(struct ksz_device *dev, u32 reg, u16 *val)
+-{
+-	int ret = ksz_spi_read(dev, reg, (u8 *)val, 2);
+-
+-	if (!ret)
+-		*val = be16_to_cpu(*val);
+-
+-	return ret;
+-}
+-
+-static int ksz_spi_read24(struct ksz_device *dev, u32 reg, u32 *val)
+-{
+-	int ret;
+-
+-	*val = 0;
+-	ret = ksz_spi_read(dev, reg, (u8 *)val, 3);
+-	if (!ret) {
+-		*val = be32_to_cpu(*val);
+-		/* convert to 24bit */
+-		*val >>= 8;
+-	}
+-
+-	return ret;
+-}
+-
+-static int ksz_spi_read32(struct ksz_device *dev, u32 reg, u32 *val)
+-{
+-	int ret = ksz_spi_read(dev, reg, (u8 *)val, 4);
+-
+-	if (!ret)
+-		*val = be32_to_cpu(*val);
+-
+-	return ret;
+-}
+-
+-static int ksz_spi_write_reg(struct spi_device *spi, u32 reg, u8 *val,
+-			     unsigned int len)
+-{
+-	u32 txbuf;
+-	u8 data[12];
+-	int i;
+-
+-	txbuf = reg & SPI_ADDR_MASK;
+-	txbuf |= (KS_SPIOP_WR << SPI_ADDR_SHIFT);
+-	txbuf <<= SPI_TURNAROUND_SHIFT;
+-	txbuf = cpu_to_be32(txbuf);
+-
+-	data[0] = txbuf & 0xFF;
+-	data[1] = (txbuf & 0xFF00) >> 8;
+-	data[2] = (txbuf & 0xFF0000) >> 16;
+-	data[3] = (txbuf & 0xFF000000) >> 24;
+-	for (i = 0; i < len; i++)
+-		data[i + 4] = val[i];
+-
+-	return spi_write(spi, &data, 4 + len);
+-}
+-
+-static int ksz_spi_write8(struct ksz_device *dev, u32 reg, u8 value)
+-{
+-	struct spi_device *spi = dev->priv;
+-
+-	return ksz_spi_write_reg(spi, reg, &value, 1);
+-}
+-
+-static int ksz_spi_write16(struct ksz_device *dev, u32 reg, u16 value)
+-{
+-	struct spi_device *spi = dev->priv;
+-
+-	value = cpu_to_be16(value);
+-	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 2);
+-}
+-
+-static int ksz_spi_write24(struct ksz_device *dev, u32 reg, u32 value)
+-{
+-	struct spi_device *spi = dev->priv;
+-
+-	/* make it to big endian 24bit from MSB */
+-	value <<= 8;
+-	value = cpu_to_be32(value);
+-	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 3);
+-}
+-
+-static int ksz_spi_write32(struct ksz_device *dev, u32 reg, u32 value)
+-{
+-	struct spi_device *spi = dev->priv;
+-
+-	value = cpu_to_be32(value);
+-	return ksz_spi_write_reg(spi, reg, (u8 *)&value, 4);
+-}
+-
+-static const struct ksz_io_ops ksz_spi_ops = {
+-	.read8 = ksz_spi_read8,
+-	.read16 = ksz_spi_read16,
+-	.read24 = ksz_spi_read24,
+-	.read32 = ksz_spi_read32,
+-	.write8 = ksz_spi_write8,
+-	.write16 = ksz_spi_write16,
+-	.write24 = ksz_spi_write24,
+-	.write32 = ksz_spi_write32,
+-};
+-
+-static int ksz_spi_probe(struct spi_device *spi)
+-{
+-	struct ksz_device *dev;
+-	int ret;
+-
+-	dev = ksz_switch_alloc(&spi->dev, &ksz_spi_ops, spi);
+-	if (!dev)
+-		return -ENOMEM;
+-
+-	if (spi->dev.platform_data)
+-		dev->pdata = spi->dev.platform_data;
+-
+-	ret = ksz_switch_register(dev);
+-	if (ret)
+-		return ret;
+-
+-	spi_set_drvdata(spi, dev);
+-
+-	return 0;
+-}
+-
+-static int ksz_spi_remove(struct spi_device *spi)
+-{
+-	struct ksz_device *dev = spi_get_drvdata(spi);
+-
+-	if (dev)
+-		ksz_switch_remove(dev);
+-
+-	return 0;
+-}
+-
+-static const struct of_device_id ksz_dt_ids[] = {
+-	{ .compatible = "microchip,ksz9477" },
+-	{ .compatible = "microchip,ksz9897" },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, ksz_dt_ids);
+-
+-static struct spi_driver ksz_spi_driver = {
+-	.driver = {
+-		.name	= "ksz9477-switch",
+-		.owner	= THIS_MODULE,
+-		.of_match_table = of_match_ptr(ksz_dt_ids),
+-	},
+-	.probe	= ksz_spi_probe,
+-	.remove	= ksz_spi_remove,
+-};
+-
+-module_spi_driver(ksz_spi_driver);
+-
+-MODULE_AUTHOR("Woojung Huh <Woojung.Huh@microchip.com>");
+-MODULE_DESCRIPTION("Microchip KSZ Series Switch SPI access Driver");
+-MODULE_LICENSE("GPL");

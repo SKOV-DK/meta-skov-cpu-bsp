@@ -1,16 +1,16 @@
-# umpf-base: v4.19.8
+# umpf-base: v4.19.20
 # umpf-name: 4.19/customers/skov/imx6
-# umpf-version: 4.19/customers/skov/imx6/20181212-2
+# umpf-version: 4.19/customers/skov/imx6/20190326-1
 # umpf-topic: v4.19/customers/skov/imx6_project_specific
-# umpf-hashinfo: b5010bb1e250a336ed822bbdf748fdf4e6f06142
-# umpf-topic-range: 178574b66509c9ff7df4ad26c84a8884567e93b4..44c8027baa5309aa809287562ca776b1542de687
+# umpf-hashinfo: d003c9efdea4dbfb0254a38112ee4a6e4a63f7e8
+# umpf-topic-range: 323e0195e63ff967a4fbdab7b17120f544ddc88f..30a585b6e3d578d95263d73df5b9b93df599fd68
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   "
 # umpf-topic: v4.19/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: d9940c21073bc07816ab532cda39237a49d260a4
-# umpf-topic-range: 44c8027baa5309aa809287562ca776b1542de687..9a10dd770ef3102bbcba78740f52475b9bb2ccc4
+# umpf-topic-range: 30a585b6e3d578d95263d73df5b9b93df599fd68..e9882e900bdb575bced0f788a910c175d006519f
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -26,7 +26,7 @@ SRC_URI += "\
   "
 # umpf-topic: v4.19/topic/etnaviv
 # umpf-hashinfo: f3a03093edf8fe8ca01ee44956feaeb5a03032f2
-# umpf-topic-range: 9a10dd770ef3102bbcba78740f52475b9bb2ccc4..716eaa545a5de2e13aee2bd9c2c989b189b00a1a
+# umpf-topic-range: e9882e900bdb575bced0f788a910c175d006519f..70ffe48e1567b1751b99e6a5121fbd5c87cb3d6b
 SRC_URI += "\
   file://patches/0201-drm-etnaviv-kill-active-fence-tracking.patch \
   file://patches/0202-drm-etnaviv-consolidate-hardware-fence-handling-in-e.patch \
@@ -51,8 +51,8 @@ SRC_URI += "\
   file://patches/0221-drm-etnaviv-dump-only-failing-submit.patch \
   "
 # umpf-topic: v4.19/topic/coda
-# umpf-hashinfo: f041edbef475826a9d6ba160f4e2ce957b8ffd2b
-# umpf-topic-range: 716eaa545a5de2e13aee2bd9c2c989b189b00a1a..092404671334b4d3e82c5ae3638d7cb6844f85f6
+# umpf-hashinfo: 73b6f27ceb1608ac3b1037c9f0bc39339047b9ac
+# umpf-topic-range: 70ffe48e1567b1751b99e6a5121fbd5c87cb3d6b..e356e4136b608f8cc815ad6e7655bb63742dbe44
 SRC_URI += "\
   file://patches/0301-media-coda-reduce-minimum-frame-size-to-48x16-pixels.patch \
   file://patches/0302-media-coda-hold-back-decoder-jobs-until-we-have-at-l.patch \
@@ -109,19 +109,40 @@ SRC_URI += "\
   file://patches/0353-media-coda-Add-control-for-h.264-chroma-qp-index-off.patch \
   file://patches/0354-media-coda-use-macroblock-tiling-on-CODA960-only.patch \
   file://patches/0355-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
+  file://patches/0356-media-coda-fix-decoder-capture-buffer-payload.patch \
+  file://patches/0357-HACK-media-coda-page-align-decoded-buffers-on-CodaHx.patch \
   "
 # umpf-topic: v4.19/topic/drm-sched-accounting
 # umpf-hashinfo: 02230e2fa9afbad0bede6a712e5a51523d968202
-# umpf-topic-range: 092404671334b4d3e82c5ae3638d7cb6844f85f6..4aa82dee8c42afc4373797b77bff0d2386fccaa6
+# umpf-topic-range: e356e4136b608f8cc815ad6e7655bb63742dbe44..ba1e81eaa77322c88ee366462d45c7f9c5327339
 SRC_URI += "\
   file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
   file://patches/0403-drm-sched-make-fence-ops-static.patch \
   "
-# umpf-release: 4.19/customers/skov/imx6/20181212-2
-# umpf-topic-range: 4aa82dee8c42afc4373797b77bff0d2386fccaa6..d2f79fb48843d0f639a70c1c3ba17d746c7c196f
+# umpf-topic: v4.19/topic/ksz8873
+# umpf-hashinfo: 1cf261b13c8f4a18d96f7c0a20741ddb677df574
+# umpf-topic-range: ba1e81eaa77322c88ee366462d45c7f9c5327339..8c74a7afb65de8e007b6f8dc8f760bcaf28bd181
 SRC_URI += "\
-  file://patches/0501-Release-4.19-customers-skov-imx6-20181212-2.patch \
-  file://patches/0700-Revert-can-dev__can_get_echo_skb_print_error_message.patch \
+  file://patches/0501-mdio-bitbang-add-SMI0-mode-support.patch \
+  file://patches/0502-micrel-fix-config_aneg-for-ksz886x.patch \
+  file://patches/0503-micrel-support-write-to-registers-via-regmap.patch \
+  file://patches/0504-dsa-add-ksz8873-tail-tagging.patch \
+  file://patches/0505-dsa-add-self_test-ethtool-function-handling.patch \
+  file://patches/0506-Replace-license-with-GPL.patch \
+  file://patches/0507-Clean-up-code-according-to-patch-check-suggestions.patch \
+  file://patches/0508-Rename-some-functions-with-ksz9477-prefix-to-separat.patch \
+  file://patches/0509-Rename-ksz_spi.c-to-ksz9477_spi.c-and-update-Kconfig.patch \
+  file://patches/0510-Break-KSZ9477-DSA-driver-into-two-files-in-preparati.patch \
+  file://patches/0511-Add-MIB-counter-reading-support.patch \
+  file://patches/0512-dsa-ksz-Use-timer_init-for-mib-counter-handling.patch \
+  file://patches/0513-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
+  file://patches/0514-dsa-ksz-dont-complain-about-not-being-able-to-remove.patch \
+  file://patches/0515-ksz-Add-Microchip-KSZ8873-SMI-DSA-driver.patch \
+  "
+# umpf-release: 4.19/customers/skov/imx6/20190326-1
+# umpf-topic-range: 8c74a7afb65de8e007b6f8dc8f760bcaf28bd181..0c3d31609bfe8fa5536437fb61728bc58d9334de
+SRC_URI += "\
+  file://patches/0601-Release-4.19-customers-skov-imx6-20190326-1.patch \
   "
 # umpf-end

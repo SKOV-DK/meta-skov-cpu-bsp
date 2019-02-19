@@ -9,12 +9,12 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
  arch/arm/boot/dts/Makefile                   |   4 +
  arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts   |  23 +
- arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 ++
+ arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 +
  arch/arm/boot/dts/imx6q-skov-revc-lt2.dts    |  36 ++
  arch/arm/boot/dts/imx6q-skov-revc-lt6.dts    |  40 ++
- arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi |  80 ++++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 644 +++++++++++++++++++++++++++
- 7 files changed, 854 insertions(+)
+ arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi |  80 +++
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 703 +++++++++++++++++++++++++++
+ 7 files changed, 913 insertions(+)
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
@@ -282,10 +282,10 @@ index 000000000000..97284a974c1c
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 new file mode 100644
-index 000000000000..8dbbddbd0aac
+index 000000000000..0ff40206a283
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
-@@ -0,0 +1,644 @@
+@@ -0,0 +1,703 @@
 +/*
 + * Copyright 2014 Rose Technology.
 + * Copyright 2012 Freescale Semiconductor, Inc.
@@ -321,6 +321,7 @@ index 000000000000..8dbbddbd0aac
 +		usb1 = &usbotg;
 +		rtc0 = &i2c_rtc;
 +		rtc1 = &snvs;
++		mdio-gpio0 = &mdio0;
 +	};
 +
 +	leds {
@@ -344,6 +345,70 @@ index 000000000000..8dbbddbd0aac
 +                        gpios = <&gpio1 4 0>;
 +                        default-state = "on";
 +                };
++	};
++
++
++	mdio0: mdio-gpio {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_mdio_1>;
++		compatible = "virtual,mdio-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		gpios = <&gpio1 31 0
++			 &gpio1 22 0>;
++
++		switchphy1: switchphy@1 {
++			reg = <1>;
++		};
++
++		switchphy2: switchphy@2 {
++			reg = <2>;
++		};
++
++		switchphy3: switchphy@3 {
++			reg = <3>;
++		};
++
++		/*
++		 * MDIO phy#1 is port 1 e.g. LAN1
++		 * MDIO phy#2 is port 2 e.g. LAN2
++		 * MDIO phy#2 is port 2 e.g. RMII port, with no real and usable
++		 * phy emulation
++		 */
++		ksz8873@3 {
++			compatible = "micrel,ksz8873";
++			interrupt-parrent = <&gpio3>;
++			interrupt = <30 IRQ_TYPE_LEVEL_HIGH>;
++			reg = <0>;
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				ports@0 {
++					reg = <0>;
++					phy-handle = <&switchphy1>;
++				};
++
++				ports@1 {
++					reg = <1>;
++					phy-handle = <&switchphy2>;
++				};
++
++				ports@2 {
++					reg = <2>;
++					label = "cpu";
++					ethernet = <&fec>;
++					phy-handle = <&switchphy3>;
++
++					fixed-link {
++						speed = <100>;
++						full-duplex;
++					};
++				};
++			};
++		};
++
 +	};
 +
 +	skov_version {
@@ -585,29 +650,19 @@ index 000000000000..8dbbddbd0aac
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_enet_4>;
 +	phy-mode = "rmii";
++	phy-handle = <&switchphy3>;
 +	phy-reset-gpios = <&gpio1 5 0>;
 +	phy-reset-duration = "100";
 +	phy-supply = <&reg_3p3v>;
 +	#address-cells = <0>;
 +	#size-cells = <1>;
-+
-+	/*
-+	 * MDIO phy#1 is port 1 e.g. LAN1
-+	 * MDIO phy#2 is port 2 e.g. LAN2
-+	 * MDIO phy#2 is port 2 e.g. RMII port, with no real and usable
-+	 * phy emulation
-+	 */
-+	fixed-link {
-+		speed = <100>;
-+		full-duplex;
-+	};
 +};
 +
 +/* signal "active link" on the RMII to the ethernet switch */
 +&gpio1 {
 +	active_rmii_link {
 +		gpio-hog;
-+		gpios = <&gpio1 24 GPIO_ACTIVE_LOW>;
++		gpios = <24 GPIO_ACTIVE_HIGH>;
 +		output-low;
 +		line-name = "rmii-active-link";
 +	};
@@ -628,7 +683,7 @@ index 000000000000..8dbbddbd0aac
 +	i2c_rtc: pcf85063@51 {
 +		compatible = "nxp,pcf85063";
 +		reg = <0x51>;
-+		quartz-load-femtofarad = <12500>;
++		quartz_load_12.5pf;
 +	};
 +};
 +
@@ -701,13 +756,17 @@ index 000000000000..8dbbddbd0aac
 +			>;
 +		};
 +
++		pinctrl_mdio_1: mdio-1 {
++			fsl,pins = <
++				MX6QDL_PAD_ENET_MDIO__GPIO1_IO22	0x100b1
++				MX6QDL_PAD_ENET_MDC__GPIO1_IO31		0x000b1
++			>;
++		};
++
 +		pinctrl_enet_4: enetgrp-4 {
 +			fsl,pins = <
-+				/* MDIO speed up to 5 MHz */
-+				MX6QDL_PAD_ENET_MDIO__ENET_MDIO		0x100b1
-+				MX6QDL_PAD_ENET_MDC__ENET_MDC		0x000b1
 +				/* RMII 50 MHz */
-+				MX6QDL_PAD_ENET_CRS_DV__ENET_RX_EN	0x100f5
++				MX6QDL_PAD_ENET_CRS_DV__ENET_RX_EN	0x100f5      /* set to phy mode */
 +				MX6QDL_PAD_ENET_TX_EN__ENET_TX_EN	0x100f5
 +				MX6QDL_PAD_ENET_RXD0__ENET_RX_DATA0	0x100c0
 +				MX6QDL_PAD_ENET_RXD1__ENET_RX_DATA1	0x100c0

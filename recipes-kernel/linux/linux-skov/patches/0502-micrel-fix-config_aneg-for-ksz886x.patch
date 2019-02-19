@@ -1,0 +1,38 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Tue, 26 Apr 2016 18:03:52 +0200
+Subject: [PATCH] micrel: fix config_aneg for ksz886x
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/phy/micrel.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
+index 3db06b40580d..14a169039eb0 100644
+--- a/drivers/net/phy/micrel.c
++++ b/drivers/net/phy/micrel.c
+@@ -666,6 +666,16 @@ static int ksz8873mll_config_aneg(struct phy_device *phydev)
+ 	return 0;
+ }
+ 
++static int ksz886x_config_aneg(struct phy_device *phydev)
++{
++	if (phydev->mdio.addr == 3) {
++		phydev->autoneg = AUTONEG_DISABLE;
++		genphy_read_status(phydev);
++	}
++
++	return genphy_config_aneg(phydev);
++}
++
+ static int kszphy_get_sset_count(struct phy_device *phydev)
+ {
+ 	return ARRAY_SIZE(kszphy_hw_stats);
+@@ -990,6 +1000,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.features	= PHY_BASIC_FEATURES,
+ 	.flags		= PHY_HAS_INTERRUPT,
+ 	.config_init	= kszphy_config_init,
++	.config_aneg	= ksz886x_config_aneg,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
