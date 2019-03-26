@@ -1,0 +1,45 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Wed, 10 Oct 2018 12:36:15 +0200
+Subject: [PATCH] dsa: ksz: add test_cnt option for ethtool test options
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/dsa/microchip/ksz_common.c | 11 ++++++++++-
+ drivers/net/dsa/microchip/ksz_priv.h   |  2 ++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
+index 62c07d68acff..ff3b614d3d86 100644
+--- a/drivers/net/dsa/microchip/ksz_common.c
++++ b/drivers/net/dsa/microchip/ksz_common.c
+@@ -167,7 +167,16 @@ int ksz_sset_count(struct dsa_switch *ds, int port, int sset)
+ {
+ 	struct ksz_device *dev = ds->priv;
+ 
+-	return dev->mib_cnt;
++	switch (sset) {
++	case ETH_SS_STATS:
++		return dev->mib_cnt;
++		break;
++	case ETH_SS_TEST:
++		return dev->test_cnt;
++		break;
++	}
++
++	return -EINVAL;
+ }
+ 
+ void ksz_get_ethtool_stats(struct dsa_switch *ds, int port, uint64_t *buf)
+diff --git a/drivers/net/dsa/microchip/ksz_priv.h b/drivers/net/dsa/microchip/ksz_priv.h
+index 0e1ccd39c777..92e3f0217cf2 100644
+--- a/drivers/net/dsa/microchip/ksz_priv.h
++++ b/drivers/net/dsa/microchip/ksz_priv.h
+@@ -89,6 +89,8 @@ struct ksz_device {
+ 	int interface;
+ 	u32 regs_size;
+ 
++	int test_cnt;
++
+ 	struct vlan_table *vlan_cache;
+ 
+ 	u8 *txbuf;
