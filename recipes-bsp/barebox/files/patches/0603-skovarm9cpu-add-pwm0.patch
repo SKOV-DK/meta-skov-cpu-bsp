@@ -1,3 +1,10 @@
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Fri, 21 Sep 2018 22:59:02 +0200
+Subject: [PATCH 1/1] skovarm9cpu: add pwm0
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
 index 6c56175..b84de5f 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
@@ -6,7 +13,7 @@ index 6c56175..b84de5f 100644
  							AT91_PIOC 27 AT91_PERIPH_A AT91_PINCTRL_NONE>;  /* LCDD23 */
  					};
  				};
-+				
++
 +				pwm0 {
 +					pinctrl_pwm0: pwm0_pwm1 {
 +						atmel,pins = <AT91_PIOB 8 AT91_PERIPH_B AT91_PINCTRL_NONE>;

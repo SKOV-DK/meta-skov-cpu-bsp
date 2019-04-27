@@ -1,3 +1,12 @@
+From 493962d75286b080bc43c26661c56bc0d63bbdb8 Mon Sep 17 00:00:00 2001
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 17 Oct 2018 09:05:30 +0200
+Subject: [PATCH] of: fix reproducible node name for legacy vs. new partition
+ binding
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
 the of_reproducible_name mechanism is used to find a partition node
 from the barebox devicetree in the Linux devicetree. Unfortunately
 we have two different partition bindings. In the legacy one the partition
@@ -12,8 +21,9 @@ reproducible name.
 This makes the partition fixup in barebox-state work when the barebox
 devicetree uses another binding than the Linux devicetree.
 
-Signed-off-by: Sascha Hauer <s.hauer@xxxxxxxxxxxxxx>
-Tested-by: Ulrich Ölmann <u.oelmann@xxxxxxxxxxxxxx>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Tested-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+Tested-by: Gavin Schenk <g.schenk@eckelmann.de
 ---
  drivers/of/base.c | 12 ++++++++++++
  1 file changed, 12 insertions(+)
@@ -42,4 +52,4 @@ index fc01a99ef2..f9b1c3c4cb 100644
  
  	offset = of_read_number(reg, na);
 -- 
-2.19.0
+2.19.1
