@@ -10,7 +10,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/arch/arm/dts/skovarm9cpu.dts b/arch/arm/dts/skovarm9cpu.dts
-index d1e95e3cafd2..7ea55a3a49b8 100644
+index 4e1ef03ae56b..c112892825e0 100644
 --- a/arch/arm/dts/skovarm9cpu.dts
 +++ b/arch/arm/dts/skovarm9cpu.dts
 @@ -261,30 +261,30 @@

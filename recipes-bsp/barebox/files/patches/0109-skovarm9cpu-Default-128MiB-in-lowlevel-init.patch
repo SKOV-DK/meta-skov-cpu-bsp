@@ -14,7 +14,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm/boards/skovarm9cpu/lowlevel_init.c b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
-index 1c7f4708fea4..bb2231176740 100644
+index 97a481e5d9f9..341c22be626c 100644
 --- a/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 +++ b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 @@ -74,7 +74,7 @@ static void __bare_init skovarm9cpu_board_config(struct at91sam926x_board_cfg *c
