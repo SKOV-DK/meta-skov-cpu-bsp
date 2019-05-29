@@ -9,16 +9,16 @@ TODO:
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
- arch/arm/boards/Makefile                    |   2 +
+ arch/arm/boards/Makefile                    |   3 +-
  arch/arm/boards/skovarm9cpu/Makefile        |   3 +
  arch/arm/boards/skovarm9cpu/lowlevel_init.c | 130 ++++++++++
- arch/arm/boards/skovarm9cpu/of_init.c       | 101 ++++++++
+ arch/arm/boards/skovarm9cpu/of_init.c       | 100 ++++++++
  arch/arm/configs/skovarm9cpu_defconfig      |  85 +++++++
  arch/arm/dts/Makefile                       |   2 +
  arch/arm/dts/skovarm9cpu.dts                | 354 ++++++++++++++++++++++++++++
  arch/arm/mach-at91/Kconfig                  |  10 +
  images/Makefile.at91                        |   4 +
- 9 files changed, 691 insertions(+)
+ 9 files changed, 690 insertions(+), 1 deletion(-)
  create mode 100644 arch/arm/boards/skovarm9cpu/Makefile
  create mode 100644 arch/arm/boards/skovarm9cpu/lowlevel_init.c
  create mode 100644 arch/arm/boards/skovarm9cpu/of_init.c
@@ -26,14 +26,16 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/dts/skovarm9cpu.dts
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index f332a21952b6..56f174ea56db 100644
+index e469a1568b2e..58171197427c 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -155,3 +155,5 @@ obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
- obj-$(CONFIG_MACH_ZII_RDU1)			+= zii-imx51-rdu1/
- obj-$(CONFIG_MACH_ZII_RDU2)			+= zii-imx6q-rdu2/
- obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
-+
+@@ -166,4 +166,5 @@ obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
+ obj-$(CONFIG_MACH_ZII_IMX7D_RPU2)		+= zii-imx7d-rpu2/
+ obj-$(CONFIG_MACH_WAGO_PFC_AM35XX)		+= wago-pfc-am35xx/
+ obj-$(CONFIG_MACH_LS1046ARDB)			+= ls1046ardb/
+-obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
+\ No newline at end of file
++obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
 +obj-$(CONFIG_MACH_SKOVARM9CPU)			+= skovarm9cpu/
 diff --git a/arch/arm/boards/skovarm9cpu/Makefile b/arch/arm/boards/skovarm9cpu/Makefile
 new file mode 100644
@@ -46,7 +48,7 @@ index 000000000000..5b7c8a6cbf3c
 +lwl-y += lowlevel_init.o
 diff --git a/arch/arm/boards/skovarm9cpu/lowlevel_init.c b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 new file mode 100644
-index 000000000000..1c7f4708fea4
+index 000000000000..97a481e5d9f9
 --- /dev/null
 +++ b/arch/arm/boards/skovarm9cpu/lowlevel_init.c
 @@ -0,0 +1,130 @@
@@ -81,8 +83,8 @@ index 000000000000..1c7f4708fea4
 +	cfg->ebi_pio_ppudr = 0xFFFF0000;
 +	/* EBI0_CSA, CS1 SDRAM, CS3 NAND Flash, 3.3V memories */
 +	cfg->ebi_csa =
-+		AT91_MATRIX_EBI0_DBPUC | AT91_MATRIX_EBI0_VDDIOMSEL_3_3V |
-+		AT91_MATRIX_EBI0_CS1A_SDRAMC;
++		AT91SAM9263_MATRIX_EBI0_DBPUC | AT91SAM9263_MATRIX_EBI0_VDDIOMSEL_3_3V |
++		AT91SAM9263_MATRIX_EBI0_CS1A_SDRAMC;
 +
 +	cfg->smc_cs = 0;
 +	cfg->smc_mode =
@@ -158,10 +160,10 @@ index 000000000000..1c7f4708fea4
 +	cfg.pio = IOMEM(AT91SAM9263_BASE_PIOD);
 +	cfg.sdramc = IOMEM(AT91SAM9263_BASE_SDRAMC0);
 +	cfg.ebi_pio_is_peripha = true;
-+	cfg.matrix_csa = AT91_MATRIX_EBI0CSA;
++	cfg.matrix_csa = IOMEM(AT91SAM9263_BASE_MATRIX + AT91SAM9263_MATRIX_EBI0CSA);
 +
 +	skovarm9cpu_board_config(&cfg);
-+	at91sam926x_board_init(&cfg);
++	at91sam9263_board_init(&cfg);
 +
 +	barebox_arm_entry(AT91_CHIPSELECT_1, at91_get_sdram_size(cfg.sdramc),
 +			  fdt);
@@ -182,10 +184,10 @@ index 000000000000..1c7f4708fea4
 +}
 diff --git a/arch/arm/boards/skovarm9cpu/of_init.c b/arch/arm/boards/skovarm9cpu/of_init.c
 new file mode 100644
-index 000000000000..e0e922a539df
+index 000000000000..d3320d54b239
 --- /dev/null
 +++ b/arch/arm/boards/skovarm9cpu/of_init.c
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,100 @@
 +/*
 + * Copyright (C) 2017 Sam Ravnborg <sam@ravnborg.org>
 + *
@@ -209,7 +211,6 @@ index 000000000000..e0e922a539df
 +#include <mach/at91sam9_smc.h>
 +#include <mach/hardware.h>
 +#include <mach/iomux.h>
-+#include <mach/io.h>
 +
 +static int check_fdt(void)
 +{
@@ -268,9 +269,9 @@ index 000000000000..e0e922a539df
 +	ek_nand_smc_config.mode |= AT91_SMC_DBW_8;
 +#endif
 +
-+	csa = at91_sys_read(AT91_MATRIX_EBI0CSA);
-+	csa |= AT91_MATRIX_EBI0_CS3A_SMC_SMARTMEDIA;
-+	at91_sys_write(AT91_MATRIX_EBI0CSA, csa);
++	csa = readl(AT91SAM9263_BASE_MATRIX + AT91SAM9263_MATRIX_EBI0CSA);
++	csa |= AT91SAM9263_MATRIX_EBI0_CS3A_SMC_SMARTMEDIA;
++	writel(csa, AT91SAM9263_BASE_MATRIX + AT91SAM9263_MATRIX_EBI0CSA);
 +
 +	/* configure chip-select 3 (NAND) */
 +	sam9_smc_configure(0, 3, &ek_nand_smc_config);
@@ -379,12 +380,12 @@ index 000000000000..9463f809e074
 +CONFIG_FS_FAT_LFN=y
 +CONFIG_PNG=y
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 31e1b3cbe9bc..ba2b61c78797 100644
+index 79a175409a60..29955cef209a 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -115,4 +115,6 @@ pbl-dtb-$(CONFIG_MACH_ZII_VF610_DEV) += \
- pbl-dtb-$(CONFIG_MACH_AT91SAM9263EK_DT) += at91sam9263ek.dtb.o
- pbl-dtb-$(CONFIG_MACH_AT91SAM9X5EK) += at91sam9x5ek.dtb.o
+@@ -137,4 +137,6 @@ pbl-dtb-$(CONFIG_MACH_WAGO_PFC_AM35XX) += am35xx-pfc-750_820x.dtb.o
+ pbl-dtb-$(CONFIG_MACH_LS1046ARDB) += fsl-ls1046a-rdb.dtb.o
+ pbl-dtb-$(CONFIG_MACH_TQMLS1046A) += fsl-tqmls1046a-mbls10xxa.dtb.o
  
 +pbl-dtb-$(CONFIG_MACH_SKOVARM9CPU) += skovarm9cpu.dtb.o
 +
@@ -750,10 +751,10 @@ index 000000000000..7723031a6866
 +	};
 +};
 diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
-index 0a9cf3ad137f..81f2050fafd1 100644
+index efed73827849..d6eedf758fa8 100644
 --- a/arch/arm/mach-at91/Kconfig
 +++ b/arch/arm/mach-at91/Kconfig
-@@ -531,6 +531,16 @@ config AT91_MULTI_BOARDS
+@@ -541,6 +541,16 @@ config AT91_MULTI_BOARDS
  
  if AT91_MULTI_BOARDS
  
@@ -771,14 +772,14 @@ index 0a9cf3ad137f..81f2050fafd1 100644
  	bool "Atmel AT91SAM9263-EK"
  	depends on ARCH_AT91SAM9263
 diff --git a/images/Makefile.at91 b/images/Makefile.at91
-index c7d86563a7ae..4288cfe7ac3f 100644
+index acdb591d2452..4fe094ee0ff2 100644
 --- a/images/Makefile.at91
 +++ b/images/Makefile.at91
-@@ -9,3 +9,7 @@ image-$(CONFIG_MACH_AT91SAM9X5EK) += barebox-at91sam9x5ek.img
- pblx-$(CONFIG_MACH_AT91SAM9263EK) += start_at91sam9263ek
- FILE_barebox-at91sam9263ek.img = start_at91sam9263ek.pblx
- image-$(CONFIG_MACH_AT91SAM9263EK) += barebox-at91sam9263ek.img
+@@ -13,3 +13,7 @@ image-$(CONFIG_MACH_AT91SAM9263EK) += barebox-at91sam9263ek.img
+ pblb-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += start_sama5d3_xplained_ung8071
+ FILE_barebox-microchip-ksz9477-evb.img = start_sama5d3_xplained_ung8071.pblb
+ image-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += barebox-microchip-ksz9477-evb.img
 +
-+pblx-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
-+FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblx
++pblb-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
++FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblb
 +image-$(CONFIG_MACH_SKOVARM9CPU) += barebox-skovarm9cpu.img

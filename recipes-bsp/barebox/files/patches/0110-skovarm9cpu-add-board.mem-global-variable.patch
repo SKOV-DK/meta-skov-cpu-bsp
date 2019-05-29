@@ -10,7 +10,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 14 insertions(+)
 
 diff --git a/arch/arm/boards/skovarm9cpu/of_init.c b/arch/arm/boards/skovarm9cpu/of_init.c
-index e0e922a539df..b384227330b8 100644
+index d3320d54b239..fcf460da856b 100644
 --- a/arch/arm/boards/skovarm9cpu/of_init.c
 +++ b/arch/arm/boards/skovarm9cpu/of_init.c
 @@ -13,11 +13,16 @@
@@ -30,7 +30,7 @@ index e0e922a539df..b384227330b8 100644
  #include <mach/at91sam9_smc.h>
  #include <mach/hardware.h>
  #include <mach/iomux.h>
-@@ -91,11 +96,20 @@ static int at91sam9263_smc_init(void)
+@@ -90,11 +95,20 @@ static int at91sam9263_smc_init(void)
  }
  device_initcall(at91sam9263_smc_init);
  
