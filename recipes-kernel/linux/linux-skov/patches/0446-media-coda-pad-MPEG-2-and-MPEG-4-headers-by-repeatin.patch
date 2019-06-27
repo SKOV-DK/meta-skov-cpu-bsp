@@ -1,0 +1,248 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 27 Mar 2019 15:28:31 +0100
+Subject: [PATCH] media: coda: pad MPEG-2 and MPEG-4 headers by repeating them
+
+Instead of padding to 512 bytes, it seems to be enough on CODA960 to
+repeat the sequence and extension headers (MPEG-2) or the VOS and VO
+headers (MPEG-4) in the first buffer once for sequence initialization
+to succeed without further bitstream data. On CodaHx4 the headers have
+to be repeated multiple times until the 512 byte mark is reached.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 173 ++++++++++++++++++++++++---------
+ 1 file changed, 126 insertions(+), 47 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index b0f283422f1e..9a6681c49978 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -195,38 +195,19 @@ static void coda_kfifo_sync_to_device_write(struct coda_ctx *ctx)
+ 	coda_write(dev, wr_ptr, CODA_REG_BIT_WR_PTR(ctx->reg_idx));
+ }
+ 
+-static int coda_mpeg2_user_data(int size, char *p)
+-{
+-	if (size < 4)
+-		return -EINVAL;
+-
+-	p[0] = 0x00;
+-	p[1] = 0x00;
+-	p[2] = 0x01;
+-	p[3] = 0xb2;
+-	memset(p + 4, 0xff, size - 4);
+-
+-	return 0;
+-}
+-
+-static int coda_bitstream_pad(struct coda_ctx *ctx, u32 size)
++static int coda_h264_bitstream_pad(struct coda_ctx *ctx, u32 size)
+ {
+ 	unsigned char *buf;
+ 	u32 n;
+ 
+-	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264 && size < 6)
++	if (size < 6)
+ 		size = 6;
+-	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG2 && size < 4)
+-		size = 4;
+ 
+ 	buf = kmalloc(size, GFP_KERNEL);
+ 	if (!buf)
+ 		return -ENOMEM;
+ 
+-	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264)
+-		coda_h264_filler_nal(size, buf);
+-	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG2)
+-		coda_mpeg2_user_data(size, buf);
++	coda_h264_filler_nal(size, buf);
+ 
+ 	n = kfifo_in(&ctx->bitstream_fifo, buf, size);
+ 	kfree(buf);
+@@ -241,6 +222,104 @@ static int coda_bitstream_queue(struct coda_ctx *ctx, const u8 *buf, u32 size)
+ 	return (n < size) ? -ENOSPC : 0;
+ }
+ 
++/*
++ * Check if the buffer starts with the MPEG-2 sequence header (with or without
++ * quantization matrix) and extension header, for example:
++ *
++ *   00 00 01 b3 2d 01 e0 34 08 8b a3 81
++ *               10 11 11 12 12 12 13 13 13 13 14 14 14 14 14 15
++ *               15 15 15 15 15 16 16 16 16 16 16 16 17 17 17 17
++ *               17 17 17 17 18 18 18 19 18 18 18 19 1a 1a 1a 1a
++ *               19 1b 1b 1b 1b 1b 1c 1c 1c 1c 1e 1e 1e 1f 1f 21
++ *   00 00 01 b5 14 8a 00 01 00 00
++ *
++ * or:
++ *
++ *   00 00 01 b3 08 00 40 15 ff ff e0 28
++ *   00 00 01 b5 14 8a 00 01 00 00
++ */
++static u32 coda_mpeg2_parse_headers(struct coda_ctx *ctx, u8 *buf, u32 size)
++{
++	static const u8 sequence_header_start[4] = { 0x00, 0x00, 0x01, 0xb3 };
++	static const union {
++		u8 extension_start[4];
++		u8 start_code_prefix[3];
++	} u = { { 0x00, 0x00, 0x01, 0xb5 } };
++
++	if (size < 22 ||
++	    memcmp(buf, sequence_header_start, 4) != 0)
++		return 0;
++
++	if ((size == 22 ||
++	     (size >= 25 && memcmp(buf + 22, u.start_code_prefix, 3) == 0)) &&
++	    memcmp(buf + 12, u.extension_start, 4) == 0)
++		return 22;
++
++	if ((size == 86 ||
++	     (size > 89 && memcmp(buf + 86, u.start_code_prefix, 3) == 0)) &&
++	    memcmp(buf + 76, u.extension_start, 4) == 0)
++		return 86;
++
++	return 0;
++}
++
++/*
++ * Check if the buffer starts with the MPEG-4 visual object sequence and visual
++ * object headers, for example:
++ *
++ *   00 00 01 b0 f1
++ *   00 00 01 b5 a9 13 00 00 01 00 00 00 01 20 08
++ *               d4 8d 88 00 f5 04 04 08 14 30 3f
++ */
++static u32 coda_mpeg4_parse_headers(struct coda_ctx *ctx, u8 *buf, u32 size)
++{
++	static const u8 visual_object_sequence_start[4] = { 0x00, 0x00, 0x01, 0xb0 };
++	static const union {
++		u8 visual_object_start[4];
++		u8 start_code_prefix[3];
++	} u = { { 0x00, 0x00, 0x01, 0xb5 } };
++
++	if (size < 30 ||
++	    memcmp(buf, visual_object_sequence_start, 4) != 0 ||
++	    memcmp(buf + 5, u.visual_object_start, 4) != 0)
++		return 0;
++
++	if (size == 30 ||
++	    (size >= 33 && memcmp(buf + 30, u.start_code_prefix, 3) == 0))
++		return 30;
++
++	if (size == 31 ||
++	    (size >= 34 && memcmp(buf + 31, u.start_code_prefix, 3) == 0))
++		return 31;
++
++	if (size == 32 ||
++	    (size >= 35 && memcmp(buf + 32, u.start_code_prefix, 3) == 0))
++		return 32;
++
++	return 0;
++}
++
++static u32 coda_buffer_parse_headers(struct coda_ctx *ctx,
++				     struct vb2_v4l2_buffer *src_buf,
++				     u32 payload)
++{
++	u8 *vaddr = vb2_plane_vaddr(&src_buf->vb2_buf, 0);
++	u32 size = 0;
++
++	switch (ctx->codec->src_fourcc) {
++	case V4L2_PIX_FMT_MPEG2:
++		size = coda_mpeg2_parse_headers(ctx, vaddr, payload);
++		break;
++	case V4L2_PIX_FMT_MPEG4:
++		size = coda_mpeg4_parse_headers(ctx, vaddr, payload);
++		break;
++	default:
++		break;
++	}
++
++	return size;
++}
++
+ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+ 				     struct vb2_v4l2_buffer *src_buf)
+ {
+@@ -258,43 +337,45 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+ 		return true;
+ 	}
+ 
+-	/* Pad with repeated sequence headers on CodaHx4 MPEG-2 */
+-	if (ctx->qsequence == 0 && payload < 512 &&
+-	    ctx->dev->devtype->product == CODA_HX4 &&
+-	    ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG2) {
+-		if (payload != 22 ||
+-		    vaddr[0] != 0 ||
+-		    vaddr[1] != 0 ||
+-		    vaddr[2] != 1 ||
+-		    vaddr[3] != 0xb3 ||
+-		    vaddr[12] != 0 ||
+-		    vaddr[13] != 0 ||
+-		    vaddr[14] != 1 ||
+-		    vaddr[15] != 0xb5) {
+-			coda_dbg(1, ctx, "unknown MPEG-2 header, can't pad\n");
+-		} else {
+-			for (i = 0; i < 23; i++) {
+-				ret = coda_bitstream_queue(ctx, vaddr, payload);
++	if (ctx->qsequence == 0 && payload < 512) {
++		/*
++		 * Add padding after the first buffer, if it is too small to be
++		 * fetched by the CODA, by repeating the headers. Without
++		 * repeated headers, or the first frame already queued, decoder
++		 * sequence initialization fails with error code 0x2000 on i.MX6
++		 * or error code 0x1 on i.MX51.
++		 */
++		u32 header_size = coda_buffer_parse_headers(ctx, src_buf,
++							    payload);
++
++		if (header_size) {
++			coda_dbg(1, ctx, "pad with %u-byte header\n",
++				 header_size);
++			for (i = payload; i < 512; i += header_size) {
++				ret = coda_bitstream_queue(ctx, vaddr, header_size);
+ 				if (ret < 0) {
+ 					v4l2_err(&ctx->dev->v4l2_dev, "bitstream buffer overflow\n");
+ 					return false;
+ 				}
++				if (ctx->dev->devtype->product == CODA_960)
++					break;
+ 			}
++		} else {
++			coda_dbg(1, ctx, "could not parse header, sequence initialization might fail\n");
+ 		}
+ 	}
+ 
+ 	/* Add padding before the first buffer, if it is too small */
+ 	if (ctx->qsequence == 0 && payload < 512 &&
+-	    (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264 ||
+-	     (ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG2 &&
+-	      ctx->dev->devtype->product != CODA_HX4)))
+-		coda_bitstream_pad(ctx, 512 - payload);
++	    ctx->codec->src_fourcc == V4L2_PIX_FMT_H264)
++		coda_h264_bitstream_pad(ctx, 512 - payload);
+ 
+ 	ret = coda_bitstream_queue(ctx, vaddr, payload);
+ 	if (ret < 0) {
+ 		v4l2_err(&ctx->dev->v4l2_dev, "bitstream buffer overflow\n");
+ 		return false;
+ 	}
++
+ 	src_buf->sequence = ctx->qsequence++;
+ 
+ 	/* Sync read pointer to device */
+@@ -2477,12 +2558,10 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+ 				 kfifo->out & kfifo->mask,
+ 				 kfifo->in & kfifo->mask);
+ 
+-			if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264 ||
+-			    (ctx->codec->src_fourcc == V4L2_PIX_FMT_MPEG2 &&
+-			     ctx->dev->devtype->product != CODA_HX4)) {
++			if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264) {
+ 				mutex_lock(&ctx->bitstream_mutex);
+ 				/* Pad the bitstream */
+-				coda_bitstream_pad(ctx, 768);
++				coda_h264_bitstream_pad(ctx, 768);
+ 
+ 				pr_debug("coda: padded: rd = 0x%x, wr = 0x%x\n",
+ 					 kfifo->out & kfifo->mask,

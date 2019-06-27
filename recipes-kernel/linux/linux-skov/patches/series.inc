@@ -1,9 +1,9 @@
 # umpf-base: v5.0.5
 # umpf-name: 5.0/customers/skov/imx6
-# umpf-version: 5.0/customers/skov/imx6/20190329-2
+# umpf-version: 5.0/customers/skov/imx6/20190627-1
 # umpf-topic: v5.0/customers/skov/imx6_project_specific
 # umpf-hashinfo: 2e8efca947414ab187c3a950d517c1d11b03038f
-# umpf-topic-range: 1f6f316a537d4310747b08f89fb32565317b288b..6c8903bdba214df6f329a79e02d7832bed3239bc
+# umpf-topic-range: 1f6f316a537d4310747b08f89fb32565317b288b..85d452c28d0af86bbfd9f1dc45efb8a2552dad15
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -13,7 +13,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.0/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 526a45bc0629b506b65b6c5446e6b25ae931865f
-# umpf-topic-range: 6c8903bdba214df6f329a79e02d7832bed3239bc..88300c9854c4e31874266d513d0f6dd479805e10
+# umpf-topic-range: 85d452c28d0af86bbfd9f1dc45efb8a2552dad15..b5d9c5044e02de7f7e1e9250565f33440b085fee
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -23,7 +23,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.0/customers/skov/imx6_backports_from_upstream
 # umpf-hashinfo: d9209b2ba538809eba19f935c6d005bfee064b61
-# umpf-topic-range: 88300c9854c4e31874266d513d0f6dd479805e10..39d16f78308ba3083f0a3244d9825f35b0e7a267
+# umpf-topic-range: b5d9c5044e02de7f7e1e9250565f33440b085fee..fa2ab157be7f2ce5a042f556e838abdbb43683db
 SRC_URI += "\
   file://patches/0201-dt-binding-pcf8523-add-xtal-load-capacitance.patch \
   file://patches/0202-dt-binding-pcf85063-add-xtal-load-capacitance.patch \
@@ -31,8 +31,8 @@ SRC_URI += "\
   file://patches/0204-rtc-pcf85063-set-xtal-load-capacitance-from-DT.patch \
   "
 # umpf-topic: v5.0/topic/etnaviv
-# umpf-hashinfo: 40edfdea07c1e95a7c6633b3923f64824e1d7120
-# umpf-topic-range: 39d16f78308ba3083f0a3244d9825f35b0e7a267..f8e557f13bc7dc27d26f2e3a1979e68986d06e81
+# umpf-hashinfo: 71f835ecb22e1ef494c1f545e7113afec0549d62
+# umpf-topic-range: fa2ab157be7f2ce5a042f556e838abdbb43683db..503c5a2cd6c565b7b36626490598bbeb2d108b49
 SRC_URI += "\
   file://patches/0301-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0302-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -55,10 +55,12 @@ SRC_URI += "\
   file://patches/0319-drm-scheduler-put-killed-job-cleanup-to-worker.patch \
   file://patches/0320-drm-etnaviv-avoid-DMA-API-warning-when-importing-buf.patch \
   file://patches/0321-drm-etnaviv-track-previous-gpu-mmu-context.patch \
+  file://patches/0322-mm-cma-export-functions-to-get-CMA-base-and-size.patch \
+  file://patches/0323-drm-etnaviv-use-CMA-area-to-compute-linear-window-of.patch \
   "
 # umpf-topic: v5.0/topic/coda
-# umpf-hashinfo: 636415c8d50143b9eecd28c7d12ef6f893579a2c
-# umpf-topic-range: f8e557f13bc7dc27d26f2e3a1979e68986d06e81..d14155124bd92a350a4173f05836cb1e104c09f6
+# umpf-hashinfo: 495213659d308ff39aa0dc1a5bc49254976bb85d
+# umpf-topic-range: 503c5a2cd6c565b7b36626490598bbeb2d108b49..109a80f414e5c643bbda45eb06951f6843264134
 SRC_URI += "\
   file://patches/0401-media-coda-warn-about-too-small-payload-in-start_str.patch \
   file://patches/0402-media-coda-jpeg-read-back-thumbnail-indication-and-J.patch \
@@ -105,18 +107,21 @@ SRC_URI += "\
   file://patches/0443-media-coda-pad-first-MPEG-2-buffer-to-512-bytes.patch \
   file://patches/0444-media-coda-pad-bitstream-to-release-coda-from-ring-b.patch \
   file://patches/0445-media-coda-pad-by-repeating-headers-on-CodaHx4.patch \
+  file://patches/0446-media-coda-pad-MPEG-2-and-MPEG-4-headers-by-repeatin.patch \
+  file://patches/0447-media-coda-do-not-enforce-512-byte-initial-bitstream.patch \
+  file://patches/0448-media-coda-MPEG-2-end-of-stream-handling.patch \
   "
 # umpf-topic: v5.0/topic/drm-sched-accounting
 # umpf-hashinfo: 61d32aff72edbfce114f534a8463ba39abcf352a
-# umpf-topic-range: d14155124bd92a350a4173f05836cb1e104c09f6..baf76ab814e6eff773bf1d46d50720da1533c92e
+# umpf-topic-range: 109a80f414e5c643bbda45eb06951f6843264134..bdbed632668dc31e540f40d7ca3cd3d101467a71
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   file://patches/0503-drm-sched-make-fence-ops-static.patch \
   "
 # umpf-topic: v5.0/topic/ksz8873
-# umpf-hashinfo: c58125b0705aa97ef98acdbf0273c81025fa6daf
-# umpf-topic-range: baf76ab814e6eff773bf1d46d50720da1533c92e..17bf2ee3724491afcc52e5bb98c6d0647ed8861c
+# umpf-hashinfo: 7f394afb51c5fa8ee203a63b3211a2cb0f1dca78
+# umpf-topic-range: bdbed632668dc31e540f40d7ca3cd3d101467a71..659789c0b419f3671b00a0398225c8fbc07e6827
 SRC_URI += "\
   file://patches/0601-net-dsa-microchip-prepare-PHY-for-proper-advertiseme.patch \
   file://patches/0602-net-dsa-microchip-add-MIB-counter-reading-support.patch \
@@ -131,16 +136,16 @@ SRC_URI += "\
   "
 # umpf-topic: v5.0/topic/touchscreen-ads7846
 # umpf-hashinfo: fae0522ac384a5a8e8c3d95d0f96bfa2c35f6ea5
-# umpf-topic-range: 17bf2ee3724491afcc52e5bb98c6d0647ed8861c..16d435b6e3949c2da84b1130b01ee34f066deee9
+# umpf-topic-range: 659789c0b419f3671b00a0398225c8fbc07e6827..c31e534467c9c39636c3b67494a8cf9c75775f4a
 SRC_URI += "\
   file://patches/0701-Input-ads7846-convert-to-devm_-alloc-functions.patch \
   file://patches/0702-dt-bindings-input-ads7846-fix-property-description.patch \
   file://patches/0703-dt-bindings-input-ads7846-replace-vendor-bindings-by.patch \
   file://patches/0704-Input-ads7846-add-support-for-general-touchscreen-bi.patch \
   "
-# umpf-release: 5.0/customers/skov/imx6/20190329-2
-# umpf-topic-range: 16d435b6e3949c2da84b1130b01ee34f066deee9..7a5288c9d60ab13c22b564cacb3f92e3adc5d7ec
+# umpf-release: 5.0/customers/skov/imx6/20190627-1
+# umpf-topic-range: c31e534467c9c39636c3b67494a8cf9c75775f4a..77ba96ca641eec06780e17f8f56f6215535f0fe3
 SRC_URI += "\
-  file://patches/0801-Release-5.0-customers-skov-imx6-20190329-2.patch \
+  file://patches/0801-Release-5.0-customers-skov-imx6-20190627-1.patch \
   "
 # umpf-end
