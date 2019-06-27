@@ -1,0 +1,43 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 27 Mar 2019 19:20:04 +0100
+Subject: [PATCH] media: coda: do not enforce 512-byte initial bitstream
+ payload
+
+For h.264 we allow sequence initialization to succeed by padding the
+first buffer, for MPEG-2 and MPEG-4 it is enough to repeat the headers
+once.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 55c481cb66be..4dc215143832 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1852,7 +1852,6 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+ 	struct coda_q_data *q_data_src, *q_data_dst;
+ 	struct v4l2_m2m_buffer *m2m_buf, *tmp;
+ 	struct vb2_v4l2_buffer *buf;
+-	unsigned int payload;
+ 	struct list_head list;
+ 	int ret = 0;
+ 
+@@ -1870,16 +1869,6 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+ 			mutex_lock(&ctx->bitstream_mutex);
+ 			coda_fill_bitstream(ctx, &list);
+ 			mutex_unlock(&ctx->bitstream_mutex);
+-
+-			payload = coda_get_bitstream_payload(ctx);
+-			if (payload < 512) {
+-				v4l2_err(v4l2_dev, "start payload: %u < 512, count: %u\n",
+-					 payload, count);
+-				coda_dump_metas(ctx);
+-				coda_dump_payload(ctx);
+-				ret = -EINVAL;
+-				goto err;
+-			}
+ 		}
+ 
+ 		/* Check the first input JPEG buffer to determine chroma subsampling */

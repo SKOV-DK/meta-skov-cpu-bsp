@@ -1,0 +1,62 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 25 Mar 2019 17:43:40 +0100
+Subject: [PATCH] media: coda: MPEG-2 end of stream handling
+
+I assume flag 0x40000 is the end of stream signal of the MPEG-2 decoder
+firmware. Once it is set, the firmware does not decode any further
+frames, but it still continues to point out the remaining already
+decoded frames for presentation. Once the last frame is reached, signal
+it via the V4L2_BUF_FLAG_LAST mechanism.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 9a6681c49978..5213dc31b6a1 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -2258,6 +2258,7 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+ 	int success;
+ 	u32 err_mb;
+ 	int err_vdoa = 0;
++	bool mpeg2_eos = false;
+ 	u32 val;
+ 
+ 	/* Update kfifo out pointer from coda bitstream read pointer */
+@@ -2277,8 +2278,17 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+ 	src_fourcc = q_data_src->fourcc;
+ 
+ 	val = coda_read(dev, CODA_RET_DEC_PIC_SUCCESS);
+-	if (val != 1)
+-		pr_err("DEC_PIC_SUCCESS = %d\n", val);
++	if (val == 0x40001 && src_fourcc == V4L2_PIX_FMT_MPEG2) {
++		coda_dbg(1, ctx, "end of stream signal?\n");
++		/*
++		 * We expect that from this point on no new frames are decoded.
++		 * The firmware will continue to point out which already
++		 * decoded frames to present.
++		 */
++		mpeg2_eos = true;
++	} else if (val != 1) {
++		pr_err("DEC_PIC_SUCCESS = 0x%x\n", val);
++	}
+ 
+ 	success = val & 0x1;
+ 	if (!success)
+@@ -2452,6 +2462,14 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+ 					     V4L2_BUF_FLAG_PFRAME |
+ 					     V4L2_BUF_FLAG_BFRAME);
+ 		dst_buf->flags |= ctx->frame_types[ctx->display_idx];
++		/*
++		 * If there is no designated presentation frame anymore,
++		 * this frame has to be the last one.
++		 */
++		if ((ctx->bit_stream_param & CODA_BIT_STREAM_END_FLAG ||
++		     mpeg2_eos) &&
++		    display_idx == -1)
++			dst_buf->flags |= V4L2_BUF_FLAG_LAST;
+ 		meta = &ctx->frame_metas[ctx->display_idx];
+ 		dst_buf->timecode = meta->timecode;
+ 		dst_buf->vb2_buf.timestamp = meta->timestamp;
