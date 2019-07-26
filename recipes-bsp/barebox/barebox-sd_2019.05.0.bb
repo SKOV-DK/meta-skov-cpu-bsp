@@ -5,8 +5,6 @@ LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
 
 DEPENDS += "coreutils-native"
-# for barebox >= v2019.02.0 (commit 273dbe5f87de)
-DEPENDS += "bison-native flex-native"
 
 SRC_URI += "\
   file://env/init/permit_fusing_ocotp \
