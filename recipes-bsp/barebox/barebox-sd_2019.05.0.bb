@@ -4,12 +4,7 @@ SRC_URI += "\
   file://env/init/permit_fusing_ocotp \
   "
 
-PROVIDES_remove = "virtual/bootloader"
 BAREBOX_IMG_BASENAME = "${PN}-skov-imx6"
 COMPATIBLE_MACHINE = "imx6-cpu"
 
-do_deploy () {
-	install -d ${DEPLOYDIR}
-	install -m 644 -T ${S}/images/${BAREBOX_IMAGE} ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}-${DATETIME}.img
-	ln -sf ${BAREBOX_IMG_BASENAME}-${DATETIME}.img ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}.img
-}
+require barebox-skov-deploy.inc
