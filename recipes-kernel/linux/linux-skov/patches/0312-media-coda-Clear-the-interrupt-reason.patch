@@ -1,0 +1,37 @@
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Thu, 2 May 2019 18:00:45 -0400
+Subject: [PATCH] media: coda: Clear the interrupt reason
+
+This commit clears the interrupt reason (INT_REASON) register
+on the interrupt handler. Without this clearing, the CODA hardware
+has been observed to get completely stalled on CODA980 variants,
+requiring a pretty deep hardware reset.
+
+The datasheet specifies that the INT_REASON register is set
+by the CODA hardware, and should be cleared by the host.
+
+While the CODA versions that are currently supported by this driver
+don't seem to need this change, it's a really small change,
+so it seems a wise thing to do to avoid hitting some
+rare race-condition in the hardware.
+
+Reviewed-by: Philipp Zabel <p.zabel@pengutronix.de>
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Signed-off-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+---
+ drivers/media/platform/coda/coda-bit.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index c3f7a6fea146..68a8da77a52c 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -2343,6 +2343,7 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+ 
+ 	/* read status register to attend the IRQ */
+ 	coda_read(dev, CODA_REG_BIT_INT_STATUS);
++	coda_write(dev, 0, CODA_REG_BIT_INT_REASON);
+ 	coda_write(dev, CODA_REG_BIT_INT_CLEAR_SET,
+ 		      CODA_REG_BIT_INT_CLEAR);
+ 

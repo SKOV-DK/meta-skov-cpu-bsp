@@ -1,0 +1,57 @@
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date: Fri, 25 Jan 2019 01:54:17 -0500
+Subject: [PATCH] media: coda: remove -I$(src) header search path
+
+Remove the header search path to the current directory.
+
+The compiler will search headers in the current directory by
+using #include "..." instead of #include <...>
+
+Also, change TRACE_INCLUDE_PATH to point to the location of trace.h.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+---
+ drivers/media/platform/coda/Makefile    | 2 --
+ drivers/media/platform/coda/coda-h264.c | 3 ++-
+ drivers/media/platform/coda/trace.h     | 2 +-
+ 3 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/media/platform/coda/Makefile b/drivers/media/platform/coda/Makefile
+index cfe3ef8fad8a..2b9622f4ceab 100644
+--- a/drivers/media/platform/coda/Makefile
++++ b/drivers/media/platform/coda/Makefile
+@@ -1,6 +1,4 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+-ccflags-y += -I$(src)
+-
+ coda-vpu-objs := coda-common.o coda-bit.o coda-gdi.o coda-h264.o coda-jpeg.o
+ 
+ obj-$(CONFIG_VIDEO_CODA) += coda-vpu.o
+diff --git a/drivers/media/platform/coda/coda-h264.c b/drivers/media/platform/coda/coda-h264.c
+index a2fa29da1d31..8bd0aa8af114 100644
+--- a/drivers/media/platform/coda/coda-h264.c
++++ b/drivers/media/platform/coda/coda-h264.c
+@@ -10,7 +10,8 @@
+ #include <linux/kernel.h>
+ #include <linux/string.h>
+ #include <linux/videodev2.h>
+-#include <coda.h>
++
++#include "coda.h"
+ 
+ static const u8 coda_filler_size[8] = { 0, 7, 14, 13, 12, 11, 10, 9 };
+ 
+diff --git a/drivers/media/platform/coda/trace.h b/drivers/media/platform/coda/trace.h
+index a672bfc4c6ba..6cf58237fff2 100644
+--- a/drivers/media/platform/coda/trace.h
++++ b/drivers/media/platform/coda/trace.h
+@@ -157,7 +157,7 @@ DEFINE_EVENT(coda_buf_meta_class, coda_dec_rot_done,
+ #endif /* __CODA_TRACE_H__ */
+ 
+ #undef TRACE_INCLUDE_PATH
+-#define TRACE_INCLUDE_PATH .
++#define TRACE_INCLUDE_PATH ../../drivers/media/platform/coda
+ #undef TRACE_INCLUDE_FILE
+ #define TRACE_INCLUDE_FILE trace
+ 

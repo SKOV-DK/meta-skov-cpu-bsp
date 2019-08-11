@@ -23,24 +23,24 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 drivers/skov/skov_version.c
 
 diff --git a/drivers/Kconfig b/drivers/Kconfig
-index 4f9f99057ff8..79fce1c51173 100644
+index e8231663f201..a04dfcf3f334 100644
 --- a/drivers/Kconfig
 +++ b/drivers/Kconfig
-@@ -228,4 +228,6 @@ source "drivers/siox/Kconfig"
+@@ -232,4 +232,6 @@ source "drivers/interconnect/Kconfig"
  
- source "drivers/slimbus/Kconfig"
+ source "drivers/counter/Kconfig"
  
 +source "drivers/skov/Kconfig"
 +
  endmenu
 diff --git a/drivers/Makefile b/drivers/Makefile
-index e1ce029d28fd..b3bd59f4070b 100644
+index 28b030d7988d..570581090cd2 100644
 --- a/drivers/Makefile
 +++ b/drivers/Makefile
-@@ -186,3 +186,4 @@ obj-$(CONFIG_MULTIPLEXER)	+= mux/
- obj-$(CONFIG_UNISYS_VISORBUS)	+= visorbus/
- obj-$(CONFIG_SIOX)		+= siox/
+@@ -188,3 +188,4 @@ obj-$(CONFIG_SIOX)		+= siox/
  obj-$(CONFIG_GNSS)		+= gnss/
+ obj-$(CONFIG_INTERCONNECT)	+= interconnect/
+ obj-$(CONFIG_COUNTER)		+= counter/
 +obj-y				+= skov/
 diff --git a/drivers/skov/Kconfig b/drivers/skov/Kconfig
 new file mode 100644

@@ -1,0 +1,72 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 18 Jun 2019 10:48:43 +0200
+Subject: [PATCH] media: coda: make coda_bitstream_queue more versatile
+
+Pass vaddr and size to coda_bitstream_queue instead of a struct
+vb2_v4l2_buffer to make it reusable for queueing data that is
+not exactly a whole v4l2 buffer into the bitstream ringbuffer.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 23 +++++++++--------------
+ 1 file changed, 9 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index cd063317e95b..0af0b4d747e7 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -199,33 +199,25 @@ static int coda_bitstream_pad(struct coda_ctx *ctx, u32 size)
+ 	return (n < size) ? -ENOSPC : 0;
+ }
+ 
+-static int coda_bitstream_queue(struct coda_ctx *ctx,
+-				struct vb2_v4l2_buffer *src_buf)
++static int coda_bitstream_queue(struct coda_ctx *ctx, const u8 *buf, u32 size)
+ {
+-	u32 src_size = vb2_get_plane_payload(&src_buf->vb2_buf, 0);
+-	u32 n;
+-
+-	n = kfifo_in(&ctx->bitstream_fifo,
+-			vb2_plane_vaddr(&src_buf->vb2_buf, 0), src_size);
+-	if (n < src_size)
+-		return -ENOSPC;
++	u32 n = kfifo_in(&ctx->bitstream_fifo, buf, size);
+ 
+-	src_buf->sequence = ctx->qsequence++;
+-
+-	return 0;
++	return (n < size) ? -ENOSPC : 0;
+ }
+ 
+ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+ 				     struct vb2_v4l2_buffer *src_buf)
+ {
+ 	unsigned long payload = vb2_get_plane_payload(&src_buf->vb2_buf, 0);
++	u8 *vaddr = vb2_plane_vaddr(&src_buf->vb2_buf, 0);
+ 	int ret;
+ 
+ 	if (coda_get_bitstream_payload(ctx) + payload + 512 >=
+ 	    ctx->bitstream.size)
+ 		return false;
+ 
+-	if (vb2_plane_vaddr(&src_buf->vb2_buf, 0) == NULL) {
++	if (!vaddr) {
+ 		v4l2_err(&ctx->dev->v4l2_dev, "trying to queue empty buffer\n");
+ 		return true;
+ 	}
+@@ -235,11 +227,14 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+ 	    ctx->codec->src_fourcc == V4L2_PIX_FMT_H264)
+ 		coda_bitstream_pad(ctx, 512 - payload);
+ 
+-	ret = coda_bitstream_queue(ctx, src_buf);
++	ret = coda_bitstream_queue(ctx, vaddr, payload);
+ 	if (ret < 0) {
+ 		v4l2_err(&ctx->dev->v4l2_dev, "bitstream buffer overflow\n");
+ 		return false;
+ 	}
++
++	src_buf->sequence = ctx->qsequence++;
++
+ 	/* Sync read pointer to device */
+ 	if (ctx == v4l2_m2m_get_curr_priv(ctx->dev->m2m_dev))
+ 		coda_kfifo_sync_to_device_write(ctx);

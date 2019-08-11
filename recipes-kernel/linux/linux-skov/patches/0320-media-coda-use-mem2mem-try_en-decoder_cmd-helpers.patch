@@ -1,0 +1,49 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 13 Jun 2019 17:58:52 +0200
+Subject: [PATCH] media: coda: use mem2mem try_en/decoder_cmd helpers
+
+Use mem2mem try_en/decoder_cmd helpers to ensure consistent behaviour
+with other video codec drivers.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 19 ++-----------------
+ 1 file changed, 2 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 4179de16287f..d3b1e7b87a8a 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1001,13 +1001,7 @@ static int coda_try_encoder_cmd(struct file *file, void *fh,
+ 	if (ctx->inst_type != CODA_INST_ENCODER)
+ 		return -ENOTTY;
+ 
+-	if (ec->cmd != V4L2_ENC_CMD_STOP)
+-		return -EINVAL;
+-
+-	if (ec->flags & V4L2_ENC_CMD_STOP_AT_GOP_END)
+-		return -EINVAL;
+-
+-	return 0;
++	return v4l2_m2m_ioctl_try_encoder_cmd(file, fh, ec);
+ }
+ 
+ static int coda_encoder_cmd(struct file *file, void *fh,
+@@ -1045,16 +1039,7 @@ static int coda_try_decoder_cmd(struct file *file, void *fh,
+ 	if (ctx->inst_type != CODA_INST_DECODER)
+ 		return -ENOTTY;
+ 
+-	if (dc->cmd != V4L2_DEC_CMD_STOP)
+-		return -EINVAL;
+-
+-	if (dc->flags & V4L2_DEC_CMD_STOP_TO_BLACK)
+-		return -EINVAL;
+-
+-	if (!(dc->flags & V4L2_DEC_CMD_STOP_IMMEDIATELY) && (dc->stop.pts != 0))
+-		return -EINVAL;
+-
+-	return 0;
++	return v4l2_m2m_ioctl_try_decoder_cmd(file, fh, dc);
+ }
+ 
+ static int coda_decoder_cmd(struct file *file, void *fh,
