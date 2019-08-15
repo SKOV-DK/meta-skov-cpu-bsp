@@ -1,0 +1,31 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Wed, 15 May 2019 11:03:34 +0200
+Subject: [PATCH] mm: cma: export functions to get CMA base and size
+
+Make them usable in modules. Some drivers want to know where their
+device CMA area is located to make better decisions about the DMA
+programming.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ mm/cma.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/mm/cma.c b/mm/cma.c
+index 4973d253dc83..d2ec40b7ee2a 100644
+--- a/mm/cma.c
++++ b/mm/cma.c
+@@ -44,11 +44,13 @@ phys_addr_t cma_get_base(const struct cma *cma)
+ {
+ 	return PFN_PHYS(cma->base_pfn);
+ }
++EXPORT_SYMBOL_GPL(cma_get_base);
+ 
+ unsigned long cma_get_size(const struct cma *cma)
+ {
+ 	return cma->count << PAGE_SHIFT;
+ }
++EXPORT_SYMBOL_GPL(cma_get_size);
+ 
+ const char *cma_get_name(const struct cma *cma)
+ {

@@ -1,0 +1,36 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 25 Mar 2019 17:28:52 +0100
+Subject: [PATCH] media: coda: improve decoder sequence init failure message
+
+BIT(31) of the error reason firmware return value seems to indicate an
+out-of-order SEQ_INIT call, in case the context is already initialized.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 1521d2cf3d5b..0bf906704db3 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -1933,9 +1933,16 @@ static int __coda_decoder_seq_init(struct coda_ctx *ctx)
+ 	coda_kfifo_sync_from_device(ctx);
+ 
+ 	if (coda_read(dev, CODA_RET_DEC_SEQ_SUCCESS) == 0) {
+-		v4l2_err(&dev->v4l2_dev,
+-			"CODA_COMMAND_SEQ_INIT failed, error code = 0x%x\n",
+-			coda_read(dev, CODA_RET_DEC_SEQ_ERR_REASON));
++		val = coda_read(dev, CODA_RET_DEC_SEQ_ERR_REASON);
++		if (val == 0x80000000) {
++			v4l2_err(&dev->v4l2_dev,
++				 "CODA_COMMAND_SEQ_INIT failed, error code = 0x%x (already initialized)\n",
++				 val);
++		} else {
++			v4l2_err(&dev->v4l2_dev,
++				 "CODA_COMMAND_SEQ_INIT failed, error code = 0x%x\n",
++				 val);
++		}
+ 		return -EAGAIN;
+ 	}
+ 
