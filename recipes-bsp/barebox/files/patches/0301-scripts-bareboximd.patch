@@ -1,0 +1,124 @@
+diff --git a/scripts/bareboximd.c b/scripts/bareboximd.c
+index 7d4cbeb..af95d00 100644
+--- a/scripts/bareboximd.c
++++ b/scripts/bareboximd.c
+@@ -34,6 +34,7 @@
+ #include <errno.h>
+ #include <stdarg.h>
+ #include <linux/err.h>
++#include <sys/mman.h>
+ 
+ #include "../include/image-metadata.h"
+ 
+@@ -64,6 +65,7 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, loff_t
+ 	ssize_t rsize;
+ 	int ret, fd;
+ 	void *buf;
++	struct stat st;
+ 
+ 	*size = 0;
+ 	*outbuf = NULL;
+@@ -74,45 +76,69 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, loff_t
+ 		return -errno;
+ 	}
+ 
+-	fsize = lseek(fd, 0, SEEK_END);
+-	if (fsize == -1) {
+-		fprintf(stderr, "Cannot get size %s: %s\n", filename, strerror(errno));
+-		ret = -errno;
+-		goto close;
++	if (fstat(fd, &st)) {
++		fprintf(stderr, "Cannot fstat %s: %s\n", filename, strerror(errno));
++		return -errno;
++	}
++   
++	fsize = st.st_size;
++	if (fsize == 0) {
++		// size is zero for mtd devices, use seek find size 
++		fsize = lseek(fd, 0, SEEK_END);
++		if (fsize == -1) {
++			fprintf(stderr, "Cannot get size %s: %s\n", filename, strerror(errno));
++			ret = -errno;
++			goto close;
++		}
+ 	}
+ 
+ 	if (fsize < max_size)
+ 		max_size = fsize;
+-
+-	if (lseek(fd, 0, SEEK_SET) == -1) {
+-		fprintf(stderr, "Cannot seek to start %s: %s\n", filename, strerror(errno));
+-		ret = -errno;
+-		goto close;
+-	}
+-
+-	buf = malloc(max_size);
+-	if (!buf) {
+-		fprintf(stderr, "Cannot allocate memory\n");
+-		ret = -ENOMEM;
+-		goto close;
+-	}
+-
+-	*outbuf = buf;
+-	while (*size < max_size) {
+-		rsize = read(fd, buf, max_size-*size);
+-		if (rsize == 0) {
+-			ret = -EIO;
+-			goto free;
+-		} else if (rsize < 0) {
+-			if (errno == EAGAIN)
+-				continue;
+-			else {
+-				ret = -errno;
++   
++	if (S_ISCHR(st.st_mode)) {
++
++		if (lseek(fd, 0, SEEK_SET) == -1) {
++			fprintf(stderr, "Cannot seek to start %s: %s\n", filename, strerror(errno));
++			ret = -errno;
++			goto close;
++		}
++
++		buf = malloc(max_size);
++		if (!buf) {
++			fprintf(stderr, "Cannot allocate memory\n");
++			ret = -ENOMEM;
++			goto close;
++		}
++
++		*outbuf = buf;
++		while (*size < max_size) {
++			rsize = read(fd, buf, max_size-*size);
++			if (rsize == 0) {
++				ret = -EIO;
+ 				goto free;
+-			}
+-		} /* ret > 0 */
+-		buf += rsize;
+-		*size += rsize;
++			} else if (rsize < 0) {
++				if (errno == EAGAIN)
++					continue;
++				else {
++					ret = -errno;
++					goto free;
++				}
++			} /* ret > 0 */
++			buf += rsize;
++			*size += rsize;
++		}   
++	}
++	else {
++		// this require block device or regular file
++		buf = mmap(NULL, max_size, PROT_READ, MAP_SHARED, fd, 0);
++		if (buf == MAP_FAILED ) {
++			fprintf(stderr, "mmap failed %s: %s\n", filename, strerror(errno));
++			ret = -errno;
++			goto close;
++		}   
++      
++		*outbuf = buf;
++		*size = max_size;
+ 	}
+ 
+ 	ret = 0;

@@ -35,5 +35,6 @@ SRC_URI += "\
 # umpf-topic-range: 24af1c918cf65723c9b4bf58f7b85ea8dfa338e6..198e07bfd10669426d06ef274b88a67a4670e17a
 SRC_URI += "\
   file://patches/0201-Release-2019.05.0-customers-skov-imx6-20190528-1.patch \
+  file://patches/0301-scripts-bareboximd.patch \
   "
 # umpf-end
