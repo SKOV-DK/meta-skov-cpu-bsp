@@ -3692,6 +3692,7 @@ CONFIG_PM_OPP=y
 # SKOV specific drivers
 #
 CONFIG_SKOV_VERSION=y
+CONFIG_TOUCHTOY=m
 # end of SKOV specific drivers
 # end of Device Drivers
 

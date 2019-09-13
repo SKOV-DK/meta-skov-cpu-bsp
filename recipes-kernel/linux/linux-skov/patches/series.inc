@@ -7,6 +7,7 @@
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
+  file://patches/0003-imx6-cpu-add-SKOV-specific-touchtoy.patch \
   "
 # umpf-topic: v5.2/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 613d9d45c3f035f44f534e1d977c04a809fc7889
