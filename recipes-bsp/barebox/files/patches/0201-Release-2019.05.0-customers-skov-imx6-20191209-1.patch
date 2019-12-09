@@ -1,13 +1,13 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Tue, 28 May 2019 11:19:30 +0200
-Subject: [PATCH] Release 2019.05.0/customers/skov/imx6/20190528-1
+Date: Mon, 9 Dec 2019 14:22:14 +0100
+Subject: [PATCH] Release 2019.05.0/customers/skov/imx6/20191209-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 29347b67803c..ae57e502abd9 100644
+index 29347b67803c..653a8c430d65 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,7 +1,7 @@
@@ -15,7 +15,7 @@ index 29347b67803c..ae57e502abd9 100644
  PATCHLEVEL = 05
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20190528-1
++EXTRAVERSION =-20191209-1
  NAME = None
  
  # *DOCUMENTATION*
