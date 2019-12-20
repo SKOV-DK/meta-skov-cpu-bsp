@@ -1,21 +1,22 @@
-# umpf-base: v2019.05.0
-# umpf-name: 2019.05.0/customers/skov/imx6
-# umpf-version: 2019.05.0/customers/skov/imx6/20191209-1
-# umpf-topic: v2019.05.0/customers/skov/imx6
-# umpf-hashinfo: 964f63a6d49eaca40b245b68b9be299adb9ca5a4
-# umpf-topic-range: 94420265227df2bbe221293f9e10466030387209..2e74b8da7ee759a3759054aeb79a6c3fdd9e0a32
+# umpf-base: v2019.12.0
+# umpf-name: 2019.12.0/customers/skov/imx6
+# umpf-version: 2019.12.0/customers/skov/imx6/20200107-1
+# umpf-topic: v2019.12.0/customers/skov/imx6
+# umpf-hashinfo: aead1650757c2418b661b793758d582db8833ba4
+# umpf-topic-range: 48b57af0ab888bf88607d0e55ad3e79d13cc0a31..a54e7d978bbc23eb190bb90cb6f47620e4c0f1ff
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov-add-support-for-video-output-to-the-barebox-DTS.patch \
   file://patches/0003-skov-set-backlight-brightness-from-state.patch \
   file://patches/0004-skov-choose-environment-depending-on-bootsource.patch \
   file://patches/0005-video-edid-increase-number-of-retries-to-request-EDI.patch \
-  file://patches/0006-bareboximd-workaround-for-page-allocation-fault.patch \
-  file://patches/0007-mtd-spi-nor-Add-support-for-en25qh64.patch \
+  file://patches/0006-Revert-imd-fix-memory-leak.patch \
+  file://patches/0007-bareboximd-workaround-for-page-allocation-fault.patch \
+  file://patches/0008-mtd-spi-nor-Add-support-for-en25qh64.patch \
   "
-# umpf-topic: v2019.05.0/customers/skov/arm9
-# umpf-hashinfo: 6cebfa5f332812a570d8dfa4b301c7e9919c8255
-# umpf-topic-range: 2e74b8da7ee759a3759054aeb79a6c3fdd9e0a32..13bf837b44bed89c809f94205b639d5e580427d1
+# umpf-topic: v2019.12.0/customers/skov/arm9
+# umpf-hashinfo: 9c8f3f7b2f6f9f769b4844115056bc25a62ac10b
+# umpf-topic-range: a54e7d978bbc23eb190bb90cb6f47620e4c0f1ff..31d71ec77e7d611d54f6a2a67265ad59761af460
 SRC_URI += "\
   file://patches/0101-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch \
   file://patches/0102-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
@@ -32,10 +33,11 @@ SRC_URI += "\
   file://patches/0113-skovarmcpu-add-support-for-rotary-encoder-in-DT.patch \
   file://patches/0114-skovarm9cpu-add-matrix-keyboard-and-folio-leds.patch \
   file://patches/0115-skovarm9cpu-add-pwm0.patch \
+  file://patches/0116-lds-align-RO_DATA_SECTION-members.patch \
   "
-# umpf-release: 2019.05.0/customers/skov/imx6/20191209-1
-# umpf-topic-range: 13bf837b44bed89c809f94205b639d5e580427d1..5f028e4803db41075aa79a240540517dc16250bc
+# umpf-release: 2019.12.0/customers/skov/imx6/20200107-1
+# umpf-topic-range: 31d71ec77e7d611d54f6a2a67265ad59761af460..cf86ce2018179b0febca4a1c04086481ca43b918
 SRC_URI += "\
-  file://patches/0201-Release-2019.05.0-customers-skov-imx6-20191209-1.patch \
+  file://patches/0201-Release-2019.12.0-customers-skov-imx6-20200107-1.patch \
   "
 # umpf-end

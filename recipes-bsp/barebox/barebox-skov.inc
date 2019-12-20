@@ -11,5 +11,5 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
 
 DEPENDS += "coreutils-native"
 
-SRC_URI[md5sum] = "2e721cce90f1ea1492710ca23680311f"
-SRC_URI[sha256sum] = "704bb09b2bf1347e43ebb9138da32a7e1b4d13892fd187be98f4f9dae000501d"
+SRC_URI[md5sum] = "2d25158ccffaa843c9e4943bbe820ce2"
+SRC_URI[sha256sum] = "fb77afc5c1a9783b8e1a9bb6c617973f5c0ed4c6f8e079f96cb7e7e0818a7a90"

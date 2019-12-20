@@ -9,16 +9,16 @@ TODO:
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
- arch/arm/boards/Makefile                    |   3 +-
+ arch/arm/boards/Makefile                    |   1 +
  arch/arm/boards/skovarm9cpu/Makefile        |   3 +
  arch/arm/boards/skovarm9cpu/lowlevel_init.c | 130 ++++++++++
  arch/arm/boards/skovarm9cpu/of_init.c       | 100 ++++++++
  arch/arm/configs/skovarm9cpu_defconfig      |  85 +++++++
  arch/arm/dts/Makefile                       |   2 +
  arch/arm/dts/skovarm9cpu.dts                | 354 ++++++++++++++++++++++++++++
- arch/arm/mach-at91/Kconfig                  |  10 +
- images/Makefile.at91                        |   4 +
- 9 files changed, 690 insertions(+), 1 deletion(-)
+ arch/arm/mach-at91/Kconfig                  |  11 +
+ images/Makefile.at91                        |   5 +
+ 9 files changed, 691 insertions(+)
  create mode 100644 arch/arm/boards/skovarm9cpu/Makefile
  create mode 100644 arch/arm/boards/skovarm9cpu/lowlevel_init.c
  create mode 100644 arch/arm/boards/skovarm9cpu/of_init.c
@@ -26,16 +26,13 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/dts/skovarm9cpu.dts
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index e469a1568b2e..58171197427c 100644
+index 238efa48c123..a9b2c75985d3 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -166,4 +166,5 @@ obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
- obj-$(CONFIG_MACH_ZII_IMX7D_RPU2)		+= zii-imx7d-rpu2/
+@@ -170,3 +170,4 @@ obj-$(CONFIG_MACH_ZII_IMX7D_DEV)		+= zii-imx7d-dev/
  obj-$(CONFIG_MACH_WAGO_PFC_AM35XX)		+= wago-pfc-am35xx/
  obj-$(CONFIG_MACH_LS1046ARDB)			+= ls1046ardb/
--obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
-\ No newline at end of file
-+obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
+ obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
 +obj-$(CONFIG_MACH_SKOVARM9CPU)			+= skovarm9cpu/
 diff --git a/arch/arm/boards/skovarm9cpu/Makefile b/arch/arm/boards/skovarm9cpu/Makefile
 new file mode 100644
@@ -380,12 +377,12 @@ index 000000000000..9463f809e074
 +CONFIG_FS_FAT_LFN=y
 +CONFIG_PNG=y
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 79a175409a60..29955cef209a 100644
+index 214a09d3eff5..35c616fd0f30 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -137,4 +137,6 @@ pbl-dtb-$(CONFIG_MACH_WAGO_PFC_AM35XX) += am35xx-pfc-750_820x.dtb.o
- pbl-dtb-$(CONFIG_MACH_LS1046ARDB) += fsl-ls1046a-rdb.dtb.o
- pbl-dtb-$(CONFIG_MACH_TQMLS1046A) += fsl-tqmls1046a-mbls10xxa.dtb.o
+@@ -145,4 +145,6 @@ lwl-dtb-$(CONFIG_MACH_WAGO_PFC_AM35XX) += am35xx-pfc-750_820x.dtb.o
+ lwl-dtb-$(CONFIG_MACH_LS1046ARDB) += fsl-ls1046a-rdb.dtb.o
+ lwl-dtb-$(CONFIG_MACH_TQMLS1046A) += fsl-tqmls1046a-mbls10xxa.dtb.o
  
 +pbl-dtb-$(CONFIG_MACH_SKOVARM9CPU) += skovarm9cpu.dtb.o
 +
@@ -751,15 +748,16 @@ index 000000000000..7723031a6866
 +	};
 +};
 diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
-index efed73827849..d6eedf758fa8 100644
+index 5ad1f62c8d67..b8ced9fa901b 100644
 --- a/arch/arm/mach-at91/Kconfig
 +++ b/arch/arm/mach-at91/Kconfig
-@@ -541,6 +541,16 @@ config AT91_MULTI_BOARDS
+@@ -547,6 +547,17 @@ config AT91_MULTI_BOARDS
  
  if AT91_MULTI_BOARDS
  
 +config MACH_SKOVARM9CPU
 +	bool "SKOV ARM9 CPU"
++	select SOC_AT91SAM9263
 +	select OFDEVICE
 +	select COMMON_CLK_OF_PROVIDER
 +	select HAVE_AT91_USB_CLK
@@ -770,16 +768,17 @@ index efed73827849..d6eedf758fa8 100644
 +
  config MACH_AT91SAM9263EK
  	bool "Atmel AT91SAM9263-EK"
- 	depends on ARCH_AT91SAM9263
+ 	select SOC_AT91SAM9263
 diff --git a/images/Makefile.at91 b/images/Makefile.at91
-index acdb591d2452..4fe094ee0ff2 100644
+index f321bdec3696..86b977260aa6 100644
 --- a/images/Makefile.at91
 +++ b/images/Makefile.at91
-@@ -13,3 +13,7 @@ image-$(CONFIG_MACH_AT91SAM9263EK) += barebox-at91sam9263ek.img
- pblb-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += start_sama5d3_xplained_ung8071
- FILE_barebox-microchip-ksz9477-evb.img = start_sama5d3_xplained_ung8071.pblb
- image-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += barebox-microchip-ksz9477-evb.img
+@@ -17,3 +17,8 @@ image-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += barebox-microchip-ksz9477-evb.img
+ pblb-$(CONFIG_MACH_SAMA5D27_SOM1) += start_sama5d27_som1_ek
+ FILE_barebox-sama5d27-som1-ek.img = start_sama5d27_som1_ek.pblb
+ image-$(CONFIG_MACH_SAMA5D27_SOM1) += barebox-sama5d27-som1-ek.img
 +
 +pblb-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
 +FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblb
++MAX_PBL_MEMORY_SIZE_start_skovarm9cpu = 0x12000
 +image-$(CONFIG_MACH_SKOVARM9CPU) += barebox-skovarm9cpu.img

@@ -52,17 +52,17 @@ e9a1f3cbaf5f]
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 91f17374c986..e469a1568b2e 100644
+index 6cb40d084b3d..238efa48c123 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -109,6 +109,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
+@@ -111,6 +111,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
 +obj-$(CONFIG_MACH_SKOV_IMX6)			+= skov-imx6/
  obj-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB)	+= freescale-mx6sx-sabresdb/
+ obj-$(CONFIG_MACH_SAMA5D27_SOM1)		+= sama5d27-som1/
  obj-$(CONFIG_MACH_SAMA5D3XEK)			+= sama5d3xek/
- obj-$(CONFIG_MACH_SAMA5D3_XPLAINED)		+= sama5d3_xplained/
 diff --git a/arch/arm/boards/skov-imx6/Makefile b/arch/arm/boards/skov-imx6/Makefile
 new file mode 100644
 index 000000000000..206715adce68
@@ -1109,17 +1109,17 @@ index 000000000000..7f6651011d7c
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 1c6129816daf..79a175409a60 100644
+index 294a0bfa5525..214a09d3eff5 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -79,6 +79,7 @@ pbl-dtb-$(CONFIG_MACH_RPI3) += bcm2837-rpi-3.dtb.o
- pbl-dtb-$(CONFIG_MACH_RPI_CM3) += bcm2837-rpi-cm3.dtb.o
- pbl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
- pbl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
+@@ -83,6 +83,7 @@ lwl-dtb-$(CONFIG_MACH_RPI_CM3) += bcm2837-rpi-cm3.dtb.o
+ lwl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
+ lwl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
+ lwl-dtb-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB) += imx6sx-sdb.dtb.o
 +pbl-dtb-$(CONFIG_MACH_SKOV_IMX6) += imx6dl-skov-imx6.dtb.o imx6q-skov-imx6.dtb.o
- pbl-dtb-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB) += imx6sx-sdb.dtb.o
- pbl-dtb-$(CONFIG_MACH_SOCFPGA_ALTERA_SOCDK) += socfpga_cyclone5_socdk.dtb.o
- pbl-dtb-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES) += socfpga_cyclone5_socrates.dtb.o
+ lwl-dtb-$(CONFIG_MACH_SOCFPGA_ALTERA_SOCDK) += socfpga_cyclone5_socdk.dtb.o
+ lwl-dtb-$(CONFIG_MACH_SOCFPGA_EBV_SOCRATES) += socfpga_cyclone5_socrates.dtb.o
+ lwl-dtb-$(CONFIG_MACH_SOCFPGA_REFLEX_ACHILLES) += socfpga_arria10_achilles.dtb.o
 diff --git a/arch/arm/dts/imx6dl-skov-imx6.dts b/arch/arm/dts/imx6dl-skov-imx6.dts
 new file mode 100644
 index 000000000000..c2dac682048a
@@ -1520,12 +1520,12 @@ index 000000000000..896324f145a2
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index 71d37cee9069..dd1701098af2 100644
+index 6e98e95dbb00..13b04450353c 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -505,6 +505,12 @@ config MACH_GRINN_LITEBOARD
- 	bool "Grinn liteboard"
+@@ -528,6 +528,12 @@ config MACH_DIGI_CCIMX6ULSBCPRO
  	select ARCH_IMX6UL
+ 	select ARM_USE_COMPRESSED_DTB
  
 +config MACH_SKOV_IMX6
 +	bool "Skov IMX6"
@@ -1537,10 +1537,10 @@ index 71d37cee9069..dd1701098af2 100644
  
  # ----------------------------------------------------------
 diff --git a/common/blspec.c b/common/blspec.c
-index 41f2a4c53443..334b3214be3c 100644
+index 7fb62d310f09..0ea5565178c5 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
-@@ -372,14 +372,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
+@@ -464,14 +464,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
  	if (!strcmp(devicetree, "none"))
  		return true;
  
@@ -1568,10 +1568,10 @@ index 41f2a4c53443..334b3214be3c 100644
  	if (entry->rootpath)
  		abspath = entry->rootpath;
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index e6f741cdb44d..daa813efeacd 100644
+index a8f8a9b7d622..b5f6263113f3 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -458,6 +458,11 @@ CFG_start_imx6dl_samx6i.pblb.imximg = $(board)/kontron-samx6i/flash-header-samx6
+@@ -486,6 +486,11 @@ CFG_start_imx6dl_samx6i.pblb.imximg = $(board)/kontron-samx6i/flash-header-samx6
  FILE_barebox-imx6dl-samx6i.img = start_imx6dl_samx6i.pblb.imximg
  image-$(CONFIG_MACH_KONTRON_SAMX6I) += barebox-imx6dl-samx6i.img
  

@@ -11,10 +11,10 @@ Signed-off-by: Kim Christensen <kch@skov.dk>
  1 file changed, 59 insertions(+), 33 deletions(-)
 
 diff --git a/scripts/bareboximd.c b/scripts/bareboximd.c
-index 7d4cbeb9a83f..c2f5ddcb12a3 100644
+index 5ef91831c457..9d91c911a477 100644
 --- a/scripts/bareboximd.c
 +++ b/scripts/bareboximd.c
-@@ -34,6 +34,7 @@
+@@ -33,6 +33,7 @@
  #include <errno.h>
  #include <stdarg.h>
  #include <linux/err.h>
@@ -22,7 +22,7 @@ index 7d4cbeb9a83f..c2f5ddcb12a3 100644
  
  #include "../include/image-metadata.h"
  
-@@ -64,6 +65,7 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, loff_t
+@@ -63,6 +64,7 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
  	ssize_t rsize;
  	int ret, fd;
  	void *buf;
@@ -30,7 +30,7 @@ index 7d4cbeb9a83f..c2f5ddcb12a3 100644
  
  	*size = 0;
  	*outbuf = NULL;
-@@ -74,45 +76,69 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, loff_t
+@@ -73,45 +75,69 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
  		return -errno;
  	}
  
