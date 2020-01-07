@@ -1,0 +1,119 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Wed, 8 May 2019 17:33:44 +0200
+Subject: [PATCH] ksz: add self_test support for Link-MD detection on KSZ8863
+
+The KSZ8863/KSZ8873 is capable of testing the Link-Quality of the cable.
+We implement a self_test to measure the results.
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/dsa/microchip/ksz8795.c | 77 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 73 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
+index 5468d75405f0..af18cd3273e4 100644
+--- a/drivers/net/dsa/microchip/ksz8795.c
++++ b/drivers/net/dsa/microchip/ksz8795.c
+@@ -897,15 +897,82 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
+ 		DSA_TAG_PROTO_KSZ8795 : DSA_TAG_PROTO_KSZ8863;
+ }
+ 
++enum ksz8_ethtool_tests {
++	KSZ8_ETHTOOL_LINK_MD_QUALITY_TEST,
++	KSZ8_ETHTOOL_LINK_MD_ERROR_TEST,
++	KSZ8_ETHTOOL_TEST_MAX,
++};
++
++static const char ksz8_tests_str_arr[KSZ8_ETHTOOL_TEST_MAX][ETH_GSTRING_LEN] = {
++	"LinkMD Quality (online)",
++	"LinkMD Error Distance (online)",
++};
++
+ static void ksz8_get_strings(struct dsa_switch *ds, int port,
+ 			     u32 stringset, uint8_t *buf)
+ {
+ 	struct ksz_device *dev = ds->priv;
+ 
+-	if (ksz_is_87(dev))
+-		memcpy(buf, ksz87xx_mib_names, sizeof(ksz87xx_mib_names));
+-	else
+-		memcpy(buf, ksz88xx_mib_names, sizeof(ksz88xx_mib_names));
++	switch (stringset) {
++	case ETH_SS_STATS:
++		if (ksz_is_87(dev))
++			memcpy(buf, ksz87xx_mib_names,
++					sizeof(ksz87xx_mib_names));
++		else
++			memcpy(buf, ksz88xx_mib_names,
++					sizeof(ksz88xx_mib_names));
++		break;
++	case ETH_SS_TEST:
++		memcpy(buf, ksz8_tests_str_arr,
++			ETH_GSTRING_LEN * KSZ8_ETHTOOL_TEST_MAX);
++		break;
++	}
++
++}
++
++static void ksz8_self_test(struct dsa_switch *ds, int port,
++                               struct ethtool_test *test, uint64_t *data)
++{
++       struct ksz_device *dev = ds->priv;
++       u8 mdctrl = 0;
++       u8 mdstat = 0;
++       int timeout = 500;
++
++       memset(data, 0, test->len * sizeof(uint64_t));
++
++       /* Undocumented: disable all advertisement and flow control
++        * before test. This makes the test much more stable
++        */
++       ksz_write8(dev, REG_PORT_2_CTRL_12, 0x00);
++       ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, true);
++
++       ksz_port_cfg(dev, port, REG_PORT_LINK_MD_CTRL, PORT_START_CABLE_DIAG, true);
++
++       do {
++               ksz_pread8(dev, port, REG_PORT_LINK_MD_CTRL, &mdctrl);
++               timeout--;
++               if (!timeout)
++                       break;
++       } while (mdctrl & PORT_START_CABLE_DIAG);
++
++       ksz_pread8(dev, port, REG_PORT_LINK_MD_RESULT, &mdstat);
++
++       ksz_write8(dev, REG_PORT_2_CTRL_12, 0xff);
++       ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, false);
++
++       if (!port || ((mdctrl & PORT_CABLE_STAT_FAILED)
++                               == PORT_CABLE_STAT_FAILED)) {
++               int i;
++               for (i = 0; i < test->len; i++)
++                       data[i] = 1;
++               test->flags |= ETH_TEST_FL_FAILED;
++               return;
++       }
++
++       if (mdctrl & PORT_CABLE_STAT_FAILED) {
++               data[0] |= (mdctrl & PORT_CABLE_STAT_FAILED);
++               data[1] = (((mdctrl & 0x1) << 8) | mdstat) * 2 / 5;
++       }
+ }
+ 
+ static void ksz8_cfg_port_member(struct ksz_device *dev, int port, u8 member)
+@@ -1389,6 +1456,7 @@ static const struct dsa_switch_ops ksz8_switch_ops = {
+ 	.adjust_link		= ksz_adjust_link,
+ 	.port_enable		= ksz_enable_port,
+ 	.port_disable		= ksz_disable_port,
++	.self_test		= ksz8_self_test,
+ 	.get_strings		= ksz8_get_strings,
+ 	.get_ethtool_stats	= ksz_get_ethtool_stats,
+ 	.get_sset_count		= ksz_sset_count,
+@@ -1563,6 +1631,7 @@ static int ksz8_switch_init(struct ksz_device *dev)
+ 	dev->port_mask |= dev->host_mask;
+ 
+ 	dev->reg_mib_cnt = SWITCH_COUNTER_NUM;
++	dev->test_cnt = KSZ8_ETHTOOL_TEST_MAX;
+ 
+ 	i = dev->mib_port_cnt;
+ 	dev->ports = devm_kzalloc(dev->dev, sizeof(struct ksz_port) * i,

@@ -20,10 +20,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 23 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.c b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
-index e8778ebb72e6..a3524a6bc962 100644
+index cb1faaac380a..f1fc14abc116 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
-@@ -127,6 +127,13 @@ static int etnaviv_gem_mmap_obj(struct etnaviv_gem_object *etnaviv_obj,
+@@ -128,6 +128,13 @@ static int etnaviv_gem_mmap_obj(struct etnaviv_gem_object *etnaviv_obj,
  		struct vm_area_struct *vma)
  {
  	pgprot_t vm_page_prot;
@@ -37,7 +37,7 @@ index e8778ebb72e6..a3524a6bc962 100644
  
  	vma->vm_flags &= ~VM_PFNMAP;
  	vma->vm_flags |= VM_MIXEDMAP;
-@@ -156,17 +163,26 @@ static int etnaviv_gem_mmap_obj(struct etnaviv_gem_object *etnaviv_obj,
+@@ -157,17 +164,26 @@ static int etnaviv_gem_mmap_obj(struct etnaviv_gem_object *etnaviv_obj,
  
  int etnaviv_gem_mmap(struct file *filp, struct vm_area_struct *vma)
  {

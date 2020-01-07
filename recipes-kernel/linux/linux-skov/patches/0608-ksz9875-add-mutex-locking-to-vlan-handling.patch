@@ -1,0 +1,49 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Tue, 17 Dec 2019 13:43:22 +0100
+Subject: [PATCH] ksz9875: add mutex locking to vlan handling
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/dsa/microchip/ksz8795.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
+index 24a5e99f7fd5..b8877770a8fc 100644
+--- a/drivers/net/dsa/microchip/ksz8795.c
++++ b/drivers/net/dsa/microchip/ksz8795.c
+@@ -807,6 +807,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
+ 	u16 data, vid, new_pvid = 0;
+ 	u8 fid, member, valid;
+ 
++	mutex_lock(&dev->vlan_mutex);
++
+ 	ksz_port_cfg(dev, port, P_TAG_CTRL, PORT_REMOVE_TAG, untagged);
+ 
+ 	for (vid = vlan->vid_begin; vid <= vlan->vid_end; vid++) {
+@@ -835,6 +837,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
+ 		vid |= new_pvid;
+ 		ksz_pwrite16(dev, port, REG_PORT_CTRL_VID, vid);
+ 	}
++
++	mutex_unlock(&dev->vlan_mutex);
+ }
+ 
+ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+@@ -845,6 +849,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+ 	u16 data, vid, pvid, new_pvid = 0;
+ 	u8 fid, member, valid;
+ 
++	mutex_lock(&dev->vlan_mutex);
++
+ 	ksz_pread16(dev, port, REG_PORT_CTRL_VID, &pvid);
+ 	pvid = pvid & 0xFFF;
+ 
+@@ -872,6 +878,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+ 	if (new_pvid != pvid)
+ 		ksz_pwrite16(dev, port, REG_PORT_CTRL_VID, pvid);
+ 
++	mutex_unlock(&dev->vlan_mutex);
++
+ 	return 0;
+ }
+ 

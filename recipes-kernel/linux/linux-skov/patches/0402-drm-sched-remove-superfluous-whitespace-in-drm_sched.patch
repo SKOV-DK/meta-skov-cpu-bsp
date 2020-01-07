@@ -1,0 +1,23 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 29 Nov 2019 14:24:30 +0100
+Subject: [PATCH] drm/sched: remove superfluous whitespace in
+ drm_sched_resubmit_jobs
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/scheduler/sched_main.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
+index 029d8ad6466b..ced49d3fded7 100644
+--- a/drivers/gpu/drm/scheduler/sched_main.c
++++ b/drivers/gpu/drm/scheduler/sched_main.c
+@@ -501,8 +501,6 @@ void drm_sched_resubmit_jobs(struct drm_gpu_scheduler *sched)
+ 		} else {
+ 			s_job->s_fence->parent = fence;
+ 		}
+-
+-
+ 	}
+ }
+ EXPORT_SYMBOL(drm_sched_resubmit_jobs);

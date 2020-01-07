@@ -1,0 +1,30 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 28 Oct 2019 10:33:54 +0100
+Subject: [PATCH] Revert "media: coda: Replace the threaded interrupt with a
+ hard interrupt"
+
+This reverts commit 1405bc55e617e3e03339dc2d23423b84d9bd039d, as commit
+8f0b08b6f253 ("media: coda: pad bitstream to release coda from ring
+buffer empty condition") currently requires the interrupt handler to
+be threaded.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 6a8a7c7dec77..5f35fd548d29 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -3559,8 +3559,8 @@ static int coda_probe(struct platform_device *pdev)
+ 		return irq;
+ 	}
+ 
+-	ret = devm_request_irq(&pdev->dev, irq, coda_irq_handler, 0,
+-			       dev_name(&pdev->dev), dev);
++	ret = devm_request_threaded_irq(&pdev->dev, irq, NULL, coda_irq_handler,
++			IRQF_ONESHOT, dev_name(&pdev->dev), dev);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "failed to request irq: %d\n", ret);
+ 		return ret;

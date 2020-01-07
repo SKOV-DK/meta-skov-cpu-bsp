@@ -1,0 +1,71 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 12 Nov 2019 15:00:54 +0100
+Subject: [PATCH] media: coda: lock capture queue wakeup against decoder stop
+ command
+
+Similar to 9ee50a9489f1 ("media: coda: lock capture queue wakeup
+against encoder stop command"), make sure that a JPEG decoder stop
+command running concurrently with a decoder finish_run always either
+flags the last returned buffer or wakes up the capture queue to signal
+the end of stream condition afterwards.
+
+This was not necessary for BIT processor contexts because of the need to
+release the bitstream buffer with the stream end condition. In contrast,
+the JPEG decoder can be finished with decoding the image between the
+time the application queues the last output buffer and the time it
+issues the decoder stop command.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 4 ++++
+ drivers/media/platform/coda/coda-jpeg.c   | 8 ++++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 5659610d29a3..e3fd51992e17 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1424,6 +1424,8 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 		stream_end = false;
+ 		wakeup = false;
+ 
++		mutex_lock(&ctx->wakeup_mutex);
++
+ 		buf = v4l2_m2m_last_src_buf(ctx->fh.m2m_ctx);
+ 		if (buf) {
+ 			coda_dbg(1, ctx, "marking last pending buffer\n");
+@@ -1473,6 +1475,8 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 			coda_wake_up_capture_queue(ctx);
+ 		}
+ 
++		mutex_unlock(&ctx->wakeup_mutex);
++
+ 		if (ctx->state != CODA_STATE_DECODING) {
+ 			coda_dbg(1, ctx, "dec_cmd_stop: invalid state: %s\n",
+ 				 coda_state_name(ctx->state));
+diff --git a/drivers/media/platform/coda/coda-jpeg.c b/drivers/media/platform/coda/coda-jpeg.c
+index 34a7f0599811..3c49970df4dc 100644
+--- a/drivers/media/platform/coda/coda-jpeg.c
++++ b/drivers/media/platform/coda/coda-jpeg.c
+@@ -1539,6 +1539,12 @@ static void coda9_jpeg_finish_decode(struct coda_ctx *ctx)
+ 
+ 	coda_write(dev, 0, CODA9_REG_JPEG_BBC_FLUSH_CMD);
+ 
++	/*
++	 * Lock to make sure that a decoder stop command running in parallel
++	 * will either already have marked src_buf as last, or it will wake up
++	 * the capture queue after the buffers are returned.
++	 */
++	mutex_lock(&ctx->wakeup_mutex);
+ 	src_buf = v4l2_m2m_src_buf_remove(ctx->fh.m2m_ctx);
+ 	dst_buf = v4l2_m2m_dst_buf_remove(ctx->fh.m2m_ctx);
+ 	dst_buf->sequence = ctx->osequence++;
+@@ -1558,6 +1564,8 @@ static void coda9_jpeg_finish_decode(struct coda_ctx *ctx)
+ 	coda_m2m_buf_done(ctx, dst_buf, err_mb ? VB2_BUF_STATE_ERROR :
+ 						 VB2_BUF_STATE_DONE);
+ 
++	mutex_unlock(&ctx->wakeup_mutex);
++
+ 	coda_dbg(1, ctx, "job finished: decoded frame (%u)%s\n",
+ 		 dst_buf->sequence,
+ 		 (dst_buf->flags & V4L2_BUF_FLAG_LAST) ? " (last)" : "");

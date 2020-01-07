@@ -1,0 +1,69 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 12 Nov 2019 14:57:56 +0100
+Subject: [PATCH] media: coda: mark last capture buffer
+
+If a JPEG decoding application queues the last capture and output
+buffers, issues a decoder stop command after the decoding is already
+done, and then dequeues the last capture buffer, it is not marked as
+last. Detect this condition in the decoder stop command and mark the
+last buffer on the capture done list.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 35 ++++++++++++++++++++++++++++---
+ 1 file changed, 32 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 2b62970c9acd..5659610d29a3 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1355,6 +1355,31 @@ static bool coda_mark_last_meta(struct coda_ctx *ctx)
+ 	return true;
+ }
+ 
++static bool coda_mark_last_dst_buf(struct coda_ctx *ctx)
++{
++	struct vb2_v4l2_buffer *buf;
++	struct vb2_buffer *dst_vb;
++	struct vb2_queue *dst_vq;
++	unsigned long flags;
++
++	coda_dbg(1, ctx, "marking last capture buffer\n");
++
++	dst_vq = v4l2_m2m_get_vq(ctx->fh.m2m_ctx, V4L2_BUF_TYPE_VIDEO_CAPTURE);
++	spin_lock_irqsave(&dst_vq->done_lock, flags);
++	if (list_empty(&dst_vq->done_list)) {
++		spin_unlock_irqrestore(&dst_vq->done_lock, flags);
++		return false;
++	}
++
++	dst_vb = list_last_entry(&dst_vq->done_list, struct vb2_buffer,
++				 done_entry);
++	buf = to_vb2_v4l2_buffer(dst_vb);
++	buf->flags |= V4L2_BUF_FLAG_LAST;
++
++	spin_unlock_irqrestore(&dst_vq->done_lock, flags);
++	return true;
++}
++
+ static int coda_decoder_cmd(struct file *file, void *fh,
+ 			    struct v4l2_decoder_cmd *dc)
+ {
+@@ -1424,10 +1449,14 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 				stream_end = true;
+ 			}
+ 		} else {
+-			if (coda_mark_last_meta(ctx))
+-				stream_end = true;
++			if (ctx->use_bit)
++				if (coda_mark_last_meta(ctx))
++					stream_end = true;
++				else
++					wakeup = true;
+ 			else
+-				wakeup = true;
++				if (!coda_mark_last_dst_buf(ctx))
++					wakeup = true;
+ 		}
+ 
+ 		if (stream_end) {

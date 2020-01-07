@@ -54,13 +54,13 @@ index 000000000000..211f0dffcf16
 +This binding is compatible with the simple-panel binding, which is specified
 +in simple-panel.txt in this directory.
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-index 33a65a45e319..26dd568a3e7d 100644
+index 967e78c5ec0a..f1460b2216b1 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-@@ -485,6 +485,8 @@ patternProperties:
-     description: Linear Technology Corporation
-   "^logicpd,.*":
+@@ -543,6 +543,8 @@ patternProperties:
      description: Logic PD, Inc.
+   "^longcheer,.*":
+     description: Longcheer Technology (Shanghai) Co., Ltd.
 +  "^logictechnologies,.*":
 +    description: LOGIC Technologies, Inc.
    "^lsi,.*":
