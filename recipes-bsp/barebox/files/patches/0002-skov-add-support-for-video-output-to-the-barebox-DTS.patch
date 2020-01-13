@@ -174,7 +174,7 @@ index 278c2c944f2c..fea84cb4986b 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 896324f145a2..90ecfbe8738c 100644
+index 7d3b24a79d5d..fd928ff72292 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -9,6 +9,8 @@

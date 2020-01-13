@@ -89,7 +89,7 @@ index 9625390b1ffa..29c0b4385802 100644
  }
  coredevice_initcall(skov_imx6_devices_init);
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 90ecfbe8738c..5fd21018d761 100644
+index fd928ff72292..9b8c94fa79a9 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -16,9 +16,18 @@

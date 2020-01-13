@@ -1,9 +1,9 @@
 # umpf-base: v2019.12.0
 # umpf-name: 2019.12.0/customers/skov/imx6
-# umpf-version: 2019.12.0/customers/skov/imx6/20200107-1
+# umpf-version: 2019.12.0/customers/skov/imx6/20200113-1
 # umpf-topic: v2019.12.0/customers/skov/imx6
-# umpf-hashinfo: aead1650757c2418b661b793758d582db8833ba4
-# umpf-topic-range: 48b57af0ab888bf88607d0e55ad3e79d13cc0a31..a54e7d978bbc23eb190bb90cb6f47620e4c0f1ff
+# umpf-hashinfo: ee86b3306b675548e5574090739a2e150c1dcb37
+# umpf-topic-range: 48b57af0ab888bf88607d0e55ad3e79d13cc0a31..1db6dac4eb86cd9ebe61417e8355401bb3a12c21
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov-add-support-for-video-output-to-the-barebox-DTS.patch \
@@ -16,7 +16,7 @@ SRC_URI += "\
   "
 # umpf-topic: v2019.12.0/customers/skov/arm9
 # umpf-hashinfo: 9c8f3f7b2f6f9f769b4844115056bc25a62ac10b
-# umpf-topic-range: a54e7d978bbc23eb190bb90cb6f47620e4c0f1ff..31d71ec77e7d611d54f6a2a67265ad59761af460
+# umpf-topic-range: 1db6dac4eb86cd9ebe61417e8355401bb3a12c21..8b1bcbb831296fbd56401c770718e4d9da0a532e
 SRC_URI += "\
   file://patches/0101-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch \
   file://patches/0102-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
@@ -35,9 +35,9 @@ SRC_URI += "\
   file://patches/0115-skovarm9cpu-add-pwm0.patch \
   file://patches/0116-lds-align-RO_DATA_SECTION-members.patch \
   "
-# umpf-release: 2019.12.0/customers/skov/imx6/20200107-1
-# umpf-topic-range: 31d71ec77e7d611d54f6a2a67265ad59761af460..cf86ce2018179b0febca4a1c04086481ca43b918
+# umpf-release: 2019.12.0/customers/skov/imx6/20200113-1
+# umpf-topic-range: 8b1bcbb831296fbd56401c770718e4d9da0a532e..e3d8b3e0982a86cc3837961e051c81793849aaf1
 SRC_URI += "\
-  file://patches/0201-Release-2019.12.0-customers-skov-imx6-20200107-1.patch \
+  file://patches/0201-Release-2019.12.0-customers-skov-imx6-20200113-1.patch \
   "
 # umpf-end

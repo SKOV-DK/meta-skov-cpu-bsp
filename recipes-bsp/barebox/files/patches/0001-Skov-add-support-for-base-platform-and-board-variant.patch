@@ -1182,7 +1182,7 @@ index 000000000000..278c2c944f2c
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 new file mode 100644
-index 000000000000..896324f145a2
+index 000000000000..7d3b24a79d5d
 --- /dev/null
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -0,0 +1,333 @@
@@ -1435,7 +1435,7 @@ index 000000000000..896324f145a2
 +	norflash: m25p80@0 {
 +		#address-cells = <1>;
 +		#size-cells = <1>;
-+		compatible = "st,n25q064", "st,m25p";
++		compatible = "jedec,spi-nor";
 +		spi-max-frequency = <54000000>;
 +		reg = <0>;
 +	};
