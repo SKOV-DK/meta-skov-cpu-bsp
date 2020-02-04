@@ -11,10 +11,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index d47d1a8e0219..8bae874ff3a5 100644
+index 5418a1a87b2c..c3be5b0a9b5d 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1003,6 +1003,7 @@ void etnaviv_gpu_recover_hang(struct etnaviv_gpu *gpu)
+@@ -1008,6 +1008,7 @@ void etnaviv_gpu_recover_hang(struct etnaviv_gpu *gpu)
  /* fence object management */
  struct etnaviv_fence {
  	struct etnaviv_gpu *gpu;
@@ -22,7 +22,7 @@ index d47d1a8e0219..8bae874ff3a5 100644
  	struct dma_fence base;
  };
  
-@@ -1059,8 +1060,9 @@ static struct dma_fence *etnaviv_gpu_fence_alloc(struct etnaviv_gpu *gpu)
+@@ -1064,8 +1065,9 @@ static struct dma_fence *etnaviv_gpu_fence_alloc(struct etnaviv_gpu *gpu)
  		return NULL;
  
  	f->gpu = gpu;
@@ -33,7 +33,7 @@ index d47d1a8e0219..8bae874ff3a5 100644
  		       gpu->fence_context, ++gpu->next_fence);
  
  	return &f->base;
-@@ -1639,7 +1641,6 @@ static int etnaviv_gpu_bind(struct device *dev, struct device *master,
+@@ -1632,7 +1634,6 @@ static int etnaviv_gpu_bind(struct device *dev, struct device *master,
  	gpu->drm = drm;
  	gpu->fence_context = dma_fence_context_alloc(1);
  	idr_init(&gpu->fence_idr);
@@ -42,10 +42,10 @@ index d47d1a8e0219..8bae874ff3a5 100644
  	INIT_WORK(&gpu->sync_point_work, sync_point_worker);
  	init_waitqueue_head(&gpu->fence_event);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-index 8f9bd4edc96a..3f8a097fdaa5 100644
+index 9bcf151f706b..dc0180fd69ee 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-@@ -121,7 +121,6 @@ struct etnaviv_gpu {
+@@ -122,7 +122,6 @@ struct etnaviv_gpu {
  	u32 completed_fence;
  	wait_queue_head_t fence_event;
  	u64 fence_context;

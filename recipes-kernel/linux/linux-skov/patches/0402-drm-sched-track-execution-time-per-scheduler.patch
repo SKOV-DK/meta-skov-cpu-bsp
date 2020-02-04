@@ -1,0 +1,54 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 8 Jun 2018 12:10:40 +0200
+Subject: [PATCH] drm/sched: track execution time per scheduler
+
+This will alllow us to export some useful statistics to userspace.
+A next step would be to track execution time per job/client, but this
+needs stronger ordering on the fence completion than what is currently
+provided and it's unclear if all drivers can provide the necessary
+ordering.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/scheduler/sched_main.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
+index 22aa873c5e15..9c8dd6f5e613 100644
+--- a/drivers/gpu/drm/scheduler/sched_main.c
++++ b/drivers/gpu/drm/scheduler/sched_main.c
+@@ -301,6 +301,10 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)
+ 	spin_lock_irqsave(&sched->job_list_lock, flags);
+ 	list_add_tail(&s_job->node, &sched->ring_mirror_list);
+ 	drm_sched_start_timeout(sched);
++	if (list_is_singular(&sched->ring_mirror_list)) {
++		sched->stats->active_ts = ktime_get();
++		sched->stats->active = true;
++	}
+ 	spin_unlock_irqrestore(&sched->job_list_lock, flags);
+ }
+ 
+@@ -596,8 +600,10 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
+ static void drm_sched_process_job(struct dma_fence *f, struct dma_fence_cb *cb)
+ {
+ 	struct drm_sched_job *s_job = container_of(cb, struct drm_sched_job, cb);
++	struct drm_gpu_scheduler_stats *stats = s_job->sched->stats;
+ 	struct drm_sched_fence *s_fence = s_job->s_fence;
+ 	struct drm_gpu_scheduler *sched = s_fence->sched;
++	ktime_t now = ktime_get();
+ 	unsigned long flags;
+ 
+ 	cancel_delayed_work(&sched->work_tdr);
+@@ -615,6 +621,12 @@ static void drm_sched_process_job(struct dma_fence *f, struct dma_fence_cb *cb)
+ 	trace_drm_sched_process_job(s_fence);
+ 	wake_up_interruptible(&sched->wake_up_worker);
+ 
++	spin_lock_irqsave(&stats->lock, flags);
++	stats->active_time_us += ktime_to_us(ktime_sub(now, stats->active_ts));
++	stats->active_ts = now;
++	stats->active = false;
++	spin_unlock_irqrestore(&stats->lock, flags);
++
+ 	schedule_work(&s_job->finish_work);
+ }
+ 

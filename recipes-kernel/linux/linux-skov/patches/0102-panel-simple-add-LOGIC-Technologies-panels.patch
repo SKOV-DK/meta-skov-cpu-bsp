@@ -20,10 +20,10 @@ Cc: Thierry Reding <thierry.reding@gmail.com>
  1 file changed, 70 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 28fa6ba7b767..d6a09f6b0fdb 100644
+index 397a3086eac8..84c513d3cd18 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -2034,6 +2034,70 @@ static const struct panel_desc lg_lp129qe = {
+@@ -1762,6 +1762,70 @@ static const struct panel_desc lg_lp129qe = {
  	},
  };
  
@@ -94,7 +94,7 @@ index 28fa6ba7b767..d6a09f6b0fdb 100644
  static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
  	.clock = 30400,
  	.hdisplay = 800,
-@@ -3264,6 +3328,12 @@ static const struct of_device_id platform_of_match[] = {
+@@ -2758,6 +2822,12 @@ static const struct of_device_id platform_of_match[] = {
  	}, {
  		.compatible = "lg,lp129qe",
  		.data = &lg_lp129qe,

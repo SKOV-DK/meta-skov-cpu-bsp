@@ -1,0 +1,48 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 4 Apr 2019 15:09:02 +0200
+Subject: [PATCH] media: coda: only set the stream end flags if there are no
+ more pending output buffers
+
+If there are still queued output buffers pending to be copied into the
+bitstream ring buffer, setting the stream end flag should be deferred
+until the marked last output buffer is written into the bitstream ring
+buffer.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 9b32b5862aa8..4002a5b8c9ea 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1098,16 +1098,20 @@ static int coda_decoder_cmd(struct file *file, void *fh,
+ 			/* Mark last buffer */
+ 			buf->flags |= V4L2_BUF_FLAG_LAST;
+ 
+-		/* Set the stream-end flag on this context */
+-		coda_bit_stream_end_flag(ctx);
+-		ctx->hold = false;
+-		v4l2_m2m_try_schedule(ctx->fh.m2m_ctx);
++		if (v4l2_m2m_num_src_bufs_ready(ctx->fh.m2m_ctx) == 0) {
++			/* Set the stream-end flag on this context */
++			coda_bit_stream_end_flag(ctx);
++			ctx->hold = false;
++			v4l2_m2m_try_schedule(ctx->fh.m2m_ctx);
+ 
+-		flush_work(&ctx->pic_run_work);
++			flush_work(&ctx->pic_run_work);
++
++			/* If there is no buffer in flight, wake up */
++			if (!ctx->streamon_out ||
++			    ctx->qsequence == ctx->osequence)
++				coda_wake_up_capture_queue(ctx);
++		}
+ 
+-		/* If there is no buffer in flight, wake up */
+-		if (!ctx->streamon_out || ctx->qsequence == ctx->osequence)
+-			coda_wake_up_capture_queue(ctx);
+ 		break;
+ 	default:
+ 		return -EINVAL;

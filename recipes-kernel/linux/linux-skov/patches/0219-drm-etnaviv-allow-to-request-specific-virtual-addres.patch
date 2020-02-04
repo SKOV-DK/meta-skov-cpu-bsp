@@ -1,0 +1,78 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 2 Aug 2019 14:19:38 +0200
+Subject: [PATCH] drm/etnaviv: allow to request specific virtual address for
+ gem mapping
+
+Allow the mapping code to request a specific virtual address for the gem
+mapping. If the virtual address is zero we fall back to the old mode of
+allocating a virtual address for the mapping.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gem.h |  2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.c | 16 ++++++++++++++--
+ drivers/gpu/drm/etnaviv/etnaviv_mmu.h |  2 +-
+ 3 files changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.h b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+index 6776caaf4274..1c2ce665a1a7 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -120,7 +120,7 @@ struct page **etnaviv_gem_get_pages(struct etnaviv_gem_object *obj);
+ void etnaviv_gem_put_pages(struct etnaviv_gem_object *obj);
+ 
+ struct etnaviv_vram_mapping *etnaviv_gem_mapping_get(
+-	struct drm_gem_object *obj, struct etnaviv_iommu_context *mmu);
++	struct drm_gem_object *obj, struct etnaviv_iommu_context *mmu, u64 va);
+ void etnaviv_gem_mapping_reference(struct etnaviv_vram_mapping *mapping);
+ void etnaviv_gem_mapping_unreference(struct etnaviv_vram_mapping *mapping);
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+index 99cd2f8c7b5d..2da309278f90 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.c
+@@ -217,9 +217,16 @@ static int etnaviv_iommu_find_iova(struct etnaviv_iommu_context *context,
+ 	return ret;
+ }
+ 
++static int etnaviv_iommu_insert_exact(struct etnaviv_iommu_context *context,
++		   struct drm_mm_node *node, size_t size, u64 va)
++{
++	return drm_mm_insert_node_in_range(&context->mm, node, size, 0, 0, va,
++					   va + size, DRM_MM_INSERT_LOW);
++}
++
+ int etnaviv_iommu_map_gem(struct etnaviv_iommu_context *context,
+ 	struct etnaviv_gem_object *etnaviv_obj, u32 memory_base,
+-	struct etnaviv_vram_mapping *mapping)
++	struct etnaviv_vram_mapping *mapping, u64 va)
+ {
+ 	struct sg_table *sgt = etnaviv_obj->sgt;
+ 	struct drm_mm_node *node;
+@@ -245,7 +252,12 @@ int etnaviv_iommu_map_gem(struct etnaviv_iommu_context *context,
+ 
+ 	node = &mapping->vram_node;
+ 
+-	ret = etnaviv_iommu_find_iova(context, node, etnaviv_obj->base.size);
++	if (va)
++		ret = etnaviv_iommu_insert_exact(context, node,
++						 etnaviv_obj->base.size, va);
++	else
++		ret = etnaviv_iommu_find_iova(context, node,
++					      etnaviv_obj->base.size);
+ 	if (ret < 0)
+ 		goto unlock;
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+index 6dcbddd34b27..466940ac9723 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_mmu.h
+@@ -85,7 +85,7 @@ struct etnaviv_gem_object;
+ 
+ int etnaviv_iommu_map_gem(struct etnaviv_iommu_context *context,
+ 	struct etnaviv_gem_object *etnaviv_obj, u32 memory_base,
+-	struct etnaviv_vram_mapping *mapping);
++	struct etnaviv_vram_mapping *mapping, u64 va);
+ void etnaviv_iommu_unmap_gem(struct etnaviv_iommu_context *context,
+ 	struct etnaviv_vram_mapping *mapping);
+ 

@@ -1,0 +1,164 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Fri, 12 Apr 2019 11:51:29 -0400
+Subject: [PATCH] media: coda: update profile and level controls after sequence
+ initialization
+
+The header report return value from decoder sequence initialization is
+available on CodaHx4 and CODA7541 already. Use the profile and level
+identification values reported by the firmware to update codec specific
+profile and level controls after sequence initialization has succeeded.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+Signed-off-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+---
+ drivers/media/platform/coda/coda-bit.c    | 11 ++++++
+ drivers/media/platform/coda/coda-common.c | 66 ++++++++++++++++++-------------
+ drivers/media/platform/coda/coda.h        |  3 ++
+ drivers/media/platform/coda/coda_regs.h   |  2 +-
+ 4 files changed, 54 insertions(+), 28 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 856b395fdbb4..f3e52828ae2f 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -1811,6 +1811,17 @@ static int __coda_start_decoding(struct coda_ctx *ctx)
+ 					  (top_bottom & 0x3ff);
+ 	}
+ 
++	if (dev->devtype->product != CODA_DX6) {
++		u8 profile, level;
++
++		val = coda_read(dev, CODA7_RET_DEC_SEQ_HEADER_REPORT);
++		profile = val & 0xff;
++		level = (val >> 8) & 0x7f;
++
++		if (profile || level)
++			coda_update_profile_level_ctrls(ctx, profile, level);
++	}
++
+ 	ret = coda_alloc_framebuffers(ctx, q_data_dst, src_fourcc);
+ 	if (ret < 0) {
+ 		v4l2_err(&dev->v4l2_dev, "failed to allocate framebuffers\n");
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 5238745d66a8..443be47e1dcf 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1565,42 +1565,53 @@ static void coda_update_menu_ctrl(struct v4l2_ctrl *ctrl, int value)
+ 	v4l2_ctrl_unlock(ctrl);
+ }
+ 
+-static void coda_update_h264_profile_ctrl(struct coda_ctx *ctx)
++void coda_update_profile_level_ctrls(struct coda_ctx *ctx, u8 profile_idc,
++				     u8 level_idc)
+ {
+ 	const char * const *profile_names;
++	const char * const *level_names;
++	struct v4l2_ctrl *profile_ctrl;
++	struct v4l2_ctrl *level_ctrl;
++	const char *codec_name;
++	u32 profile_cid;
++	u32 level_cid;
+ 	int profile;
++	int level;
+ 
+-	profile = coda_h264_profile(ctx->params.h264_profile_idc);
+-	if (profile < 0) {
+-		v4l2_warn(&ctx->dev->v4l2_dev, "Invalid H264 Profile: %u\n",
+-			  ctx->params.h264_profile_idc);
++	switch (ctx->codec->src_fourcc) {
++	case V4L2_PIX_FMT_H264:
++		codec_name = "H264";
++		profile_cid = V4L2_CID_MPEG_VIDEO_H264_PROFILE;
++		level_cid = V4L2_CID_MPEG_VIDEO_H264_LEVEL;
++		profile_ctrl = ctx->h264_profile_ctrl;
++		level_ctrl = ctx->h264_level_ctrl;
++		profile = coda_h264_profile(profile_idc);
++		level = coda_h264_level(level_idc);
++		break;
++	default:
+ 		return;
+ 	}
+ 
+-	coda_update_menu_ctrl(ctx->h264_profile_ctrl, profile);
+-
+-	profile_names = v4l2_ctrl_get_menu(V4L2_CID_MPEG_VIDEO_H264_PROFILE);
++	profile_names = v4l2_ctrl_get_menu(profile_cid);
++	level_names = v4l2_ctrl_get_menu(level_cid);
+ 
+-	coda_dbg(1, ctx, "Parsed H264 Profile: %s\n", profile_names[profile]);
+-}
+-
+-static void coda_update_h264_level_ctrl(struct coda_ctx *ctx)
+-{
+-	const char * const *level_names;
+-	int level;
++	if (profile < 0) {
++		v4l2_warn(&ctx->dev->v4l2_dev, "Invalid %s profile: %u\n",
++			  codec_name, profile_idc);
++	} else {
++		coda_dbg(1, ctx, "Parsed %s profile: %s\n", codec_name,
++			 profile_names[profile]);
++		coda_update_menu_ctrl(profile_ctrl, profile);
++	}
+ 
+-	level = coda_h264_level(ctx->params.h264_level_idc);
+ 	if (level < 0) {
+-		v4l2_warn(&ctx->dev->v4l2_dev, "Invalid H264 Level: %u\n",
+-			  ctx->params.h264_level_idc);
+-		return;
++		v4l2_warn(&ctx->dev->v4l2_dev, "Invalid %s level: %u\n",
++			  codec_name, level_idc);
++	} else {
++		coda_dbg(1, ctx, "Parsed %s level: %s\n", codec_name,
++			 level_names[level]);
++		coda_update_menu_ctrl(level_ctrl, level);
+ 	}
+-
+-	coda_update_menu_ctrl(ctx->h264_level_ctrl, level);
+-
+-	level_names = v4l2_ctrl_get_menu(V4L2_CID_MPEG_VIDEO_H264_LEVEL);
+-
+-	coda_dbg(1, ctx, "Parsed H264 Level: %s\n", level_names[level]);
+ }
+ 
+ static void coda_buf_queue(struct vb2_buffer *vb)
+@@ -1633,8 +1644,9 @@ static void coda_buf_queue(struct vb2_buffer *vb)
+ 			 */
+ 			if (!ctx->params.h264_profile_idc) {
+ 				coda_sps_parse_profile(ctx, vb);
+-				coda_update_h264_profile_ctrl(ctx);
+-				coda_update_h264_level_ctrl(ctx);
++				coda_update_profile_level_ctrls(ctx,
++						ctx->params.h264_profile_idc,
++						ctx->params.h264_level_idc);
+ 			}
+ 		}
+ 
+diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
+index cfcfff7838cd..7bb349695dbe 100644
+--- a/drivers/media/platform/coda/coda.h
++++ b/drivers/media/platform/coda/coda.h
+@@ -324,6 +324,9 @@ int coda_sps_parse_profile(struct coda_ctx *ctx, struct vb2_buffer *vb);
+ int coda_h264_sps_fixup(struct coda_ctx *ctx, int width, int height, char *buf,
+ 			int *size, int max_size);
+ 
++void coda_update_profile_level_ctrls(struct coda_ctx *ctx, u8 profile_idc,
++				     u8 level_idc);
++
+ bool coda_jpeg_check_buffer(struct coda_ctx *ctx, struct vb2_buffer *vb);
+ int coda_jpeg_write_tables(struct coda_ctx *ctx);
+ void coda_set_jpeg_compression_quality(struct coda_ctx *ctx, int quality);
+diff --git a/drivers/media/platform/coda/coda_regs.h b/drivers/media/platform/coda/coda_regs.h
+index abf8e195f6c0..4d503f472397 100644
+--- a/drivers/media/platform/coda/coda_regs.h
++++ b/drivers/media/platform/coda/coda_regs.h
+@@ -177,7 +177,7 @@
+ #define CODA_RET_DEC_SEQ_FRATE_DR		0x1e8
+ #define CODA_RET_DEC_SEQ_JPG_PARA		0x1e4
+ #define CODA_RET_DEC_SEQ_JPG_THUMB_IND		0x1e8
+-#define CODA9_RET_DEC_SEQ_HEADER_REPORT		0x1ec
++#define CODA7_RET_DEC_SEQ_HEADER_REPORT		0x1ec
+ 
+ /* Decoder Picture Run */
+ #define CODA_CMD_DEC_PIC_ROT_MODE		0x180
