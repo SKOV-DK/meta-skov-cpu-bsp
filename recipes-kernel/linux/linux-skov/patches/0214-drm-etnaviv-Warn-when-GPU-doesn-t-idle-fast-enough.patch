@@ -1,0 +1,33 @@
+From: =?UTF-8?q?Guido=20G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Mon, 2 Mar 2020 20:13:36 +0100
+Subject: [PATCH] drm/etnaviv: Warn when GPU doesn't idle fast enough
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+If the GPU isn't idle after signalling pm_runtime_mark_last_busy() plus
+waiting for the autosuspend delay there's likely something wrong with
+the way we check idleness so warn about that.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index e333014d3d2a..80555e76f407 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1841,8 +1841,11 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+ 	mask = gpu->idle_mask & ~(VIVS_HI_IDLE_STATE_FE |
+ 				  VIVS_HI_IDLE_STATE_MC);
+ 	idle = gpu_read(gpu, VIVS_HI_IDLE_STATE) & mask;
+-	if (idle != mask)
++	if (idle != mask) {
++		dev_warn_ratelimited(dev, "GPU not yet idle, mask: 0x%08x\n",
++				     idle);
+ 		return -EBUSY;
++	}
+ 
+ 	return etnaviv_gpu_hw_suspend(gpu);
+ }

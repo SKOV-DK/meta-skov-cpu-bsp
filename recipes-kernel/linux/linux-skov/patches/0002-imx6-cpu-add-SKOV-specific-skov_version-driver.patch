@@ -16,17 +16,17 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  drivers/Makefile            |   1 +
  drivers/skov/Kconfig        |  12 ++
  drivers/skov/Makefile       |   1 +
- drivers/skov/skov_version.c | 315 ++++++++++++++++++++++++++++++++++++++++++++
- 5 files changed, 331 insertions(+)
+ drivers/skov/skov_version.c | 325 ++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 341 insertions(+)
  create mode 100644 drivers/skov/Kconfig
  create mode 100644 drivers/skov/Makefile
  create mode 100644 drivers/skov/skov_version.c
 
 diff --git a/drivers/Kconfig b/drivers/Kconfig
-index e8231663f201..a04dfcf3f334 100644
+index 8befa53f43be..255417fe7712 100644
 --- a/drivers/Kconfig
 +++ b/drivers/Kconfig
-@@ -232,4 +232,6 @@ source "drivers/interconnect/Kconfig"
+@@ -228,4 +228,6 @@ source "drivers/interconnect/Kconfig"
  
  source "drivers/counter/Kconfig"
  
@@ -34,10 +34,10 @@ index e8231663f201..a04dfcf3f334 100644
 +
  endmenu
 diff --git a/drivers/Makefile b/drivers/Makefile
-index 28b030d7988d..570581090cd2 100644
+index aaef17cc6512..15b18090a7a3 100644
 --- a/drivers/Makefile
 +++ b/drivers/Makefile
-@@ -188,3 +188,4 @@ obj-$(CONFIG_SIOX)		+= siox/
+@@ -186,3 +186,4 @@ obj-$(CONFIG_SIOX)		+= siox/
  obj-$(CONFIG_GNSS)		+= gnss/
  obj-$(CONFIG_INTERCONNECT)	+= interconnect/
  obj-$(CONFIG_COUNTER)		+= counter/
@@ -69,10 +69,10 @@ index 000000000000..d6068949425b
 +obj-$(CONFIG_SKOV_VERSION)      += skov_version.o
 diff --git a/drivers/skov/skov_version.c b/drivers/skov/skov_version.c
 new file mode 100644
-index 000000000000..2e7613eae0bd
+index 000000000000..83ada4527d15
 --- /dev/null
 +++ b/drivers/skov/skov_version.c
-@@ -0,0 +1,315 @@
+@@ -0,0 +1,325 @@
 +/*
 + * Skov version driver
 + *
@@ -98,8 +98,10 @@ index 000000000000..2e7613eae0bd
 + * 00010010	- i.MX6 CPU QuadCore+		 C    4192MB - 16384MB
 + * 00010011	- i.MX6 CPU SoloCore		 C    512 MB -  2048MB
 + * 00010100	- i.MX6 CPU QuadCore		 C    1024MB -  4096MB
-+ * 00010101    - i.MX6 CPU SoloCore             C    512 MB -  2048MB
-+ * 00010110    - i.MX6 CPU QuadCore             C    1024MB -  4096MB
++ * 00010101	- i.MX6 CPU SoloCore             D    512 MB -  2048MB
++ * 00010110	- i.MX6 CPU QuadCore             D    1024MB -  4096MB
++ * 00010111	---- not defined ----
++ * 00011000	- i.MX6 mkII with LVDS           E    1024MB -  4096MB
 + */
 +#include <linux/err.h>
 +#include <linux/clk.h>
@@ -140,7 +142,8 @@ index 000000000000..2e7613eae0bd
 +	"Middle Performance",
 +	"i.MX6 CPU SoloCore",
 +	"i.MX6 CPU QuadCore",
-+	"i.MX6 CPU QuadCore+"
++	"i.MX6 CPU QuadCore+",
++	"i.MX6 mkII with LVDS",
 +};
 +
 +static const unsigned int mem[] = {
@@ -149,7 +152,7 @@ index 000000000000..2e7613eae0bd
 +	1024,
 +	2048,
 +	3840,
-+	0
++	0,
 +};
 +
 +static const char *rev[] = {
@@ -178,7 +181,7 @@ index 000000000000..2e7613eae0bd
 +	4096,
 +	8192,
 +	16384,
-+	32768
++	32768,
 +};
 +
 +/*
@@ -195,6 +198,7 @@ index 000000000000..2e7613eae0bd
 +			return sprintf(buf, "%u\n", mem[1]);
 +		case 20:
 +		case 22:
++		case 24:
 +			return sprintf(buf, "%u\n", mem[2]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
@@ -203,9 +207,12 @@ index 000000000000..2e7613eae0bd
 +		switch(svpd->var){
 +		case 19:
 +		case 20:
++			return sprintf(buf, "%s\n", rev[2]);
 +		case 21:
 +		case 22:
-+			return sprintf(buf, "%s\n", rev[2]);
++			return sprintf(buf, "%s\n", rev[3]);
++		case 24:
++			return sprintf(buf, "%s\n", rev[4]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
 +		}
@@ -217,6 +224,8 @@ index 000000000000..2e7613eae0bd
 +		case 20:
 +		case 22:
 +			return sprintf(buf, "%s\n", description[6]);
++		case 24:
++			return sprintf(buf, "%s\n", description[8]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);
 +		}
@@ -227,6 +236,7 @@ index 000000000000..2e7613eae0bd
 +			return sprintf(buf, "%u\n", nand[7]);
 +		case 20:
 +		case 22:
++		case 24:
 +			return sprintf(buf, "%u\n", nand[8]);
 +		default:
 +			return sprintf(buf, "Unsupported board revision: 0x%x\n", svpd->var);

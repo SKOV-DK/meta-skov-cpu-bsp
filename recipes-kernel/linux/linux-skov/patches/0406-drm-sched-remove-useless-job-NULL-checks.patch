@@ -1,0 +1,58 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Thu, 6 Feb 2020 11:38:32 +0100
+Subject: [PATCH] drm/sched: remove useless job NULL checks
+
+The scheduler never calls into the driver timedout_job function with
+a NULL job pointer. All drivers do dereference the job pointer before
+this check, so they would crash anyways if the scheduler behavior
+ever changes. Remove the useless check.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_sched.c | 3 +--
+ drivers/gpu/drm/lima/lima_sched.c       | 3 +--
+ drivers/gpu/drm/v3d/v3d_sched.c         | 3 +--
+ 3 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+index d8aac79419d7..473ac19ae94f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -111,8 +111,7 @@ static void etnaviv_sched_timedout_job(struct drm_sched_job *sched_job)
+ 	/* block scheduler */
+ 	drm_sched_stop(&gpu->sched, sched_job);
+ 
+-	if(sched_job)
+-		drm_sched_increase_karma(sched_job);
++	drm_sched_increase_karma(sched_job);
+ 
+ 	/* get the GPU back into the init state */
+ 	etnaviv_core_dump(submit);
+diff --git a/drivers/gpu/drm/lima/lima_sched.c b/drivers/gpu/drm/lima/lima_sched.c
+index 4127cacac454..d82d31f2294f 100644
+--- a/drivers/gpu/drm/lima/lima_sched.c
++++ b/drivers/gpu/drm/lima/lima_sched.c
+@@ -260,8 +260,7 @@ static void lima_sched_handle_error_task(struct lima_sched_pipe *pipe,
+ {
+ 	drm_sched_stop(&pipe->base, &task->base);
+ 
+-	if (task)
+-		drm_sched_increase_karma(&task->base);
++	drm_sched_increase_karma(&task->base);
+ 
+ 	pipe->task_error(pipe);
+ 
+diff --git a/drivers/gpu/drm/v3d/v3d_sched.c b/drivers/gpu/drm/v3d/v3d_sched.c
+index 8c2df6d95283..2497cd8ae8d0 100644
+--- a/drivers/gpu/drm/v3d/v3d_sched.c
++++ b/drivers/gpu/drm/v3d/v3d_sched.c
+@@ -270,8 +270,7 @@ v3d_gpu_reset_for_timeout(struct v3d_dev *v3d, struct drm_sched_job *sched_job)
+ 	for (q = 0; q < V3D_MAX_QUEUES; q++)
+ 		drm_sched_stop(&v3d->queue[q].sched, sched_job);
+ 
+-	if (sched_job)
+-		drm_sched_increase_karma(sched_job);
++	drm_sched_increase_karma(sched_job);
+ 
+ 	/* get the GPU back into the init state */
+ 	v3d_reset(v3d);

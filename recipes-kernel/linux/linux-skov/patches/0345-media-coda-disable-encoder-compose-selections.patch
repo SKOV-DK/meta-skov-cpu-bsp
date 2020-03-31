@@ -1,0 +1,29 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Thu, 7 Nov 2019 11:03:47 +0100
+Subject: [PATCH] media: coda: disable encoder compose selections
+
+Disable capture side compose selections for the encoder.
+This fixes the following v4l2-compliance complaint:
+
+		fail: v4l2-test-formats.cpp(1662): IS_ENCODER(node)
+	test Composing: FAIL
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 9aba57ebf808..1e943feaf6c4 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1195,7 +1195,8 @@ static int coda_g_selection(struct file *file, void *fh,
+ 		/* fallthrough */
+ 	case V4L2_SEL_TGT_COMPOSE:
+ 	case V4L2_SEL_TGT_COMPOSE_DEFAULT:
+-		if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
++		if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE ||
++		    ctx->inst_type == CODA_INST_ENCODER)
+ 			return -EINVAL;
+ 		break;
+ 	default:

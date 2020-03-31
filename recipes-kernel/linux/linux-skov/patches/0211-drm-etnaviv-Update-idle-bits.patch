@@ -1,0 +1,33 @@
+From: =?UTF-8?q?Guido=20G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Mon, 2 Mar 2020 20:13:33 +0100
+Subject: [PATCH] drm/etnaviv: Update idle bits
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Update the state HI and common header from rnndb commit
+commit 19280a95a (rnndb: Update idle bits)
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+---
+ drivers/gpu/drm/etnaviv/state_hi.xml.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/state_hi.xml.h b/drivers/gpu/drm/etnaviv/state_hi.xml.h
+index 41d8da2b6f4f..8fe4598395f1 100644
+--- a/drivers/gpu/drm/etnaviv/state_hi.xml.h
++++ b/drivers/gpu/drm/etnaviv/state_hi.xml.h
+@@ -81,6 +81,13 @@ DEALINGS IN THE SOFTWARE.
+ #define VIVS_HI_IDLE_STATE_IM					0x00000200
+ #define VIVS_HI_IDLE_STATE_FP					0x00000400
+ #define VIVS_HI_IDLE_STATE_TS					0x00000800
++#define VIVS_HI_IDLE_STATE_BL					0x00001000
++#define VIVS_HI_IDLE_STATE_ASYNCFE				0x00002000
++#define VIVS_HI_IDLE_STATE_MC					0x00004000
++#define VIVS_HI_IDLE_STATE_PPA					0x00008000
++#define VIVS_HI_IDLE_STATE_WD					0x00010000
++#define VIVS_HI_IDLE_STATE_NN					0x00020000
++#define VIVS_HI_IDLE_STATE_TP					0x00040000
+ #define VIVS_HI_IDLE_STATE_AXI_LP				0x80000000
+ 
+ #define VIVS_HI_AXI_CONFIG					0x00000008

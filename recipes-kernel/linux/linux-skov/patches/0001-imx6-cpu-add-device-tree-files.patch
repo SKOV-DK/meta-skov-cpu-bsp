@@ -9,12 +9,12 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
  arch/arm/boot/dts/Makefile                   |   4 +
  arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts   |  23 +
- arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 ++
- arch/arm/boot/dts/imx6q-skov-revc-lt2.dts    |  36 ++
- arch/arm/boot/dts/imx6q-skov-revc-lt6.dts    |  40 ++
+ arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  27 +
+ arch/arm/boot/dts/imx6q-skov-revc-lt2.dts    |  32 ++
+ arch/arm/boot/dts/imx6q-skov-revc-lt6.dts    |  36 ++
  arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi |  72 +++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 702 +++++++++++++++++++++++++++
- 7 files changed, 904 insertions(+)
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 706 +++++++++++++++++++++++++++
+ 7 files changed, 900 insertions(+)
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
@@ -23,10 +23,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index dab2914fa293..1e18d6f631ef 100644
+index b21b3a64641a..a2e159bc4705 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -437,6 +437,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -438,6 +438,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6dl-sabrelite.dtb \
  	imx6dl-sabresd.dtb \
  	imx6dl-savageboard.dtb \
@@ -35,7 +35,7 @@ index dab2914fa293..1e18d6f631ef 100644
  	imx6dl-ts4900.dtb \
  	imx6dl-ts7970.dtb \
  	imx6dl-tx6dl-comtft.dtb \
-@@ -517,6 +519,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -518,6 +520,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6q-sabresd.dtb \
  	imx6q-savageboard.dtb \
  	imx6q-sbc6x.dtb \
@@ -108,10 +108,10 @@ index 000000000000..cc278ac3f435
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
 new file mode 100644
-index 000000000000..7132c1fd6094
+index 000000000000..0fd5e7d8eb34
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,32 @@
 +/*
 + * Copyright 2014 Rose Technology
 + * Copyright 2012 Freescale Semiconductor, Inc.
@@ -136,10 +136,6 @@ index 000000000000..7132c1fd6094
 +	compatible = "skov,imx6q-skov-revc-lt2", "skov,imx6", "fsl,imx6q";
 +};
 +
-+&sata {
-+	status = "disabled";
-+};
-+
 +&i2c2 {
 +	status = "okay";
 +};
@@ -150,10 +146,10 @@ index 000000000000..7132c1fd6094
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
 new file mode 100644
-index 000000000000..07dd8bea7f24
+index 000000000000..af416b5011b9
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,36 @@
 +/*
 + * Copyright 2014 Rose Technology
 + * Copyright 2012 Freescale Semiconductor, Inc.
@@ -176,10 +172,6 @@ index 000000000000..07dd8bea7f24
 +/ {
 +	model = "SKOV IMX6 CPU QuadCore";
 +	compatible = "skov,imx6q-skov-revc-lt6", "skov,imx6", "fsl,imx6q";
-+};
-+
-+&sata {
-+	status = "disabled";
 +};
 +
 +&i2c2 {
@@ -274,7 +266,7 @@ index 000000000000..2338e2cc7347
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 new file mode 100644
-index 000000000000..2ba489c5eb52
+index 000000000000..27879f47f5c0
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 @@ -0,0 +1,706 @@
@@ -368,7 +360,7 @@ index 000000000000..2ba489c5eb52
 +		 * phy emulation
 +		 */
 +		ksz8873@3 {
-+			compatible = "micrel,ksz8873";
++			compatible = "microchip,ksz8873";
 +			interrupt-parrent = <&gpio3>;
 +			interrupt = <30 IRQ_TYPE_LEVEL_HIGH>;
 +			reg = <0>;
@@ -585,7 +577,7 @@ index 000000000000..2ba489c5eb52
 +	status = "okay";
 +
 +	flash: m25p80@0 {
-+		compatible = "n25q064";
++		compatible = "jedec,spi-nor";
 +		spi-max-frequency = <54000000>;
 +		reg = <0>;
 +		#address-cells = <1>;
@@ -622,7 +614,7 @@ index 000000000000..2ba489c5eb52
 +
 +		ti,x-plate-ohms = /bits/ 16 <850>;
 +		ti,y-plate-ohms = /bits/ 16 <295>;
-+               ti,pressure-min = /bits/ 16 <2>;
++		ti,pressure-min = /bits/ 16 <2>;
 +		ti,pressure-max = /bits/ 16 <1500>;
 +		ti,vref-mv	= /bits/ 16 <3300>;
 +		ti,settle-delay-usec = /bits/ 16 <15>;
