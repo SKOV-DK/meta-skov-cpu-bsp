@@ -1,0 +1,71 @@
+From: Sam Ravnborg <sam@ravnborg.org>
+Date: Sun, 12 Apr 2020 11:03:05 +0200
+Subject: [PATCH] drm: panel: add Multi-Innotechnology MI1010AIT-1CP1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The Multi Innotechnology is a 10.1" 1280x800 panel.
+
+The datasheet did not specify specific values for sync, back, front porch.
+The values are a best guess based on values for similar panels.
+
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+[Compared to Sam's v1: removed the last two flags/bus_flags & connector_type,
+added bpc & delay]
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ drivers/gpu/drm/panel/panel-simple.c | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 70628b100d42..2d6ff6405237 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -2164,6 +2164,36 @@ static const struct panel_desc mitsubishi_aa070mc01 = {
+ 	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
+ };
+ 
++static const struct display_timing multi_inno_1010ait_1cp1_timing = {
++	.pixelclock = { 68900000, 71100000, 73400000 },
++	.hactive = { 1280, 1280, 1280 },
++	.hfront_porch = { 50, 60, 71 },
++	.hback_porch = { 50, 60, 71 },
++	.hsync_len = { 30, 40, 48 },
++	.vactive = { 800, 800, 800 },
++	.vfront_porch = { 5, 7, 10 },
++	.vback_porch = { 5, 7, 10 },
++	.vsync_len = { 5, 9, 13 },
++	.flags = DISPLAY_FLAGS_HSYNC_LOW | DISPLAY_FLAGS_VSYNC_LOW |
++		 DISPLAY_FLAGS_DE_HIGH,
++};
++
++static const struct panel_desc multi_inno_1010ait_1cp1 = {
++	.timings = &multi_inno_1010ait_1cp1_timing,
++	.num_timings = 1,
++	.bpc = 8,
++	.size = {
++		.width = 217,
++		.height = 136,
++	},
++	.delay = {
++		.enable = 50,
++		.disable = 50,
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
++	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
++};
++
+ static const struct display_timing nec_nl12880bc20_05_timing = {
+ 	.pixelclock = { 67000000, 71000000, 75000000 },
+ 	.hactive = { 1280, 1280, 1280 },
+@@ -3399,6 +3429,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "mitsubishi,aa070mc01-ca1",
+ 		.data = &mitsubishi_aa070mc01,
++	}, {
++		.compatible = "multi-inno,1010ait-1cp1",
++		.data = &multi_inno_1010ait_1cp1,
+ 	}, {
+ 		.compatible = "nec,nl12880bc20-05",
+ 		.data = &nec_nl12880bc20_05,
