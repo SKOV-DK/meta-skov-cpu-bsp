@@ -30,8 +30,8 @@ e9a1f3cbaf5f]
  arch/arm/boards/skov-imx6/env/init/automount       |  14 +
  arch/arm/boards/skov-imx6/env/nv/boot.default      |   1 +
  .../skov-imx6/flash-header-mx6-skov-imx6.imxcfg    |   4 +
- arch/arm/boards/skov-imx6/lowlevel.c               | 695 +++++++++++++++++++++
- arch/arm/boards/skov-imx6/version.c                | 257 ++++++++
+ arch/arm/boards/skov-imx6/lowlevel.c               | 707 +++++++++++++++++++++
+ arch/arm/boards/skov-imx6/version.c                | 306 +++++++++
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
@@ -39,7 +39,7 @@ e9a1f3cbaf5f]
  arch/arm/mach-imx/Kconfig                          |   6 +
  common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1409 insertions(+), 8 deletions(-)
+ 15 files changed, 1470 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -146,10 +146,10 @@ index 000000000000..9e8dce5877a1
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..4da39b9b4be2
+index 000000000000..4329e2eea70c
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
-@@ -0,0 +1,695 @@
+@@ -0,0 +1,707 @@
 +/*
 + * This program is free software; you can redistribute it and/or
 + * modify it under the terms of the GNU General Public License as
@@ -734,8 +734,10 @@ index 000000000000..4da39b9b4be2
 + * 00010010       C    4096 MiB     16 GiB     i.MX6Q+
 + * 00010011       C     512 MiB      2 GiB     i.MX6S
 + * 00010100       C    1024 MiB      4 GiB     i.MX6Q
-+ * 00010101       C     512 MiB      2 GIB     i.MX6S
-+ * 00010110       C    1024 MiB      4 GIB     i.MX6Q
++ * 00010101       D     512 MiB      2 GIB     i.MX6S
++ * 00010110       D    1024 MiB      4 GIB     i.MX6Q
++ * 00010111       ---- not defined ----
++ * 00011000       E    1024 MiB      4 GIB     i.MX6Q
 + *
 + * This routine does not return if starting the image from SD card or NOR
 + * was successful. It restarts skov_imx6_start() instead
@@ -779,6 +781,16 @@ index 000000000000..4da39b9b4be2
 +			return;
 +		}
 +		pr_debug("Initializing board variant 22\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
++					&skov_imx6_calib_4x128Mb_1066MHz,
++					&skov_imx6_cfg_4x128Mb_1066MHz);
++		break;
++	case 24: /* i.MX6Q, "Quad_R1G_F4G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 24\n");
 +		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
 +					&skov_imx6_calib_4x128Mb_1066MHz,
 +					&skov_imx6_cfg_4x128Mb_1066MHz);
@@ -847,10 +859,10 @@ index 000000000000..4da39b9b4be2
 +}
 diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
 new file mode 100644
-index 000000000000..7f6651011d7c
+index 000000000000..ba25f51af08e
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/version.c
-@@ -0,0 +1,257 @@
+@@ -0,0 +1,306 @@
 +/*
 + * SPDX-License-Identifier: GPL-2.0
 + */
@@ -894,11 +906,39 @@ index 000000000000..7f6651011d7c
 +		.soc = "i.MX6Q",
 +		.dts_compatible = "skov,imx6-imxq-revA",
 +	},
++	[3] = {
++		.value = NULL,
++		.revision = NULL,
++		.soc = NULL,
++		.dts_compatible = NULL,
++		.display = NULL,
++	},
 +	[4] = {
 +		.value = "low cost",
 +		.revision = "A",
 +		.soc = "i.MX6S",
 +		.dts_compatible = "skov,imx6-imxdl-revA",
++	},
++	[5] = {
++		.value = NULL,
++		.revision = NULL,
++		.soc = NULL,
++		.dts_compatible = NULL,
++		.display = NULL,
++	},
++	[6] = {
++		.value = NULL,
++		.revision = NULL,
++		.soc = NULL,
++		.dts_compatible = NULL,
++		.display = NULL,
++	},
++	[7] = {
++		.value = NULL,
++		.revision = NULL,
++		.soc = NULL,
++		.dts_compatible = NULL,
++		.display = NULL,
 +	},
 +	[8] = {
 +		.value = "high performance",
@@ -991,6 +1031,20 @@ index 000000000000..7f6651011d7c
 +		.soc = "i.MX6Q",
 +		.dts_compatible = "skov,imx6q-skov-revc-lt6",
 +	},
++	[23] = {
++		.value = NULL,
++		.revision = NULL,
++		.soc = NULL,
++		.dts_compatible = NULL,
++		.display = NULL,
++	},
++	[24] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "E",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6q-skov-reve",
++		.display = "mi1010ait-1cp1",
++	},
 +};
 +
 +/*
@@ -1068,6 +1122,13 @@ index 000000000000..7f6651011d7c
 +		var |= !!!gpio_get_value(gpios[i]);
 +	}
 +
++	switch (var) {
++	case 3:
++	case 5 ... 7:
++	case 23:
++		dev_err(dev, "Invalid 'version' value of %u, this variant is not existing.\n", var);
++		goto unclaim_on_error;
++	}
 +	if (var >= ARRAY_SIZE(imx6_variants)) {
 +		dev_err(dev, "Invalid 'version' value. Expected up to %u, but got %u\n", ARRAY_SIZE(imx6_variants) - 1, var);
 +		goto unclaim_on_error;
