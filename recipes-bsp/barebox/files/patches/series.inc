@@ -1,9 +1,9 @@
 # umpf-base: v2019.12.0
-# umpf-name: 2019.12.0/customers/skov/WIP/imx6
-# umpf-version: 2019.12.0/customers/skov/WIP/imx6/20200417-1
-# umpf-topic: v2019.12.0/customers/skov/WIP/imx6
-# umpf-hashinfo: 7bdbf6f3f95ec177cb2a3a7670b81bff07052e28
-# umpf-topic-range: 48b57af0ab888bf88607d0e55ad3e79d13cc0a31..149fd3aaac277eea22fdc77737556e75ed38e32a
+# umpf-name: 2019.12.0/customers/skov/imx6
+# umpf-version: 2019.12.0/customers/skov/imx6/20200429-1
+# umpf-topic: v2019.12.0/customers/skov/imx6
+# umpf-hashinfo: af48d31a8fd37c0da26ae589dd4c4290292b33d7
+# umpf-topic-range: 48b57af0ab888bf88607d0e55ad3e79d13cc0a31..ccb4163424eeec7d0285fed6529b16386827afc0
 SRC_URI += "\
   file://patches/0001-Skov-add-support-for-base-platform-and-board-variant.patch \
   file://patches/0002-skov-add-support-for-video-output-to-the-barebox-DTS.patch \
@@ -16,7 +16,7 @@ SRC_URI += "\
   "
 # umpf-topic: v2019.12.0/customers/skov/arm9
 # umpf-hashinfo: 9c8f3f7b2f6f9f769b4844115056bc25a62ac10b
-# umpf-topic-range: 149fd3aaac277eea22fdc77737556e75ed38e32a..91acd3ad397ce1ed253380956f8e28176c4aea10
+# umpf-topic-range: ccb4163424eeec7d0285fed6529b16386827afc0..7171cf6fa1d5360edee0fa3853f657f37a069d64
 SRC_URI += "\
   file://patches/0101-atmel_lcdfb-fix-atmel-lcd-wiring-mode-BGR-BRG.patch \
   file://patches/0102-pwm-add-pwm-atmel-from-Linux-kernel-4.14.patch \
@@ -35,9 +35,9 @@ SRC_URI += "\
   file://patches/0115-skovarm9cpu-add-pwm0.patch \
   file://patches/0116-lds-align-RO_DATA_SECTION-members.patch \
   "
-# umpf-release: 2019.12.0/customers/skov/WIP/imx6/20200417-1
-# umpf-topic-range: 91acd3ad397ce1ed253380956f8e28176c4aea10..83a60987655fdbc71976155158b065b437af75b0
+# umpf-release: 2019.12.0/customers/skov/imx6/20200429-1
+# umpf-topic-range: 7171cf6fa1d5360edee0fa3853f657f37a069d64..0d1f975511f83c06a7e54851921c7bfa5feb7ba1
 SRC_URI += "\
-  file://patches/0201-Release-2019.12.0-customers-skov-WIP-imx6-20200417-1.patch \
+  file://patches/0201-Release-2019.12.0-customers-skov-imx6-20200429-1.patch \
   "
 # umpf-end

@@ -30,16 +30,16 @@ e9a1f3cbaf5f]
  arch/arm/boards/skov-imx6/env/init/automount       |  14 +
  arch/arm/boards/skov-imx6/env/nv/boot.default      |   1 +
  .../skov-imx6/flash-header-mx6-skov-imx6.imxcfg    |   4 +
- arch/arm/boards/skov-imx6/lowlevel.c               | 707 +++++++++++++++++++++
- arch/arm/boards/skov-imx6/version.c                | 306 +++++++++
+ arch/arm/boards/skov-imx6/lowlevel.c               | 843 +++++++++++++++++++++
+ arch/arm/boards/skov-imx6/version.c                | 307 ++++++++
  arch/arm/dts/Makefile                              |   1 +
  arch/arm/dts/imx6dl-skov-imx6.dts                  |  24 +
  arch/arm/dts/imx6q-skov-imx6.dts                   |  24 +
- arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 333 ++++++++++
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 333 ++++++++
  arch/arm/mach-imx/Kconfig                          |   6 +
  common/blspec.c                                    |  20 +-
  images/Makefile.imx                                |   5 +
- 15 files changed, 1470 insertions(+), 8 deletions(-)
+ 15 files changed, 1607 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -146,10 +146,10 @@ index 000000000000..9e8dce5877a1
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..4329e2eea70c
+index 000000000000..a795270a9356
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
-@@ -0,0 +1,707 @@
+@@ -0,0 +1,843 @@
 +/*
 + * This program is free software; you can redistribute it and/or
 + * modify it under the terms of the GNU General Public License as
@@ -191,6 +191,122 @@ index 000000000000..4329e2eea70c
 +
 +	for (i = 0; i < us * 4; i++);
 +}
++
++/* ------------------------------------------------------------------------ */
++
++/*
++ * Micron MT41K512M16HA-125 IT:E ->  8 GBit = 64 Meg x 16 x 8 banks
++ *
++ * Speed Grade   Data Rate (MT/s)  tRCD-tRP-CL   tRCD(ns)  tRP(ns)  CL(ns)
++ *    -125          1600            11-11-11      13.75     13.75   13.75
++ *               (=800 MHz)
++ *
++ * Memory configuration used by variant:
++ * - "Max Performance", 64 bit data bus, 1066 MHz, 4 GiB memory
++ */
++static const struct mx6_ddr3_cfg skov_imx6_cfg_4x512Mb_1066MHz = {
++	.mem_speed = 1066,
++	.density = 8, /* GiBit */
++	.width = 16, /* 16 bit data per device */
++	.banks = 8,
++	.rowaddr = 16, /* 64 k */
++	.coladdr = 10, /* 1 k */
++	.pagesz = 2, /* [kiB] */
++	.trcd = 1375, /* 13.75 ns = 11 clocks @ 1.6 GHz */
++	.trcmin = 4875, /* 48.75 ns = 39 clocks @ 1.6 GHz */
++	.trasmin = 3500, /* 35 ns = 28 clocks @ 1.6 GHz */
++	.SRT = 0,
++};
++
++static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_4x512Mb_1066MHz = {
++	.dsize = 2, /* 64 bit wide = 4 devices, 16 bit each */
++	.cs_density = 32, /* four 8 GBit devices connected */
++	.ncs = 1, /* one CS line for all devices */
++	.cs1_mirror = 1, /* TODO */
++	.bi_on = 1, /* TODO */
++	.rtt_nom = 1, /* MX6_MMDC_P0_MPODTCTRL -> 0x00022227 */
++	.rtt_wr = 0, /* is LW_EN is 0 in their code */
++	.ralat = 5, /* TODO */
++	.walat = 1, /* TODO */
++	.mif3_mode = 3, /* TODO */
++	.rst_to_cke = 0x23, /* used in their code as well */
++	.sde_to_rst = 0x10, /* used in their code as well */
++	.pd_fast_exit = 0, /* TODO */
++};
++
++static const struct mx6_mmdc_calibration skov_imx6_calib_4x512Mb_1066MHz = {
++	.p0_mpwldectrl0 = 0x001a0017,
++	.p0_mpwldectrl1 = 0x001F001F,
++	.p0_mpdgctrl0 = 0x43040319,
++	.p0_mpdgctrl1 = 0x03040279,
++	.p0_mprddlctl = 0x4d434248,
++	.p0_mpwrdlctl = 0x34424543,
++
++	.p1_mpwldectrl0 = 0x00170027,
++	.p1_mpwldectrl1 = 0x000a001f,
++	.p1_mpdgctrl0 = 0x43040321,
++	.p1_mpdgctrl1 = 0x03030251,
++	.p1_mprddlctl = 0x42413c4d,
++	.p1_mpwrdlctl = 0x49324933,
++};
++
++/* ------------------------------------------------------------------------ */
++
++/*
++ * Micron MT41K256M16HA-125 IT:E ->  4 GBit = 32 Meg x 16 x 8 banks
++ *
++ * Speed Grade   Data Rate (MT/s)  tRCD-tRP-CL   tRCD(ns)  tRP(ns)  CL(ns)
++ *    -125          1600            11-11-11      13.75     13.75   13.75
++ *               (=800 MHz)
++ *
++ * Memory configuration used by variant:
++ * - "Max Performance", 64 bit data bus, 1066 MHz, 2 GiB memory
++ */
++static const struct mx6_ddr3_cfg skov_imx6_cfg_4x256Mb_1066MHz = {
++	.mem_speed = 1066,
++	.density = 4, /* GiBit */
++	.width = 16, /* 16 bit data per device */
++	.banks = 8,
++	.rowaddr = 15, /* 32 k */
++	.coladdr = 10, /* 1 k */
++	.pagesz = 2, /* [kiB] */
++	.trcd = 1375, /* 13.75 ns = 11 clocks @ 1.6 GHz */
++	.trcmin = 4875, /* 48.75 ns = 39 clocks @ 1.6 GHz */
++	.trasmin = 3500, /* 35 ns = 28 clocks @ 1.6 GHz */
++	.SRT = 0,
++};
++
++static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_4x256Mb_1066MHz = {
++	.dsize = 2, /* 64 bit wide = 4 devices, 16 bit each */
++	.cs_density = 16, /* four 4 GBit devices connected */
++	.ncs = 1, /* one CS line for all devices */
++	.cs1_mirror = 1, /* TODO */
++	.bi_on = 1, /* TODO */
++	.rtt_nom = 1, /* MX6_MMDC_P0_MPODTCTRL -> 0x00022227 */
++	.rtt_wr = 0, /* is LW_EN is 0 in their code */
++	.ralat = 5, /* TODO */
++	.walat = 1, /* TODO */
++	.mif3_mode = 3, /* TODO */
++	.rst_to_cke = 0x23, /* used in their code as well */
++	.sde_to_rst = 0x10, /* used in their code as well */
++	.pd_fast_exit = 0, /* TODO */
++};
++
++static const struct mx6_mmdc_calibration skov_imx6_calib_4x256Mb_1066MHz = {
++	.p0_mpwldectrl0 = 0x001a0017,
++	.p0_mpwldectrl1 = 0x001F001F,
++	.p0_mpdgctrl0 = 0x43040319,
++	.p0_mpdgctrl1 = 0x03040279,
++	.p0_mprddlctl = 0x4d434248,
++	.p0_mpwrdlctl = 0x34424543,
++
++	.p1_mpwldectrl0 = 0x00170027,
++	.p1_mpwldectrl1 = 0x000a001f,
++	.p1_mpdgctrl0 = 0x43040321,
++	.p1_mpdgctrl1 = 0x03030251,
++	.p1_mprddlctl = 0x42413c4d,
++	.p1_mpwrdlctl = 0x49324933,
++};
 +
 +/* ------------------------------------------------------------------------ */
 +
@@ -745,6 +861,26 @@ index 000000000000..4329e2eea70c
 +static void skov_imx6_init(int cpu_type, unsigned board_variant)
 +{
 +	switch (board_variant) {
++	case 12: /* P2 i.MX6Q, max performance */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing a P2 max performance system...\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x256Mb_1066MHz,
++					&skov_imx6_calib_4x256Mb_1066MHz,
++					&skov_imx6_cfg_4x256Mb_1066MHz);
++		break;
++	case 18: /* i.MX6Q+ */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 18\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x512Mb_1066MHz,
++					&skov_imx6_calib_4x512Mb_1066MHz,
++					&skov_imx6_cfg_4x512Mb_1066MHz);
++		break;
 +	case 19: /* i.MX6S "Solo_R512M_F2G" */
 +		if (cpu_type != IMX6_CPUTYPE_IMX6S) {
 +			pr_err("Invalid SoC! i.MX6S expected\n");
@@ -859,10 +995,10 @@ index 000000000000..4329e2eea70c
 +}
 diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
 new file mode 100644
-index 000000000000..ba25f51af08e
+index 000000000000..17caab5c3728
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/version.c
-@@ -0,0 +1,306 @@
+@@ -0,0 +1,307 @@
 +/*
 + * SPDX-License-Identifier: GPL-2.0
 + */
@@ -969,7 +1105,8 @@ index 000000000000..ba25f51af08e
 +		.value = "max performance",
 +		.revision = "B",
 +		.soc = "i.MX6Q",
-+		.dts_compatible = "skov,imx6-imxq-revB",
++		.dts_compatible = "skov,imx6q-skov-revc-lt2",
++		.display = "l2rt",
 +	},
 +	[13] = {
 +		.value = "low cost",
@@ -1042,7 +1179,7 @@ index 000000000000..ba25f51af08e
 +		.value = "Quad_R1G_F4G",
 +		.revision = "E",
 +		.soc = "i.MX6Q",
-+		.dts_compatible = "skov,imx6q-skov-reve",
++		.dts_compatible = "skov,imx6q-skov-reve-mi1010ait-1cp1",
 +		.display = "mi1010ait-1cp1",
 +	},
 +};
