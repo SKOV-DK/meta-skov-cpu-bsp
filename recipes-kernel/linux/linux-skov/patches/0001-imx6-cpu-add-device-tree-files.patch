@@ -7,25 +7,25 @@ maintenance simpler.
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 ---
- arch/arm/boot/dts/Makefile                   |   5 +
- arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts   |  15 +
- arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts   |  19 +
- arch/arm/boot/dts/imx6q-skov-revc-lt2.dts    |  24 +
- arch/arm/boot/dts/imx6q-skov-revc-lt6.dts    |  28 ++
- arch/arm/boot/dts/imx6q-skov-reve.dts        |  85 ++++
- arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi | 137 ++++++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi      | 625 +++++++++++++++++++++++++++
- 8 files changed, 938 insertions(+)
+ arch/arm/boot/dts/Makefile                         |   5 +
+ arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts         |  15 +
+ arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts         |  19 +
+ arch/arm/boot/dts/imx6q-skov-revc-lt2.dts          |  24 +
+ arch/arm/boot/dts/imx6q-skov-revc-lt6.dts          |  28 +
+ .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    |  85 +++
+ arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi       | 137 +++++
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 617 +++++++++++++++++++++
+ 8 files changed, 930 insertions(+)
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
- create mode 100644 arch/arm/boot/dts/imx6q-skov-reve.dts
+ create mode 100644 arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index b21b3a64641a..a561d818fb84 100644
+index b21b3a64641a..7afa722c691b 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
 @@ -438,6 +438,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
@@ -43,7 +43,7 @@ index b21b3a64641a..a561d818fb84 100644
  	imx6q-sbc6x.dtb \
 +	imx6q-skov-revc-lt2.dtb \
 +	imx6q-skov-revc-lt6.dtb \
-+	imx6q-skov-reve.dtb \
++	imx6q-skov-reve-mi1010ait-1cp1.dtb \
  	imx6q-tbs2910.dtb \
  	imx6q-ts4900.dtb \
  	imx6q-ts7970.dtb \
@@ -157,11 +157,11 @@ index 000000000000..fb56ebca3b13
 +&panel {
 +	compatible = "logictechnologies,lttd800480070-l6wh-rt";
 +};
-diff --git a/arch/arm/boot/dts/imx6q-skov-reve.dts b/arch/arm/boot/dts/imx6q-skov-reve.dts
+diff --git a/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
 new file mode 100644
-index 000000000000..84637dd417f4
+index 000000000000..947d4af64980
 --- /dev/null
-+++ b/arch/arm/boot/dts/imx6q-skov-reve.dts
++++ b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
 @@ -0,0 +1,85 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
@@ -173,7 +173,7 @@ index 000000000000..84637dd417f4
 +
 +/ {
 +	model = "SKOV IMX6 CPU QuadCore";
-+	compatible = "skov,imx6q-skov-reve", "skov,imx6", "fsl,imx6q";
++	compatible = "skov,imx6q-skov-reve-mi1010ait-1cp1", "skov,imx6", "fsl,imx6q";
 +};
 +
 +&hdmi {
@@ -393,10 +393,10 @@ index 000000000000..e2f028a0e07e
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 new file mode 100644
-index 000000000000..bc1ccf3467ed
+index 000000000000..0a8ec03331fe
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
-@@ -0,0 +1,625 @@
+@@ -0,0 +1,617 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
 +// Copyright 2014 Rose Technology
@@ -455,23 +455,11 @@ index 000000000000..bc1ccf3467ed
 +	mdio0: mdio-gpio {
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_mdio_1>;
-+		compatible = "virtual,mdio-gpio";
++		compatible = "microchip,mdio-smi0";
 +		#address-cells = <1>;
 +		#size-cells = <0>;
 +		gpios = <&gpio1 31 0
 +			 &gpio1 22 0>;
-+
-+		switchphy1: switchphy@1 {
-+			reg = <1>;
-+		};
-+
-+		switchphy2: switchphy@2 {
-+			reg = <2>;
-+		};
-+
-+		switchphy3: switchphy@3 {
-+			reg = <3>;
-+		};
 +
 +		/*
 +		 * MDIO phy#1 is port 1 e.g. LAN1
@@ -491,19 +479,19 @@ index 000000000000..bc1ccf3467ed
 +
 +				ports@0 {
 +					reg = <0>;
-+					phy-handle = <&switchphy1>;
++					phy-mode = "internal";
 +				};
 +
 +				ports@1 {
 +					reg = <1>;
-+					phy-handle = <&switchphy2>;
++					phy-mode = "internal";
 +				};
 +
 +				ports@2 {
 +					reg = <2>;
 +					label = "cpu";
 +					ethernet = <&fec>;
-+					phy-handle = <&switchphy3>;
++					phy-mode = "rmii";
 +
 +					fixed-link {
 +						speed = <100>;
@@ -699,12 +687,16 @@ index 000000000000..bc1ccf3467ed
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_enet_4>;
 +	phy-mode = "rmii";
-+	phy-handle = <&switchphy3>;
 +	phy-reset-gpios = <&gpio1 5 0>;
 +	phy-reset-duration = "100";
 +	phy-supply = <&reg_3p3v>;
 +	#address-cells = <0>;
 +	#size-cells = <1>;
++
++	fixed-link {
++		speed = <100>;
++		full-duplex;
++	};
 +};
 +
 +/* signal "active link" on the RMII to the ethernet switch */

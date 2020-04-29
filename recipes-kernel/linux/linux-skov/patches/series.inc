@@ -1,9 +1,9 @@
-# umpf-base: v5.4.32
-# umpf-name: 5.4/customers/skov/WIP/imx6
-# umpf-version: 5.4/customers/skov/WIP/imx6/20200416-1
+# umpf-base: v5.4.35
+# umpf-name: 5.4/customers/skov/imx6
+# umpf-version: 5.4/customers/skov/imx6/20200429-1
 # umpf-topic: v5.4/customers/skov/imx6_project_specific
-# umpf-hashinfo: b33e46f8b2bdaafe789893593780a3f3fc92609b
-# umpf-topic-range: bc844d58f697dff3ded4b410094ee89f5cedc04c..46db7a0f4a9c8758f810076c925a2045cc529a7e
+# umpf-hashinfo: 99f9392ebe4251254597c674d5466e2fadb410d6
+# umpf-topic-range: 0c418786cb3aa175823f0172d939679df9ab9a54..a4c6a27b8de052fbdd1cf36c4b1cd0c8ad4b2362
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -12,7 +12,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 4ee3fbe7035ccddd51524f1c94950a6d1f6b3bb8
-# umpf-topic-range: 46db7a0f4a9c8758f810076c925a2045cc529a7e..c2df80008fd40e89266516161052d5d3ca047967
+# umpf-topic-range: a4c6a27b8de052fbdd1cf36c4b1cd0c8ad4b2362..ca4f80663eba4d21aeb5ca32956471994631ae0e
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -23,7 +23,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/etnaviv
 # umpf-hashinfo: deaa7fbd4154b7da17f342518de785407ab67338
-# umpf-topic-range: c2df80008fd40e89266516161052d5d3ca047967..ae534effc613159f57fe2495c7aa3e5aff5e9dfe
+# umpf-topic-range: ca4f80663eba4d21aeb5ca32956471994631ae0e..0ad1bb29f605b19f1998a6ae23ac4fb03bc37658
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -33,16 +33,15 @@ SRC_URI += "\
   file://patches/0206-mm-cma-export-functions-to-get-CMA-base-and-size.patch \
   file://patches/0207-drm-etnaviv-use-CMA-area-to-compute-linear-window-of.patch \
   file://patches/0208-drm-etnaviv-fix-TS-cache-flushing-on-GPUs-with-BLT-e.patch \
-  file://patches/0209-drm-etnaviv-rework-perfmon-query-infrastructure.patch \
-  file://patches/0210-drm-etnaviv-Fix-typo-in-comment.patch \
-  file://patches/0211-drm-etnaviv-Update-idle-bits.patch \
-  file://patches/0212-drm-etnaviv-Consider-all-kwnown-idle-bits-in-debugfs.patch \
-  file://patches/0213-drm-etnaviv-Ignore-MC-when-checking-runtime-suspend-.patch \
-  file://patches/0214-drm-etnaviv-Warn-when-GPU-doesn-t-idle-fast-enough.patch \
+  file://patches/0209-drm-etnaviv-Fix-typo-in-comment.patch \
+  file://patches/0210-drm-etnaviv-Update-idle-bits.patch \
+  file://patches/0211-drm-etnaviv-Consider-all-kwnown-idle-bits-in-debugfs.patch \
+  file://patches/0212-drm-etnaviv-Ignore-MC-when-checking-runtime-suspend-.patch \
+  file://patches/0213-drm-etnaviv-Warn-when-GPU-doesn-t-idle-fast-enough.patch \
   "
 # umpf-topic: v5.4/topic/coda
 # umpf-hashinfo: a3e90d97a5ab3f8bfb190a0df3df668004cc2e16
-# umpf-topic-range: ae534effc613159f57fe2495c7aa3e5aff5e9dfe..ddf7331e620c85aaaed61571bef655bc48626f3a
+# umpf-topic-range: 0ad1bb29f605b19f1998a6ae23ac4fb03bc37658..399edd5a511473faf55aa50e9f103d829eb4a8ae
 SRC_URI += "\
   file://patches/0301-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   file://patches/0302-media-coda-create-bitstream-debugfs-entry.patch \
@@ -96,7 +95,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched
 # umpf-hashinfo: 766eec81f78c8800663f8b6f0b07cb1fd770ea47
-# umpf-topic-range: ddf7331e620c85aaaed61571bef655bc48626f3a..1ac5d90d4e332cdb8844c032987142d2f776b7d3
+# umpf-topic-range: 399edd5a511473faf55aa50e9f103d829eb4a8ae..f58c57dd0280e42119692c4372110cc48f91e82f
 SRC_URI += "\
   file://patches/0401-drm-sched-don-t-try-to-construct-error-code-from-NUL.patch \
   file://patches/0402-drm-sched-remove-superfluous-whitespace-in-drm_sched.patch \
@@ -109,36 +108,35 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched-accounting
 # umpf-hashinfo: 7f614500c6d169d75e3f8bcf8cf51342c90f3a50
-# umpf-topic-range: 1ac5d90d4e332cdb8844c032987142d2f776b7d3..4c7f690712f53d0118f566803a56250f64e7affe
+# umpf-topic-range: f58c57dd0280e42119692c4372110cc48f91e82f..290af14f67d4818ef7650bd777713aa2f5875c36
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873
-# umpf-hashinfo: a90546af96415d6da2e67de450d9e12d46776be4
-# umpf-topic-range: 4c7f690712f53d0118f566803a56250f64e7affe..eeaa4e512119efe59b359fe02ea3fc332e27b064
+# umpf-hashinfo: cd9397aef791b73b30f172891f39f423d43797a6
+# umpf-topic-range: 290af14f67d4818ef7650bd777713aa2f5875c36..df3d5588d79efda13ac0554ae94424ae66a614b8
 SRC_URI += "\
   file://patches/0601-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
   file://patches/0602-net-dsa-tag-fix-tag-handling.patch \
   file://patches/0603-dsa-add-self_test-ethtool-function-handling.patch \
   file://patches/0604-net-dsa-ksz-use-common-define-for-tag-len.patch \
-  file://patches/0605-mdio-bitbang-add-support-for-lowlevel-mdio-read-writ.patch \
-  file://patches/0606-micrel-fix-config_aneg-for-ksz886x.patch \
-  file://patches/0607-net-tag-ksz-Add-KSZ8863-tag-code.patch \
-  file://patches/0608-ksz9875-add-mutex-locking-to-vlan-handling.patch \
-  file://patches/0609-ksz-Add-Microchip-KSZ8863-SMI-based-driver-support.patch \
-  file://patches/0610-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
-  file://patches/0611-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
+  file://patches/0605-net-tag-ksz-Add-KSZ8863-tag-code.patch \
+  file://patches/0606-ksz9875-add-mutex-locking-to-vlan-handling.patch \
+  file://patches/0607-ksz-Add-Microchip-KSZ8863-SMI-based-driver-support.patch \
+  file://patches/0608-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
+  file://patches/0609-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
+  file://patches/0610-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
   "
 # umpf-topic: v5.4/topic/imx6-cpuidle
 # umpf-hashinfo: 92d93abd47b004b4f38ee4d49cf17090e6fd7184
-# umpf-topic-range: eeaa4e512119efe59b359fe02ea3fc332e27b064..098bfbcd4e0261833a08559e8e583d624d6e5781
+# umpf-topic-range: df3d5588d79efda13ac0554ae94424ae66a614b8..0b3c850db483cfb8f141f727c62f65f9f32b6235
 SRC_URI += "\
   file://patches/0701-ARM-imx-provide-v7_cpu_resume-only-on-ARM_CPU_SUSPEN.patch \
   "
-# umpf-release: 5.4/customers/skov/WIP/imx6/20200416-1
-# umpf-topic-range: 098bfbcd4e0261833a08559e8e583d624d6e5781..36d6e448b7b341f37296fcaf356b705e42cf4eb9
+# umpf-release: 5.4/customers/skov/imx6/20200429-1
+# umpf-topic-range: 0b3c850db483cfb8f141f727c62f65f9f32b6235..9b56404199ac6604ad8ce67b47e3c6b835093e15
 SRC_URI += "\
-  file://patches/0801-Release-5.4-customers-skov-WIP-imx6-20200416-1.patch \
+  file://patches/0801-Release-5.4-customers-skov-imx6-20200429-1.patch \
   "
 # umpf-end

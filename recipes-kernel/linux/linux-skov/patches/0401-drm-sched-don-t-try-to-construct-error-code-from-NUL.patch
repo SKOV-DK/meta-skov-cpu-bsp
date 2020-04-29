@@ -19,7 +19,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 2af64459b3d7..029d8ad6466b 100644
+index dfb29e6eeff1..e671d697d3cb 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -495,7 +495,7 @@ void drm_sched_resubmit_jobs(struct drm_gpu_scheduler *sched)

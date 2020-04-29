@@ -8,8 +8,8 @@ callback on dsa based interfaces.
 Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
 ---
  include/net/dsa.h |  2 ++
- net/dsa/slave.c   | 20 ++++++++++++++++----
- 2 files changed, 18 insertions(+), 4 deletions(-)
+ net/dsa/slave.c   | 20 +++++++++++++++++---
+ 2 files changed, 19 insertions(+), 3 deletions(-)
 
 diff --git a/include/net/dsa.h b/include/net/dsa.h
 index 541fb514e31d..6090303eb06c 100644
@@ -25,7 +25,7 @@ index 541fb514e31d..6090303eb06c 100644
  	 * ethtool Wake-on-LAN
  	 */
 diff --git a/net/dsa/slave.c b/net/dsa/slave.c
-index 23c2210fa7ec..8666707baa20 100644
+index 23c2210fa7ec..79fd28abdd68 100644
 --- a/net/dsa/slave.c
 +++ b/net/dsa/slave.c
 @@ -655,6 +655,17 @@ static void dsa_slave_get_strings(struct net_device *dev,
@@ -46,23 +46,24 @@ index 23c2210fa7ec..8666707baa20 100644
  static void dsa_slave_get_ethtool_stats(struct net_device *dev,
  					struct ethtool_stats *stats,
  					uint64_t *data)
-@@ -690,11 +701,11 @@ static int dsa_slave_get_sset_count(struct net_device *dev, int sset)
+@@ -690,11 +701,13 @@ static int dsa_slave_get_sset_count(struct net_device *dev, int sset)
  {
  	struct dsa_port *dp = dsa_slave_to_port(dev);
  	struct dsa_switch *ds = dp->ds;
-+	int count = 4;
++	int count = 0;
  
 -	if (sset == ETH_SS_STATS) {
 -		int count;
 -
--		count = 4;
 +	switch (sset) {
 +	case ETH_SS_STATS:
+ 		count = 4;
++		/* fall through */
 +	case ETH_SS_TEST:
  		if (ds->ops->get_sset_count)
  			count += ds->ops->get_sset_count(ds, dp->index, sset);
  
-@@ -1191,6 +1202,7 @@ static const struct ethtool_ops dsa_slave_ethtool_ops = {
+@@ -1191,6 +1204,7 @@ static const struct ethtool_ops dsa_slave_ethtool_ops = {
  	.get_rxnfc		= dsa_slave_get_rxnfc,
  	.set_rxnfc		= dsa_slave_set_rxnfc,
  	.get_ts_info		= dsa_slave_get_ts_info,
