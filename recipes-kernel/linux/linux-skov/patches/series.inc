@@ -128,12 +128,6 @@ SRC_URI += "\
   file://patches/0609-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
   file://patches/0610-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
   "
-# umpf-topic: v5.4/topic/imx6-cpuidle
-# umpf-hashinfo: 92d93abd47b004b4f38ee4d49cf17090e6fd7184
-# umpf-topic-range: df3d5588d79efda13ac0554ae94424ae66a614b8..0b3c850db483cfb8f141f727c62f65f9f32b6235
-SRC_URI += "\
-  file://patches/0701-ARM-imx-provide-v7_cpu_resume-only-on-ARM_CPU_SUSPEN.patch \
-  "
 # umpf-release: 5.4/customers/skov/imx6/20200429-1
 # umpf-topic-range: 0b3c850db483cfb8f141f727c62f65f9f32b6235..9b56404199ac6604ad8ce67b47e3c6b835093e15
 SRC_URI += "\

@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "5.4.35"
+LINUX_VERSION = "5.4.42"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig \
@@ -18,8 +18,8 @@ SRC_URI += "file://defconfig \
 
 require linux-skov/patches/series.inc
 
-SRC_URI[md5sum] = "504a03f47f41fe4a29e66eda6eacc7a3"
-SRC_URI[sha256sum] = "e16bd5f7284a80a41328bf712e1136b0adf5b71cc0bd263efa7cac75539806d4"
+SRC_URI[md5sum] = "18ca31dd4343cb9642b5fac1f3d5bcaf"
+SRC_URI[sha256sum] = "4e431b7c0266a07b76fdb77f8917ad681f0fa34ffba0eb8a172b67f7ef57bc31"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
