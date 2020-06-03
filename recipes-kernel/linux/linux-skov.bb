@@ -21,6 +21,8 @@ require linux-skov/patches/series.inc
 SRC_URI[md5sum] = "5bfc6716f00841486f82d54f0b0d5606"
 SRC_URI[sha256sum] = "2667b90a42d42557aca9e3d37bba1b4e71809b9523958e6870ada311c4790744"
 
+DEPENDS += "openssl-native util-linux-native lz4-native"
+
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
