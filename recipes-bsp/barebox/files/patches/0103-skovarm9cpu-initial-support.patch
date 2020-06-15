@@ -1,6 +1,9 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Fri, 29 Dec 2017 10:01:36 +0100
 Subject: [PATCH] skovarm9cpu: initial support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 TODO:
 - display does not work.
@@ -8,6 +11,9 @@ TODO:
 - pwm is not correct
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+[Note: this commit results of fixing up 9a2aec684507 with
+4cc134240ab9]
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  arch/arm/boards/Makefile                    |   1 +
  arch/arm/boards/skovarm9cpu/Makefile        |   3 +
@@ -26,10 +32,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/dts/skovarm9cpu.dts
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 238efa48c123..a9b2c75985d3 100644
+index 5048be5632dc..d4d75970c7c1 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -170,3 +170,4 @@ obj-$(CONFIG_MACH_ZII_IMX7D_DEV)		+= zii-imx7d-dev/
+@@ -173,3 +173,4 @@ obj-$(CONFIG_MACH_ZII_IMX7D_DEV)		+= zii-imx7d-dev/
  obj-$(CONFIG_MACH_WAGO_PFC_AM35XX)		+= wago-pfc-am35xx/
  obj-$(CONFIG_MACH_LS1046ARDB)			+= ls1046ardb/
  obj-$(CONFIG_MACH_TQMLS1046A)			+= tqmls1046a/
@@ -377,12 +383,12 @@ index 000000000000..9463f809e074
 +CONFIG_FS_FAT_LFN=y
 +CONFIG_PNG=y
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 214a09d3eff5..35c616fd0f30 100644
+index 14f72b70764d..14c3e022da2e 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -145,4 +145,6 @@ lwl-dtb-$(CONFIG_MACH_WAGO_PFC_AM35XX) += am35xx-pfc-750_820x.dtb.o
- lwl-dtb-$(CONFIG_MACH_LS1046ARDB) += fsl-ls1046a-rdb.dtb.o
+@@ -150,4 +150,6 @@ lwl-dtb-$(CONFIG_MACH_LS1046ARDB) += fsl-ls1046a-rdb.dtb.o
  lwl-dtb-$(CONFIG_MACH_TQMLS1046A) += fsl-tqmls1046a-mbls10xxa.dtb.o
+ lwl-dtb-$(CONFIG_MACH_ZEDBOARD) += zynq-zed.dtb.o
  
 +pbl-dtb-$(CONFIG_MACH_SKOVARM9CPU) += skovarm9cpu.dtb.o
 +
@@ -748,10 +754,10 @@ index 000000000000..7723031a6866
 +	};
 +};
 diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
-index 5ad1f62c8d67..b8ced9fa901b 100644
+index 54fa9b8aa28c..39bb2ef69103 100644
 --- a/arch/arm/mach-at91/Kconfig
 +++ b/arch/arm/mach-at91/Kconfig
-@@ -547,6 +547,17 @@ config AT91_MULTI_BOARDS
+@@ -568,6 +568,17 @@ config AT91_MULTI_BOARDS
  
  if AT91_MULTI_BOARDS
  
@@ -770,13 +776,13 @@ index 5ad1f62c8d67..b8ced9fa901b 100644
  	bool "Atmel AT91SAM9263-EK"
  	select SOC_AT91SAM9263
 diff --git a/images/Makefile.at91 b/images/Makefile.at91
-index f321bdec3696..86b977260aa6 100644
+index 448d71fb981d..80b3bbeac4b6 100644
 --- a/images/Makefile.at91
 +++ b/images/Makefile.at91
-@@ -17,3 +17,8 @@ image-$(CONFIG_MACH_MICROCHIP_KSZ9477_EVB) += barebox-microchip-ksz9477-evb.img
- pblb-$(CONFIG_MACH_SAMA5D27_SOM1) += start_sama5d27_som1_ek
- FILE_barebox-sama5d27-som1-ek.img = start_sama5d27_som1_ek.pblb
- image-$(CONFIG_MACH_SAMA5D27_SOM1) += barebox-sama5d27-som1-ek.img
+@@ -21,3 +21,8 @@ image-$(CONFIG_MACH_SAMA5D27_SOM1) += barebox-sama5d27-som1-ek.img
+ pblb-$(CONFIG_MACH_SAMA5D27_GIANTBOARD) += start_sama5d27_giantboard
+ FILE_barebox-groboards-sama5d27-giantboard.img = start_sama5d27_giantboard.pblb
+ image-$(CONFIG_MACH_SAMA5D27_GIANTBOARD) += barebox-groboards-sama5d27-giantboard.img
 +
 +pblb-$(CONFIG_MACH_SKOVARM9CPU) += start_skovarm9cpu
 +FILE_barebox-skovarm9cpu.img = start_skovarm9cpu.pblb

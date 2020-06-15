@@ -1,21 +1,21 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 29 Apr 2020 13:09:45 +0200
-Subject: [PATCH] Release 2019.12.0/customers/skov/imx6/20200429-1
+Date: Mon, 15 Jun 2020 15:10:40 +0200
+Subject: [PATCH] Release 2020.06.0/customers/skov/imx6/20200615-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 600ca36a311c..e25fbe6817bf 100644
+index 0531a712d758..e1a0a24d7be8 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1,7 +1,7 @@
- VERSION = 2019
- PATCHLEVEL = 12
+@@ -2,7 +2,7 @@
+ VERSION = 2020
+ PATCHLEVEL = 06
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20200429-1
++EXTRAVERSION =-20200615-1
  NAME = None
  
  # *DOCUMENTATION*

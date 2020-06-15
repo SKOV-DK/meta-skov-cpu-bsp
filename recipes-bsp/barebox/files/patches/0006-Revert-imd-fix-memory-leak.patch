@@ -20,10 +20,10 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 6 insertions(+), 14 deletions(-)
 
 diff --git a/common/imd.c b/common/imd.c
-index 913a01de87bf..05e118e77361 100644
+index 96496514a54a..63211a4d3d3c 100644
 --- a/common/imd.c
 +++ b/common/imd.c
-@@ -337,10 +337,8 @@ int imd_command(int argc, char *argv[])
+@@ -480,10 +480,8 @@ int imd_command(int argc, char *argv[])
  		return -errno;
  
  	imd_start = imd_get(buf, size);
@@ -34,9 +34,9 @@ index 913a01de87bf..05e118e77361 100644
 +	if (IS_ERR(imd_start))
 +		return PTR_ERR(imd_start);
  
- 	if (type == IMD_TYPE_INVALID) {
- 		imd_for_each(imd_start, imd) {
-@@ -358,8 +356,7 @@ int imd_command(int argc, char *argv[])
+ 	if (checksum)
+ 		imd_write_crc32(buf, imd_start, filename, size);
+@@ -510,8 +508,7 @@ int imd_command(int argc, char *argv[])
  		imd = imd_find_type(imd_start, type);
  		if (!imd) {
  			debug("No tag of type 0x%08x found\n", type);
@@ -46,7 +46,7 @@ index 913a01de87bf..05e118e77361 100644
  		}
  
  		if (imd_is_string(type)) {
-@@ -373,10 +370,8 @@ int imd_command(int argc, char *argv[])
+@@ -525,10 +522,8 @@ int imd_command(int argc, char *argv[])
  				str = imd_concat_strings(imd);
  			}
  
@@ -59,7 +59,7 @@ index 913a01de87bf..05e118e77361 100644
  
  			if (variable_name)
  				imd_command_setenv(variable_name, str);
-@@ -389,8 +384,5 @@ int imd_command(int argc, char *argv[])
+@@ -541,8 +536,5 @@ int imd_command(int argc, char *argv[])
  		}
  	}
  

@@ -14,10 +14,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  2 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/video/atmel_lcdfb_core.c b/drivers/video/atmel_lcdfb_core.c
-index c6ece5b785df..6d6665cbd360 100644
+index d8c35b275571..daabfe92d2ca 100644
 --- a/drivers/video/atmel_lcdfb_core.c
 +++ b/drivers/video/atmel_lcdfb_core.c
-@@ -132,7 +132,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+@@ -129,7 +129,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
  			= info->bits_per_pixel;
  		break;
  	case 16:
@@ -26,7 +26,7 @@ index c6ece5b785df..6d6665cbd360 100644
  		if (sinfo->have_intensity_bit)
  			info->green.length = 5;
  		else
-@@ -142,7 +142,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+@@ -139,7 +139,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
  			info->red.offset = info->green.length + 5;
  			info->blue.offset = 0;
  		} else {
@@ -35,7 +35,7 @@ index c6ece5b785df..6d6665cbd360 100644
  			info->red.offset = 0;
  			info->blue.offset = info->green.length + 5;
  		}
-@@ -159,7 +159,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
+@@ -156,7 +156,7 @@ static int atmel_lcdfb_check_var(struct fb_info *info)
  			info->red.offset = 16;
  			info->blue.offset = 0;
  		} else {
@@ -44,7 +44,7 @@ index c6ece5b785df..6d6665cbd360 100644
  			info->red.offset = 0;
  			info->blue.offset = 16;
  		}
-@@ -282,7 +282,7 @@ static int power_control_init(struct device_d *dev,
+@@ -279,7 +279,7 @@ static int power_control_init(struct device_d *dev,
  }
  
  /*
@@ -53,7 +53,7 @@ index c6ece5b785df..6d6665cbd360 100644
   */
  static int of_get_wiring_mode(struct device_node *np,
  			      struct atmel_lcdfb_info *sinfo)
-@@ -293,12 +293,12 @@ static int of_get_wiring_mode(struct device_node *np,
+@@ -290,12 +290,12 @@ static int of_get_wiring_mode(struct device_node *np,
  	ret = of_property_read_string(np, "atmel,lcd-wiring-mode", &mode);
  	if (ret < 0) {
  		/* Not present, use defaults */

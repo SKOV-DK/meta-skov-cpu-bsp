@@ -7,29 +7,80 @@ Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
-[Note: this commit results of fixing up 3030da6f8b4a with
-cd507b63d504..f5684d3276dd]
+[Note: this commit results of fixing up a9735bcdb1eb with
+e0c8a03e4a01]
 ---
- arch/arm/boards/skov-imx6/board.c   |  21 +++++
- arch/arm/boards/skov-imx6/version.c |  23 +++---
+ arch/arm/boards/skov-imx6/board.c   |  72 +++++++++++++
+ arch/arm/boards/skov-imx6/version.c |  25 ++---
  arch/arm/dts/imx6q-skov-imx6.dts    |   4 +
- arch/arm/dts/imx6qdl-skov-imx6.dtsi | 157 ++++++++++++++++++++++++++++++++++++
- 4 files changed, 194 insertions(+), 11 deletions(-)
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi | 207 ++++++++++++++++++++++++++++++++++++
+ 4 files changed, 296 insertions(+), 12 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 0362379bb88a..c86473297853 100644
+index 0362379bb88a..1b9bb4914031 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -16,6 +16,8 @@
+@@ -16,6 +16,59 @@
  #include <common.h>
  #include <init.h>
  #include <mach/bbu.h>
 +#include <environment.h>
 +#include <i2c/i2c.h>
++
++/*
++ * This initcall needs to be executed before coredevices, so we have a chance to
++ * fix up the internal DT with respect to enabling either the parallel display
++ * or the LVDS display bridge. As this requires to know which board variant we
++ * are running on we need an already probed version driver.
++ */
++static int skov_imx6_fixup_display(void)
++{
++	struct device_node *np;
++	unsigned board_variant;
++
++	if (!of_machine_is_compatible("skov,imx6"))
++		return 0;
++
++	board_variant = simple_strtoul(getenv("global.board.no"), NULL, 0);
++
++	switch (board_variant) {
++	case 0 ... 23:
++		/* enable the parallel display */
++		np = of_find_compatible_node(NULL, NULL, "fsl,imx-parallel-display");
++		if (!np)
++			return -ENODEV;
++
++		of_device_enable_and_register(np);
++		break;
++	case 24:
++		/* enable the LDB... */
++		np = of_find_compatible_node(NULL, NULL, "fsl,imx6q-ldb");
++		if (!np)
++			return -ENODEV;
++
++		of_device_enable_and_register(np);
++
++		/* ... as well as its channel 0 */
++		np = of_find_node_by_name(np, "lvds-channel@0");
++		if (!np)
++			return -ENODEV;
++
++		of_device_enable(np);
++		break;
++	default:
++		pr_err("Unsupported board variant: 0x%x\n", board_variant);
++		/* don't continue */
++		while(1);
++		break;
++	}
++
++	return 0;
++}
++fs_initcall(skov_imx6_fixup_display);
  
  static int skov_imx6_devices_init(void)
  {
-@@ -28,3 +30,22 @@ static int skov_imx6_devices_init(void)
+@@ -28,3 +81,22 @@ static int skov_imx6_devices_init(void)
  	return 0;
  }
  coredevice_initcall(skov_imx6_devices_init);
@@ -53,7 +104,7 @@ index 0362379bb88a..c86473297853 100644
 +}
 +predevshutdown_exitcall(skov_imx6_devices_shutdown);
 diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
-index 17caab5c3728..32a32ee64bd0 100644
+index 17caab5c3728..23439fae19ab 100644
 --- a/arch/arm/boards/skov-imx6/version.c
 +++ b/arch/arm/boards/skov-imx6/version.c
 @@ -20,6 +20,7 @@ struct board_description {
@@ -161,6 +212,12 @@ index 17caab5c3728..32a32ee64bd0 100644
  
  	tweak_board(var);
  
+@@ -304,4 +305,4 @@ static struct driver_d skov_version_driver = {
+ 	.probe = skov_version_probe,
+ 	.of_compatible = DRV_OF_COMPAT(skov_version_ids),
+ };
+-device_platform_driver(skov_version_driver);
++coredevice_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/imx6q-skov-imx6.dts b/arch/arm/dts/imx6q-skov-imx6.dts
 index 278c2c944f2c..fea84cb4986b 100644
 --- a/arch/arm/dts/imx6q-skov-imx6.dts
@@ -174,7 +231,7 @@ index 278c2c944f2c..fea84cb4986b 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 7d3b24a79d5d..fd928ff72292 100644
+index 7d3b24a79d5d..55bd415e8e71 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -9,6 +9,8 @@
@@ -186,7 +243,7 @@ index 7d3b24a79d5d..fd928ff72292 100644
  / {
  	aliases {
  		state = &state;
-@@ -129,6 +131,101 @@
+@@ -129,6 +131,134 @@
  			};
  		};
  	};
@@ -203,7 +260,7 @@ index 7d3b24a79d5d..fd928ff72292 100644
 +	};
 +
 +	display {
-+		status = "okay";
++		status = "disabled";
 +		compatible = "fsl,imx-parallel-display";
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_ipu1_4>;
@@ -253,6 +310,39 @@ index 7d3b24a79d5d..fd928ff72292 100644
 +			};
 +		};
 +	};
++
++	panel {
++		compatible = "simple-panel";
++		backlight = <&backlight_lcd>;
++		/* power-supply = <&reg_3p3v>; */
++
++		display-timings {
++			native-mode = &mi1010ait_1cp1;
++
++			mi1010ait_1cp1: mi1010ait-1cp1 {
++				native-mode;
++				clock-frequency = <71100000>;
++				hactive = <1280>;
++				vactive = <800>;
++				hback-porch = <60>;
++				hfront-porch = <60>;
++				vback-porch = <7>;
++				vfront-porch = <7>;
++				hsync-len = <40>;
++				vsync-len = <9>;
++				/* pixelclk-active = <>; */
++				hsync-active = <0>;
++				vsync-active = <0>;
++				de-active = <1>;
++			};
++		};
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&lvds0_out>;
++			};
++		};
++	};
 +};
 +
 +&pwm2 {
@@ -288,7 +378,7 @@ index 7d3b24a79d5d..fd928ff72292 100644
  };
  
  &iomuxc {
-@@ -227,6 +324,66 @@
+@@ -227,6 +357,66 @@
  			MX6QDL_PAD_NANDF_D7__NAND_DATA07 0xb0b1
  		>;
  	};
@@ -355,3 +445,27 @@ index 7d3b24a79d5d..fd928ff72292 100644
  };
  
  /* console */
+@@ -269,6 +459,23 @@
+ 	};
+ };
+ 
++&ldb {
++	status = "disabled";
++
++	lvds0: lvds-channel@0 {
++		status = "disabled";
++		fsl,data-width = <24>;
++		fsl,data-mapping = "spwg";
++
++		port@4 {
++			reg = <4>;
++			lvds0_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
+ &wdog1 {
+ 	status = "okay";
+ };

@@ -21,8 +21,8 @@ Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 Signed-off-by: Søren Andersen <san@skov.dk>
 Signed-off-by: Sam Ravnborg <srn@skov.dk>
-[Note: this commit results of fixing up f583fe1afc7e with 4828235c325a &
-e9a1f3cbaf5f]
+[Note: this commit results of fixing up 2dba72e50518 with
+ee86b3306b67^..09034a95eac4]
 ---
  arch/arm/boards/Makefile                           |   1 +
  arch/arm/boards/skov-imx6/Makefile                 |   2 +
@@ -38,8 +38,8 @@ e9a1f3cbaf5f]
  arch/arm/dts/imx6qdl-skov-imx6.dtsi                | 333 ++++++++
  arch/arm/mach-imx/Kconfig                          |   6 +
  common/blspec.c                                    |  20 +-
- images/Makefile.imx                                |   5 +
- 15 files changed, 1607 insertions(+), 8 deletions(-)
+ images/Makefile.imx                                |   2 +
+ 15 files changed, 1604 insertions(+), 8 deletions(-)
  create mode 100644 arch/arm/boards/skov-imx6/Makefile
  create mode 100644 arch/arm/boards/skov-imx6/board.c
  create mode 100644 arch/arm/boards/skov-imx6/env/init/automount
@@ -52,17 +52,17 @@ e9a1f3cbaf5f]
  create mode 100644 arch/arm/dts/imx6qdl-skov-imx6.dtsi
 
 diff --git a/arch/arm/boards/Makefile b/arch/arm/boards/Makefile
-index 6cb40d084b3d..238efa48c123 100644
+index e9e9163d589b..5048be5632dc 100644
 --- a/arch/arm/boards/Makefile
 +++ b/arch/arm/boards/Makefile
-@@ -111,6 +111,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
+@@ -112,6 +112,7 @@ obj-$(CONFIG_MACH_REALQ7)			+= datamodul-edm-qmx6/
  obj-$(CONFIG_MACH_RPI_COMMON)			+= raspberry-pi/
  obj-$(CONFIG_MACH_SABRELITE)			+= freescale-mx6-sabrelite/
  obj-$(CONFIG_MACH_SABRESD)			+= freescale-mx6-sabresd/
 +obj-$(CONFIG_MACH_SKOV_IMX6)			+= skov-imx6/
  obj-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB)	+= freescale-mx6sx-sabresdb/
+ obj-$(CONFIG_MACH_SAMA5D27_GIANTBOARD)		+= sama5d27-giantboard/
  obj-$(CONFIG_MACH_SAMA5D27_SOM1)		+= sama5d27-som1/
- obj-$(CONFIG_MACH_SAMA5D3XEK)			+= sama5d3xek/
 diff --git a/arch/arm/boards/skov-imx6/Makefile b/arch/arm/boards/skov-imx6/Makefile
 new file mode 100644
 index 000000000000..206715adce68
@@ -146,7 +146,7 @@ index 000000000000..9e8dce5877a1
 +dcdofs 0x400
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
 new file mode 100644
-index 000000000000..a795270a9356
+index 000000000000..f70699e76171
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
 @@ -0,0 +1,843 @@
@@ -932,7 +932,7 @@ index 000000000000..a795270a9356
 +					&skov_imx6_cfg_4x128Mb_1066MHz);
 +		break;
 +	default:
-+		pr_err("Unsupported board revision: 0x%x\n", board_variant);
++		pr_err("Unsupported board variant: 0x%x\n", board_variant);
 +		/* don't continue */
 +		while(1);
 +		break;
@@ -1307,10 +1307,10 @@ index 000000000000..17caab5c3728
 +};
 +device_platform_driver(skov_version_driver);
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 294a0bfa5525..214a09d3eff5 100644
+index 1aeaa61e017e..14f72b70764d 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -83,6 +83,7 @@ lwl-dtb-$(CONFIG_MACH_RPI_CM3) += bcm2837-rpi-cm3.dtb.o
+@@ -84,6 +84,7 @@ lwl-dtb-$(CONFIG_MACH_RPI_CM3) += bcm2837-rpi-cm3.dtb.o
  lwl-dtb-$(CONFIG_MACH_SABRELITE) += imx6q-sabrelite.dtb.o imx6dl-sabrelite.dtb.o
  lwl-dtb-$(CONFIG_MACH_SABRESD) += imx6q-sabresd.dtb.o
  lwl-dtb-$(CONFIG_MACH_FREESCALE_IMX6SX_SABRESDB) += imx6sx-sdb.dtb.o
@@ -1718,10 +1718,10 @@ index 000000000000..7d3b24a79d5d
 +	barebox,provide-mac-address = <&fec 0x620>;
 +};
 diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index 6e98e95dbb00..13b04450353c 100644
+index 6dd5cb2aca15..0d60084a0bd3 100644
 --- a/arch/arm/mach-imx/Kconfig
 +++ b/arch/arm/mach-imx/Kconfig
-@@ -528,6 +528,12 @@ config MACH_DIGI_CCIMX6ULSBCPRO
+@@ -548,6 +548,12 @@ config MACH_DIGI_CCIMX6ULSBCPRO
  	select ARCH_IMX6UL
  	select ARM_USE_COMPRESSED_DTB
  
@@ -1735,7 +1735,7 @@ index 6e98e95dbb00..13b04450353c 100644
  
  # ----------------------------------------------------------
 diff --git a/common/blspec.c b/common/blspec.c
-index 7fb62d310f09..0ea5565178c5 100644
+index 1a6d581f5a20..dbd29fd2e82c 100644
 --- a/common/blspec.c
 +++ b/common/blspec.c
 @@ -464,14 +464,18 @@ static bool entry_is_of_compatible(struct blspec_entry *entry)
@@ -1766,18 +1766,15 @@ index 7fb62d310f09..0ea5565178c5 100644
  	if (entry->rootpath)
  		abspath = entry->rootpath;
 diff --git a/images/Makefile.imx b/images/Makefile.imx
-index a8f8a9b7d622..b5f6263113f3 100644
+index 765702f26deb..635331c5ceb8 100644
 --- a/images/Makefile.imx
 +++ b/images/Makefile.imx
-@@ -486,6 +486,11 @@ CFG_start_imx6dl_samx6i.pblb.imximg = $(board)/kontron-samx6i/flash-header-samx6
- FILE_barebox-imx6dl-samx6i.img = start_imx6dl_samx6i.pblb.imximg
- image-$(CONFIG_MACH_KONTRON_SAMX6I) += barebox-imx6dl-samx6i.img
+@@ -303,6 +303,8 @@ $(call build_imx_habv4img, CONFIG_MACH_KONTRON_SAMX6I, start_imx6q_samx6i, kontr
  
-+pblb-$(CONFIG_MACH_SKOV_IMX6) += start_imx6_skov_imx6
-+CFG_start_imx6_skov_imx6.pblb.imximg = $(board)/skov-imx6/flash-header-mx6-skov-imx6.imxcfg
-+FILE_barebox-skov-imx6.img = start_imx6_skov_imx6.pblb.imximg
-+image-$(CONFIG_MACH_SKOV_IMX6) += barebox-skov-imx6.img
+ $(call build_imx_habv4img, CONFIG_MACH_KONTRON_SAMX6I, start_imx6dl_samx6i, kontron-samx6i/flash-header-samx6i-duallite, imx6dl-samx6i)
+ 
++$(call build_imx_habv4img, CONFIG_MACH_SKOV_IMX6, start_imx6_skov_imx6, skov-imx6/flash-header-mx6-skov-imx6, skov-imx6)
 +
- pblb-$(CONFIG_MACH_GW_VENTANA) += start_imx6q_gw54xx_1gx64
- CFG_start_imx6q_gw54xx_1gx64.pblb.imximg = $(board)/gateworks-ventana/flash-header-ventana-quad-1gx64.imxcfg
- FILE_barebox-gateworks-imx6q-ventana-1gx64.img = start_imx6q_gw54xx_1gx64.pblb.imximg
+ $(call build_imx_habv4img, CONFIG_MACH_GW_VENTANA, start_imx6q_gw54xx_1gx64, gateworks-ventana/flash-header-ventana-quad-1gx64, gateworks-imx6q-ventana-1gx64)
+ 
+ $(call build_imx_habv4img, CONFIG_MACH_ELTEC_HIPERCAM, start_imx6dl_eltec_hipercam, eltec-hipercam/flash-header-eltec-hipercam, eltec-hipercam)

@@ -7,22 +7,22 @@ mmap it into the process' memory.
 
 Signed-off-by: Kim Christensen <kch@skov.dk>
 ---
- scripts/bareboximd.c | 92 +++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 59 insertions(+), 33 deletions(-)
+ scripts/bareboximd.c | 88 ++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 57 insertions(+), 31 deletions(-)
 
 diff --git a/scripts/bareboximd.c b/scripts/bareboximd.c
-index 5ef91831c457..9d91c911a477 100644
+index 48c3e8ab3f96..3386f099ad9a 100644
 --- a/scripts/bareboximd.c
 +++ b/scripts/bareboximd.c
-@@ -33,6 +33,7 @@
- #include <errno.h>
+@@ -27,6 +27,7 @@
  #include <stdarg.h>
  #include <linux/err.h>
+ #include <linux/kernel.h>
 +#include <sys/mman.h>
  
  #include "../include/image-metadata.h"
  
-@@ -63,6 +64,7 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
+@@ -82,6 +83,7 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
  	ssize_t rsize;
  	int ret, fd;
  	void *buf;
@@ -30,7 +30,7 @@ index 5ef91831c457..9d91c911a477 100644
  
  	*size = 0;
  	*outbuf = NULL;
-@@ -73,45 +75,69 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
+@@ -92,45 +94,69 @@ static int read_file_2(const char *filename, size_t *size, void **outbuf, size_t
  		return -errno;
  	}
  
@@ -42,15 +42,8 @@ index 5ef91831c457..9d91c911a477 100644
 +	if (fstat(fd, &st)) {
 +		fprintf(stderr, "Cannot fstat %s: %s\n", filename, strerror(errno));
 +		return -errno;
- 	}
- 
--	if (fsize < max_size)
--		max_size = fsize;
--
--	if (lseek(fd, 0, SEEK_SET) == -1) {
--		fprintf(stderr, "Cannot seek to start %s: %s\n", filename, strerror(errno));
--		ret = -errno;
--		goto close;
++	}
++
 +	fsize = st.st_size;
 +	if (fsize == 0) {
 +		// size is zero for mtd devices, use seek find size
@@ -62,28 +55,22 @@ index 5ef91831c457..9d91c911a477 100644
 +		}
  	}
  
+ 	if (fsize < max_size)
+ 		max_size = fsize;
+ 
+-	if (lseek(fd, 0, SEEK_SET) == -1) {
+-		fprintf(stderr, "Cannot seek to start %s: %s\n", filename, strerror(errno));
+-		ret = -errno;
+-		goto close;
+-	}
++	if (S_ISCHR(st.st_mode)) {
+ 
 -	buf = malloc(max_size);
 -	if (!buf) {
 -		fprintf(stderr, "Cannot allocate memory\n");
 -		ret = -ENOMEM;
 -		goto close;
 -	}
-+	if (fsize < max_size)
-+		max_size = fsize;
- 
--	*outbuf = buf;
--	while (*size < max_size) {
--		rsize = read(fd, buf, max_size-*size);
--		if (rsize == 0) {
--			ret = -EIO;
--			goto free;
--		} else if (rsize < 0) {
--			if (errno == EAGAIN)
--				continue;
--			else {
--				ret = -errno;
-+	if (S_ISCHR(st.st_mode)) {
-+
 +		if (lseek(fd, 0, SEEK_SET) == -1) {
 +			fprintf(stderr, "Cannot seek to start %s: %s\n", filename, strerror(errno));
 +			ret = -errno;
@@ -96,7 +83,18 @@ index 5ef91831c457..9d91c911a477 100644
 +			ret = -ENOMEM;
 +			goto close;
 +		}
-+
+ 
+-	*outbuf = buf;
+-	while (*size < max_size) {
+-		rsize = read(fd, buf, max_size-*size);
+-		if (rsize == 0) {
+-			ret = -EIO;
+-			goto free;
+-		} else if (rsize < 0) {
+-			if (errno == EAGAIN)
+-				continue;
+-			else {
+-				ret = -errno;
 +		*outbuf = buf;
 +		while (*size < max_size) {
 +			rsize = read(fd, buf, max_size-*size);

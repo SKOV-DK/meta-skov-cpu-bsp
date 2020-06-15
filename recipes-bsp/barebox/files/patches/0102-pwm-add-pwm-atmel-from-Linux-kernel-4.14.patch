@@ -19,7 +19,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 drivers/pwm/pwm-atmel.c
 
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 97c3deff107b..5242c35e93ad 100644
+index 478ea49eede7..a6e141817b15 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
 @@ -16,6 +16,12 @@ config PWM_PXA
@@ -34,17 +34,18 @@ index 97c3deff107b..5242c35e93ad 100644
 +
  config PWM_IMX
  	bool "i.MX PWM Support"
- 	depends on ARCH_IMX
+ 	depends on ARCH_IMX || COMPILE_TEST
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index 46865a24eeb4..d2ae19b9aa50 100644
+index c0a27becefcd..55558aa42e34 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
-@@ -1,4 +1,5 @@
+@@ -1,5 +1,6 @@
  obj-$(CONFIG_PWM)		+= core.o
  obj-$(CONFIG_PWM_PXA)		+= pxa_pwm.o
 +obj-$(CONFIG_PWM_ATMEL)		+= pwm-atmel.o
  obj-$(CONFIG_PWM_IMX)		+= pwm-imx.o
  obj-$(CONFIG_PWM_MXS)		+= pwm-mxs.o
+ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
 diff --git a/drivers/pwm/pwm-atmel.c b/drivers/pwm/pwm-atmel.c
 new file mode 100644
 index 000000000000..7fa394934a76

@@ -12,12 +12,12 @@ Signed-off-by: Jan Luebbe <jlu@pengutronix.de>
  1 file changed, 27 insertions(+)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index c86473297853..9625390b1ffa 100644
+index 1b9bb4914031..0a3d15c46cf2 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -19,6 +19,31 @@
- #include <environment.h>
- #include <i2c/i2c.h>
+@@ -70,6 +70,31 @@ static int skov_imx6_fixup_display(void)
+ }
+ fs_initcall(skov_imx6_fixup_display);
  
 +static int skov_imx6_fixup(struct device_node *root, void *unused)
 +{
@@ -47,7 +47,7 @@ index c86473297853..9625390b1ffa 100644
  static int skov_imx6_devices_init(void)
  {
  	if (!of_machine_is_compatible("skov,imx6"))
-@@ -27,6 +52,8 @@ static int skov_imx6_devices_init(void)
+@@ -78,6 +103,8 @@ static int skov_imx6_devices_init(void)
  	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0.barebox",
  		BBU_HANDLER_FLAG_DEFAULT);
  
