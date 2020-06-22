@@ -27,15 +27,15 @@ index 70628b100d42..2d6ff6405237 100644
  };
  
 +static const struct display_timing multi_inno_1010ait_1cp1_timing = {
-+	.pixelclock = { 68900000, 71100000, 73400000 },
++	.pixelclock = { 68900000, 70000000, 73400000 },
 +	.hactive = { 1280, 1280, 1280 },
-+	.hfront_porch = { 50, 60, 71 },
-+	.hback_porch = { 50, 60, 71 },
-+	.hsync_len = { 30, 40, 48 },
++	.hfront_porch = { 30, 60, 71 },
++	.hback_porch = { 30, 60, 71 },
++	.hsync_len = { 10, 10, 48 },
 +	.vactive = { 800, 800, 800 },
-+	.vfront_porch = { 5, 7, 10 },
-+	.vback_porch = { 5, 7, 10 },
-+	.vsync_len = { 5, 9, 13 },
++	.vfront_porch = { 5, 10, 10 },
++	.vback_porch = { 5, 10, 10 },
++	.vsync_len = { 5, 6, 13 },
 +	.flags = DISPLAY_FLAGS_HSYNC_LOW | DISPLAY_FLAGS_VSYNC_LOW |
 +		 DISPLAY_FLAGS_DE_HIGH,
 +};
