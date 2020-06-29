@@ -12,7 +12,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts         |  19 +
  arch/arm/boot/dts/imx6q-skov-revc-lt2.dts          |  24 +
  arch/arm/boot/dts/imx6q-skov-revc-lt6.dts          |  28 +
- .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    |  85 +++
+ .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    |  91 +++
  arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi       | 137 +++++
  arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 617 +++++++++++++++++++++
  8 files changed, 930 insertions(+)
@@ -162,7 +162,7 @@ new file mode 100644
 index 000000000000..947d4af64980
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,91 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
 +// Copyright (C) 2020 Pengutronix, Ulrich Oelmann <kernel@pengutronix.de>
@@ -247,6 +247,12 @@ index 000000000000..947d4af64980
 +			MX6QDL_PAD_EIM_D23__GPIO3_IO23		0x1b0b0		/* CTP_RST */
 +		>;
 +	};
++};
++&clks {
++	assigned-clocks = <&clks IMX6QDL_CLK_LDB_DI0_SEL>,
++			<&clks IMX6QDL_CLK_LDB_DI1_SEL>;
++	assigned-clock-parents = <&clks IMX6QDL_CLK_PLL5_VIDEO_DIV>,
++			<&clks IMX6QDL_CLK_PLL5_VIDEO_DIV>;
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 new file mode 100644
