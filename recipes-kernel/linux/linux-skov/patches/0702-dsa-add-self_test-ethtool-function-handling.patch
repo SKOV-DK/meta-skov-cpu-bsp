@@ -12,10 +12,10 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  2 files changed, 19 insertions(+), 3 deletions(-)
 
 diff --git a/include/net/dsa.h b/include/net/dsa.h
-index 541fb514e31d..6090303eb06c 100644
+index a7ed97629969..fd81b950048c 100644
 --- a/include/net/dsa.h
 +++ b/include/net/dsa.h
-@@ -406,6 +406,8 @@ struct dsa_switch_ops {
+@@ -408,6 +408,8 @@ struct dsa_switch_ops {
  	void	(*get_ethtool_phy_stats)(struct dsa_switch *ds,
  					 int port, uint64_t *data);
  

@@ -195,8 +195,8 @@ index 000000000000..947d4af64980
 +		interrupt-parent = <&gpio3>;
 +		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;
 +		reset-gpios = <&gpio3 23 GPIO_ACTIVE_LOW>;
-+		touchscreen-size-x = <1024>;
-+		touchscreen-size-y = <600>;
++		touchscreen-size-x = <1280>;
++		touchscreen-size-y = <800>;
 +		wakeup-source;
 +	};
 +};

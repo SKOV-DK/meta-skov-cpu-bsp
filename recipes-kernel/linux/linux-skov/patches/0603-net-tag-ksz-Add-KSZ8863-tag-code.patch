@@ -4,6 +4,7 @@ Subject: [PATCH] net: tag: ksz: Add KSZ8863 tag code
 
 Add DSA tag code for Microchip KSZ8863 switch.
 
+Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
 Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
 ---
  include/net/dsa.h |  2 ++
@@ -11,7 +12,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  2 files changed, 59 insertions(+)
 
 diff --git a/include/net/dsa.h b/include/net/dsa.h
-index 6090303eb06c..fd81b950048c 100644
+index 541fb514e31d..a7ed97629969 100644
 --- a/include/net/dsa.h
 +++ b/include/net/dsa.h
 @@ -42,6 +42,7 @@ struct phylink_link_state;
@@ -31,16 +32,16 @@ index 6090303eb06c..fd81b950048c 100644
  
  struct packet_type;
 diff --git a/net/dsa/tag_ksz.c b/net/dsa/tag_ksz.c
-index 0afd2fa42450..efdcbe2f29ae 100644
+index 73605bcbb385..ec5972d47f64 100644
 --- a/net/dsa/tag_ksz.c
 +++ b/net/dsa/tag_ksz.c
-@@ -242,8 +242,65 @@ static const struct dsa_device_ops ksz9893_netdev_ops = {
+@@ -243,8 +243,65 @@ static const struct dsa_device_ops ksz9893_netdev_ops = {
  DSA_TAG_DRIVER(ksz9893_netdev_ops);
  MODULE_ALIAS_DSA_TAG_DRIVER(DSA_TAG_PROTO_KSZ9893);
  
 +/* For ingress (Host -> KSZ8863), 1 byte is added before FCS.
 + * ---------------------------------------------------------------------------
-+ * DA(6bytes)|SA(6bytes)|....|Data(nbytes)|tag0(1byte)|tag1(1byte)|FCS(4bytes)
++ * DA(6bytes)|SA(6bytes)|....|Data(nbytes)|tag0(1byte)|FCS(4bytes)
 + * ---------------------------------------------------------------------------
 + * tag0[1,0] : represents port
 + *             (e.g. 0b00=addr-lookup 0b01=port1, 0b10=port2, 0b11=port1+port2)
@@ -60,7 +61,7 @@ index 0afd2fa42450..efdcbe2f29ae 100644
 +{
 +	struct dsa_port *dp = dsa_slave_to_port(dev);
 +	struct sk_buff *nskb;
-+	__be16 *tag;
++	u8 *tag;
 +
 +	nskb = ksz_common_xmit(skb, dev, KSZ_INGRESS_TAG_LEN);
 +	if (!nskb)
@@ -69,7 +70,7 @@ index 0afd2fa42450..efdcbe2f29ae 100644
 +	/* Tag encoding */
 +	tag = skb_put(nskb, KSZ_INGRESS_TAG_LEN);
 +
-+	*tag = cpu_to_be16(1 << (dp->index)); /* destination port */
++	*tag = BIT(dp->index); /* destination port */
 +
 +	return nskb;
 +}

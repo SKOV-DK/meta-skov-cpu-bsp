@@ -1,9 +1,9 @@
-# umpf-base: v5.4.35
+# umpf-base: v5.4.43
 # umpf-name: 5.4/customers/skov/imx6
-# umpf-version: 5.4/customers/skov/imx6/20200429-1
+# umpf-version: 5.4/customers/skov/imx6/20200710-1
 # umpf-topic: v5.4/customers/skov/imx6_project_specific
-# umpf-hashinfo: 99f9392ebe4251254597c674d5466e2fadb410d6
-# umpf-topic-range: 0c418786cb3aa175823f0172d939679df9ab9a54..a4c6a27b8de052fbdd1cf36c4b1cd0c8ad4b2362
+# umpf-hashinfo: fcf111f3dfbdfa0d31f184c966d37ce122f617ba
+# umpf-topic-range: e0d81ce760044efd3f26004aa32821c34968512a..c6e9ce2e4b8607b7d7e906afaaacd0688d300084
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -12,7 +12,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 4ee3fbe7035ccddd51524f1c94950a6d1f6b3bb8
-# umpf-topic-range: a4c6a27b8de052fbdd1cf36c4b1cd0c8ad4b2362..ca4f80663eba4d21aeb5ca32956471994631ae0e
+# umpf-topic-range: c6e9ce2e4b8607b7d7e906afaaacd0688d300084..d5b35dcd283dd49f09513946ba44278d79701fdb
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -23,7 +23,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/etnaviv
 # umpf-hashinfo: deaa7fbd4154b7da17f342518de785407ab67338
-# umpf-topic-range: ca4f80663eba4d21aeb5ca32956471994631ae0e..0ad1bb29f605b19f1998a6ae23ac4fb03bc37658
+# umpf-topic-range: d5b35dcd283dd49f09513946ba44278d79701fdb..b0cbc159cc0abd9e93234338fbf95006b7319261
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -41,7 +41,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/coda
 # umpf-hashinfo: a3e90d97a5ab3f8bfb190a0df3df668004cc2e16
-# umpf-topic-range: 0ad1bb29f605b19f1998a6ae23ac4fb03bc37658..399edd5a511473faf55aa50e9f103d829eb4a8ae
+# umpf-topic-range: b0cbc159cc0abd9e93234338fbf95006b7319261..458897e4fa2834a4397377ca83557600c0a75922
 SRC_URI += "\
   file://patches/0301-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   file://patches/0302-media-coda-create-bitstream-debugfs-entry.patch \
@@ -95,7 +95,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched
 # umpf-hashinfo: 766eec81f78c8800663f8b6f0b07cb1fd770ea47
-# umpf-topic-range: 399edd5a511473faf55aa50e9f103d829eb4a8ae..f58c57dd0280e42119692c4372110cc48f91e82f
+# umpf-topic-range: 458897e4fa2834a4397377ca83557600c0a75922..aee9bc658867427adccfcaed407ab2c8a751f9be
 SRC_URI += "\
   file://patches/0401-drm-sched-don-t-try-to-construct-error-code-from-NUL.patch \
   file://patches/0402-drm-sched-remove-superfluous-whitespace-in-drm_sched.patch \
@@ -108,29 +108,36 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched-accounting
 # umpf-hashinfo: 7f614500c6d169d75e3f8bcf8cf51342c90f3a50
-# umpf-topic-range: f58c57dd0280e42119692c4372110cc48f91e82f..290af14f67d4818ef7650bd777713aa2f5875c36
+# umpf-topic-range: aee9bc658867427adccfcaed407ab2c8a751f9be..c319c33662d6a74804de0e59ea802016c057b4a3
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873
-# umpf-hashinfo: cd9397aef791b73b30f172891f39f423d43797a6
-# umpf-topic-range: 290af14f67d4818ef7650bd777713aa2f5875c36..df3d5588d79efda13ac0554ae94424ae66a614b8
+# umpf-hashinfo: 91bc3d307f15edf467d3ef538352b656b345309f
+# umpf-topic-range: c319c33662d6a74804de0e59ea802016c057b4a3..48b2921a704f47746fc94fd879288331977a5c89
 SRC_URI += "\
-  file://patches/0601-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
-  file://patches/0602-net-dsa-tag-fix-tag-handling.patch \
-  file://patches/0603-dsa-add-self_test-ethtool-function-handling.patch \
-  file://patches/0604-net-dsa-ksz-use-common-define-for-tag-len.patch \
-  file://patches/0605-net-tag-ksz-Add-KSZ8863-tag-code.patch \
-  file://patches/0606-ksz9875-add-mutex-locking-to-vlan-handling.patch \
-  file://patches/0607-ksz-Add-Microchip-KSZ8863-SMI-based-driver-support.patch \
-  file://patches/0608-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
-  file://patches/0609-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
-  file://patches/0610-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
+  file://patches/0601-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
+  file://patches/0602-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
+  file://patches/0603-net-tag-ksz-Add-KSZ8863-tag-code.patch \
+  file://patches/0604-net-dsa-microchip-refactor-to-use-ksz8863-register-o.patch \
+  file://patches/0605-net-dsa-microchip-Add-Microchip-KSZ8863-SMI-based-dr.patch \
+  file://patches/0606-net-dsa-microchip-Add-Microchip-KSZ8863-SPI-based-dr.patch \
+  file://patches/0607-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
+  file://patches/0608-ksz9875-add-mutex-locking-to-vlan-handling.patch \
+  file://patches/0609-net-dsa-tag-fix-tag-handling.patch \
   "
-# umpf-release: 5.4/customers/skov/imx6/20200429-1
-# umpf-topic-range: 0b3c850db483cfb8f141f727c62f65f9f32b6235..9b56404199ac6604ad8ce67b47e3c6b835093e15
+# umpf-topic: v5.4/topic/ksz8873_cabletest
+# umpf-hashinfo: c5c608b49d4e3db0627cf5ef15529ebf6a604dd2
+# umpf-topic-range: 48b2921a704f47746fc94fd879288331977a5c89..e09019cbc05d39699488f9360bbf0a75641202b3
 SRC_URI += "\
-  file://patches/0801-Release-5.4-customers-skov-imx6-20200429-1.patch \
+  file://patches/0701-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
+  file://patches/0702-dsa-add-self_test-ethtool-function-handling.patch \
+  file://patches/0703-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
+  "
+# umpf-release: 5.4/customers/skov/imx6/20200710-1
+# umpf-topic-range: e09019cbc05d39699488f9360bbf0a75641202b3..8881ee70d5440f737e0fe7f9f528e0037df4d30c
+SRC_URI += "\
+  file://patches/0801-Release-5.4-customers-skov-imx6-20200710-1.patch \
   "
 # umpf-end

@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "5.4.48"
+LINUX_VERSION = "5.4.50"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig \
@@ -18,10 +18,8 @@ SRC_URI += "file://defconfig \
 
 require linux-skov/patches/series.inc
 
-SRC_URI[md5sum] = "9c52c899b701e827b4686677853945e5"
-SRC_URI[sha256sum] = "bf20ddafcd04c114d34654bb10d1eb74f1864f3d14b676c6f0d42d60bbcf1d53"
-
-DEPENDS += "openssl-native util-linux-native lz4-native"
+SRC_URI[md5sum] = "6ffc24516fafb57972ea9b8deefe96b9"
+SRC_URI[sha256sum] = "ad10f4c1e900f4e3eb4903b65dbcb4ca74250de63aa9fa7105b9b3c3f9a8a6e2"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 

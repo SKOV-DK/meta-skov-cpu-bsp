@@ -7,24 +7,23 @@ We implement a self_test to measure the results.
 
 Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
 ---
- drivers/net/dsa/microchip/ksz8795.c     | 85 +++++++++++++++++++++++++++++++--
+ drivers/net/dsa/microchip/ksz8795.c     | 84 +++++++++++++++++++++++++++++++--
  drivers/net/dsa/microchip/ksz8795_reg.h |  2 +
- 2 files changed, 83 insertions(+), 4 deletions(-)
+ 2 files changed, 82 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 52d4d870965c..c93684561c2f 100644
+index b8315ed29bb2..f91b72c3220e 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
-@@ -698,6 +698,8 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+@@ -698,6 +698,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  	u16 data = 0;
  	u8 p = phy;
  
 +	mutex_lock(&dev->dev_mutex);
-+
  	switch (reg) {
  	case PHY_REG_CTRL:
  		ksz_pread8(dev, p, regs->p_neg_restart_ctrl, &restart);
-@@ -791,6 +793,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+@@ -791,6 +792,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  	}
  	if (processed)
  		*val = data;
@@ -32,16 +31,15 @@ index 52d4d870965c..c93684561c2f 100644
  }
  
  static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
-@@ -800,6 +803,8 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
+@@ -800,6 +802,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  	u8 restart, speed, ctrl, data;
  	u8 p = phy;
  
 +	mutex_lock(&dev->dev_mutex);
-+
  	switch (reg) {
  	case PHY_REG_CTRL:
  
-@@ -898,6 +903,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
+@@ -898,6 +901,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  	default:
  		break;
  	}
@@ -49,7 +47,7 @@ index 52d4d870965c..c93684561c2f 100644
  }
  
  static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
-@@ -909,15 +915,84 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
+@@ -909,15 +913,85 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
  		DSA_TAG_PROTO_KSZ8795 : DSA_TAG_PROTO_KSZ8863;
  }
  
@@ -93,52 +91,53 @@ index 52d4d870965c..c93684561c2f 100644
 +static void ksz8_self_test(struct dsa_switch *ds, int port,
 +                               struct ethtool_test *test, uint64_t *data)
 +{
-+       struct ksz_device *dev = ds->priv;
-+       u8 mdctrl = 0;
-+       u8 mdstat = 0;
-+       int timeout = 500;
++	struct ksz_device *dev = ds->priv;
++	u8 mdctrl = 0;
++	u8 mdstat = 0;
++	int timeout = 500;
 +
-+       mutex_lock(&dev->dev_mutex);
-+       memset(data, 0, test->len * sizeof(uint64_t));
++	mutex_lock(&dev->dev_mutex);
++	memset(data, 0, test->len * sizeof(uint64_t));
 +
-+       /* Undocumented: disable all advertisement and flow control
-+        * before test. This makes the test much more stable
-+        */
-+       ksz_write8(dev, PORT_CTRL_ADDR(port, REG_PORT_CTRL_12), 0x00);
-+       ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, true);
++	/* Undocumented: disable all advertisement and flow control
++	 * before test. This makes the test much more stable
++	 */
++	ksz_write8(dev, PORT_CTRL_ADDR(port, REG_PORT_CTRL_12), 0x00);
++	ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, true);
 +
-+       ksz_port_cfg(dev, port, REG_PORT_LINK_MD_CTRL, PORT_START_CABLE_DIAG, true);
++	ksz_port_cfg(dev, port, REG_PORT_LINK_MD_CTRL, PORT_START_CABLE_DIAG, true);
 +
-+       do {
-+               ksz_pread8(dev, port, REG_PORT_LINK_MD_CTRL, &mdctrl);
-+               timeout--;
-+               if (!timeout)
-+                       break;
-+       } while (mdctrl & PORT_START_CABLE_DIAG);
++	do {
++		ksz_pread8(dev, port, REG_PORT_LINK_MD_CTRL, &mdctrl);
++		timeout--;
++		if (!timeout)
++			break;
++	} while (mdctrl & PORT_START_CABLE_DIAG);
 +
-+       ksz_pread8(dev, port, REG_PORT_LINK_MD_RESULT, &mdstat);
++	ksz_pread8(dev, port, REG_PORT_LINK_MD_RESULT, &mdstat);
 +
-+       ksz_write8(dev, PORT_CTRL_ADDR(port, REG_PORT_CTRL_12), 0xff);
-+       ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, false);
++	ksz_write8(dev, PORT_CTRL_ADDR(port, REG_PORT_CTRL_12), 0xff);
++	ksz_port_cfg(dev, port, REG_PORT_CTRL_13, PORT_AUTO_MDIX_DISABLE, false);
 +
-+       if (!port || ((mdctrl & PORT_CABLE_DIAG_RESULT)
-+                               == PORT_CABLE_DIAG_RESULT)) {
-+               int i;
-+               for (i = 0; i < test->len; i++)
-+                       data[i] = 1;
-+               test->flags |= ETH_TEST_FL_FAILED;
-+               return;
-+       }
++	if (!port || ((mdctrl & PORT_CABLE_DIAG_RESULT)
++			== PORT_CABLE_DIAG_RESULT)) {
++		int i;
++		for (i = 0; i < test->len; i++)
++			data[i] = 1;
++		test->flags |= ETH_TEST_FL_FAILED;
++		mutex_unlock(&dev->dev_mutex);
++		return;
++	}
 +
-+       if (mdctrl & PORT_CABLE_DIAG_RESULT) {
-+               data[0] |= (mdctrl & PORT_CABLE_DIAG_RESULT);
-+               data[1] = (((mdctrl & 0x1) << 8) | mdstat) * 2 / 5;
-+       }
-+       mutex_unlock(&dev->dev_mutex);
++	if (mdctrl & PORT_CABLE_DIAG_RESULT) {
++		data[0] |= (mdctrl & PORT_CABLE_DIAG_RESULT);
++		data[1] = (((mdctrl & 0x1) << 8) | mdstat) * 2 / 5;
++	}
++	mutex_unlock(&dev->dev_mutex);
  }
  
  static void ksz8_cfg_port_member(struct ksz_device *dev, int port, u8 member)
-@@ -1401,6 +1476,7 @@ static const struct dsa_switch_ops ksz8_switch_ops = {
+@@ -1401,6 +1475,7 @@ static const struct dsa_switch_ops ksz8_switch_ops = {
  	.adjust_link		= ksz_adjust_link,
  	.port_enable		= ksz_enable_port,
  	.port_disable		= ksz_disable_port,
@@ -146,7 +145,7 @@ index 52d4d870965c..c93684561c2f 100644
  	.get_strings		= ksz8_get_strings,
  	.get_ethtool_stats	= ksz_get_ethtool_stats,
  	.get_sset_count		= ksz_sset_count,
-@@ -1575,6 +1651,7 @@ static int ksz8_switch_init(struct ksz_device *dev)
+@@ -1575,6 +1650,7 @@ static int ksz8_switch_init(struct ksz_device *dev)
  	dev->port_mask |= dev->host_mask;
  
  	dev->reg_mib_cnt = SWITCH_COUNTER_NUM;
