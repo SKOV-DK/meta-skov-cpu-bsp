@@ -23,3 +23,4 @@ else
    let CHECKSUM=0x6e^0x51^0x84^0x03^0x10^0x00^${BRIGHTNESS}
    i2c_write -b 0 -a 0x37 -r 0x51 0x84 0x03 0x10 0x00 ${BRIGHTNESS} ${CHECKSUM}
 fi
+# This line is added to force barebox image size to grow in size. The size must be less or bigger than 550318 bytes
