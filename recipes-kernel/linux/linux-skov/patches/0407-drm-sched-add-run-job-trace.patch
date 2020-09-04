@@ -49,10 +49,10 @@ index d79086498aff..877ce9b127f1 100644
  	    TP_PROTO(struct drm_sched_fence *fence),
  	    TP_ARGS(fence),
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index ed23a6d25882..eff81985cea6 100644
+index c797578c44ca..2aa9a9b3acf0 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
-@@ -733,6 +733,7 @@ static int drm_sched_main(void *param)
+@@ -735,6 +735,7 @@ static int drm_sched_main(void *param)
  		atomic_inc(&sched->hw_rq_count);
  		drm_sched_job_begin(sched_job);
  

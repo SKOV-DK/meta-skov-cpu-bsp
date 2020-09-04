@@ -22,7 +22,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 92 insertions(+), 55 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 95b41c0891d0..aa7c19f7e298 100644
+index 7f480c6b1981..b367523b8526 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
 @@ -408,6 +408,38 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,

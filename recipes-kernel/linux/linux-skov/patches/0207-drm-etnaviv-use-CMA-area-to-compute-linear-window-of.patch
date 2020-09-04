@@ -15,7 +15,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 12 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 291384f34c96..108a82a115ad 100644
+index 775ba4c5e6c9..7e46d25ee9b4 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 @@ -4,8 +4,10 @@

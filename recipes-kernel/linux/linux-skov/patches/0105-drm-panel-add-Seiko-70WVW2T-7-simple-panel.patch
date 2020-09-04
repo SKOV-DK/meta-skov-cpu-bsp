@@ -12,7 +12,7 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  1 file changed, 28 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 0b74aa36339a..70628b100d42 100644
+index 4b2164d93be0..c74c2fe731e3 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
 @@ -2830,6 +2830,31 @@ static const struct panel_desc shelly_sca07010_bfn_lnn = {

@@ -18,10 +18,10 @@ Signed-off-by: Guido Günther <agx@sigxcpu.org>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 6fef24d8e6a6..e333014d3d2a 100644
+index 7cf6ab5b9ffc..06603edcf067 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1837,8 +1837,9 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+@@ -1846,8 +1846,9 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
  	if (atomic_read(&gpu->sched.hw_rq_count))
  		return -EBUSY;
  

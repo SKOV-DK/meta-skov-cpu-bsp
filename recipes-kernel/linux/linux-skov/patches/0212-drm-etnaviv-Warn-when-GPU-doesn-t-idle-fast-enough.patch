@@ -15,10 +15,10 @@ Signed-off-by: Guido Günther <agx@sigxcpu.org>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index e333014d3d2a..80555e76f407 100644
+index 06603edcf067..4c17b082729a 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1841,8 +1841,11 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+@@ -1850,8 +1850,11 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
  	mask = gpu->idle_mask & ~(VIVS_HI_IDLE_STATE_FE |
  				  VIVS_HI_IDLE_STATE_MC);
  	idle = gpu_read(gpu, VIVS_HI_IDLE_STATE) & mask;

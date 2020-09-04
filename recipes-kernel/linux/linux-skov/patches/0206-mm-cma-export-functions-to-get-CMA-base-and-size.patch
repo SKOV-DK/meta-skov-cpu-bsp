@@ -12,7 +12,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 2 insertions(+)
 
 diff --git a/mm/cma.c b/mm/cma.c
-index 7fe0b8356775..58d6d64a7f2f 100644
+index 7de520c0a1db..5a553242781b 100644
 --- a/mm/cma.c
 +++ b/mm/cma.c
 @@ -44,11 +44,13 @@ phys_addr_t cma_get_base(const struct cma *cma)

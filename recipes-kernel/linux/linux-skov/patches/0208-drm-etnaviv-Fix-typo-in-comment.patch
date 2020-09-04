@@ -14,7 +14,7 @@ Signed-off-by: Guido Günther <agx@sigxcpu.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 108a82a115ad..6f973ecf4323 100644
+index 7e46d25ee9b4..b83b5fdef9bd 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 @@ -508,7 +508,7 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)

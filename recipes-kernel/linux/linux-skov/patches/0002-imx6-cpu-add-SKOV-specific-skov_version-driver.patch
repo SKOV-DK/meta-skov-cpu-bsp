@@ -69,7 +69,7 @@ index 000000000000..d6068949425b
 +obj-$(CONFIG_SKOV_VERSION)      += skov_version.o
 diff --git a/drivers/skov/skov_version.c b/drivers/skov/skov_version.c
 new file mode 100644
-index 000000000000..fe71a6ff0656
+index 000000000000..904b1a529d04
 --- /dev/null
 +++ b/drivers/skov/skov_version.c
 @@ -0,0 +1,327 @@

@@ -68,7 +68,7 @@ index f1fc14abc116..4f5990515d2b 100644
  	etnaviv_gem_obj_add(dev, obj);
  
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 7583183fa729..291384f34c96 100644
+index 95aa28f8181f..775ba4c5e6c9 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 @@ -772,6 +772,14 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)

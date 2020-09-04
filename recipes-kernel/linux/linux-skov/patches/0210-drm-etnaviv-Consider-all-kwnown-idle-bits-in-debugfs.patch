@@ -13,10 +13,10 @@ Signed-off-by: Guido Günther <agx@sigxcpu.org>
  1 file changed, 14 insertions(+)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 6f973ecf4323..6fef24d8e6a6 100644
+index b83b5fdef9bd..7cf6ab5b9ffc 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -947,6 +947,20 @@ int etnaviv_gpu_debugfs(struct etnaviv_gpu *gpu, struct seq_file *m)
+@@ -948,6 +948,20 @@ int etnaviv_gpu_debugfs(struct etnaviv_gpu *gpu, struct seq_file *m)
  		seq_puts(m, "\t FP is not idle\n");
  	if ((idle & VIVS_HI_IDLE_STATE_TS) == 0)
  		seq_puts(m, "\t TS is not idle\n");

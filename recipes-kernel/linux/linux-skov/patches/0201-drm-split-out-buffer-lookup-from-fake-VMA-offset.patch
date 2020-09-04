@@ -13,10 +13,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  2 files changed, 42 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/gpu/drm/drm_gem.c b/drivers/gpu/drm/drm_gem.c
-index 6854f5867d51..d66fbcd80686 100644
+index 1fdc85a71cec..0863dec140fa 100644
 --- a/drivers/gpu/drm/drm_gem.c
 +++ b/drivers/gpu/drm/drm_gem.c
-@@ -1129,30 +1129,21 @@ int drm_gem_mmap_obj(struct drm_gem_object *obj, unsigned long obj_size,
+@@ -1127,30 +1127,21 @@ int drm_gem_mmap_obj(struct drm_gem_object *obj, unsigned long obj_size,
  EXPORT_SYMBOL(drm_gem_mmap_obj);
  
  /**
@@ -53,7 +53,7 @@ index 6854f5867d51..d66fbcd80686 100644
  
  	drm_vma_offset_lock_lookup(dev->vma_offset_manager);
  	node = drm_vma_offset_exact_lookup_locked(dev->vma_offset_manager,
-@@ -1175,15 +1166,45 @@ int drm_gem_mmap(struct file *filp, struct vm_area_struct *vma)
+@@ -1173,15 +1164,45 @@ int drm_gem_mmap(struct file *filp, struct vm_area_struct *vma)
  	}
  	drm_vma_offset_unlock_lookup(dev->vma_offset_manager);
  
@@ -101,7 +101,7 @@ index 6854f5867d51..d66fbcd80686 100644
  		if (vma->vm_flags & VM_WRITE) {
  			drm_gem_object_put_unlocked(obj);
  			return -EINVAL;
-@@ -1192,7 +1213,8 @@ int drm_gem_mmap(struct file *filp, struct vm_area_struct *vma)
+@@ -1190,7 +1211,8 @@ int drm_gem_mmap(struct file *filp, struct vm_area_struct *vma)
  		vma->vm_flags &= ~VM_MAYWRITE;
  	}
  

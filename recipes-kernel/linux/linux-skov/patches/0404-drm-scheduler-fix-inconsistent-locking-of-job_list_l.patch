@@ -20,7 +20,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 14 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 811cd391f266..ed23a6d25882 100644
+index 9aa22633ab41..c797578c44ca 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -220,8 +220,7 @@ EXPORT_SYMBOL(drm_sched_fault);
@@ -132,7 +132,7 @@ index 811cd391f266..ed23a6d25882 100644
  	}
  
  	kthread_unpark(sched->thread);
-@@ -646,7 +638,6 @@ static struct drm_sched_job *
+@@ -648,7 +640,6 @@ static struct drm_sched_job *
  drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  {
  	struct drm_sched_job *job;
@@ -140,7 +140,7 @@ index 811cd391f266..ed23a6d25882 100644
  
  	/*
  	 * Don't destroy jobs while the timeout worker is running  OR thread
-@@ -657,7 +648,7 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+@@ -659,7 +650,7 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  	    __kthread_should_park(sched->thread))
  		return NULL;
  
@@ -149,7 +149,7 @@ index 811cd391f266..ed23a6d25882 100644
  
  	job = list_first_entry_or_null(&sched->ring_mirror_list,
  				       struct drm_sched_job, node);
-@@ -671,7 +662,7 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+@@ -673,7 +664,7 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  		drm_sched_start_timeout(sched);
  	}
  

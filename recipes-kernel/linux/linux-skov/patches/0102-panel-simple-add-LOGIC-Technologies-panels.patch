@@ -20,7 +20,7 @@ Cc: Thierry Reding <thierry.reding@gmail.com>
  1 file changed, 70 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 8abb31f83ffc..0b74aa36339a 100644
+index 6d9656323a3f..4b2164d93be0 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
 @@ -2034,6 +2034,70 @@ static const struct panel_desc lg_lp129qe = {

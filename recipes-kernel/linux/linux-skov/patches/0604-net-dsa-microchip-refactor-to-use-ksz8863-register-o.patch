@@ -2009,7 +2009,7 @@ index 3a50462df8fa..ed543ceac6b7 100644
  
 diff --git a/drivers/net/dsa/microchip/ksz8863_reg.h b/drivers/net/dsa/microchip/ksz8863_reg.h
 new file mode 100644
-index 000000000000..9262b5a0e374
+index 000000000000..e26566531c91
 --- /dev/null
 +++ b/drivers/net/dsa/microchip/ksz8863_reg.h
 @@ -0,0 +1,121 @@
@@ -2070,7 +2070,7 @@ index 000000000000..9262b5a0e374
 +#define TOTAL_KSZ8863_COUNTER_NUM		(KSZ8863_COUNTER_NUM + 2)
 +
 +#define KSZ8863_P_LOCAL_CTRL			REG_PORT_CTRL_12
-+#define KSZ8863_P_REMOTE_STATUS			KSZ8863_REG_PORT_STATUS_1
++#define KSZ8863_P_REMOTE_STATUS			KSZ8863_REG_PORT_STATUS_0
 +#define KSZ8863_P_FORCE_CTRL			REG_PORT_CTRL_12
 +#define KSZ8863_P_NEG_RESTART_CTRL		REG_PORT_CTRL_13
 +#define KSZ8863_P_SPEED_STATUS			KSZ8863_REG_PORT_STATUS_1

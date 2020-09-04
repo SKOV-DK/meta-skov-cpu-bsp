@@ -29,10 +29,10 @@ index aa3e4c3b063a..21c11540723c 100644
  	}
  	kfree(submit->pmrs);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 8bae874ff3a5..7583183fa729 100644
+index 1357f4928cbf..95aa28f8181f 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1723,7 +1723,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
+@@ -1732,7 +1732,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
  
  	gpu->dev = &pdev->dev;
  	mutex_init(&gpu->lock);
