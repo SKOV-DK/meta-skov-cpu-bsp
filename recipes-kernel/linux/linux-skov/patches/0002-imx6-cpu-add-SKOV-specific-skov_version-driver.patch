@@ -95,15 +95,15 @@ index 000000000000..fe71a6ff0656
 + * 00001101     - Low Cost                       C    256 MB -  256 MB
 + * 00001110     - High Performance               C    1024MB -  256 MB
 + * 00001111     - Middle Performance             C    512 MB -  256 MB
-+ * 00010000     - i.MX6 CPU SoloCore             C    512 MB -  4096MB
-+ * 00010001     - i.MX6 CPU QuadCore             C    2048MB -  8192MB
-+ * 00010010     - i.MX6 CPU QuadCore+            C    4192MB - 16384MB
-+ * 00010011     - i.MX6 CPU SoloCore             C    512 MB -  2048MB
-+ * 00010100     - i.MX6 CPU QuadCore             C    1024MB -  4096MB
-+ * 00010101     - i.MX6 CPU SoloCore             D    512 MB -  2048MB
-+ * 00010110     - i.MX6 CPU QuadCore             D    1024MB -  4096MB
++ * 00010000     - IMX6 CPU SoloCore              C    512 MB -  4096MB
++ * 00010001     - IMX6 CPU QuadCore              C    2048MB -  8192MB
++ * 00010010     - IMX6 CPU QuadCore+             C    4192MB - 16384MB
++ * 00010011     - IMX6 CPU SoloCore R512M F2G    C    512 MB -  2048MB
++ * 00010100     - IMX6 CPU QuadCore R1G F4G      C    1024MB -  4096MB
++ * 00010101     - IMX6 CPU SoloCore R512M F2G    D    512 MB -  2048MB
++ * 00010110     - IMX6 CPU QuadCore R1G F4G      D    1024MB -  4096MB
 + * 00010111     ---- not defined ----
-+ * 00011000     - i.MX6 mkII with LVDS           E    1024MB -  4096MB
++ * 00011000     - IMX6 mkII CPU QuadCore R1G F4G E    1024MB -  4096MB
 + */
 +#include <linux/err.h>
 +#include <linux/clk.h>
@@ -142,10 +142,10 @@ index 000000000000..fe71a6ff0656
 +	"High Performance",
 +	"Maximum Performance",
 +	"Middle Performance",
-+	"i.MX6 CPU SoloCore",
-+	"i.MX6 CPU QuadCore",
-+	"i.MX6 CPU QuadCore+",
-+	"i.MX6 mkII with LVDS",
++	"IMX6 CPU SoloCore R512M F2G",
++	"IMX6 CPU QuadCore R1G F4G",
++	"IMX6 CPU QuadCore+",
++	"IMX6 mkII CPU QuadCore R1G F4G",
 +};
 +
 +static const unsigned int mem[] = {
