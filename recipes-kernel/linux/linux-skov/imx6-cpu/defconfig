@@ -1,13 +1,13 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.4.52 Kernel Configuration
+# Linux/arm 5.4.64 Kernel Configuration
 #
 
 #
-# Compiler: arm-pmc-linux-gnueabi-gcc (GCC) 9.3.0
+# Compiler: arm-pmc-linux-gnueabi-gcc (GCC) 8.3.0
 #
 CONFIG_CC_IS_GCC=y
-CONFIG_GCC_VERSION=90300
+CONFIG_GCC_VERSION=80300
 CONFIG_CLANG_VERSION=0
 CONFIG_CC_HAS_ASM_GOTO=y
 CONFIG_CC_HAS_ASM_INLINE=y
@@ -2852,7 +2852,7 @@ CONFIG_USB_SERIAL=m
 CONFIG_USB_SERIAL_CP210X=m
 # CONFIG_USB_SERIAL_CYPRESS_M8 is not set
 # CONFIG_USB_SERIAL_EMPEG is not set
-# CONFIG_USB_SERIAL_FTDI_SIO is not set
+CONFIG_USB_SERIAL_FTDI_SIO=m
 # CONFIG_USB_SERIAL_VISOR is not set
 # CONFIG_USB_SERIAL_IPAQ is not set
 # CONFIG_USB_SERIAL_IR is not set
