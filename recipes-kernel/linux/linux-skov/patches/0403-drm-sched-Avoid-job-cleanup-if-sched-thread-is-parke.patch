@@ -16,10 +16,10 @@ Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index e7e412713a78..9aa22633ab41 100644
+index 92d89011b174..099ede5bec10 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
-@@ -650,9 +650,13 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+@@ -677,9 +677,13 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  	struct drm_sched_job *job;
  	unsigned long flags;
  

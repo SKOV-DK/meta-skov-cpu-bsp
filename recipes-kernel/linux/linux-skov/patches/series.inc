@@ -1,9 +1,9 @@
-# umpf-base: v5.4.63
+# umpf-base: v5.4.71
 # umpf-name: 5.4/customers/skov/imx6
-# umpf-version: 5.4/customers/skov/imx6/20200909-1
+# umpf-version: 5.4/customers/skov/imx6/20201014-1
 # umpf-topic: v5.4/customers/skov/imx6_project_specific
-# umpf-hashinfo: 524f9dbe371ae4c7e02026b000752205f96ba7df
-# umpf-topic-range: e32f4fa1b24d825b2560ca9cfbfd9df44a4310b4..8fc66a7f2cfc40aa8e84155dc601e526ee35fc6d
+# umpf-hashinfo: 5d88b5331ad55572da2449653d71eb014c68a5e4
+# umpf-topic-range: 85b0841aab15c12948af951d477183ab3df7de14..a406d03ba22eabe8b62ec773904b29ba8f8c03f3
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -12,8 +12,8 @@ SRC_URI += "\
   file://patches/0005-Revert-net-dsa-microchip-set-the-correct-number-of-p.patch \
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
-# umpf-hashinfo: 792529e1558cac9d17c63298bee04364040d7d35
-# umpf-topic-range: 8fc66a7f2cfc40aa8e84155dc601e526ee35fc6d..94d726f52c63c2b83099451ad30d0942daf0efd0
+# umpf-hashinfo: 9c9bc9c6a214827166b61c73415d09686a95eb0c
+# umpf-topic-range: a406d03ba22eabe8b62ec773904b29ba8f8c03f3..8b5d2223bff4b7cb22ea174ea9e6089ce140efef
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -23,8 +23,8 @@ SRC_URI += "\
   file://patches/0106-drm-panel-add-Multi-Innotechnology-MI1010AIT-1CP1.patch \
   "
 # umpf-topic: v5.4/topic/etnaviv
-# umpf-hashinfo: deaa7fbd4154b7da17f342518de785407ab67338
-# umpf-topic-range: 94d726f52c63c2b83099451ad30d0942daf0efd0..aa2f8103f3ee8c4f76c856f35d231ec8b3b66abe
+# umpf-hashinfo: 5bcf41f3ae8cce23305dc6bb989dd6c60023561e
+# umpf-topic-range: 8b5d2223bff4b7cb22ea174ea9e6089ce140efef..7c1cf98ffa4bab5cfe05f5adc58532144f5f6b40
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -40,8 +40,8 @@ SRC_URI += "\
   file://patches/0212-drm-etnaviv-Warn-when-GPU-doesn-t-idle-fast-enough.patch \
   "
 # umpf-topic: v5.4/topic/coda
-# umpf-hashinfo: a3e90d97a5ab3f8bfb190a0df3df668004cc2e16
-# umpf-topic-range: aa2f8103f3ee8c4f76c856f35d231ec8b3b66abe..7990a70cf1543dadc25d040a9df5960c1f4ce74a
+# umpf-hashinfo: bf7a254d8b776db87aa4b5d796ebecb0fb9febe7
+# umpf-topic-range: 7c1cf98ffa4bab5cfe05f5adc58532144f5f6b40..3bdfb797986521002c05b3901ddb8501a20b1ccf
 SRC_URI += "\
   file://patches/0301-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   file://patches/0302-media-coda-create-bitstream-debugfs-entry.patch \
@@ -92,10 +92,16 @@ SRC_URI += "\
   file://patches/0347-media-coda-split-marking-last-meta-into-helper-funct.patch \
   file://patches/0348-media-coda-mark-last-capture-buffer.patch \
   file://patches/0349-media-coda-lock-capture-queue-wakeup-against-decoder.patch \
+  file://patches/0350-coda-Remove-redundant-ctx-initialized-setting.patch \
+  file://patches/0351-coda-Simplify-H.264-small-buffer-padding-logic.patch \
+  file://patches/0352-coda-Clarify-device-registered-log.patch \
+  file://patches/0353-coda-Clarify-interrupt-registered-name.patch \
+  file://patches/0354-coda-coda_buffer_meta-housekeeping-fix.patch \
+  file://patches/0355-coda-Add-a-V4L2-user-for-control-error-macroblocks-c.patch \
   "
 # umpf-topic: v5.4/topic/drm-sched
-# umpf-hashinfo: 766eec81f78c8800663f8b6f0b07cb1fd770ea47
-# umpf-topic-range: 7990a70cf1543dadc25d040a9df5960c1f4ce74a..bbdf3458ded32e26cc89a7732db02ceaef9f1fb5
+# umpf-hashinfo: e00c050f946b5ce4706f087cef68eedb9470958a
+# umpf-topic-range: 3bdfb797986521002c05b3901ddb8501a20b1ccf..278f3d44a8a2429aae0c2bfac89463b90eca6515
 SRC_URI += "\
   file://patches/0401-drm-sched-remove-superfluous-whitespace-in-drm_sched.patch \
   file://patches/0402-drm-sched-Use-completion-to-wait-for-sched-thread-id.patch \
@@ -106,15 +112,15 @@ SRC_URI += "\
   file://patches/0407-drm-sched-add-run-job-trace.patch \
   "
 # umpf-topic: v5.4/topic/drm-sched-accounting
-# umpf-hashinfo: 7f614500c6d169d75e3f8bcf8cf51342c90f3a50
-# umpf-topic-range: bbdf3458ded32e26cc89a7732db02ceaef9f1fb5..ed1632653af9656d17aaf8500a95f1775eb65749
+# umpf-hashinfo: 9552e24bff06545632b895c3b21d050fea005a4f
+# umpf-topic-range: 278f3d44a8a2429aae0c2bfac89463b90eca6515..0fb926c092d9c9a7147e0d4b31f001d4d71745c9
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873
 # umpf-hashinfo: 02b0e02023d3932e9468c9049291357e59919d5c
-# umpf-topic-range: ed1632653af9656d17aaf8500a95f1775eb65749..15145463adb9ff7d32ce854aa5f25e4c0da08fbd
+# umpf-topic-range: 0fb926c092d9c9a7147e0d4b31f001d4d71745c9..23d4e504a9be5eab7e10b34365b0498d3f854138
 SRC_URI += "\
   file://patches/0601-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
   file://patches/0602-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
@@ -128,15 +134,15 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/ksz8873_cabletest
 # umpf-hashinfo: 26c96ad4f0fc1239399fe332c085672407076de6
-# umpf-topic-range: 15145463adb9ff7d32ce854aa5f25e4c0da08fbd..23adcf759d3e05f7b1836eb085b6d22658f42587
+# umpf-topic-range: 23d4e504a9be5eab7e10b34365b0498d3f854138..2037a2fa7d08d5b5c7e9d6d14d2fdc1d63a8753d
 SRC_URI += "\
   file://patches/0701-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
   file://patches/0702-dsa-add-self_test-ethtool-function-handling.patch \
   file://patches/0703-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
   "
-# umpf-release: 5.4/customers/skov/imx6/20200909-1
-# umpf-topic-range: 23adcf759d3e05f7b1836eb085b6d22658f42587..73258b2a5fe3b043177dcfce90313020ed555164
+# umpf-release: 5.4/customers/skov/imx6/20201014-1
+# umpf-topic-range: 2037a2fa7d08d5b5c7e9d6d14d2fdc1d63a8753d..59de2870451a74634eca2b821772ff216006fa4d
 SRC_URI += "\
-  file://patches/0801-Release-5.4-customers-skov-imx6-20200909-1.patch \
+  file://patches/0801-Release-5.4-customers-skov-imx6-20201014-1.patch \
   "
 # umpf-end

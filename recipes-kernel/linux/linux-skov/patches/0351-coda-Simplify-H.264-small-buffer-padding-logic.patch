@@ -1,0 +1,41 @@
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Wed, 7 Oct 2020 07:35:40 -0300
+Subject: [PATCH] coda: Simplify H.264 small buffer padding logic
+
+The H.264 small buffer padding is done under
+the (ctx->qsequence == 0 && payload < 512) condition.
+
+Given this is the exact same condition immediately
+above, we can move it right there, making the code
+slightly clearer.
+
+This change shouldn't affect functionality as it's just
+cosmetics.
+
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Reviewed-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 6f7415f5a1f3..8bfcdb8aa0bb 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -308,12 +308,11 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,
+ 			coda_dbg(1, ctx,
+ 				 "could not parse header, sequence initialization might fail\n");
+ 		}
+-	}
+ 
+-	/* Add padding before the first buffer, if it is too small */
+-	if (ctx->qsequence == 0 && payload < 512 &&
+-	    ctx->codec->src_fourcc == V4L2_PIX_FMT_H264)
+-		coda_h264_bitstream_pad(ctx, 512 - payload);
++		/* Add padding before the first buffer, if it is too small */
++		if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264)
++			coda_h264_bitstream_pad(ctx, 512 - payload);
++	}
+ 
+ 	ret = coda_bitstream_queue(ctx, vaddr, payload);
+ 	if (ret < 0) {

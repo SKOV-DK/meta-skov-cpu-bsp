@@ -60,7 +60,7 @@ index 1a5153197fe9..461a7a8129f4 100644
  		if (entity->dependency) {
  			dma_fence_remove_callback(entity->dependency,
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 0098e2f4840f..e7e412713a78 100644
+index c76ee551aed3..92d89011b174 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -47,6 +47,7 @@
@@ -87,7 +87,7 @@ index 0098e2f4840f..e7e412713a78 100644
  			spin_unlock(&rq->lock);
  			return entity;
  		}
-@@ -726,6 +729,9 @@ static int drm_sched_main(void *param)
+@@ -753,6 +756,9 @@ static int drm_sched_main(void *param)
  			continue;
  
  		sched_job = drm_sched_entity_pop_job(entity);

@@ -1,21 +1,21 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 9 Sep 2020 13:01:11 +0200
-Subject: [PATCH] Release 5.4/customers/skov/imx6/20200909-1
+Date: Wed, 14 Oct 2020 21:41:10 +0200
+Subject: [PATCH] Release 5.4/customers/skov/imx6/20201014-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 418814b108ae..d08bea59627f 100644
+index f342e64c8c1d..85b8346da026 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
  PATCHLEVEL = 4
- SUBLEVEL = 63
+ SUBLEVEL = 71
 -EXTRAVERSION =
-+EXTRAVERSION =-20200909-1
++EXTRAVERSION =-20201014-1
  NAME = Kleptomaniac Octopus
  
  # *DOCUMENTATION*

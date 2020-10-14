@@ -13,10 +13,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  4 files changed, 11 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-index aa3e4c3b063a..21c11540723c 100644
+index 1ba83a90cdef..fe558a529042 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-@@ -407,9 +407,9 @@ static void submit_cleanup(struct kref *kref)
+@@ -409,9 +409,9 @@ static void submit_cleanup(struct kref *kref)
  		dma_fence_put(submit->in_fence);
  	if (submit->out_fence) {
  		/* first remove from IDR, so fence can not be found anymore */

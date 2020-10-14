@@ -1,0 +1,40 @@
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Wed, 7 Oct 2020 07:35:42 -0300
+Subject: [PATCH] coda: Clarify interrupt registered name
+
+Make interrupt naming more consistent by using a common
+pattern for video and jpeg interrupts.
+
+With this commit, interrupts are shown as:
+
+29:          0          0       GPC  12 Level     coda-video
+30:          0          0       GPC   3 Level     coda-jpeg
+
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Acked-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 55c568e358d3..9ad5a6362de5 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -3601,7 +3601,7 @@ static int coda_probe(struct platform_device *pdev)
+ 
+ 	ret = devm_request_threaded_irq(&pdev->dev, irq, coda_irq_handler,
+ 					coda_threaded_irq_handler, IRQF_ONESHOT,
+-					dev_name(&pdev->dev), dev);
++					CODA_NAME "-video", dev);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "failed to request irq: %d\n", ret);
+ 		return ret;
+@@ -3617,7 +3617,7 @@ static int coda_probe(struct platform_device *pdev)
+ 
+ 		ret = devm_request_threaded_irq(&pdev->dev, irq, NULL,
+ 					coda9_jpeg_irq_handler, IRQF_ONESHOT,
+-					CODA_NAME " jpeg", dev);
++					CODA_NAME "-jpeg", dev);
+ 		if (ret < 0) {
+ 			dev_err(&pdev->dev, "failed to request jpeg irq\n");
+ 			return ret;

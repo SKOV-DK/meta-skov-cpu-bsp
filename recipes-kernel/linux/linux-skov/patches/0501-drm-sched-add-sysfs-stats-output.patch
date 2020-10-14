@@ -84,7 +84,7 @@ index 8b45c3a1b84e..219feaa4cda0 100644
  MODULE_DESCRIPTION("DRM GPU scheduler");
  MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 2aa9a9b3acf0..7ff8abe39308 100644
+index 0ac088a29c55..e82897a4e819 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -57,6 +57,8 @@
@@ -96,7 +96,7 @@ index 2aa9a9b3acf0..7ff8abe39308 100644
  #define to_drm_sched_job(sched_job)		\
  		container_of((sched_job), struct drm_sched_job, queue_node)
  
-@@ -798,12 +800,17 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
+@@ -825,12 +827,17 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
  	atomic_set(&sched->num_jobs, 0);
  	atomic64_set(&sched->job_id_count, 0);
  
@@ -114,7 +114,7 @@ index 2aa9a9b3acf0..7ff8abe39308 100644
  		return ret;
  	}
  
-@@ -821,6 +828,8 @@ EXPORT_SYMBOL(drm_sched_init);
+@@ -848,6 +855,8 @@ EXPORT_SYMBOL(drm_sched_init);
   */
  void drm_sched_fini(struct drm_gpu_scheduler *sched)
  {
