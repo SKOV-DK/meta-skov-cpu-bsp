@@ -15,11 +15,17 @@ then implement the rest of the microchip SMI0 odderties.
 
 Signed-off-by: Andrew Lunn <andrew@lunn.ch>
 Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+
+---
+v1 -> v2: - patch not present
+v2 -> v3: - first patch
+v3 -> v4: - added override_c22_op
+v4 -> v5: - moved override_c22_op out of else case
 ---
  drivers/net/phy/mdio-bitbang.c | 8 ++++++--
- drivers/net/phy/mdio-gpio.c    | 9 +++++++++
+ drivers/net/phy/mdio-gpio.c    | 8 ++++++++
  include/linux/mdio-bitbang.h   | 3 +++
- 3 files changed, 18 insertions(+), 2 deletions(-)
+ 3 files changed, 17 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/phy/mdio-bitbang.c b/drivers/net/phy/mdio-bitbang.c
 index 5136275c8e73..528e255d1ffe 100644
@@ -55,10 +61,10 @@ index 5136275c8e73..528e255d1ffe 100644
  	return bus;
  }
 diff --git a/drivers/net/phy/mdio-gpio.c b/drivers/net/phy/mdio-gpio.c
-index 1b00235d7dc5..e8d83cee1bc1 100644
+index 1b00235d7dc5..13ec31e89e94 100644
 --- a/drivers/net/phy/mdio-gpio.c
 +++ b/drivers/net/phy/mdio-gpio.c
-@@ -132,6 +132,14 @@ static struct mii_bus *mdio_gpio_bus_init(struct device *dev,
+@@ -132,6 +132,13 @@ static struct mii_bus *mdio_gpio_bus_init(struct device *dev,
  		new_bus->phy_ignore_ta_mask = pdata->phy_ignore_ta_mask;
  	}
  
@@ -66,14 +72,13 @@ index 1b00235d7dc5..e8d83cee1bc1 100644
 +	    of_device_is_compatible(dev->of_node, "microchip,mdio-smi0")) {
 +		bitbang->ctrl.op_c22_read = 0;
 +		bitbang->ctrl.op_c22_write = 0;
-+	} else {
 +		bitbang->ctrl.override_op_c22 = 1;
 +	}
 +
  	dev_set_drvdata(dev, new_bus);
  
  	return new_bus;
-@@ -196,6 +204,7 @@ static int mdio_gpio_remove(struct platform_device *pdev)
+@@ -196,6 +203,7 @@ static int mdio_gpio_remove(struct platform_device *pdev)
  
  static const struct of_device_id mdio_gpio_of_match[] = {
  	{ .compatible = "virtual,mdio-gpio", },

@@ -19,7 +19,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 33 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index c74c2fe731e3..c6722626b4c0 100644
+index 70f4857f8eb6..f2f8dd1355aa 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
 @@ -2164,6 +2164,36 @@ static const struct panel_desc mitsubishi_aa070mc01 = {

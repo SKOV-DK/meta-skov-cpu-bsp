@@ -1,19 +1,19 @@
-# umpf-base: v5.4.71
+# umpf-base: v5.4.83
 # umpf-name: 5.4/customers/skov/imx6
-# umpf-version: 5.4/customers/skov/imx6/20201014-1
+# umpf-version: 5.4/customers/skov/imx6/20201215-1
 # umpf-topic: v5.4/customers/skov/imx6_project_specific
-# umpf-hashinfo: 5d88b5331ad55572da2449653d71eb014c68a5e4
-# umpf-topic-range: 85b0841aab15c12948af951d477183ab3df7de14..a406d03ba22eabe8b62ec773904b29ba8f8c03f3
+# umpf-hashinfo: a1acb8fbf724f2d5b3cc247fc96448322c0b2b44
+# umpf-topic-range: 2bff021f53b211386abad8cd661e6bb38d0fd524..859c4ad716a386668563bd2daacb042dc627015a
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   file://patches/0003-imx6-cpu-add-SKOV-specific-touchtoy-driver.patch \
-  file://patches/0004-Revert-mmc-block-Add-CMD13-polling-for-MMC-IOCTLS-wi.patch \
+  file://patches/0004-mmc-block-Fixup-condition-for-CMD13-polling-for-RPMB.patch \
   file://patches/0005-Revert-net-dsa-microchip-set-the-correct-number-of-p.patch \
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 9c9bc9c6a214827166b61c73415d09686a95eb0c
-# umpf-topic-range: a406d03ba22eabe8b62ec773904b29ba8f8c03f3..8b5d2223bff4b7cb22ea174ea9e6089ce140efef
+# umpf-topic-range: 859c4ad716a386668563bd2daacb042dc627015a..47d68914bafaae3bd20b7d0f887d14b056c97ffc
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -24,7 +24,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/etnaviv
 # umpf-hashinfo: 5bcf41f3ae8cce23305dc6bb989dd6c60023561e
-# umpf-topic-range: 8b5d2223bff4b7cb22ea174ea9e6089ce140efef..7c1cf98ffa4bab5cfe05f5adc58532144f5f6b40
+# umpf-topic-range: 47d68914bafaae3bd20b7d0f887d14b056c97ffc..a8955c212d3c647ee3e68d22c872578fa38fc4b6
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -41,7 +41,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/coda
 # umpf-hashinfo: bf7a254d8b776db87aa4b5d796ebecb0fb9febe7
-# umpf-topic-range: 7c1cf98ffa4bab5cfe05f5adc58532144f5f6b40..3bdfb797986521002c05b3901ddb8501a20b1ccf
+# umpf-topic-range: a8955c212d3c647ee3e68d22c872578fa38fc4b6..afccd65734cbfd1f0d067d5448303da54438d279
 SRC_URI += "\
   file://patches/0301-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   file://patches/0302-media-coda-create-bitstream-debugfs-entry.patch \
@@ -101,7 +101,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched
 # umpf-hashinfo: e00c050f946b5ce4706f087cef68eedb9470958a
-# umpf-topic-range: 3bdfb797986521002c05b3901ddb8501a20b1ccf..278f3d44a8a2429aae0c2bfac89463b90eca6515
+# umpf-topic-range: afccd65734cbfd1f0d067d5448303da54438d279..434da16db8089417773f6f0db02057a2f85219a5
 SRC_URI += "\
   file://patches/0401-drm-sched-remove-superfluous-whitespace-in-drm_sched.patch \
   file://patches/0402-drm-sched-Use-completion-to-wait-for-sched-thread-id.patch \
@@ -113,36 +113,53 @@ SRC_URI += "\
   "
 # umpf-topic: v5.4/topic/drm-sched-accounting
 # umpf-hashinfo: 9552e24bff06545632b895c3b21d050fea005a4f
-# umpf-topic-range: 278f3d44a8a2429aae0c2bfac89463b90eca6515..0fb926c092d9c9a7147e0d4b31f001d4d71745c9
+# umpf-topic-range: 434da16db8089417773f6f0db02057a2f85219a5..8302e88919307a940ba1a5f27e01a98c539e456f
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873
-# umpf-hashinfo: 02b0e02023d3932e9468c9049291357e59919d5c
-# umpf-topic-range: 0fb926c092d9c9a7147e0d4b31f001d4d71745c9..23d4e504a9be5eab7e10b34365b0498d3f854138
+# umpf-hashinfo: 23e43bdebabe1022f52f1755c6e37a281af21fae
+# umpf-topic-range: 8302e88919307a940ba1a5f27e01a98c539e456f..8a4b03006a5f9ac6a1f07b101b282fb04862afb5
 SRC_URI += "\
-  file://patches/0601-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
-  file://patches/0602-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
-  file://patches/0603-net-tag-ksz-Add-KSZ8863-tag-code.patch \
-  file://patches/0604-net-dsa-microchip-refactor-to-use-ksz8863-register-o.patch \
-  file://patches/0605-net-dsa-microchip-Add-Microchip-KSZ8863-SMI-based-dr.patch \
-  file://patches/0606-net-dsa-microchip-Add-Microchip-KSZ8863-SPI-based-dr.patch \
-  file://patches/0607-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
-  file://patches/0608-ksz9875-add-mutex-locking-to-vlan-handling.patch \
-  file://patches/0609-net-dsa-tag-fix-tag-handling.patch \
+  file://patches/0601-net-phy-micrel-move-phy-reg-offsets-to-common-header.patch \
+  file://patches/0602-net-dsa-microchip-ksz8795-remove-unused-last_port-op.patch \
+  file://patches/0603-net-dsa-microchip-ksz8795-move-dev-asignement-from-d.patch \
+  file://patches/0604-net-dsa-microchip-ksz8795-use-reg_mib_cnt-where-poss.patch \
+  file://patches/0605-net-dsa-microchip-ksz8795-use-mib_cnt-where-possible.patch \
+  file://patches/0606-net-dsa-microchip-ksz8795-fix-port_cnt-usage-to-alig.patch \
+  file://patches/0607-net-dsa-microchip-ksz9477-remove-superfluous-num_por.patch \
+  file://patches/0608-net-dsa-microchip-ksz8795-remove-usage-of-mib_num_co.patch \
+  file://patches/0609-net-dsa-microchip-ksz8795-use-port_cnt-where-possibl.patch \
+  file://patches/0610-net-dsa-microchip-ksz8795-dynamic-allocate-memory-fo.patch \
+  file://patches/0611-net-dsa-microchip-ksz8795-change-drivers-prefix-to-b.patch \
+  file://patches/0612-net-dsa-microchip-ksz8795-move-register-offsets-and-.patch \
+  file://patches/0613-net-tag-ksz-Add-KSZ8863-tag-code.patch \
+  file://patches/0614-net-dsa-microchip-ksz8795-add-support-for-ksz88xx-ch.patch \
+  file://patches/0615-net-dsa-microchip-Add-Microchip-KSZ8863-SPI-based-dr.patch \
+  file://patches/0616-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
+  file://patches/0617-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
+  file://patches/0618-net-dsa-microchip-Add-Microchip-KSZ8863-SMI-based-dr.patch \
+  file://patches/0619-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
+  file://patches/0620-net-dsa-microchip-ksz8795-add-phylink-support.patch \
+  file://patches/0621-net-dsa-register-dsa-mdio-via-of-if-compatible-is-se.patch \
+  file://patches/0622-net-dsa-microchip-ksz8795-return-values-of-regmap_up.patch \
+  file://patches/0623-net-dsa-microchip-ksz8795-add-interrupt-support.patch \
+  file://patches/0624-net-phy-micrel-add-dummy-interrupt-functions-which-a.patch \
+  file://patches/0625-net-dsa-microchip-add-mutex-locking-to-vlan-handling.patch \
+  file://patches/0626-net-dsa-microchip-ksz_common-fix-slave-usage-if-port.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873_cabletest
-# umpf-hashinfo: 26c96ad4f0fc1239399fe332c085672407076de6
-# umpf-topic-range: 23d4e504a9be5eab7e10b34365b0498d3f854138..2037a2fa7d08d5b5c7e9d6d14d2fdc1d63a8753d
+# umpf-hashinfo: f8c0036a4954d349e9e12125977cf884f3434815
+# umpf-topic-range: 8a4b03006a5f9ac6a1f07b101b282fb04862afb5..f53f90e18d7673df9b516afa31c3405121f5962d
 SRC_URI += "\
   file://patches/0701-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
   file://patches/0702-dsa-add-self_test-ethtool-function-handling.patch \
   file://patches/0703-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
   "
-# umpf-release: 5.4/customers/skov/imx6/20201014-1
-# umpf-topic-range: 2037a2fa7d08d5b5c7e9d6d14d2fdc1d63a8753d..59de2870451a74634eca2b821772ff216006fa4d
+# umpf-release: 5.4/customers/skov/imx6/20201215-1
+# umpf-topic-range: f53f90e18d7673df9b516afa31c3405121f5962d..e27ab3d35fc427db3bb9c39fd78109801b770ffd
 SRC_URI += "\
-  file://patches/0801-Release-5.4-customers-skov-imx6-20201014-1.patch \
+  file://patches/0801-Release-5.4-customers-skov-imx6-20201215-1.patch \
   "
 # umpf-end

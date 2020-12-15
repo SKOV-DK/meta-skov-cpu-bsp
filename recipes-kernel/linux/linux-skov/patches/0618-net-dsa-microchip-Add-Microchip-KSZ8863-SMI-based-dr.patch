@@ -14,19 +14,32 @@ v1 -> v2:  - this code was part of previuos patch
 v2 -> v3:  - this code was part of previuos patch
 v3 -> v4:  - moved this glue code so separate patch
            - fixed locking in regmap and mdio_read/mdio_write
+v4 -> v5:  - removed extra default y in Kconfig
+           - fixed capitalization in Kconfig description
+	   - removed unnecessary cast
+	   - added back the define for READ operation
+	   - added KSZ88x3 to help text for KSZ8795 Kconfig entry
 ---
- drivers/net/dsa/microchip/Kconfig       |   9 ++
+ drivers/net/dsa/microchip/Kconfig       |  10 +-
  drivers/net/dsa/microchip/Makefile      |   1 +
- drivers/net/dsa/microchip/ksz8863_smi.c | 204 ++++++++++++++++++++++++++++++++
- drivers/net/dsa/microchip/ksz_common.h  |   1 +
- 4 files changed, 215 insertions(+)
+ drivers/net/dsa/microchip/ksz8863_smi.c | 206 ++++++++++++++++++++++++++++++++
+ 3 files changed, 216 insertions(+), 1 deletion(-)
  create mode 100644 drivers/net/dsa/microchip/ksz8863_smi.c
 
 diff --git a/drivers/net/dsa/microchip/Kconfig b/drivers/net/dsa/microchip/Kconfig
-index 1d7870c6df3c..a94985f77a3e 100644
+index 1d7870c6df3c..6a26e276b3bd 100644
 --- a/drivers/net/dsa/microchip/Kconfig
 +++ b/drivers/net/dsa/microchip/Kconfig
-@@ -39,3 +39,12 @@ config NET_DSA_MICROCHIP_KSZ8795_SPI
+@@ -28,7 +28,7 @@ menuconfig NET_DSA_MICROCHIP_KSZ8795
+ 	depends on NET_DSA
+ 	select NET_DSA_MICROCHIP_KSZ_COMMON
+ 	help
+-	  This driver adds support for Microchip KSZ8795 switch chips.
++	  This driver adds support for Microchip KSZ8795/KSZ88X3 switch chips.
+ 
+ config NET_DSA_MICROCHIP_KSZ8795_SPI
+ 	tristate "KSZ8795 series SPI connected switch driver"
+@@ -39,3 +39,11 @@ config NET_DSA_MICROCHIP_KSZ8795_SPI
  
  	  It is required to use the KSZ8795 switch driver as the only access
  	  is through SPI.
@@ -35,10 +48,9 @@ index 1d7870c6df3c..a94985f77a3e 100644
 +	tristate "KSZ series SMI connected switch driver"
 +	depends on NET_DSA_MICROCHIP_KSZ8795
 +	select MDIO_BITBANG
-+	default y
 +	help
 +	  Select to enable support for registering switches configured through
-+	  Microchip SMI. It Supports the KSZ8863 and KSZ8873 Switch.
++	  Microchip SMI. It supports the KSZ8863 and KSZ8873 switch.
 diff --git a/drivers/net/dsa/microchip/Makefile b/drivers/net/dsa/microchip/Makefile
 index 929caa81e782..2a03b21a3386 100644
 --- a/drivers/net/dsa/microchip/Makefile
@@ -50,10 +62,10 @@ index 929caa81e782..2a03b21a3386 100644
 +obj-$(CONFIG_NET_DSA_MICROCHIP_KSZ8863_SMI)	+= ksz8863_smi.o
 diff --git a/drivers/net/dsa/microchip/ksz8863_smi.c b/drivers/net/dsa/microchip/ksz8863_smi.c
 new file mode 100644
-index 000000000000..0401ccc5e6bf
+index 000000000000..c5400b96571b
 --- /dev/null
 +++ b/drivers/net/dsa/microchip/ksz8863_smi.c
-@@ -0,0 +1,204 @@
+@@ -0,0 +1,206 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Microchip KSZ8863 series register access through SMI
@@ -73,10 +85,12 @@ index 000000000000..0401ccc5e6bf
 + *
 + */
 +
++#define SMI_KSZ88XX_READ_PHY	BIT(4)
++
 +static int ksz8863_mdio_read(void *ctx, const void *reg_buf, size_t reg_len,
 +			     void *val_buf, size_t val_len)
 +{
-+	struct ksz_device *dev = (struct ksz_device *)ctx;
++	struct ksz_device *dev = ctx;
 +	struct ksz8 *ksz8 = dev->priv;
 +	struct mdio_device *mdev = ksz8->priv;
 +	u8 reg = *(u8 *)reg_buf;
@@ -89,7 +103,7 @@ index 000000000000..0401ccc5e6bf
 +		int tmp = reg + i;
 +
 +		ret = __mdiobus_read(mdev->bus, ((tmp & 0xE0) >> 5) |
-+				     BIT(4), tmp);
++				     SMI_KSZ88XX_READ_PHY, tmp);
 +		if (ret < 0)
 +			goto out;
 +
@@ -105,7 +119,7 @@ index 000000000000..0401ccc5e6bf
 +
 +static int ksz8863_mdio_write(void *ctx, const void *data, size_t count)
 +{
-+	struct ksz_device *dev = (struct ksz_device *)ctx;
++	struct ksz_device *dev = ctx;
 +	struct ksz8 *ksz8 = dev->priv;
 +	struct mdio_device *mdev = ksz8->priv;
 +	u8 *val = (u8 *)(data + 4);
@@ -218,7 +232,7 @@ index 000000000000..0401ccc5e6bf
 +	if (mdiodev->dev.platform_data)
 +		dev->pdata = mdiodev->dev.platform_data;
 +
-+	ret = ksz8863_switch_register(dev);
++	ret = ksz8_switch_register(dev);
 +
 +	/* Main DSA driver may not be started yet. */
 +	if (ret)
@@ -258,15 +272,3 @@ index 000000000000..0401ccc5e6bf
 +MODULE_AUTHOR("Michael Grzeschik <m.grzeschik@pengutronix.de>");
 +MODULE_DESCRIPTION("Microchip KSZ8863 SMI Switch driver");
 +MODULE_LICENSE("GPL v2");
-diff --git a/drivers/net/dsa/microchip/ksz_common.h b/drivers/net/dsa/microchip/ksz_common.h
-index 061142b183cb..6fc4c4b8c07c 100644
---- a/drivers/net/dsa/microchip/ksz_common.h
-+++ b/drivers/net/dsa/microchip/ksz_common.h
-@@ -149,6 +149,7 @@ int ksz_switch_register(struct ksz_device *dev,
- void ksz_switch_remove(struct ksz_device *dev);
- 
- int ksz8795_switch_register(struct ksz_device *dev);
-+int ksz8863_switch_register(struct ksz_device *dev);
- int ksz9477_switch_register(struct ksz_device *dev);
- 
- void ksz_update_port_member(struct ksz_device *dev, int port);
