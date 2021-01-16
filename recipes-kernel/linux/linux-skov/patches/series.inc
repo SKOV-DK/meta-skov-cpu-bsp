@@ -8,7 +8,6 @@ SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   file://patches/0003-imx6-cpu-add-SKOV-specific-touchtoy-driver.patch \
-  file://patches/0004-mmc-block-Fixup-condition-for-CMD13-polling-for-RPMB.patch \
   file://patches/0005-Revert-net-dsa-microchip-set-the-correct-number-of-p.patch \
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
