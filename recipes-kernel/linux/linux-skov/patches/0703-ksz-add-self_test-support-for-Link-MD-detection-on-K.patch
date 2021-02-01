@@ -12,10 +12,10 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  2 files changed, 80 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 040bb0cc51f8..537d3eb0e651 100644
+index bccbb6a04542..acecedaa823e 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
-@@ -719,6 +719,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+@@ -720,6 +720,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  	u16 data = 0;
  	u8 p = phy;
  
@@ -23,7 +23,7 @@ index 040bb0cc51f8..537d3eb0e651 100644
  	switch (reg) {
  	case PHY_REG_CTRL:
  		ksz_pread8(dev, p, regs[P_NEG_RESTART_CTRL], &restart);
-@@ -809,6 +810,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+@@ -810,6 +811,7 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  	}
  	if (processed)
  		*val = data;
@@ -31,15 +31,15 @@ index 040bb0cc51f8..537d3eb0e651 100644
  }
  
  static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
-@@ -818,6 +820,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
- 	const u8 *regs = ksz8->regs;
+@@ -819,6 +821,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  	u8 restart, speed, ctrl, data;
+ 	const u8 *regs = ksz8->regs;
  
 +	mutex_lock(&dev->dev_mutex);
  	switch (reg) {
  	case PHY_REG_CTRL:
  
-@@ -916,6 +919,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
+@@ -918,6 +921,7 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  	default:
  		break;
  	}
@@ -47,8 +47,8 @@ index 040bb0cc51f8..537d3eb0e651 100644
  }
  
  static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
-@@ -927,16 +931,84 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
- 		DSA_TAG_PROTO_KSZ8795 : DSA_TAG_PROTO_KSZ8863;
+@@ -930,16 +934,84 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
+ 		DSA_TAG_PROTO_KSZ8863 : DSA_TAG_PROTO_KSZ8795;
  }
  
 +enum ksz8_ethtool_tests {
@@ -143,16 +143,16 @@ index 040bb0cc51f8..537d3eb0e651 100644
  	.get_strings		= ksz8_get_strings,
  	.get_ethtool_stats	= ksz_get_ethtool_stats,
  	.get_sset_count		= ksz_sset_count,
-@@ -1840,6 +1913,7 @@ static int ksz8_switch_init(struct ksz_device *dev)
+@@ -1842,6 +1915,7 @@ static int ksz8_switch_init(struct ksz_device *dev)
  	dev->port_mask |= dev->host_mask;
  
- 	dev->reg_mib_cnt = KSZ8795_COUNTER_NUM;
+ 	dev->reg_mib_cnt = MIB_COUNTER_NUM;
 +	dev->test_cnt = KSZ8_ETHTOOL_TEST_MAX;
  
  	dev->phy_port_cnt = dev->port_cnt - 1;
  
 diff --git a/drivers/net/dsa/microchip/ksz8795_reg.h b/drivers/net/dsa/microchip/ksz8795_reg.h
-index 4786297d6b03..d754768100dd 100644
+index 3b2722286613..a74bfa34f1d4 100644
 --- a/drivers/net/dsa/microchip/ksz8795_reg.h
 +++ b/drivers/net/dsa/microchip/ksz8795_reg.h
 @@ -248,6 +248,9 @@

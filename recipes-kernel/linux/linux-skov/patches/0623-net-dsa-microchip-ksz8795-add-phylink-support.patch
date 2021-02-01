@@ -7,13 +7,13 @@ Subject: [PATCH] net: dsa: microchip: ksz8795: add phylink support
  1 file changed, 73 insertions(+)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index de15f32df783..5bc3042ed64d 100644
+index e870aa3201c5..30c9cf3ecedc 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -18,6 +18,7 @@
+ #include <linux/micrel_phy.h>
  #include <net/dsa.h>
  #include <net/switchdev.h>
- #include <linux/micrel_phy.h>
 +#include <linux/phylink.h>
  
  #include "ksz_common.h"
@@ -70,7 +70,7 @@ index de15f32df783..5bc3042ed64d 100644
 +
 +	phylink_set(mask, Pause);
 +	/* Silicon Errata Sheet (DS80000830A): Asym_Pause limit to port 2 */
-+	if (port || ksz_is_87(dev))
++	if (port || (!(dev->features & IS_88X3)))
 +		phylink_set(mask, Asym_Pause);
 +
 +	/* 10M and 100M are only supported */

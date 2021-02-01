@@ -12,7 +12,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  2 files changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
-index 4d142141d69f..f72685ebfe71 100644
+index e1ef9ac19b3b..94eed06f954c 100644
 --- a/drivers/net/dsa/microchip/ksz_common.c
 +++ b/drivers/net/dsa/microchip/ksz_common.c
 @@ -168,10 +168,14 @@ int ksz_sset_count(struct dsa_switch *ds, int port, int sset)

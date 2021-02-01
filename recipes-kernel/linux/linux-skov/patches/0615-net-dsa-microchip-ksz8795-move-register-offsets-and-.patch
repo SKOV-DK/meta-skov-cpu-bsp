@@ -15,6 +15,8 @@ v1 -> v4: - extracted this change from bigger previous patch
 v4 -> v5: - added missing variables in ksz8_r_vlan_entries
           - moved shifts, masks and registers to arrays indexed by enums
 	  - using unsigned types where possible
+v5 -> v6: - changed variable order to revers christmas tree
+          - fixed shift entry VLAN_TABLE_MEMBERSHIP to VLAN_TABLE_MEMBERSHIP_S
 ---
  drivers/net/dsa/microchip/ksz8.h        |  69 +++++++++
  drivers/net/dsa/microchip/ksz8795.c     | 261 ++++++++++++++++++++++----------
@@ -24,7 +26,7 @@ v4 -> v5: - added missing variables in ksz8_r_vlan_entries
 
 diff --git a/drivers/net/dsa/microchip/ksz8.h b/drivers/net/dsa/microchip/ksz8.h
 new file mode 100644
-index 000000000000..d3e89c27e22a
+index 000000000000..9d611895d3cf
 --- /dev/null
 +++ b/drivers/net/dsa/microchip/ksz8.h
 @@ -0,0 +1,69 @@
@@ -32,7 +34,7 @@ index 000000000000..d3e89c27e22a
 +/*
 + * Microchip KSZ8XXX series register access
 + *
-+ * Copyright (C) 2019 Pengutronix, Michael Grzeschik <kernel@pengutronix.de>
++ * Copyright (C) 2020 Pengutronix, Michael Grzeschik <kernel@pengutronix.de>
 + */
 +
 +#ifndef __KSZ8XXX_H
@@ -98,7 +100,7 @@ index 000000000000..d3e89c27e22a
 +
 +#endif
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 52a12a18da11..cded8367c7ba 100644
+index d751393ccd0f..6ea6916dd5e5 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -21,6 +21,57 @@
@@ -108,19 +110,19 @@ index 52a12a18da11..cded8367c7ba 100644
 +#include "ksz8.h"
 +
 +static const u8 ksz8795_regs[] = {
-+	[REG_IND_CTRL_0]	= 0x6E,
-+	[REG_IND_DATA_8]	= 0x70,
-+	[REG_IND_DATA_CHECK]	= 0x72,
-+	[REG_IND_DATA_HI]	= 0x71,
-+	[REG_IND_DATA_LO]	= 0x75,
-+	[REG_IND_MIB_CHECK]	= 0x74,
-+	[P_FORCE_CTRL]		= 0x0C,
-+	[P_LINK_STATUS]		= 0x0E,
-+	[P_LOCAL_CTRL]		= 0x07,
-+	[P_NEG_RESTART_CTRL]	= 0x0D,
-+	[P_REMOTE_STATUS]	= 0x08,
-+	[P_SPEED_STATUS]	= 0x09,
-+	[S_TAIL_TAG_CTRL]	= 0x0C,
++	[REG_IND_CTRL_0]		= 0x6E,
++	[REG_IND_DATA_8]		= 0x70,
++	[REG_IND_DATA_CHECK]		= 0x72,
++	[REG_IND_DATA_HI]		= 0x71,
++	[REG_IND_DATA_LO]		= 0x75,
++	[REG_IND_MIB_CHECK]		= 0x74,
++	[P_FORCE_CTRL]			= 0x0C,
++	[P_LINK_STATUS]			= 0x0E,
++	[P_LOCAL_CTRL]			= 0x07,
++	[P_NEG_RESTART_CTRL]		= 0x0D,
++	[P_REMOTE_STATUS]		= 0x08,
++	[P_SPEED_STATUS]		= 0x09,
++	[S_TAIL_TAG_CTRL]		= 0x0C,
 +};
 +
 +static const u32 ksz8795_masks[] = {
@@ -128,25 +130,25 @@ index 52a12a18da11..cded8367c7ba 100644
 +	[SW_TAIL_TAG_ENABLE]		= BIT(1),
 +	[MIB_COUNTER_OVERFLOW]		= BIT(6),
 +	[MIB_COUNTER_VALID]		= BIT(5),
-+	[VLAN_TABLE_FID]		= GENMASK(6,0),
-+	[VLAN_TABLE_MEMBERSHIP]		= GENMASK(11,7),
++	[VLAN_TABLE_FID]		= GENMASK(6, 0),
++	[VLAN_TABLE_MEMBERSHIP]		= GENMASK(11, 7),
 +	[VLAN_TABLE_VALID]		= BIT(12),
 +	[STATIC_MAC_TABLE_VALID]	= BIT(21),
 +	[STATIC_MAC_TABLE_USE_FID]	= BIT(23),
-+	[STATIC_MAC_TABLE_FID]		= GENMASK(30,24),
++	[STATIC_MAC_TABLE_FID]		= GENMASK(30, 24),
 +	[STATIC_MAC_TABLE_OVERRIDE]	= BIT(26),
-+	[STATIC_MAC_TABLE_FWD_PORTS]	= GENMASK(24,20),
-+	[DYNAMIC_MAC_TABLE_ENTRIES_H]	= GENMASK(6,0),
++	[STATIC_MAC_TABLE_FWD_PORTS]	= GENMASK(24, 20),
++	[DYNAMIC_MAC_TABLE_ENTRIES_H]	= GENMASK(6, 0),
 +	[DYNAMIC_MAC_TABLE_MAC_EMPTY]	= BIT(8),
 +	[DYNAMIC_MAC_TABLE_NOT_READY]	= BIT(7),
-+	[DYNAMIC_MAC_TABLE_ENTRIES]	= GENMASK(31,29),
-+	[DYNAMIC_MAC_TABLE_FID]		= GENMASK(26,20),
-+	[DYNAMIC_MAC_TABLE_SRC_PORT]	= GENMASK(26,24),
-+	[DYNAMIC_MAC_TABLE_TIMESTAMP]	= GENMASK(28,27),
++	[DYNAMIC_MAC_TABLE_ENTRIES]	= GENMASK(31, 29),
++	[DYNAMIC_MAC_TABLE_FID]		= GENMASK(26, 20),
++	[DYNAMIC_MAC_TABLE_SRC_PORT]	= GENMASK(26, 24),
++	[DYNAMIC_MAC_TABLE_TIMESTAMP]	= GENMASK(28, 27),
 +};
 +
 +static const u8 ksz8795_shifts[] = {
-+	[VLAN_TABLE_MEMBERSHIP]		= 7,
++	[VLAN_TABLE_MEMBERSHIP_S]	= 7,
 +	[VLAN_TABLE]			= 16,
 +	[STATIC_MAC_FWD_PORTS]		= 16,
 +	[STATIC_MAC_FID]		= 24,
@@ -164,8 +166,8 @@ index 52a12a18da11..cded8367c7ba 100644
  static void ksz8_r_mib_cnt(struct ksz_device *dev, int port, u16 addr, u64 *cnt)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
 +	const u32 *masks = ksz8->masks;
++	const u8 *regs = ksz8->regs;
  	u16 ctrl_addr;
  	u32 data;
  	u8 check;
@@ -197,8 +199,8 @@ index 52a12a18da11..cded8367c7ba 100644
  			   u64 *dropped, u64 *cnt)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
 +	const u32 *masks = ksz8->masks;
++	const u8 *regs = ksz8->regs;
  	u16 ctrl_addr;
  	u32 data;
  	u8 check;
@@ -276,8 +278,8 @@ index 52a12a18da11..cded8367c7ba 100644
  static int ksz8_valid_dyn_entry(struct ksz_device *dev, u8 *data)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
 +	const u32 *masks = ksz8->masks;
++	const u8 *regs = ksz8->regs;
  	int timeout = 100;
  
  	do {
@@ -307,9 +309,9 @@ index 52a12a18da11..cded8367c7ba 100644
  				u8 *timestamp, u16 *entries)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
-+	const u32 *masks = ksz8->masks;
 +	const u8 *shifts = ksz8->shifts;
++	const u32 *masks = ksz8->masks;
++	const u8 *regs = ksz8->regs;
  	u32 data_hi, data_lo;
  	u16 ctrl_addr;
  	u8 data;
@@ -338,8 +340,8 @@ index 52a12a18da11..cded8367c7ba 100644
 -			DYNAMIC_MAC_ENTRIES_S;
 +		cnt = data & masks[DYNAMIC_MAC_TABLE_ENTRIES_H];
 +		cnt <<= shifts[DYNAMIC_MAC_ENTRIES_H];
-+		cnt |= (data_hi & masks[DYNAMIC_MAC_TABLE_ENTRIES] >>
-+			shifts[DYNAMIC_MAC_ENTRIES]);
++		cnt |= (data_hi & masks[DYNAMIC_MAC_TABLE_ENTRIES]) >>
++			shifts[DYNAMIC_MAC_ENTRIES];
  		*entries = cnt + 1;
  
 -		*fid = (data_hi & DYNAMIC_MAC_TABLE_FID) >>
@@ -348,12 +350,12 @@ index 52a12a18da11..cded8367c7ba 100644
 -			DYNAMIC_MAC_SRC_PORT_S;
 -		*timestamp = (data_hi & DYNAMIC_MAC_TABLE_TIMESTAMP) >>
 -			DYNAMIC_MAC_TIMESTAMP_S;
-+		*fid = (data_hi & masks[DYNAMIC_MAC_TABLE_FID] >>
-+			shifts[DYNAMIC_MAC_FID]);
-+		*src_port = (data_hi & masks[DYNAMIC_MAC_TABLE_SRC_PORT] >>
-+			shifts[DYNAMIC_MAC_SRC_PORT]);
-+		*timestamp = (data_hi & masks[DYNAMIC_MAC_TABLE_TIMESTAMP] >>
-+			shifts[DYNAMIC_MAC_TIMESTAMP]);
++		*fid = (data_hi & masks[DYNAMIC_MAC_TABLE_FID]) >>
++			shifts[DYNAMIC_MAC_FID];
++		*src_port = (data_hi & masks[DYNAMIC_MAC_TABLE_SRC_PORT]) >>
++			shifts[DYNAMIC_MAC_SRC_PORT];
++		*timestamp = (data_hi & masks[DYNAMIC_MAC_TABLE_TIMESTAMP]) >>
++			shifts[DYNAMIC_MAC_TIMESTAMP];
  
  		mac_addr[5] = (u8)data_lo;
  		mac_addr[4] = (u8)(data_lo >> 8);
@@ -362,8 +364,8 @@ index 52a12a18da11..cded8367c7ba 100644
  				struct alu_struct *alu)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u32 *masks = ksz8->masks;
 +	const u8 *shifts = ksz8->shifts;
++	const u32 *masks = ksz8->masks;
  	u32 data_hi, data_lo;
  	u64 data;
  
@@ -404,8 +406,8 @@ index 52a12a18da11..cded8367c7ba 100644
  				 struct alu_struct *alu)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u32 *masks = ksz8->masks;
 +	const u8 *shifts = ksz8->shifts;
++	const u32 *masks = ksz8->masks;
  	u32 data_hi, data_lo;
  	u64 data;
  
@@ -444,8 +446,8 @@ index 52a12a18da11..cded8367c7ba 100644
 -	*member = (vlan & VLAN_TABLE_MEMBERSHIP) >> VLAN_TABLE_MEMBERSHIP_S;
 -	*valid = !!(vlan & VLAN_TABLE_VALID);
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u32 *masks = ksz8->masks;
 +	const u8 *shifts = ksz8->shifts;
++	const u32 *masks = ksz8->masks;
 +
 +	*fid = vlan & masks[VLAN_TABLE_FID];
 +	*member = (vlan & masks[VLAN_TABLE_MEMBERSHIP]) >>
@@ -458,8 +460,8 @@ index 52a12a18da11..cded8367c7ba 100644
 +			 u32 *vlan)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u32 *masks = ksz8->masks;
 +	const u8 *shifts = ksz8->shifts;
++	const u32 *masks = ksz8->masks;
 +
  	*vlan = fid;
 -	*vlan |= (u16)member << VLAN_TABLE_MEMBERSHIP_S;
@@ -485,16 +487,16 @@ index 52a12a18da11..cded8367c7ba 100644
  	}
  }
  
-@@ -455,6 +546,8 @@ static void ksz8_w_vlan_table(struct ksz_device *dev, u16 vid, u32 vlan)
+@@ -455,16 +546,18 @@ static void ksz8_w_vlan_table(struct ksz_device *dev, u16 vid, u32 vlan)
  
  static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  {
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
  	u8 restart, speed, ctrl, link;
++	const u8 *regs = ksz8->regs;
  	int processed = true;
  	u16 data = 0;
-@@ -462,9 +555,9 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+ 	u8 p = phy;
  
  	switch (reg) {
  	case PHY_REG_CTRL:
@@ -534,15 +536,16 @@ index 52a12a18da11..cded8367c7ba 100644
  		data = PHY_AUTO_NEG_802_3;
  		if (link & PORT_REMOTE_SYM_PAUSE)
  			data |= PHY_AUTO_NEG_SYM_PAUSE;
-@@ -547,6 +640,8 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
+@@ -547,7 +640,9 @@ static void ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val)
  static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  {
  	u8 p = phy;
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
  	u8 restart, speed, ctrl, data;
++	const u8 *regs = ksz8->regs;
  
  	switch (reg) {
+ 	case PHY_REG_CTRL:
 @@ -555,15 +650,15 @@ static void ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val)
  		/* Do not support PHY reset function. */
  		if (val & PHY_RESET)
@@ -595,7 +598,7 @@ index 52a12a18da11..cded8367c7ba 100644
  		break;
  	default:
  		break;
-@@ -803,14 +898,15 @@ static void ksz8_port_vlan_add(struct dsa_switch *ds, int port,
+@@ -801,14 +896,15 @@ static void ksz8_port_vlan_add(struct dsa_switch *ds, int port,
  {
  	bool untagged = vlan->flags & BRIDGE_VLAN_INFO_UNTAGGED;
  	struct ksz_device *dev = ds->priv;
@@ -613,7 +616,7 @@ index 52a12a18da11..cded8367c7ba 100644
  
  		/* First time to setup the VLAN entry. */
  		if (!valid) {
-@@ -820,9 +916,8 @@ static void ksz8_port_vlan_add(struct dsa_switch *ds, int port,
+@@ -818,9 +914,8 @@ static void ksz8_port_vlan_add(struct dsa_switch *ds, int port,
  		}
  		member |= BIT(port);
  
@@ -624,7 +627,7 @@ index 52a12a18da11..cded8367c7ba 100644
  		/* change PVID */
  		if (vlan->flags & BRIDGE_VLAN_INFO_PVID)
  			new_pvid = vid;
-@@ -841,7 +936,8 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
+@@ -839,7 +934,8 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
  {
  	bool untagged = vlan->flags & BRIDGE_VLAN_INFO_UNTAGGED;
  	struct ksz_device *dev = ds->priv;
@@ -634,7 +637,7 @@ index 52a12a18da11..cded8367c7ba 100644
  	u8 fid, member, valid;
  
  	ksz_pread16(dev, port, REG_PORT_CTRL_VID, &pvid);
-@@ -851,7 +947,7 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
+@@ -849,7 +945,7 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
  
  	for (vid = vlan->vid_begin; vid <= vlan->vid_end; vid++) {
  		ksz8_r_vlan_table(dev, vid, &data);
@@ -643,7 +646,7 @@ index 52a12a18da11..cded8367c7ba 100644
  
  		member &= ~BIT(port);
  
-@@ -864,7 +960,7 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
+@@ -862,7 +958,7 @@ static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
  		if (pvid == vid)
  			new_pvid = 1;
  
@@ -652,16 +655,16 @@ index 52a12a18da11..cded8367c7ba 100644
  		ksz8_w_vlan_table(dev, vid, data);
  	}
  
-@@ -923,6 +1019,8 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
+@@ -960,6 +1056,8 @@ static void ksz8795_cpu_interface_select(struct ksz_device *dev, int port)
+ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
  {
  	struct ksz_port *p = &dev->ports[port];
- 	u8 data8, member;
 +	struct ksz8 *ksz8 = dev->priv;
 +	const u32 *masks = ksz8->masks;
+ 	u8 member;
  
  	/* enable broadcast storm limit */
- 	ksz_port_cfg(dev, port, P_BCAST_STORM_CTRL, PORT_BROADCAST_STORM, true);
-@@ -933,7 +1031,8 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
+@@ -971,7 +1069,8 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
  	ksz_port_cfg(dev, port, P_PRIO_CTRL, PORT_DIFFSERV_ENABLE, false);
  
  	/* replace priority */
@@ -671,13 +674,13 @@ index 52a12a18da11..cded8367c7ba 100644
  
  	/* enable 802.1p priority */
  	ksz_port_cfg(dev, port, P_PRIO_CTRL, PORT_802_1P_ENABLE, true);
-@@ -990,13 +1089,16 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
+@@ -996,13 +1095,16 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
  static void ksz8_config_cpu_port(struct dsa_switch *ds)
  {
  	struct ksz_device *dev = ds->priv;
 +	struct ksz8 *ksz8 = dev->priv;
-+	const u8 *regs = ksz8->regs;
 +	const u32 *masks = ksz8->masks;
++	const u8 *regs = ksz8->regs;
  	struct ksz_port *p;
  	u8 remote;
  	int i;
@@ -689,7 +692,7 @@ index 52a12a18da11..cded8367c7ba 100644
  
  	p = &dev->ports[dev->cpu_port];
  	p->vid_member = dev->port_mask;
-@@ -1025,7 +1127,7 @@ static void ksz8_config_cpu_port(struct dsa_switch *ds)
+@@ -1031,7 +1133,7 @@ static void ksz8_config_cpu_port(struct dsa_switch *ds)
  		p = &dev->ports[i];
  		if (!p->on)
  			continue;
@@ -698,7 +701,7 @@ index 52a12a18da11..cded8367c7ba 100644
  		if (remote & PORT_FIBER_MODE)
  			p->fiber = 1;
  		if (p->fiber)
-@@ -1211,6 +1313,7 @@ static const struct ksz_chip_data ksz8_switch_chips[] = {
+@@ -1217,6 +1319,7 @@ static const struct ksz_chip_data ksz8_switch_chips[] = {
  static int ksz8_switch_init(struct ksz_device *dev)
  {
  	int i;
@@ -706,7 +709,7 @@ index 52a12a18da11..cded8367c7ba 100644
  
  	dev->ds->ops = &ksz8_switch_ops;
  
-@@ -1233,6 +1336,10 @@ static int ksz8_switch_init(struct ksz_device *dev)
+@@ -1239,6 +1342,10 @@ static int ksz8_switch_init(struct ksz_device *dev)
  	if (!dev->cpu_ports)
  		return -ENODEV;
  
@@ -718,7 +721,7 @@ index 52a12a18da11..cded8367c7ba 100644
  	dev->port_mask |= dev->host_mask;
  
 diff --git a/drivers/net/dsa/microchip/ksz8795_reg.h b/drivers/net/dsa/microchip/ksz8795_reg.h
-index e46776aa2ac9..256311a01e0e 100644
+index 7e9be3d0a4df..ed11b1a41d58 100644
 --- a/drivers/net/dsa/microchip/ksz8795_reg.h
 +++ b/drivers/net/dsa/microchip/ksz8795_reg.h
 @@ -98,7 +98,6 @@
@@ -785,7 +788,7 @@ index e46776aa2ac9..256311a01e0e 100644
  #define REG_INT_STATUS			0x7C
  #define REG_INT_ENABLE			0x7D
  
-@@ -795,12 +779,6 @@
+@@ -794,12 +778,6 @@
  #define P_MIRROR_CTRL			REG_PORT_CTRL_1
  #define P_802_1P_CTRL			REG_PORT_CTRL_2
  #define P_STP_CTRL			REG_PORT_CTRL_2
@@ -798,7 +801,7 @@ index e46776aa2ac9..256311a01e0e 100644
  #define P_PASS_ALL_CTRL			REG_PORT_CTRL_12
  #define P_INS_SRC_PVID_CTRL		REG_PORT_CTRL_12
  #define P_DROP_TAG_CTRL			REG_PORT_CTRL_13
-@@ -815,7 +793,6 @@
+@@ -814,7 +792,6 @@
  #define S_MIRROR_CTRL			REG_SW_CTRL_3
  #define S_REPLACE_VID_CTRL		REG_SW_CTRL_4
  #define S_PASS_PAUSE_CTRL		REG_SW_CTRL_10
@@ -806,7 +809,7 @@ index e46776aa2ac9..256311a01e0e 100644
  #define S_802_1P_PRIO_CTRL		REG_SW_CTRL_12
  #define S_TOS_PRIO_CTRL			REG_TOS_PRIO_CTRL_0
  #define S_IPV6_MLD_CTRL			REG_SW_CTRL_21
-@@ -828,65 +805,6 @@
+@@ -827,65 +804,6 @@
  /* 148,800 frames * 67 ms / 100 */
  #define BROADCAST_STORM_VALUE		9969
  
@@ -872,7 +875,7 @@ index e46776aa2ac9..256311a01e0e 100644
  /**
   * MIB_COUNTER_VALUE			00-00000000-3FFFFFFF
   * MIB_TOTAL_BYTES			00-0000000F-FFFFFFFF
-@@ -895,9 +813,6 @@
+@@ -894,9 +812,6 @@
   * MIB_COUNTER_OVERFLOW			00-00000040-00000000
   */
  

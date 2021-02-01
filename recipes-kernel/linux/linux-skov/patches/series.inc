@@ -1,18 +1,18 @@
-# umpf-base: v5.4.83
+# umpf-base: v5.4.94
 # umpf-name: 5.4/customers/skov/imx6
-# umpf-version: 5.4/customers/skov/imx6/20201215-1
+# umpf-version: 5.4/customers/skov/imx6/20210201-1
 # umpf-topic: v5.4/customers/skov/imx6_project_specific
 # umpf-hashinfo: a1acb8fbf724f2d5b3cc247fc96448322c0b2b44
-# umpf-topic-range: 2bff021f53b211386abad8cd661e6bb38d0fd524..859c4ad716a386668563bd2daacb042dc627015a
+# umpf-topic-range: 0fbca6ce4174724f28be5268c5d210f51ed96e31..dd9b61df9609dd0b75abac5d716d18ede95a7356
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   file://patches/0003-imx6-cpu-add-SKOV-specific-touchtoy-driver.patch \
-  file://patches/0005-Revert-net-dsa-microchip-set-the-correct-number-of-p.patch \
+  file://patches/0004-Revert-net-dsa-microchip-set-the-correct-number-of-p.patch \
   "
 # umpf-topic: v5.4/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: 9c9bc9c6a214827166b61c73415d09686a95eb0c
-# umpf-topic-range: 859c4ad716a386668563bd2daacb042dc627015a..47d68914bafaae3bd20b7d0f887d14b056c97ffc
+# umpf-topic-range: dd9b61df9609dd0b75abac5d716d18ede95a7356..5312063f7f08862735206469d8e4e4a347928182
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-LOGIC-Technologies-panels.patch \
   file://patches/0102-panel-simple-add-LOGIC-Technologies-panels.patch \
@@ -22,8 +22,8 @@ SRC_URI += "\
   file://patches/0106-drm-panel-add-Multi-Innotechnology-MI1010AIT-1CP1.patch \
   "
 # umpf-topic: v5.4/topic/etnaviv
-# umpf-hashinfo: 5bcf41f3ae8cce23305dc6bb989dd6c60023561e
-# umpf-topic-range: 47d68914bafaae3bd20b7d0f887d14b056c97ffc..a8955c212d3c647ee3e68d22c872578fa38fc4b6
+# umpf-hashinfo: 157879fb595cce466035e47f2f51e7da0a2f974b
+# umpf-topic-range: 5312063f7f08862735206469d8e4e4a347928182..210f5b7cdacb8c513238cc08f0fb51e7c899d9ca
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -37,10 +37,14 @@ SRC_URI += "\
   file://patches/0210-drm-etnaviv-Consider-all-kwnown-idle-bits-in-debugfs.patch \
   file://patches/0211-drm-etnaviv-Ignore-MC-when-checking-runtime-suspend-.patch \
   file://patches/0212-drm-etnaviv-Warn-when-GPU-doesn-t-idle-fast-enough.patch \
+  file://patches/0213-drm-etnaviv-rename-pipe_reg_read.patch \
+  file://patches/0214-drm-etnaviv-call-perf_reg_read.patch \
+  file://patches/0215-drm-etnaviv-add-total-hi-bandwidth-perfcounter.patch \
+  file://patches/0216-drm-etnaviv-add-pipe_select-.-helper.patch \
   "
 # umpf-topic: v5.4/topic/coda
 # umpf-hashinfo: bf7a254d8b776db87aa4b5d796ebecb0fb9febe7
-# umpf-topic-range: a8955c212d3c647ee3e68d22c872578fa38fc4b6..afccd65734cbfd1f0d067d5448303da54438d279
+# umpf-topic-range: 210f5b7cdacb8c513238cc08f0fb51e7c899d9ca..dd5012f3567b010cd062eb4fbc64cef8531abd81
 SRC_URI += "\
   file://patches/0301-media-coda-increase-prefetch-limit-to-768-bytes-on-C.patch \
   file://patches/0302-media-coda-create-bitstream-debugfs-entry.patch \
@@ -99,8 +103,8 @@ SRC_URI += "\
   file://patches/0355-coda-Add-a-V4L2-user-for-control-error-macroblocks-c.patch \
   "
 # umpf-topic: v5.4/topic/drm-sched
-# umpf-hashinfo: e00c050f946b5ce4706f087cef68eedb9470958a
-# umpf-topic-range: afccd65734cbfd1f0d067d5448303da54438d279..434da16db8089417773f6f0db02057a2f85219a5
+# umpf-hashinfo: 9cf1df9cbe345b71c085862075ae39a18723a6ca
+# umpf-topic-range: dd5012f3567b010cd062eb4fbc64cef8531abd81..995d3d044e05c14a97dd05f10f43b1331a39c6d0
 SRC_URI += "\
   file://patches/0401-drm-sched-remove-superfluous-whitespace-in-drm_sched.patch \
   file://patches/0402-drm-sched-Use-completion-to-wait-for-sched-thread-id.patch \
@@ -111,54 +115,57 @@ SRC_URI += "\
   file://patches/0407-drm-sched-add-run-job-trace.patch \
   "
 # umpf-topic: v5.4/topic/drm-sched-accounting
-# umpf-hashinfo: 9552e24bff06545632b895c3b21d050fea005a4f
-# umpf-topic-range: 434da16db8089417773f6f0db02057a2f85219a5..8302e88919307a940ba1a5f27e01a98c539e456f
+# umpf-hashinfo: 92957a8bfbbd7e2eb830fce8f6cb55d4738a2dd4
+# umpf-topic-range: 995d3d044e05c14a97dd05f10f43b1331a39c6d0..507a5b65a37d102c3b0758bae02819cc917848f2
 SRC_URI += "\
   file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873
-# umpf-hashinfo: 23e43bdebabe1022f52f1755c6e37a281af21fae
-# umpf-topic-range: 8302e88919307a940ba1a5f27e01a98c539e456f..8a4b03006a5f9ac6a1f07b101b282fb04862afb5
+# umpf-hashinfo: 1ad98b216b70a1bd40121c479726bea8b2a3fb64
+# umpf-topic-range: 507a5b65a37d102c3b0758bae02819cc917848f2..5968b1bbd515cde2158e47072ac22cdfc789d281
 SRC_URI += "\
   file://patches/0601-net-phy-micrel-move-phy-reg-offsets-to-common-header.patch \
-  file://patches/0602-net-dsa-microchip-ksz8795-remove-unused-last_port-op.patch \
-  file://patches/0603-net-dsa-microchip-ksz8795-move-dev-asignement-from-d.patch \
-  file://patches/0604-net-dsa-microchip-ksz8795-use-reg_mib_cnt-where-poss.patch \
-  file://patches/0605-net-dsa-microchip-ksz8795-use-mib_cnt-where-possible.patch \
-  file://patches/0606-net-dsa-microchip-ksz8795-fix-port_cnt-usage-to-alig.patch \
-  file://patches/0607-net-dsa-microchip-ksz9477-remove-superfluous-num_por.patch \
-  file://patches/0608-net-dsa-microchip-ksz8795-remove-usage-of-mib_num_co.patch \
-  file://patches/0609-net-dsa-microchip-ksz8795-use-port_cnt-where-possibl.patch \
-  file://patches/0610-net-dsa-microchip-ksz8795-dynamic-allocate-memory-fo.patch \
-  file://patches/0611-net-dsa-microchip-ksz8795-change-drivers-prefix-to-b.patch \
-  file://patches/0612-net-dsa-microchip-ksz8795-move-register-offsets-and-.patch \
-  file://patches/0613-net-tag-ksz-Add-KSZ8863-tag-code.patch \
-  file://patches/0614-net-dsa-microchip-ksz8795-add-support-for-ksz88xx-ch.patch \
-  file://patches/0615-net-dsa-microchip-Add-Microchip-KSZ8863-SPI-based-dr.patch \
-  file://patches/0616-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
-  file://patches/0617-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
-  file://patches/0618-net-dsa-microchip-Add-Microchip-KSZ8863-SMI-based-dr.patch \
+  file://patches/0602-net-dsa-microchip-ksz8795-remove-unused-last_port-va.patch \
+  file://patches/0603-net-dsa-microchip-ksz8795-remove-superfluous-port_cn.patch \
+  file://patches/0604-net-dsa-microchip-ksz8795-move-variable-assignments-.patch \
+  file://patches/0605-net-dsa-microchip-ksz8795-use-reg_mib_cnt-where-poss.patch \
+  file://patches/0606-net-dsa-microchip-ksz8795-use-mib_cnt-where-possible.patch \
+  file://patches/0607-net-dsa-microchip-ksz8795-use-phy_port_cnt-where-pos.patch \
+  file://patches/0608-net-dsa-microchip-remove-superfluous-num_ports-assig.patch \
+  file://patches/0609-net-dsa-microchip-ksz8795-align-port_cnt-usage-with-.patch \
+  file://patches/0610-net-dsa-microchip-remove-usage-of-mib_port_count.patch \
+  file://patches/0611-net-dsa-microchip-ksz8795-use-port_cnt-instead-of-TO.patch \
+  file://patches/0612-net-dsa-microchip-ksz8795-use-num_vlans-where-possib.patch \
+  file://patches/0613-net-dsa-microchip-ksz8795-change-drivers-prefix-to-b.patch \
+  file://patches/0614-net-dsa-microchip-ksz8795-move-cpu_select_interface-.patch \
+  file://patches/0615-net-dsa-microchip-ksz8795-move-register-offsets-and-.patch \
+  file://patches/0616-net-tag-ksz-Add-KSZ8863-tag-code.patch \
+  file://patches/0617-net-dsa-microchip-ksz8795-add-support-for-ksz88xx-ch.patch \
+  file://patches/0618-net-dsa-microchip-Add-Microchip-KSZ8863-SPI-based-dr.patch \
   file://patches/0619-dt-bindings-net-dsa-document-additional-Microchip-KS.patch \
-  file://patches/0620-net-dsa-microchip-ksz8795-add-phylink-support.patch \
-  file://patches/0621-net-dsa-register-dsa-mdio-via-of-if-compatible-is-se.patch \
-  file://patches/0622-net-dsa-microchip-ksz8795-return-values-of-regmap_up.patch \
-  file://patches/0623-net-dsa-microchip-ksz8795-add-interrupt-support.patch \
-  file://patches/0624-net-phy-micrel-add-dummy-interrupt-functions-which-a.patch \
-  file://patches/0625-net-dsa-microchip-add-mutex-locking-to-vlan-handling.patch \
-  file://patches/0626-net-dsa-microchip-ksz_common-fix-slave-usage-if-port.patch \
+  file://patches/0620-net-phy-Add-support-for-microchip-SMI0-MDIO-bus.patch \
+  file://patches/0621-dt-bindings-net-mdio-gpio-add-compatible-for-microch.patch \
+  file://patches/0622-net-dsa-microchip-Add-Microchip-KSZ8863-SMI-based-dr.patch \
+  file://patches/0623-net-dsa-microchip-ksz8795-add-phylink-support.patch \
+  file://patches/0624-net-dsa-register-dsa-mdio-via-of-if-compatible-is-se.patch \
+  file://patches/0625-net-dsa-microchip-ksz8795-return-values-of-regmap_up.patch \
+  file://patches/0626-net-dsa-microchip-ksz8795-add-interrupt-support.patch \
+  file://patches/0627-net-phy-micrel-add-dummy-interrupt-functions-which-a.patch \
+  file://patches/0628-net-dsa-microchip-add-mutex-locking-to-vlan-handling.patch \
+  file://patches/0629-net-dsa-microchip-ksz_common-fix-slave-usage-if-port.patch \
   "
 # umpf-topic: v5.4/topic/ksz8873_cabletest
-# umpf-hashinfo: f8c0036a4954d349e9e12125977cf884f3434815
-# umpf-topic-range: 8a4b03006a5f9ac6a1f07b101b282fb04862afb5..f53f90e18d7673df9b516afa31c3405121f5962d
+# umpf-hashinfo: 07cb38fd562b59ae5680fb8a5476ad3079012633
+# umpf-topic-range: 5968b1bbd515cde2158e47072ac22cdfc789d281..705acd2d6911e244d11ea263ba4f7dd3f83e9a6c
 SRC_URI += "\
   file://patches/0701-dsa-ksz-add-test_cnt-option-for-ethtool-test-options.patch \
   file://patches/0702-dsa-add-self_test-ethtool-function-handling.patch \
   file://patches/0703-ksz-add-self_test-support-for-Link-MD-detection-on-K.patch \
   "
-# umpf-release: 5.4/customers/skov/imx6/20201215-1
-# umpf-topic-range: f53f90e18d7673df9b516afa31c3405121f5962d..e27ab3d35fc427db3bb9c39fd78109801b770ffd
+# umpf-release: 5.4/customers/skov/imx6/20210201-1
+# umpf-topic-range: 705acd2d6911e244d11ea263ba4f7dd3f83e9a6c..5fbff9485cf10ef0980b2d922a156819709f29fc
 SRC_URI += "\
-  file://patches/0801-Release-5.4-customers-skov-imx6-20201215-1.patch \
+  file://patches/0801-Release-5.4-customers-skov-imx6-20210201-1.patch \
   "
 # umpf-end
