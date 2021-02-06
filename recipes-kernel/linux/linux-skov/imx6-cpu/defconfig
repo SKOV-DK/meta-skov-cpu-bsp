@@ -1,13 +1,13 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.4.64 Kernel Configuration
+# Linux/arm 5.4.96-20210210-1 Kernel Configuration
 #
 
 #
-# Compiler: arm-pmc-linux-gnueabi-gcc (GCC) 8.3.0
+# Compiler: arm-pmc-linux-gnueabi-gcc (GCC) 9.3.0
 #
 CONFIG_CC_IS_GCC=y
-CONFIG_GCC_VERSION=80300
+CONFIG_GCC_VERSION=90300
 CONFIG_CLANG_VERSION=0
 CONFIG_CC_HAS_ASM_GOTO=y
 CONFIG_CC_HAS_ASM_INLINE=y
@@ -463,6 +463,7 @@ CONFIG_ALIGNMENT_TRAP=y
 # CONFIG_PARAVIRT is not set
 # CONFIG_PARAVIRT_TIME_ACCOUNTING is not set
 # CONFIG_XEN is not set
+CONFIG_STACKPROTECTOR_PER_TASK=y
 # end of Kernel Features
 
 #
@@ -631,8 +632,13 @@ CONFIG_REFCOUNT_FULL=y
 CONFIG_ARCH_HAS_GCOV_PROFILE_ALL=y
 # end of GCOV-based kernel profiling
 
-CONFIG_PLUGIN_HOSTCC=""
+CONFIG_PLUGIN_HOSTCC="g++"
 CONFIG_HAVE_GCC_PLUGINS=y
+CONFIG_GCC_PLUGINS=y
+# CONFIG_GCC_PLUGIN_CYC_COMPLEXITY is not set
+# CONFIG_GCC_PLUGIN_LATENT_ENTROPY is not set
+# CONFIG_GCC_PLUGIN_RANDSTRUCT is not set
+CONFIG_GCC_PLUGIN_ARM_SSP_PER_TASK=y
 # end of General architecture-dependent options
 
 CONFIG_RT_MUTEXES=y
@@ -745,7 +751,6 @@ CONFIG_CMA_AREAS=7
 # CONFIG_ZPOOL is not set
 # CONFIG_ZBUD is not set
 CONFIG_ZSMALLOC=y
-CONFIG_PGTABLE_MAPPING=y
 CONFIG_ZSMALLOC_STAT=y
 CONFIG_GENERIC_EARLY_IOREMAP=y
 # CONFIG_IDLE_PAGE_TRACKING is not set
@@ -4083,6 +4088,9 @@ CONFIG_LSM="yama,loadpin,safesetid,integrity"
 # Memory initialization
 #
 CONFIG_INIT_STACK_NONE=y
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_USER is not set
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_BYREF is not set
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_BYREF_ALL is not set
 # CONFIG_INIT_ON_ALLOC_DEFAULT_ON is not set
 # CONFIG_INIT_ON_FREE_DEFAULT_ON is not set
 # end of Memory initialization
