@@ -1,0 +1,80 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 5 Feb 2021 15:55:55 +0100
+Subject: [PATCH] mtd: nand: fix error handling in nand_prog_page_op() #2
+
+On success nand_exec_prog_page_op() returns the NAND status byte, but on
+failure it returns a negative error code. nand_prog_page_op() interprets
+the return value as NAND status byte without error checking.  This means
+a failure in nand_exec_prog_page_op() can go through unnoticed.
+
+The straight forward fix would be to add the missing error checking. To
+clean the code a bit we can move the nand status check to
+nand_prog_page_op().  This way we can get rid of the overloaded return
+value from nand_exec_prog_page_op() and return a plain error code which
+is less error prone.
+
+nand_exec_prog_page_op() is only called from one other place and in this
+call the 'prog' parameter is false in which case the nand status check
+is skipped, so it's correct to not add the NAND status check there.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mtd/nand/raw/nand_base.c | 23 ++++++++++-------------
+ 1 file changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mtd/nand/raw/nand_base.c b/drivers/mtd/nand/raw/nand_base.c
+index 3577d8e1f23c..b675add8dae6 100644
+--- a/drivers/mtd/nand/raw/nand_base.c
++++ b/drivers/mtd/nand/raw/nand_base.c
+@@ -1308,8 +1308,6 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
+ 	};
+ 	struct nand_operation op = NAND_OPERATION(chip->cur_cs, instrs);
+ 	int naddrs = nand_fill_column_cycles(chip, addrs, offset_in_page);
+-	int ret;
+-	u8 status;
+ 
+ 	if (naddrs < 0)
+ 		return naddrs;
+@@ -1349,15 +1347,7 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
+ 		op.ninstrs--;
+ 	}
+ 
+-	ret = nand_exec_op(chip, &op);
+-	if (!prog || ret)
+-		return ret;
+-
+-	ret = nand_status_op(chip, &status);
+-	if (ret)
+-		return ret;
+-
+-	return status;
++	return nand_exec_op(chip, &op);
+ }
+ 
+ /**
+@@ -1463,7 +1453,8 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
+ 		      unsigned int len)
+ {
+ 	struct mtd_info *mtd = nand_to_mtd(chip);
+-	int status;
++	u8 status;
++	int ret;
+ 
+ 	if (!len || !buf)
+ 		return -EINVAL;
+@@ -1472,8 +1463,14 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
+ 		return -EINVAL;
+ 
+ 	if (nand_has_exec_op(chip)) {
+-		status = nand_exec_prog_page_op(chip, page, offset_in_page, buf,
++		ret = nand_exec_prog_page_op(chip, page, offset_in_page, buf,
+ 						len, true);
++		if (ret)
++			return ret;
++
++		ret = nand_status_op(chip, &status);
++		if (ret)
++			return ret;
+ 	} else {
+ 		chip->legacy.cmdfunc(chip, NAND_CMD_SEQIN, offset_in_page,
+ 				     page);
