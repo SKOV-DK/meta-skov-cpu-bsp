@@ -1,0 +1,10 @@
+kernel_swap:
+  description: |
+    Swap support in combination with zRAM ("Compressed RAM block device
+    support") is essential to allow Chromium to be run on the system.
+  value: True
+
+# vim: syntax=yaml
+# Local Variables:
+# mode: yaml
+# End:
