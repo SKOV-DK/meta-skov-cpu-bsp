@@ -4,6 +4,13 @@ kernel_swap:
     support") is essential to allow Chromium to be run on the system.
   value: True
 
+kernel_vt:
+  description: |
+    Deactivating virtual terminal support breaks "fbi", the currently still used
+    splashscreen application, as "platsch" did not replace it everywhere. So put
+    this check on resubmission for 2021-06-01.
+  value: True
+
 # vim: syntax=yaml
 # Local Variables:
 # mode: yaml
