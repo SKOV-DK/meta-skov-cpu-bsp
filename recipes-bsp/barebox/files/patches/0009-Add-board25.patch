@@ -1,0 +1,60 @@
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
+index ae5596fba..dfb1c7c36 100644
+--- a/arch/arm/boards/skov-imx6/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
+@@ -46,7 +46,7 @@ static int skov_imx6_fixup_display(void)
+ 
+ 		of_device_enable_and_register(np);
+ 		break;
+-	case 24:
++	case 24 ... 25:
+ 		/* enable the LDB... */
+ 		np = of_find_compatible_node(NULL, NULL, "fsl,imx6q-ldb");
+ 		if (!np)
+diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
+index f70699e76..be36b12e8 100644
+--- a/arch/arm/boards/skov-imx6/lowlevel.c
++++ b/arch/arm/boards/skov-imx6/lowlevel.c
+@@ -702,6 +702,7 @@ static inline unsigned skov_imx6_get_version(int cpu_type)
+  * 00010110       D    1024 MiB      4 GIB     i.MX6Q
+  * 00010111       ---- not defined ----
+  * 00011000       E    1024 MiB      4 GIB     i.MX6Q
++ * 00011001       E    1024 MiB      4 GIB     i.MX6Q
+  *
+  * This routine does not return if starting the image from SD card or NOR
+  * was successful. It restarts skov_imx6_start() instead
+@@ -779,6 +780,16 @@ static void skov_imx6_init(int cpu_type, unsigned board_variant)
+ 					&skov_imx6_calib_4x128Mb_1066MHz,
+ 					&skov_imx6_cfg_4x128Mb_1066MHz);
+ 		break;
++	case 25: /* i.MX6Q, "Quad_R1G_F4G" */
++		if (cpu_type != IMX6_CPUTYPE_IMX6Q) {
++			pr_err("Invalid SoC! i.MX6Q expected\n");
++			return;
++		}
++		pr_debug("Initializing board variant 25\n");
++		spl_imx6q_dram_init(&skov_imx6_sysinfo_4x128Mb_1066MHz,
++					&skov_imx6_calib_4x128Mb_1066MHz,
++					&skov_imx6_cfg_4x128Mb_1066MHz);
++		break;
+ 	default:
+ 		pr_err("Unsupported board variant: 0x%x\n", board_variant);
+ 		/* don't continue */
+diff --git a/arch/arm/boards/skov-imx6/version.c b/arch/arm/boards/skov-imx6/version.c
+index 23439fae1..4dd573f02 100644
+--- a/arch/arm/boards/skov-imx6/version.c
++++ b/arch/arm/boards/skov-imx6/version.c
+@@ -192,6 +192,13 @@ static const struct board_description imx6_variants[] = {
+ 		.dts_compatible = "skov,imx6q-skov-reve-mi1010ait-1cp1",
+ 		.display = "mi1010ait-1cp1",
+ 	},
++	[25] = {
++		.value = "Quad_R1G_F4G",
++		.revision = "E",
++		.soc = "i.MX6Q",
++		.dts_compatible = "skov,imx6q-skov-reve-dt070btft-pts1",
++		.display = "dt070btft-pts1",
++	},
+ };
+ 
+ /*
