@@ -171,6 +171,3 @@ SRC_URI += "\
   file://patches/0801-Release-5.4-customers-skov-imx6-20210210-1.patch \
   "
 # umpf-end
-SRC_URI += "\
-  file://patches/0900-loop-Only-change-blocksize-when-needed.patch \
-  "
