@@ -1,0 +1,31 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Thu, 5 Nov 2020 23:29:03 +0100
+Subject: [PATCH] net: phylink: make calling functions more robust
+
+---
+ drivers/net/phy/phylink.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
+index 26dbd9e4ac6f..caba0326cb6f 100644
+--- a/drivers/net/phy/phylink.c
++++ b/drivers/net/phy/phylink.c
+@@ -419,7 +419,8 @@ static void phylink_mac_config(struct phylink *pl,
+ 		    __ETHTOOL_LINK_MODE_MASK_NBITS, state->advertising,
+ 		    state->pause, state->link, state->an_enabled);
+ 
+-	pl->mac_ops->mac_config(pl->config, pl->cur_link_an_mode, state);
++	if (pl->mac_ops->mac_config)
++		pl->mac_ops->mac_config(pl->config, pl->cur_link_an_mode, state);
+ }
+ 
+ static void phylink_mac_pcs_an_restart(struct phylink *pl)
+@@ -453,7 +454,7 @@ static void phylink_major_config(struct phylink *pl, bool restart,
+ 
+ 	phylink_mac_config(pl, state);
+ 
+-	if (pl->pcs_ops) {
++	if (pl->pcs_ops && pl->pcs_ops->pcs_config) {
+ 		err = pl->pcs_ops->pcs_config(pl->pcs, pl->cur_link_an_mode,
+ 					      state->interface,
+ 					      state->advertising,

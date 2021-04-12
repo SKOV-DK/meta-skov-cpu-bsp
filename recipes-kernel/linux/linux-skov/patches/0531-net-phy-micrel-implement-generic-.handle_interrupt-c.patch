@@ -1,0 +1,160 @@
+From: Ioana Ciornei <ioana.ciornei@nxp.com>
+Date: Mon, 23 Nov 2020 17:38:09 +0200
+Subject: [PATCH] net: phy: micrel: implement generic .handle_interrupt()
+ callback
+
+In an attempt to actually support shared IRQs in phylib, we now move the
+responsibility of triggering the phylib state machine or just returning
+IRQ_NONE, based on the IRQ status register, to the PHY driver. Having
+3 different IRQ handling callbacks (.handle_interrupt(),
+.did_interrupt() and .ack_interrupt() ) is confusing so let the PHY
+driver implement directly an IRQ handler like any other device driver.
+Make this driver follow the new convention.
+
+Cc: Divya Koppera <Divya.Koppera@microchip.com>
+Cc: Oleksij Rempel <o.rempel@pengutronix.de>
+Cc: Philippe Schenker <philippe.schenker@toradex.com>
+Cc: Marek Vasut <marex@denx.de>
+Cc: Antoine Tenart <atenart@kernel.org>
+Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+---
+ drivers/net/phy/micrel.c | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
+index e74b0647b1f5..f6a821aa58ba 100644
+--- a/drivers/net/phy/micrel.c
++++ b/drivers/net/phy/micrel.c
+@@ -61,6 +61,10 @@
+ #define KSZPHY_INTCS_LINK_UP			BIT(8)
+ #define KSZPHY_INTCS_ALL			(KSZPHY_INTCS_LINK_UP |\
+ 						KSZPHY_INTCS_LINK_DOWN)
++#define	KSZPHY_INTCS_LINK_DOWN_STATUS		BIT(2)
++#define	KSZPHY_INTCS_LINK_UP_STATUS		BIT(0)
++#define	KSZPHY_INTCS_STATUS			(KSZPHY_INTCS_LINK_DOWN_STATUS |\
++						 KSZPHY_INTCS_LINK_UP_STATUS)
+ 
+ /* PHY Control 1 */
+ #define MII_KSZPHY_CTRL_1			0x1e
+@@ -196,6 +200,24 @@ static int kszphy_config_intr(struct phy_device *phydev)
+ 	return phy_write(phydev, MII_KSZPHY_INTCS, temp);
+ }
+ 
++static irqreturn_t kszphy_handle_interrupt(struct phy_device *phydev)
++{
++	int irq_status;
++
++	irq_status = phy_read(phydev, MII_KSZPHY_INTCS);
++	if (irq_status < 0) {
++		phy_error(phydev);
++		return IRQ_NONE;
++	}
++
++	if ((irq_status & KSZPHY_INTCS_STATUS))
++		return IRQ_NONE;
++
++	phy_trigger_machine(phydev);
++
++	return IRQ_HANDLED;
++}
++
+ static int kszphy_rmii_clk_sel(struct phy_device *phydev, bool val)
+ {
+ 	int ctrl;
+@@ -1289,6 +1311,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
+@@ -1301,6 +1324,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1316,6 +1340,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1332,6 +1357,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_aneg	= ksz8041_config_aneg,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1347,6 +1373,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1360,6 +1387,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1376,6 +1404,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1392,6 +1421,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.soft_reset	= genphy_soft_reset,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1405,6 +1435,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= ksz8061_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
+@@ -1418,6 +1449,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= ksz9021_config_init,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1437,6 +1469,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.read_status	= ksz9031_read_status,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,
+@@ -1466,6 +1499,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.read_status	= genphy_read_status,
+ 	.ack_interrupt	= kszphy_ack_interrupt,
+ 	.config_intr	= kszphy_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.get_sset_count = kszphy_get_sset_count,
+ 	.get_strings	= kszphy_get_strings,
+ 	.get_stats	= kszphy_get_stats,

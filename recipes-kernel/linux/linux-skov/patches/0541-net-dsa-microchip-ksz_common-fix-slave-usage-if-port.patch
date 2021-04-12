@@ -1,0 +1,22 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Tue, 3 Nov 2020 22:37:17 +0100
+Subject: [PATCH] net: dsa: microchip: ksz_common: fix slave usage if port is
+ not up
+
+---
+ drivers/net/dsa/microchip/ksz_common.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
+index 89b87ba14d41..80df099ba97f 100644
+--- a/drivers/net/dsa/microchip/ksz_common.c
++++ b/drivers/net/dsa/microchip/ksz_common.c
+@@ -86,7 +86,7 @@ static void ksz_mib_read_work(struct work_struct *work)
+ 		if (!p->read) {
+ 			const struct dsa_port *dp = dsa_to_port(dev->ds, i);
+ 
+-			if (!netif_carrier_ok(dp->slave))
++			if (dp->slave && !netif_carrier_ok(dp->slave))
+ 				mib->cnt_ptr = dev->reg_mib_cnt;
+ 		}
+ 		port_r_cnt(dev, i);

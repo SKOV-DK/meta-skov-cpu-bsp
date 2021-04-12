@@ -1,0 +1,21 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 13 Apr 2021 21:48:21 +0200
+Subject: [PATCH] Release 5.10/customers/skov/imx6/20210413-1
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 1d4a50ebe3b7..a6c0fcb9c0b9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 5
+ PATCHLEVEL = 10
+ SUBLEVEL = 29
+-EXTRAVERSION =
++EXTRAVERSION =-20210413-1
+ NAME = Dare mighty things
+ 
+ # *DOCUMENTATION*

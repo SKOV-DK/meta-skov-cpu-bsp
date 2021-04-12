@@ -1,11 +1,20 @@
 From: Sam Ravnborg <sam@ravnborg.org>
 Date: Thu, 6 Sep 2018 22:07:48 +0200
 Subject: [PATCH] imx6-cpu: add device tree files
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Squash all previous commits to devicetree to make patch
 maintenance simpler.
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Signed-off-by: Søren Andersen <san@skov.dk>
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
  arch/arm/boot/dts/Makefile                         |   5 +
  arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts         |  15 +
@@ -14,8 +23,8 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  arch/arm/boot/dts/imx6q-skov-revc-lt6.dts          |  28 +
  .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    |  92 +++
  arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi       | 137 +++++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 616 +++++++++++++++++++++
- 8 files changed, 936 insertions(+)
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 617 +++++++++++++++++++++
+ 8 files changed, 937 insertions(+)
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
@@ -25,10 +34,10 @@ Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index b21b3a64641a..7afa722c691b 100644
+index ce66ffd5a1bb..3f2499abd27f 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -438,6 +438,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -467,6 +467,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6dl-sabrelite.dtb \
  	imx6dl-sabresd.dtb \
  	imx6dl-savageboard.dtb \
@@ -37,7 +46,7 @@ index b21b3a64641a..7afa722c691b 100644
  	imx6dl-ts4900.dtb \
  	imx6dl-ts7970.dtb \
  	imx6dl-tx6dl-comtft.dtb \
-@@ -518,6 +520,9 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
+@@ -559,6 +561,9 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
  	imx6q-sabresd.dtb \
  	imx6q-savageboard.dtb \
  	imx6q-sbc6x.dtb \
@@ -70,7 +79,7 @@ index 000000000000..a295a6604b5f
 +};
 diff --git a/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts b/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
 new file mode 100644
-index 000000000000..ff9483d05e64
+index 000000000000..5194b5ac6fa7
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
 @@ -0,0 +1,19 @@
@@ -91,7 +100,7 @@ index 000000000000..ff9483d05e64
 +};
 +
 +&panel {
-+	compatible = "logictechnologies,lttd800480070-l6wh-rt";
++	compatible = "logictechno,lttd800480070-l6wh-rt";
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
 new file mode 100644
@@ -125,7 +134,7 @@ index 000000000000..2a789f07da05
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
 new file mode 100644
-index 000000000000..fb56ebca3b13
+index 000000000000..0f335efd93c7
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6q-skov-revc-lt6.dts
 @@ -0,0 +1,28 @@
@@ -155,7 +164,7 @@ index 000000000000..fb56ebca3b13
 +};
 +
 +&panel {
-+	compatible = "logictechnologies,lttd800480070-l6wh-rt";
++	compatible = "logictechno,lttd800480070-l6wh-rt";
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
 new file mode 100644
@@ -257,7 +266,7 @@ index 000000000000..96317c336c2f
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 new file mode 100644
-index 000000000000..e2f028a0e07e
+index 000000000000..9a65afcd2702
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 @@ -0,0 +1,137 @@
@@ -390,7 +399,7 @@ index 000000000000..e2f028a0e07e
 +};
 +
 +&panel {
-+	compatible = "logictechnologies,lttd800480070-l2rt";
++	compatible = "logictechno,lttd800480070-l2rt";
 +
 +	port {
 +		panel_in: endpoint {
@@ -400,10 +409,10 @@ index 000000000000..e2f028a0e07e
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 new file mode 100644
-index 000000000000..f4f7699b24c4
+index 000000000000..a9a45bcdee10
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
-@@ -0,0 +1,616 @@
+@@ -0,0 +1,617 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
 +// Copyright 2014 Rose Technology
@@ -947,6 +956,7 @@ index 000000000000..f4f7699b24c4
 +
 +&pwm2 {
 +	/* used for backlight brightness */
++	#pwm-cells = <2>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_pwm2_2>;
 +	status = "okay";

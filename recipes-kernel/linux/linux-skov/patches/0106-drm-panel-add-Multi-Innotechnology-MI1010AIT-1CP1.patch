@@ -11,18 +11,16 @@ The datasheet did not specify specific values for sync, back, front porch.
 The values are a best guess based on values for similar panels.
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
-[Compared to Sam's v1: removed the last two flags/bus_flags & connector_type,
-added bpc & delay]
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
- drivers/gpu/drm/panel/panel-simple.c | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ drivers/gpu/drm/panel/panel-simple.c | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 70f4857f8eb6..f2f8dd1355aa 100644
+index 844436176586..391149521910 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -2164,6 +2164,36 @@ static const struct panel_desc mitsubishi_aa070mc01 = {
+@@ -2821,6 +2821,37 @@ static const struct panel_desc mitsubishi_aa070mc01 = {
  	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
  };
  
@@ -54,12 +52,13 @@ index 70f4857f8eb6..f2f8dd1355aa 100644
 +	},
 +	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG,
 +	.bus_flags = DRM_BUS_FLAG_DE_HIGH,
++	.connector_type = DRM_MODE_CONNECTOR_LVDS,
 +};
 +
  static const struct display_timing nec_nl12880bc20_05_timing = {
  	.pixelclock = { 67000000, 71000000, 75000000 },
  	.hactive = { 1280, 1280, 1280 },
-@@ -3399,6 +3429,9 @@ static const struct of_device_id platform_of_match[] = {
+@@ -4248,6 +4279,9 @@ static const struct of_device_id platform_of_match[] = {
  	}, {
  		.compatible = "mitsubishi,aa070mc01-ca1",
  		.data = &mitsubishi_aa070mc01,

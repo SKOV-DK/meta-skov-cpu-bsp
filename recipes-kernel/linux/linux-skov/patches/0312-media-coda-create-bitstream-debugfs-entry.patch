@@ -1,0 +1,44 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 18 Mar 2019 16:02:54 +0100
+Subject: [PATCH] media: coda: create bitstream debugfs entry
+
+Provide a view into the full bitstream ringbuffer for debugging
+purposes.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-bit.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
+index 15ad82d90d5f..cf076ab1aac4 100644
+--- a/drivers/media/platform/coda/coda-bit.c
++++ b/drivers/media/platform/coda/coda-bit.c
+@@ -1771,6 +1771,18 @@ static int coda_alloc_bitstream_buffer(struct coda_ctx *ctx,
+ 	kfifo_init(&ctx->bitstream_fifo,
+ 		   ctx->bitstream.vaddr, ctx->bitstream.size);
+ 
++	if (ctx->debugfs_entry) {
++		ctx->bitstream.blob.data = ctx->bitstream.vaddr;
++		ctx->bitstream.blob.size = ctx->bitstream.size;
++		ctx->bitstream.dentry = debugfs_create_blob("bitstream", 0644,
++							    ctx->debugfs_entry,
++							    &ctx->bitstream.blob);
++		if (!ctx->bitstream.dentry) {
++			dev_warn(ctx->dev->dev,
++				 "failed to create debugfs entry bitstream\n");
++		}
++	}
++
+ 	return 0;
+ }
+ 
+@@ -1783,6 +1795,8 @@ static void coda_free_bitstream_buffer(struct coda_ctx *ctx)
+ 		    ctx->bitstream.paddr);
+ 	ctx->bitstream.vaddr = NULL;
+ 	kfifo_init(&ctx->bitstream_fifo, NULL, 0);
++	debugfs_remove(ctx->bitstream.dentry);
++	ctx->bitstream.dentry = NULL;
+ }
+ 
+ static int coda_decoder_reqbufs(struct coda_ctx *ctx,

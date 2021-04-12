@@ -23,10 +23,10 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 10 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mtd/nand/raw/nand_base.c b/drivers/mtd/nand/raw/nand_base.c
-index 3577d8e1f23c..b675add8dae6 100644
+index f46aa1409e13..533fd796d0cb 100644
 --- a/drivers/mtd/nand/raw/nand_base.c
 +++ b/drivers/mtd/nand/raw/nand_base.c
-@@ -1308,8 +1308,6 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
+@@ -1294,8 +1294,6 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
  	};
  	struct nand_operation op = NAND_OPERATION(chip->cur_cs, instrs);
  	int naddrs = nand_fill_column_cycles(chip, addrs, offset_in_page);
@@ -35,7 +35,7 @@ index 3577d8e1f23c..b675add8dae6 100644
  
  	if (naddrs < 0)
  		return naddrs;
-@@ -1349,15 +1347,7 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
+@@ -1335,15 +1333,7 @@ static int nand_exec_prog_page_op(struct nand_chip *chip, unsigned int page,
  		op.ninstrs--;
  	}
  
@@ -52,7 +52,7 @@ index 3577d8e1f23c..b675add8dae6 100644
  }
  
  /**
-@@ -1463,7 +1453,8 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
+@@ -1449,7 +1439,8 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
  		      unsigned int len)
  {
  	struct mtd_info *mtd = nand_to_mtd(chip);
@@ -62,7 +62,7 @@ index 3577d8e1f23c..b675add8dae6 100644
  
  	if (!len || !buf)
  		return -EINVAL;
-@@ -1472,8 +1463,14 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
+@@ -1458,8 +1449,14 @@ int nand_prog_page_op(struct nand_chip *chip, unsigned int page,
  		return -EINVAL;
  
  	if (nand_has_exec_op(chip)) {

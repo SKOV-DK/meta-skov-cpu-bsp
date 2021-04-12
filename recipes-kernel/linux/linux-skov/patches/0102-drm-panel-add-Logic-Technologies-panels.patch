@@ -1,0 +1,110 @@
+From: =?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>
+Date: Thu, 6 Sep 2018 22:28:27 +0200
+Subject: [PATCH] drm: panel: add Logic Technologies panels
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for the following panels from Logic Technologies Limited:
+
+  - LTTD800480070-L2RT
+  - LTTD800480070-L6WH-RT
+
+The LTTD800480 L2RT is discontinued, but it may be in use by existing products.
+
+Signed-off-by: Søren Andersen <san@skov.dk>
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+Cc: Thierry Reding <thierry.reding@gmail.com>
+---
+ drivers/gpu/drm/panel/panel-simple.c | 70 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 70 insertions(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 204674fccd64..dbd7025733fa 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -2691,6 +2691,70 @@ static const struct panel_desc logictechno_lt170410_2whc = {
+ 	.connector_type = DRM_MODE_CONNECTOR_LVDS,
+ };
+ 
++static const struct drm_display_mode logictechno_lttd800480070_l2rt_mode = {
++	.clock = 33000,
++	.hdisplay = 800,
++	.hsync_start = 800 + 112,
++	.hsync_end = 800 + 112 + 3,
++	.htotal = 800 + 112 + 3 + 85,
++	.vdisplay = 480,
++	.vsync_start = 480 + 38,
++	.vsync_end = 480 + 38 + 3,
++	.vtotal = 480 + 38 + 3 + 29,
++	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
++};
++
++static const struct panel_desc logictechno_lttd800480070_l2rt = {
++	.modes = &logictechno_lttd800480070_l2rt_mode,
++	.num_modes = 1,
++	.bpc = 8,
++	.size = {
++		.width = 154,
++		.height = 86,
++	},
++	.delay = {
++		.prepare = 45,
++		.enable = 100,
++		.disable = 100,
++		.unprepare = 45
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
++	.bus_flags = DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE,
++	.connector_type = DRM_MODE_CONNECTOR_DPI,
++};
++
++static const struct drm_display_mode logictechno_lttd800480070_l6wh_rt_mode = {
++	.clock = 33000,
++	.hdisplay = 800,
++	.hsync_start = 800 + 154,
++	.hsync_end = 800 + 154 + 3,
++	.htotal = 800 + 154 + 3 + 43,
++	.vdisplay = 480,
++	.vsync_start = 480 + 47,
++	.vsync_end = 480 + 47 + 3,
++	.vtotal = 480 + 47 + 3 + 20,
++	.flags = DRM_MODE_FLAG_NVSYNC | DRM_MODE_FLAG_NHSYNC,
++};
++
++static const struct panel_desc logictechno_lttd800480070_l6wh_rt = {
++	.modes = &logictechno_lttd800480070_l6wh_rt_mode,
++	.num_modes = 1,
++	.bpc = 8,
++	.size = {
++		.width = 154,
++		.height = 86,
++	},
++	.delay = {
++		.prepare = 45,
++		.enable = 100,
++		.disable = 100,
++		.unprepare = 45
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
++	.bus_flags = DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE,
++	.connector_type = DRM_MODE_CONNECTOR_DPI,
++};
++
+ static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
+ 	.clock = 30400,
+ 	.hdisplay = 800,
+@@ -4150,6 +4214,12 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "logictechno,lt170410-2whc",
+ 		.data = &logictechno_lt170410_2whc,
++	}, {
++		.compatible = "logictechno,lttd800480070-l2rt",
++		.data = &logictechno_lttd800480070_l2rt,
++	}, {
++		.compatible = "logictechno,lttd800480070-l6wh-rt",
++		.data = &logictechno_lttd800480070_l6wh_rt,
+ 	}, {
+ 		.compatible = "mitsubishi,aa070mc01-ca1",
+ 		.data = &mitsubishi_aa070mc01,

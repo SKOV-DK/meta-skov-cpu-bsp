@@ -1,0 +1,64 @@
+From: Michael Grzeschik <m.grzeschik@pengutronix.de>
+Date: Thu, 16 Jul 2020 17:37:39 +0200
+Subject: [PATCH] net: phy: micrel: add dummy interrupt functions, which are
+ handled by dsa
+
+Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
+---
+ drivers/net/phy/micrel.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
+index 9b0bc8b74bc0..72fee24eabf1 100644
+--- a/drivers/net/phy/micrel.c
++++ b/drivers/net/phy/micrel.c
+@@ -1360,6 +1360,13 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_init	= kszphy_config_init,
+ 	.config_aneg	= ksz8873mll_config_aneg,
+ 	.read_status	= ksz8873mll_read_status,
++	/* These interrupts are handled by the irq controller
++	 * embedded inside the KSZ8873MLL, they get unmasked when the
++	 * irq is requested and ACKed by reading the status register,
++	 * which is done by the irqchip code.
++	 */
++	.config_intr	= genphy_no_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
+@@ -1368,6 +1375,13 @@ static struct phy_driver ksphy_driver[] = {
+ 	.name		= "Micrel KSZ886X Switch",
+ 	/* PHY_BASIC_FEATURES */
+ 	.config_init	= kszphy_config_init,
++	/* These interrupts are handled by the irq controller
++	 * embedded inside the KSZ886X, they get unmasked when the
++	 * irq is requested and ACKed by reading the status register,
++	 * which is done by the irqchip code.
++	 */
++	.config_intr	= genphy_no_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
+@@ -1377,6 +1391,13 @@ static struct phy_driver ksphy_driver[] = {
+ 	.config_aneg	= ksz8873mll_config_aneg,
+ 	.read_status	= ksz8873mll_read_status,
+ 	.match_phy_device = ksz8795_match_phy_device,
++	/* These interrupts are handled by the irq controller
++	 * embedded inside the KSZ887X, they get unmasked when the
++	 * irq is requested and ACKed by reading the status register,
++	 * which is done by the irqchip code.
++	 */
++	.config_intr	= genphy_no_config_intr,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ }, {
+@@ -1385,6 +1406,7 @@ static struct phy_driver ksphy_driver[] = {
+ 	.name		= "Microchip KSZ9477",
+ 	/* PHY_GBIT_FEATURES */
+ 	.config_init	= kszphy_config_init,
++	.handle_interrupt = kszphy_handle_interrupt,
+ 	.suspend	= genphy_suspend,
+ 	.resume		= genphy_resume,
+ } };

@@ -1,0 +1,52 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Fri, 10 Jul 2020 10:27:59 +0200
+Subject: [PATCH] net: phy: micrel: use consistent indention after define
+
+This patch changes the indention to one space between "#define" and the
+macro.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/phy/micrel.c | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
+index 72fee24eabf1..318582cd0c8d 100644
+--- a/drivers/net/phy/micrel.c
++++ b/drivers/net/phy/micrel.c
+@@ -38,23 +38,23 @@
+ 
+ /* general Interrupt control/status reg in vendor specific block. */
+ #define MII_KSZPHY_INTCS			0x1B
+-#define	KSZPHY_INTCS_JABBER			BIT(15)
+-#define	KSZPHY_INTCS_RECEIVE_ERR		BIT(14)
+-#define	KSZPHY_INTCS_PAGE_RECEIVE		BIT(13)
+-#define	KSZPHY_INTCS_PARELLEL			BIT(12)
+-#define	KSZPHY_INTCS_LINK_PARTNER_ACK		BIT(11)
+-#define	KSZPHY_INTCS_LINK_DOWN			BIT(10)
+-#define	KSZPHY_INTCS_REMOTE_FAULT		BIT(9)
+-#define	KSZPHY_INTCS_LINK_UP			BIT(8)
+-#define	KSZPHY_INTCS_ALL			(KSZPHY_INTCS_LINK_UP |\
++#define KSZPHY_INTCS_JABBER			BIT(15)
++#define KSZPHY_INTCS_RECEIVE_ERR		BIT(14)
++#define KSZPHY_INTCS_PAGE_RECEIVE		BIT(13)
++#define KSZPHY_INTCS_PARELLEL			BIT(12)
++#define KSZPHY_INTCS_LINK_PARTNER_ACK		BIT(11)
++#define KSZPHY_INTCS_LINK_DOWN			BIT(10)
++#define KSZPHY_INTCS_REMOTE_FAULT		BIT(9)
++#define KSZPHY_INTCS_LINK_UP			BIT(8)
++#define KSZPHY_INTCS_ALL			(KSZPHY_INTCS_LINK_UP |\
+ 						KSZPHY_INTCS_LINK_DOWN)
+ 
+ /* PHY Control 1 */
+-#define	MII_KSZPHY_CTRL_1			0x1e
++#define MII_KSZPHY_CTRL_1			0x1e
+ 
+ /* PHY Control 2 / PHY Control (if no PHY Control 1) */
+-#define	MII_KSZPHY_CTRL_2			0x1f
+-#define	MII_KSZPHY_CTRL				MII_KSZPHY_CTRL_2
++#define MII_KSZPHY_CTRL_2			0x1f
++#define MII_KSZPHY_CTRL				MII_KSZPHY_CTRL_2
+ /* bitmap of PHY register to set interrupt mode */
+ #define KSZPHY_CTRL_INT_ACTIVE_HIGH		BIT(9)
+ #define KSZPHY_RMII_REF_CLK_SEL			BIT(7)

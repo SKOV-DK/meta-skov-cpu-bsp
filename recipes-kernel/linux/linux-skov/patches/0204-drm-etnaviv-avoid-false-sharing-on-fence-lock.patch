@@ -13,10 +13,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  4 files changed, 11 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-index 1ba83a90cdef..fe558a529042 100644
+index d05c35994579..dbc1589adebf 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-@@ -409,9 +409,9 @@ static void submit_cleanup(struct kref *kref)
+@@ -407,9 +407,9 @@ static void submit_cleanup(struct kref *kref)
  		dma_fence_put(submit->in_fence);
  	if (submit->out_fence) {
  		/* first remove from IDR, so fence can not be found anymore */
@@ -29,10 +29,10 @@ index 1ba83a90cdef..fe558a529042 100644
  	}
  	kfree(submit->pmrs);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 1357f4928cbf..95aa28f8181f 100644
+index d02aa1945494..f3df93350893 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1732,7 +1732,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
+@@ -1763,7 +1763,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
  
  	gpu->dev = &pdev->dev;
  	mutex_init(&gpu->lock);
@@ -43,7 +43,7 @@ index 1357f4928cbf..95aa28f8181f 100644
  	/* Map registers: */
  	gpu->mmio = devm_platform_ioremap_resource(pdev, 0);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-index 3f8a097fdaa5..7f81858da66d 100644
+index d6f88854cd58..61e61fb54eba 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 @@ -99,6 +99,7 @@ struct etnaviv_gpu {
@@ -64,10 +64,10 @@ index 3f8a097fdaa5..7f81858da66d 100644
  	u32 next_fence;
  	u32 completed_fence;
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-index 4e3e95dce6d8..d8aac79419d7 100644
+index cd46c882269c..b41d62754294 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-@@ -146,11 +146,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -147,11 +147,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  	int ret = 0;
  
  	/*
@@ -81,7 +81,7 @@ index 4e3e95dce6d8..d8aac79419d7 100644
  
  	ret = drm_sched_job_init(&submit->sched_job, sched_entity,
  				 submit->ctx);
-@@ -158,9 +158,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -159,9 +159,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  		goto out_unlock;
  
  	submit->out_fence = dma_fence_get(&submit->sched_job.s_fence->finished);
@@ -93,7 +93,7 @@ index 4e3e95dce6d8..d8aac79419d7 100644
  	if (submit->out_fence_id < 0) {
  		drm_sched_job_cleanup(&submit->sched_job);
  		ret = -ENOMEM;
-@@ -173,7 +175,7 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -174,7 +176,7 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  	drm_sched_entity_push_job(&submit->sched_job, sched_entity);
  
  out_unlock:

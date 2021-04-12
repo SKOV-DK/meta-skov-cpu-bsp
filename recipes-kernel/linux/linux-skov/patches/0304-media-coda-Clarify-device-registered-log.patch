@@ -1,0 +1,73 @@
+From: Ezequiel Garcia <ezequiel@collabora.com>
+Date: Wed, 7 Oct 2020 12:35:41 +0200
+Subject: [PATCH] media: coda: Clarify device registered log
+
+Instead of printing just the device type, let's use
+the device name, which makes the message more useful.
+
+With this commit, the messages shown when the driver
+is registered are:
+
+coda 2040000.vpu: Firmware code revision: 570363
+coda 2040000.vpu: Initialized CODA960.
+coda 2040000.vpu: Firmware version: 3.1.1
+coda 2040000.vpu: coda-jpeg-encoder registered as video0
+coda 2040000.vpu: coda-jpeg-decoder registered as video1
+coda 2040000.vpu: coda-video-encoder registered as video2
+coda 2040000.vpu: coda-video-decoder registered as video3
+
+Signed-off-by: Ezequiel Garcia <ezequiel@collabora.com>
+Acked-by: Philipp Zabel <p.zabel@pengutronix.de>
+Signed-off-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+---
+ drivers/media/platform/coda/coda-common.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 547ad34b1424..588617653b68 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -172,7 +172,7 @@ struct coda_video_device {
+ };
+ 
+ static const struct coda_video_device coda_bit_encoder = {
+-	.name = "coda-encoder",
++	.name = "coda-video-encoder",
+ 	.type = CODA_INST_ENCODER,
+ 	.ops = &coda_bit_encode_ops,
+ 	.src_formats = {
+@@ -202,7 +202,7 @@ static const struct coda_video_device coda_bit_jpeg_encoder = {
+ };
+ 
+ static const struct coda_video_device coda_bit_decoder = {
+-	.name = "coda-decoder",
++	.name = "coda-video-decoder",
+ 	.type = CODA_INST_DECODER,
+ 	.ops = &coda_bit_decode_ops,
+ 	.src_formats = {
+@@ -2851,12 +2851,12 @@ static int coda_hw_init(struct coda_dev *dev)
+ static int coda_register_device(struct coda_dev *dev, int i)
+ {
+ 	struct video_device *vfd = &dev->vfd[i];
+-	enum coda_inst_type type;
++	const char *name;
+ 	int ret;
+ 
+ 	if (i >= dev->devtype->num_vdevs)
+ 		return -EINVAL;
+-	type = dev->devtype->vdevs[i]->type;
++	name = dev->devtype->vdevs[i]->name;
+ 
+ 	strscpy(vfd->name, dev->devtype->vdevs[i]->name, sizeof(vfd->name));
+ 	vfd->fops	= &coda_fops;
+@@ -2876,8 +2876,7 @@ static int coda_register_device(struct coda_dev *dev, int i)
+ 	ret = video_register_device(vfd, VFL_TYPE_VIDEO, 0);
+ 	if (!ret)
+ 		v4l2_info(&dev->v4l2_dev, "%s registered as %s\n",
+-			  type == CODA_INST_ENCODER ? "encoder" : "decoder",
+-			  video_device_node_name(vfd));
++			  name, video_device_node_name(vfd));
+ 	return ret;
+ }
+ 
