@@ -5,10 +5,6 @@ SRC_URI += "file://defconfig"
 require files/patches/series.inc
 require files/${MACHINE}/env/env.inc
 
-# for barebox >= v2019.04.0 (commit 0bb285926777)
-LICENSE = "GPL-2.0"
-LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
-
 DEPENDS += "coreutils-native"
 
 SRC_URI[md5sum] = "466e436389ab1c771ddfffb5ee16e7b8"
