@@ -6,20 +6,24 @@ KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddef
 
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
+DEPENDS += "nativesdk-flex"
+RDEPENDS_${PN} = "flex"
 
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "5.10.29"
+LINUX_VERSION = "5.10.34"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig \
 "
 
 require linux-skov/patches/series.inc
+SRC_URI[sha256sum] = "6eeeb7e005bd1d4eb8b10382a35f8cd54ee6692c244ab1362590fa539f3d6582"
 
-SRC_URI[md5sum] = "63f0246acd0b35983190d1206640fab0"
-SRC_URI[sha256sum] = "158c6746c11a90645b4d40bdb5c049d9fac7e4c9ed381c9b7aa94db1a8e7e9ec"
+#5.10.33
+#SRC_URI[md5sum] = "4a3d219c4cb2eb386ec5aeff4877ae07"
+#SRC_URI[sha256sum] = "933fdbc36371c0f830b7a6a957a559fca2dad1cc0eaa852ef42fb168185b4315"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
