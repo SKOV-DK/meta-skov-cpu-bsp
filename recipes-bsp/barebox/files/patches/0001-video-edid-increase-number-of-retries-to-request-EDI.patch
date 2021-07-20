@@ -20,7 +20,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/video/edid.c b/drivers/video/edid.c
-index bee4594118bb..0178c596691d 100644
+index 1baff7317b7c..0d7503d3f4b3 100644
 --- a/drivers/video/edid.c
 +++ b/drivers/video/edid.c
 @@ -33,6 +33,7 @@
