@@ -12,14 +12,14 @@ RDEPENDS_${PN} = "flex"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "5.10.47"
+LINUX_VERSION = "5.10.52"
 
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v5.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI += "file://defconfig \
 "
 
 require linux-skov/patches/series.inc
-SRC_URI[sha256sum] = "30b52a2fe6d1e0c1e1dc651d5df9a37eb54b35ea1f7f51b9f23d8903c29ae1c5"
+SRC_URI[sha256sum] = "769e57a0fa218589fa2f8460b8682eb784a72718c7a3d95295f382a77902ae79"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 

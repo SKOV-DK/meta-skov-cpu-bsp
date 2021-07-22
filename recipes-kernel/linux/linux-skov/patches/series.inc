@@ -79,13 +79,6 @@ SRC_URI += "\
   file://patches/0341-media-coda-enable-h.264-encoder-levels-1-and-4.2.patch \
   file://patches/0342-media-coda-Fix-reported-H264-profile.patch \
   "
-# umpf-topic: v5.10/topic/drm-sched-accounting
-# umpf-hashinfo: 4e9b8da96e5de9508039351c31a36ad8d81363bf
-# umpf-topic-range: 470c2704b03f580034da144e7498ad1d1833816a..8c20adbb03620e555ce5f1f62b131ad472c58fe2
-SRC_URI += "\
-  file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
-  file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
-  "
 # umpf-topic: v5.10/topic/ksz8873
 # umpf-hashinfo: 90bc95b378ee5906e3f1d2eb45295bc562dd671c
 # umpf-topic-range: 8c20adbb03620e555ce5f1f62b131ad472c58fe2..3b9d0d58d511fe209e2c287b0defdd6ab5c6835a
