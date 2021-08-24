@@ -23,7 +23,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  1 file changed, 34 insertions(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index e74b0647b1f5..f6a821aa58ba 100644
+index 3a905b6561d6..19a5f4103011 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -61,6 +61,10 @@

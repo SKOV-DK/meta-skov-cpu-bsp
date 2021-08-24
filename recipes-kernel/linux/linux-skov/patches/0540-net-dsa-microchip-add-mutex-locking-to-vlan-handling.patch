@@ -8,7 +8,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 8 insertions(+)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 24c7245fb837..89f4fa8a96dc 100644
+index e39a41ee2476..48bc62dd5fa6 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -683,6 +683,8 @@ static void ksz8_r_vlan_table(struct ksz_device *dev, u16 vid, u32 *vlan)

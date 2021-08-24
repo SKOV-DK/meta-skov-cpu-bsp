@@ -1,9 +1,9 @@
-# umpf-base: v5.10.29
+# umpf-base: v5.10.60
 # umpf-name: 5.10/customers/skov/imx6
-# umpf-version: 5.10/customers/skov/imx6/20210413-1
+# umpf-version: 5.10/customers/skov/imx6/20210824-1
 # umpf-topic: v5.10/customers/skov/imx6_project_specific
 # umpf-hashinfo: df5e77a99f99373b83eea661ef5e4857de7d0e65
-# umpf-topic-range: d8cf82b410b4be8a1266c10d05453128bd40d03a..d186c4f76dfde0cdb5e470aed4b1e59c261c8bff
+# umpf-topic-range: 2c5bd949b1df3f9fb109107b3d766e2ebabd7238..908d05c4ba737d2c797e7c5d61cca09f8a037f11
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -11,7 +11,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: b29b9c7ab43c0570eede2457a77a5e8a67ee6b79
-# umpf-topic-range: d186c4f76dfde0cdb5e470aed4b1e59c261c8bff..8e58260822017c88503261f82e4775237d03767f
+# umpf-topic-range: 908d05c4ba737d2c797e7c5d61cca09f8a037f11..bed5b4592bc429b99faeaaa5dc580ad7988df966
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-bindings-for-Logic-Technologie.patch \
   file://patches/0102-drm-panel-add-Logic-Technologies-panels.patch \
@@ -24,7 +24,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/etnaviv
 # umpf-hashinfo: e5198246f6333894dc30a01f09a9aa6bcc98bf7e
-# umpf-topic-range: 8e58260822017c88503261f82e4775237d03767f..092ab4695c958d22dd35040249ebc9b05dc58a65
+# umpf-topic-range: bed5b4592bc429b99faeaaa5dc580ad7988df966..0ebe3a5248d62e3c93079d00887d0fc0f6665b22
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -34,7 +34,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/coda
 # umpf-hashinfo: 031b55f6159ebafe99b221bbc3fbcfdccb2a82f6
-# umpf-topic-range: 092ab4695c958d22dd35040249ebc9b05dc58a65..470c2704b03f580034da144e7498ad1d1833816a
+# umpf-topic-range: 0ebe3a5248d62e3c93079d00887d0fc0f6665b22..68f49ade4f596ef3dae5c072df503c133af5b9e4
 SRC_URI += "\
   file://patches/0301-media-coda-use-semicolons-rather-than-commas-to-sepa.patch \
   file://patches/0302-media-coda-Remove-redundant-ctx-initialized-setting.patch \
@@ -79,9 +79,16 @@ SRC_URI += "\
   file://patches/0341-media-coda-enable-h.264-encoder-levels-1-and-4.2.patch \
   file://patches/0342-media-coda-Fix-reported-H264-profile.patch \
   "
+# umpf-topic: v5.10/topic/drm-sched-accounting
+# umpf-hashinfo: ee32d16fde4648bc0374b2797998228438493229
+# umpf-topic-range: 68f49ade4f596ef3dae5c072df503c133af5b9e4..4e95a2a32cac952b180ee76aef258b8823227aeb
+SRC_URI += "\
+  file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
+  file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
+  "
 # umpf-topic: v5.10/topic/ksz8873
-# umpf-hashinfo: 90bc95b378ee5906e3f1d2eb45295bc562dd671c
-# umpf-topic-range: 8c20adbb03620e555ce5f1f62b131ad472c58fe2..3b9d0d58d511fe209e2c287b0defdd6ab5c6835a
+# umpf-hashinfo: 1920c3fb395ef0d2843726dea203a748f035c917
+# umpf-topic-range: 4e95a2a32cac952b180ee76aef258b8823227aeb..b2a59eba47f45561d758e11c79519e8f09724f4c
 SRC_URI += "\
   file://patches/0501-net-dsa-microchip-ksz8795-remove-unused-last_port-va.patch \
   file://patches/0502-net-dsa-microchip-ksz8795-remove-superfluous-port_cn.patch \
@@ -128,15 +135,15 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/fec-selftest
 # umpf-hashinfo: 0cea5c78d5adf067e63dd8d9529cd0a80f71a4f6
-# umpf-topic-range: 3b9d0d58d511fe209e2c287b0defdd6ab5c6835a..f6d782a55a6fd37f8296c22e225c25c624172a0f
+# umpf-topic-range: b2a59eba47f45561d758e11c79519e8f09724f4c..d10868458ff8adacc2a5dbd0991072d80db02117
 SRC_URI += "\
   file://patches/0601-net-phy-micrel-KSZ8081-add-loopback-support.patch \
   file://patches/0602-net-phy-at803x-AR8085-add-loopback-support.patch \
   file://patches/0603-net-fec-add-basic-selftest-support.patch \
   "
-# umpf-release: 5.10/customers/skov/imx6/20210413-1
-# umpf-topic-range: f6d782a55a6fd37f8296c22e225c25c624172a0f..5113dd826238d4917c3ba5a85f66ae9c5eaa0eea
+# umpf-release: 5.10/customers/skov/imx6/20210824-1
+# umpf-topic-range: d10868458ff8adacc2a5dbd0991072d80db02117..a42cd528fba0091d0684ecde10a951b929f66b09
 SRC_URI += "\
-  file://patches/0701-Release-5.10-customers-skov-imx6-20210413-1.patch \
+  file://patches/0701-Release-5.10-customers-skov-imx6-20210824-1.patch \
   "
 # umpf-end

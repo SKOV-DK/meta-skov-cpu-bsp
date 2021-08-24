@@ -9,7 +9,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 49ef7c5aac02..16a34ddddffa 100644
+index 2088eb6a6df4..e1990914f4cc 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -206,15 +206,15 @@ static const struct mib_names ksz88xx_mib_names[] = {

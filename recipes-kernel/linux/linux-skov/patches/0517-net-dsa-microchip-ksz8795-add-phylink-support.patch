@@ -7,7 +7,7 @@ Subject: [PATCH] net: dsa: microchip: ksz8795: add phylink support
  1 file changed, 73 insertions(+)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 81eec8acfea4..49ef7c5aac02 100644
+index 99d8672b1290..2088eb6a6df4 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -18,6 +18,7 @@
@@ -18,7 +18,7 @@ index 81eec8acfea4..49ef7c5aac02 100644
  
  #include "ksz_common.h"
  #include "ksz8795_reg.h"
-@@ -1393,11 +1394,83 @@ static int ksz8_setup(struct dsa_switch *ds)
+@@ -1454,11 +1455,83 @@ static int ksz8_setup(struct dsa_switch *ds)
  	return 0;
  }
  

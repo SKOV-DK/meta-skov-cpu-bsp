@@ -17,7 +17,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  2 files changed, 10 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index abdfc7f4d70c..ee8e82dda314 100644
+index bdf3231a3460..ff015d87d42c 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -418,8 +418,8 @@ static void ksz8795_r_vlan_entries(struct ksz_device *dev, u16 addr)
@@ -73,7 +73,7 @@ index abdfc7f4d70c..ee8e82dda314 100644
  		    p->stp_state == BR_STATE_DISABLED)
  			member = dev->host_mask | p->vid_member;
  		break;
-@@ -1006,7 +1006,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
+@@ -1065,7 +1065,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
  	ksz8795_port_setup(dev, dev->cpu_port, true);
  	dev->member = dev->host_mask;
  
@@ -82,7 +82,7 @@ index abdfc7f4d70c..ee8e82dda314 100644
  		p = &dev->ports[i];
  
  		/* Initialize to non-zero so that ksz_cfg_port_member() will
-@@ -1017,7 +1017,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
+@@ -1076,7 +1076,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
  		ksz8795_port_stp_state_set(ds, i, BR_STATE_DISABLED);
  
  		/* Last port may be disabled. */
@@ -91,7 +91,7 @@ index abdfc7f4d70c..ee8e82dda314 100644
  			break;
  		p->on = 1;
  		p->phy = 1;
-@@ -1240,7 +1240,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
+@@ -1301,7 +1301,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
  	dev->mib_cnt = ARRAY_SIZE(mib_names);
  
  	dev->mib_port_cnt = TOTAL_PORT_NUM;

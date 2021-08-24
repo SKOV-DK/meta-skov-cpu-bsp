@@ -16,10 +16,10 @@ v1 -> v5: - extracted this from previous bigger patch
  1 file changed, 50 insertions(+), 42 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 1d12597a1c8a..53cb41087a59 100644
+index 20fbc646443f..296365ea17a3 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
-@@ -911,10 +911,58 @@ static void ksz8_port_mirror_del(struct dsa_switch *ds, int port,
+@@ -970,10 +970,58 @@ static void ksz8_port_mirror_del(struct dsa_switch *ds, int port,
  			     PORT_MIRROR_SNIFFER, false);
  }
  
@@ -79,7 +79,7 @@ index 1d12597a1c8a..53cb41087a59 100644
  
  	/* enable broadcast storm limit */
  	ksz_port_cfg(dev, port, P_BCAST_STORM_CTRL, PORT_BROADCAST_STORM, true);
-@@ -931,47 +979,7 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
+@@ -990,47 +1038,7 @@ static void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port)
  	ksz_port_cfg(dev, port, P_PRIO_CTRL, PORT_802_1P_ENABLE, true);
  
  	if (cpu_port) {

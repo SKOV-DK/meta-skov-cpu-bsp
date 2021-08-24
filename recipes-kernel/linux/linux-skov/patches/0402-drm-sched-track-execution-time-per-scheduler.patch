@@ -14,7 +14,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 13 insertions(+)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index cda91c3fb613..144787b9f552 100644
+index f5117d5e9bfe..c0078ac334be 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -276,6 +276,11 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)

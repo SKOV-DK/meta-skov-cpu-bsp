@@ -55,7 +55,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 318582cd0c8d..b2b5cc388b39 100644
+index a278f04e5f9f..fa406c1ae06a 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -1015,6 +1015,26 @@ static int ksz8873mll_config_aneg(struct phy_device *phydev)

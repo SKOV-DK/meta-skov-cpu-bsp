@@ -12,7 +12,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  5 files changed, 22 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 751aa1e65abe..24c7245fb837 100644
+index cfa4a7b04748..e39a41ee2476 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -956,6 +956,18 @@ static enum dsa_tag_protocol ksz8_get_tag_protocol(struct dsa_switch *ds,
@@ -34,7 +34,7 @@ index 751aa1e65abe..24c7245fb837 100644
  static void ksz8_get_strings(struct dsa_switch *ds, int port,
  			     u32 stringset, uint8_t *buf)
  {
-@@ -1682,6 +1694,7 @@ static void ksz_validate(struct dsa_switch *ds, int port,
+@@ -1743,6 +1755,7 @@ static void ksz_validate(struct dsa_switch *ds, int port,
  
  static const struct dsa_switch_ops ksz8_switch_ops = {
  	.get_tag_protocol	= ksz8_get_tag_protocol,
@@ -43,7 +43,7 @@ index 751aa1e65abe..24c7245fb837 100644
  	.phy_read		= ksz_phy_read16,
  	.phy_write		= ksz_phy_write16,
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index ebddccefcf13..b78042358a48 100644
+index cfe2567e4213..e99366c1df6a 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -1414,6 +1414,9 @@ static int kszphy_probe(struct phy_device *phydev)
@@ -82,10 +82,10 @@ index ee23acc4d551..0117a2c126eb 100644
  #define MICREL_KSZ9021_EXTREG_CTRL	0xB
  #define MICREL_KSZ9021_EXTREG_DATA_WRITE	0xC
 diff --git a/net/dsa/slave.c b/net/dsa/slave.c
-index c6806eef906f..202f4c27f6d5 100644
+index 9281c9c6a253..f07299394221 100644
 --- a/net/dsa/slave.c
 +++ b/net/dsa/slave.c
-@@ -1681,6 +1681,10 @@ static int dsa_slave_phy_connect(struct net_device *slave_dev, int addr)
+@@ -1683,6 +1683,10 @@ static int dsa_slave_phy_connect(struct net_device *slave_dev, int addr)
  		return -ENODEV;
  	}
  

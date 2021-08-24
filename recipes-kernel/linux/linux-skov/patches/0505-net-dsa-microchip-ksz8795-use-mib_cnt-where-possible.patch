@@ -19,7 +19,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  2 files changed, 5 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 04a571bde7e6..abdfc7f4d70c 100644
+index cc42cfcb0620..bdf3231a3460 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -23,7 +23,7 @@
@@ -43,7 +43,7 @@ index 04a571bde7e6..abdfc7f4d70c 100644
  		memcpy(buf + i * ETH_GSTRING_LEN, mib_names[i].string,
  		       ETH_GSTRING_LEN);
  	}
-@@ -1236,7 +1237,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
+@@ -1297,7 +1298,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
  	dev->port_mask |= dev->host_mask;
  
  	dev->reg_mib_cnt = KSZ8795_COUNTER_NUM;
@@ -52,7 +52,7 @@ index 04a571bde7e6..abdfc7f4d70c 100644
  
  	dev->mib_port_cnt = TOTAL_PORT_NUM;
  	dev->phy_port_cnt = SWITCH_PORT_NUM;
-@@ -1254,7 +1255,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
+@@ -1315,7 +1316,7 @@ static int ksz8795_switch_init(struct ksz_device *dev)
  		dev->ports[i].mib.counters =
  			devm_kzalloc(dev->dev,
  				     sizeof(u64) *

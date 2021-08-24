@@ -12,13 +12,13 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
 v1 -> v4: - extracted this change from bigger previous patch
 v4 -> v5: - removed extra unavailable variables in ksz8_r_vlan_entries
 ---
- drivers/net/dsa/microchip/ksz8795.c     | 222 ++++++++++++++++----------------
+ drivers/net/dsa/microchip/ksz8795.c     | 224 ++++++++++++++++----------------
  drivers/net/dsa/microchip/ksz8795_spi.c |   2 +-
  drivers/net/dsa/microchip/ksz_common.h  |   2 +-
- 3 files changed, 110 insertions(+), 116 deletions(-)
+ 3 files changed, 111 insertions(+), 117 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index c973db101b72..1d12597a1c8a 100644
+index ac5c78d8702f..20fbc646443f 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -74,7 +74,7 @@ static void ksz_port_cfg(struct ksz_device *dev, int port, int offset, u8 bits,
@@ -304,8 +304,17 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_device *dev = ds->priv;
  
-@@ -796,8 +790,8 @@ static int ksz8795_port_vlan_filtering(struct dsa_switch *ds, int port,
- 	return 0;
+@@ -841,7 +835,7 @@ int ksz8795_port_vlan_prepare(struct dsa_switch *ds, int port,
+ 				continue;
+ 			}
+ 
+-			ksz8795_from_vlan(dev->vlan_cache[vid].table[0],
++			ksz8_from_vlan(dev->vlan_cache[vid].table[0],
+ 					  &fid, &member, &valid);
+ 			if (valid && (member & BIT(port)))
+ 				return -EINVAL;
+@@ -851,8 +845,8 @@ int ksz8795_port_vlan_prepare(struct dsa_switch *ds, int port,
+ 	return ksz_port_vlan_prepare(ds, port, vlan);
  }
  
 -static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
@@ -315,8 +324,8 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	bool untagged = vlan->flags & BRIDGE_VLAN_INFO_UNTAGGED;
  	struct ksz_device *dev = ds->priv;
-@@ -807,8 +801,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
- 	ksz_port_cfg(dev, port, P_TAG_CTRL, PORT_REMOVE_TAG, untagged);
+@@ -866,8 +860,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
+ 	}
  
  	for (vid = vlan->vid_begin; vid <= vlan->vid_end; vid++) {
 -		ksz8795_r_vlan_table(dev, vid, &data);
@@ -326,7 +335,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  		/* First time to setup the VLAN entry. */
  		if (!valid) {
-@@ -818,8 +812,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
+@@ -877,8 +871,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
  		}
  		member |= BIT(port);
  
@@ -337,7 +346,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  		/* change PVID */
  		if (vlan->flags & BRIDGE_VLAN_INFO_PVID)
-@@ -834,8 +828,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
+@@ -895,8 +889,8 @@ static void ksz8795_port_vlan_add(struct dsa_switch *ds, int port,
  	}
  }
  
@@ -346,10 +355,10 @@ index c973db101b72..1d12597a1c8a 100644
 +static int ksz8_port_vlan_del(struct dsa_switch *ds, int port,
 +			      const struct switchdev_obj_port_vlan *vlan)
  {
- 	bool untagged = vlan->flags & BRIDGE_VLAN_INFO_UNTAGGED;
  	struct ksz_device *dev = ds->priv;
-@@ -848,8 +842,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
- 	ksz_port_cfg(dev, port, P_TAG_CTRL, PORT_REMOVE_TAG, untagged);
+ 	u16 data, vid, pvid;
+@@ -907,8 +901,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+ 	pvid = pvid & 0xFFF;
  
  	for (vid = vlan->vid_begin; vid <= vlan->vid_end; vid++) {
 -		ksz8795_r_vlan_table(dev, vid, &data);
@@ -359,9 +368,9 @@ index c973db101b72..1d12597a1c8a 100644
  
  		member &= ~BIT(port);
  
-@@ -862,8 +856,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+@@ -921,8 +915,8 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
  		if (pvid == vid)
- 			new_pvid = 1;
+ 			del_pvid = true;
  
 -		ksz8795_to_vlan(fid, member, valid, &data);
 -		ksz8795_w_vlan_table(dev, vid, data);
@@ -369,8 +378,8 @@ index c973db101b72..1d12597a1c8a 100644
 +		ksz8_w_vlan_table(dev, vid, data);
  	}
  
- 	if (new_pvid != pvid)
-@@ -872,9 +866,9 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
+ 	if (del_pvid)
+@@ -931,9 +925,9 @@ static int ksz8795_port_vlan_del(struct dsa_switch *ds, int port,
  	return 0;
  }
  
@@ -383,7 +392,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_device *dev = ds->priv;
  
-@@ -896,8 +890,8 @@ static int ksz8795_port_mirror_add(struct dsa_switch *ds, int port,
+@@ -955,8 +949,8 @@ static int ksz8795_port_mirror_add(struct dsa_switch *ds, int port,
  	return 0;
  }
  
@@ -394,7 +403,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_device *dev = ds->priv;
  	u8 data;
-@@ -917,7 +911,7 @@ static void ksz8795_port_mirror_del(struct dsa_switch *ds, int port,
+@@ -976,7 +970,7 @@ static void ksz8795_port_mirror_del(struct dsa_switch *ds, int port,
  			     PORT_MIRROR_SNIFFER, false);
  }
  
@@ -403,7 +412,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_port *p = &dev->ports[port];
  	u8 data8, member;
-@@ -983,10 +977,10 @@ static void ksz8795_port_setup(struct ksz_device *dev, int port, bool cpu_port)
+@@ -1042,10 +1036,10 @@ static void ksz8795_port_setup(struct ksz_device *dev, int port, bool cpu_port)
  	} else {
  		member = dev->host_mask | p->vid_member;
  	}
@@ -416,7 +425,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_device *dev = ds->priv;
  	struct ksz_port *p;
-@@ -1001,7 +995,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
+@@ -1060,7 +1054,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
  	p->vid_member = dev->port_mask;
  	p->on = 1;
  
@@ -425,7 +434,7 @@ index c973db101b72..1d12597a1c8a 100644
  	dev->member = dev->host_mask;
  
  	for (i = 0; i < dev->phy_port_cnt; i++) {
-@@ -1012,7 +1006,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
+@@ -1071,7 +1065,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
  		 */
  		p->vid_member = BIT(i);
  		p->member = dev->port_mask;
@@ -434,7 +443,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  		/* Last port may be disabled. */
  		if (i == dev->phy_port_cnt)
-@@ -1036,7 +1030,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
+@@ -1095,7 +1089,7 @@ static void ksz8795_config_cpu_port(struct dsa_switch *ds)
  	}
  }
  
@@ -443,7 +452,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	struct ksz_device *dev = ds->priv;
  	struct alu_struct alu;
-@@ -1047,7 +1041,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
+@@ -1106,7 +1100,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
  	if (!dev->vlan_cache)
  		return -ENOMEM;
  
@@ -452,7 +461,7 @@ index c973db101b72..1d12597a1c8a 100644
  	if (ret) {
  		dev_err(ds->dev, "failed to reset switch\n");
  		return ret;
-@@ -1070,7 +1064,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
+@@ -1129,7 +1123,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
  			   UNICAST_VLAN_BOUNDARY | NO_EXC_COLLISION_DROP,
  			   UNICAST_VLAN_BOUNDARY | NO_EXC_COLLISION_DROP);
  
@@ -461,7 +470,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  	ksz_cfg(dev, REG_SW_CTRL_2, MULTICAST_STORM_DISABLE, true);
  
-@@ -1085,7 +1079,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
+@@ -1146,7 +1140,7 @@ static int ksz8795_setup(struct dsa_switch *ds)
  			   BROADCAST_STORM_PROT_RATE) / 100);
  
  	for (i = 0; i < (dev->num_vlans / 4); i++)
@@ -470,7 +479,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  	/* Setup STP address for STP operation. */
  	memset(&alu, 0, sizeof(alu));
-@@ -1094,45 +1088,45 @@ static int ksz8795_setup(struct dsa_switch *ds)
+@@ -1155,45 +1149,45 @@ static int ksz8795_setup(struct dsa_switch *ds)
  	alu.is_override = true;
  	alu.port_forward = dev->host_mask;
  
@@ -503,7 +512,7 @@ index c973db101b72..1d12597a1c8a 100644
  	.port_fast_age		= ksz_port_fast_age,
 -	.port_vlan_filtering	= ksz8795_port_vlan_filtering,
 +	.port_vlan_filtering	= ksz8_port_vlan_filtering,
- 	.port_vlan_prepare	= ksz_port_vlan_prepare,
+ 	.port_vlan_prepare	= ksz8795_port_vlan_prepare,
 -	.port_vlan_add		= ksz8795_port_vlan_add,
 -	.port_vlan_del		= ksz8795_port_vlan_del,
 +	.port_vlan_add		= ksz8_port_vlan_add,
@@ -529,7 +538,7 @@ index c973db101b72..1d12597a1c8a 100644
  {
  	u8 id1, id2;
  	u16 id16;
-@@ -1176,7 +1170,7 @@ struct ksz_chip_data {
+@@ -1237,7 +1231,7 @@ struct ksz_chip_data {
  	int port_cnt;
  };
  
@@ -538,7 +547,7 @@ index c973db101b72..1d12597a1c8a 100644
  	{
  		.chip_id = 0x8795,
  		.dev_name = "KSZ8795",
-@@ -1206,14 +1200,14 @@ static const struct ksz_chip_data ksz8795_switch_chips[] = {
+@@ -1267,14 +1261,14 @@ static const struct ksz_chip_data ksz8795_switch_chips[] = {
  	},
  };
  
@@ -557,7 +566,7 @@ index c973db101b72..1d12597a1c8a 100644
  
  		if (dev->chip_id == chip->chip_id) {
  			dev->name = chip->dev_name;
-@@ -1264,36 +1258,36 @@ static int ksz8795_switch_init(struct ksz_device *dev)
+@@ -1335,36 +1329,36 @@ static int ksz8795_switch_init(struct ksz_device *dev)
  	return 0;
  }
  
@@ -631,10 +640,10 @@ index 8b00f8e6c02f..3bab09c46f6a 100644
  	/* Main DSA driver may not be started yet. */
  	if (ret)
 diff --git a/drivers/net/dsa/microchip/ksz_common.h b/drivers/net/dsa/microchip/ksz_common.h
-index 720f22275c84..49f4b882bd70 100644
+index 5ff2da512b69..7f0641ad50b7 100644
 --- a/drivers/net/dsa/microchip/ksz_common.h
 +++ b/drivers/net/dsa/microchip/ksz_common.h
-@@ -142,7 +142,7 @@ int ksz_switch_register(struct ksz_device *dev,
+@@ -143,7 +143,7 @@ int ksz_switch_register(struct ksz_device *dev,
  			const struct ksz_dev_ops *ops);
  void ksz_switch_remove(struct ksz_device *dev);
  

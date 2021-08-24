@@ -8,7 +8,7 @@ Signed-off-by: Oleksij Rempel <linux@rempel-privat.de>
  1 file changed, 25 insertions(+)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 46e22cc54398..751aa1e65abe 100644
+index 146dce700f0a..cfa4a7b04748 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -6,6 +6,7 @@

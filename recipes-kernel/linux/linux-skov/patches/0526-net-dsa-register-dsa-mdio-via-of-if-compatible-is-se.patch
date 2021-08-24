@@ -8,7 +8,7 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/net/dsa/dsa2.c b/net/dsa/dsa2.c
-index a04fd637b4cd..2133df04284c 100644
+index 3ada338d7e08..9dd8c8ff7d32 100644
 --- a/net/dsa/dsa2.c
 +++ b/net/dsa/dsa2.c
 @@ -14,6 +14,7 @@
