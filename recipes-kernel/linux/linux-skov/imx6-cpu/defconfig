@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.10.37-20210413-1 Kernel Configuration
+# Linux/arm 5.10.60-20210824-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-pmc-linux-gnueabi-gcc (GCC) 9.3.0"
 CONFIG_CC_IS_GCC=y
@@ -473,6 +473,7 @@ CONFIG_ALIGNMENT_TRAP=y
 # CONFIG_PARAVIRT is not set
 # CONFIG_PARAVIRT_TIME_ACCOUNTING is not set
 # CONFIG_XEN is not set
+CONFIG_STACKPROTECTOR_PER_TASK=y
 # end of Kernel Features
 
 #
@@ -672,6 +673,11 @@ CONFIG_ARCH_HAS_GCOV_PROFILE_ALL=y
 # end of GCOV-based kernel profiling
 
 CONFIG_HAVE_GCC_PLUGINS=y
+CONFIG_GCC_PLUGINS=y
+# CONFIG_GCC_PLUGIN_CYC_COMPLEXITY is not set
+# CONFIG_GCC_PLUGIN_LATENT_ENTROPY is not set
+# CONFIG_GCC_PLUGIN_RANDSTRUCT is not set
+CONFIG_GCC_PLUGIN_ARM_SSP_PER_TASK=y
 # end of General architecture-dependent options
 
 CONFIG_RT_MUTEXES=y
@@ -1508,6 +1514,7 @@ CONFIG_BLK_DEV_LOOP_MIN_COUNT=8
 # NVME Support
 #
 # CONFIG_NVME_FC is not set
+# CONFIG_NVME_TCP is not set
 # CONFIG_NVME_TARGET is not set
 # end of NVME Support
 
@@ -2280,6 +2287,7 @@ CONFIG_POWER_SUPPLY=y
 # CONFIG_CHARGER_BQ25980 is not set
 # CONFIG_CHARGER_SMB347 is not set
 # CONFIG_BATTERY_GAUGE_LTC2941 is not set
+# CONFIG_BATTERY_RT5033 is not set
 # CONFIG_CHARGER_RT9455 is not set
 # CONFIG_CHARGER_UCS1002 is not set
 # CONFIG_CHARGER_BD99954 is not set
@@ -4105,8 +4113,6 @@ CONFIG_IMX_INTMUX=y
 # CONFIG_IPACK_BUS is not set
 CONFIG_ARCH_HAS_RESET_CONTROLLER=y
 CONFIG_RESET_CONTROLLER=y
-# CONFIG_RESET_BRCMSTB_RESCAL is not set
-# CONFIG_RESET_INTEL_GW is not set
 # CONFIG_RESET_TI_SYSCON is not set
 
 #
@@ -4455,6 +4461,9 @@ CONFIG_LSM="yama,loadpin,safesetid,integrity"
 # Memory initialization
 #
 CONFIG_INIT_STACK_NONE=y
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_USER is not set
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_BYREF is not set
+# CONFIG_GCC_PLUGIN_STRUCTLEAK_BYREF_ALL is not set
 # CONFIG_INIT_ON_ALLOC_DEFAULT_ON is not set
 # CONFIG_INIT_ON_FREE_DEFAULT_ON is not set
 # end of Memory initialization
