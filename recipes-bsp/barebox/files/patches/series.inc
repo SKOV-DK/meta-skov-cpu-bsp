@@ -10,6 +10,6 @@ SRC_URI += "\
 # umpf-release: 2021.07.0/customers/skov/imx6/20210720-1
 # umpf-topic-range: ede3b78f63eda144cc2f5880823593985c0d898f..afa7e53a70564204a0620a7341427264a3837c56
 SRC_URI += "\
-  file://patches/0101-Release-2021.07.0-customers-skov-imx6-20210720-1.patch \
+  file://patches/0201-Release-2021.08.0-customers-skov-imx6-20210910-1.patch \
   "
 # umpf-end
