@@ -1,0 +1,46 @@
+From ba647dd84fdc5f30c0185333a41132b608163213 Mon Sep 17 00:00:00 2001
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 7 Sep 2021 10:47:07 +0200
+Subject: [PATCH v2 1/7] ARM: dts: skov-imx6: add USB nodes
+
+We need USB working to make use of USB ethernet adapters.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/dts/imx6qdl-skov-imx6.dtsi | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
+index 03f3cb02fc..371a931e53 100644
+--- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
++++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
+@@ -273,6 +273,26 @@
+ 	remote-endpoint = <&display0_in>;
+ };
+ 
++&usbh1 {
++	disable-over-current;
++	status = "okay";
++};
++
++/* no usbh2 */
++&usbphynop1 {
++	status = "disabled";
++};
++
++/* no usbh3 */
++&usbphynop2 {
++	status = "disabled";
++};
++
++&usbotg {
++	disable-over-current;
++	status = "okay";
++};
++
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hog>;
+-- 
+2.30.2
+

@@ -1,0 +1,42 @@
+From d313cd608df548d44a9abea2c3132f8e45f77d4a Mon Sep 17 00:00:00 2001
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 8 Sep 2021 08:50:47 +0200
+Subject: [PATCH v2 4/7] ARM: boards: skov-imx6: disable eth0 for barebox if no
+ switch is detected
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx6/board.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
+index 2bd21adaeb..c4665c2b45 100644
+--- a/arch/arm/boards/skov-imx6/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
+@@ -540,6 +540,7 @@ static void skov_init_board(const struct board_description *variant)
+ static int skov_switch_test(void)
+ {
+ 	struct phy_device *phydev;
++	struct device_d *eth0;
+ 	struct mii_bus *mii;
+ 	int ret;
+ 
+@@ -568,6 +569,15 @@ no_switch:
+ 
+ 	pr_notice("No-switch variant is detected\n");
+ 
++	eth0 = get_device_by_name("eth0");
++	if (eth0) {
++		ret = dev_set_param(eth0, "mode", "disabled");
++		if (ret)
++			pr_warn("Can't set eth0 mode\n");
++	} else {
++		pr_warn("Can't disable eth0\n");
++	}
++
+ 	return 0;
+ }
+ late_initcall(skov_switch_test);
+-- 
+2.30.2
+

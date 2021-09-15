@@ -13,3 +13,12 @@ SRC_URI += "\
   file://patches/0201-Release-2021.08.0-customers-skov-imx6-20210910-1.patch \
   "
 # umpf-end
+SRC_URI += "\
+  file://patches/0101-ARM-dts-skov-imx6-add-USB-nodes.patch \
+  file://patches/0102-ARM-boards-skov-imx6-fixup_machine_compatible-add.patch \
+  file://patches/0103-ARM-boards-skov-imx6-add-switch-detection.patch \
+  file://patches/0104-ARM-boards-skov-imx6-disable-eth0-for-barebox-if-.patch \
+  file://patches/0105-ARM-boards-skov-imx6-fixup-different-DTS-variants.patch \
+  file://patches/0106-ARM-boards-skov-imx6-start-using-deep-probe.patch \
+  file://patches/0107-ARM-boards-skov-imx6-add-defaultenv-with-eth1-dis.patch \
+"

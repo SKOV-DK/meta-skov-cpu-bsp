@@ -1,0 +1,53 @@
+From 52a877347a7c9514cf460ffdabb8a5285a2c032a Mon Sep 17 00:00:00 2001
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 8 Sep 2021 07:44:29 +0200
+Subject: [PATCH v2 2/7] ARM: boards: skov-imx6: fixup_machine_compatible() add
+ optional root node
+
+This will be needed by the next patch
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx6/board.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
+index a58172b2b1..030ac62c52 100644
+--- a/arch/arm/boards/skov-imx6/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
+@@ -432,16 +432,18 @@ static void skov_init_board(const struct board_description *variant)
+ 	}
+ }
+ 
+-static void fixup_machine_compatible(const char *compat)
++static void fixup_machine_compatible(const char *compat,
++				     struct device_node *root)
+ {
+ 	const char *curcompat;
+-	struct device_node *root;
+ 	int cclen = 0, clen = strlen(compat) + 1;
+ 	void *buf;
+ 
+-	root = of_get_root_node();
+-	if (!root)
+-		return;
++	if (!root) {
++		root = of_get_root_node();
++		if (!root)
++			return;
++	}
+ 
+ 	curcompat = of_get_property(root, "compatible", &cclen);
+ 
+@@ -487,7 +489,7 @@ static int skov_imx6_probe(struct device_d *dev)
+ 	globalvar_add_simple("board.dts", variant->dts_compatible);
+ 	globalvar_add_simple("board.display", variant->display ?: NULL);
+ 
+-	fixup_machine_compatible(variant->dts_compatible);
++	fixup_machine_compatible(variant->dts_compatible, NULL);
+ 
+ 	skov_init_board(variant);
+ 
+-- 
+2.30.2
+
