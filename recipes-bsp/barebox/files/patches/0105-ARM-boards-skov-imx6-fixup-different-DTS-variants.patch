@@ -1,18 +1,18 @@
-From 62db6d5ada1158edfe7c16ff37bc471eb015429a Mon Sep 17 00:00:00 2001
+From 5174bf1a7bc8622cdfa4bf4d26ab99e1ebb17154 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 7 Sep 2021 14:27:09 +0200
-Subject: [PATCH v2 5/7] ARM: boards: skov-imx6: fixup different DTS variants
+Subject: [PATCH v3 5/7] ARM: boards: skov-imx6: fixup different DTS variants
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
- arch/arm/boards/skov-imx6/board.c | 47 +++++++++++++++++++++++++++----
- 1 file changed, 42 insertions(+), 5 deletions(-)
+ arch/arm/boards/skov-imx6/board.c | 48 +++++++++++++++++++++++++++----
+ 1 file changed, 43 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index c4665c2b45..fea840aa33 100644
+index 4044bacb28..44c776f9cf 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -401,13 +401,50 @@ static void skov_imx6_no_switch(struct device_node *root)
+@@ -401,13 +401,51 @@ static void skov_imx6_no_switch(struct device_node *root)
  	}
  }
  
@@ -22,7 +22,8 @@ index c4665c2b45..fea840aa33 100644
 +	char *buf;
 +	int ret;
 +
-+	size = strlen(path) + 1;
++	/* size is, string + '\0' + port number */
++	size = strlen(path) + 2;
 +	buf = xzalloc(size);
 +	if (!buf)
 +		return -ENOMEM;

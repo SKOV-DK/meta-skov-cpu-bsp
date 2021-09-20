@@ -1,7 +1,7 @@
 From 3293db1f87ec2960da164f847c766f06fe686fd7 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Mon, 6 Sep 2021 14:50:39 +0200
-Subject: [PATCH v2 3/7] ARM: boards: skov-imx6: add switch detection
+Subject: [PATCH v3 3/7] ARM: boards: skov-imx6: add switch detection
 
 There are board variants with same board ID but not switch. Detect this
 variants.

@@ -1,7 +1,7 @@
-From d4c2af1a1a912ade43f67f9bb5fb7fc35d4aac5f Mon Sep 17 00:00:00 2001
+From 2236f426d3a7856628924a68100cb967cac6e941 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Thu, 9 Sep 2021 13:04:22 +0200
-Subject: [PATCH v2 7/7] ARM: boards: skov-imx6: add defaultenv with
+Subject: [PATCH v3 7/7] ARM: boards: skov-imx6: add defaultenv with
  eth1-discover script
 
 Add eth1-discover script to run USB detection if eth0 is disabled. The
@@ -26,7 +26,7 @@ index a5e85bc1e1..07b87ff11d 100644
  obj-pbl-y += version.o
 +bbenv-y += defaultenv-skov-imx6
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 6cdfc8f24d..9c4cf2667f 100644
+index 6a9055757c..8881c10ab2 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -5,6 +5,7 @@

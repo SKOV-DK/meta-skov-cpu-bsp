@@ -1,7 +1,7 @@
-From c24b348951ccae37a637e5124499c20d5b03abcc Mon Sep 17 00:00:00 2001
+From f9901685d078cd29d845d287737639d74f089303 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Wed, 8 Sep 2021 12:44:08 +0200
-Subject: [PATCH v2 6/7] ARM: boards: skov-imx6: start using deep-probe
+Subject: [PATCH v3 6/7] ARM: boards: skov-imx6: start using deep-probe
 
 Port Skov boards to the deep-propbe and reduce boot time by 100msec.
 
@@ -11,7 +11,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index fea840aa33..6cdfc8f24d 100644
+index 44c776f9cf..6a9055757c 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -2,16 +2,17 @@
@@ -37,7 +37,7 @@ index fea840aa33..6cdfc8f24d 100644
  
  #include "version.h"
  
-@@ -499,10 +500,20 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
+@@ -500,10 +501,20 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
   */
  static void skov_init_board(const struct board_description *variant)
  {

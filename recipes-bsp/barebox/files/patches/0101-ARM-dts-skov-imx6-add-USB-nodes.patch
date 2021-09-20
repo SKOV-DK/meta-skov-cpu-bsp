@@ -1,7 +1,7 @@
 From ba647dd84fdc5f30c0185333a41132b608163213 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 7 Sep 2021 10:47:07 +0200
-Subject: [PATCH v2 1/7] ARM: dts: skov-imx6: add USB nodes
+Subject: [PATCH v3 1/7] ARM: dts: skov-imx6: add USB nodes
 
 We need USB working to make use of USB ethernet adapters.
 

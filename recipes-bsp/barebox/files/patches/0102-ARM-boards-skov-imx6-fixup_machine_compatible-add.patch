@@ -1,7 +1,7 @@
 From 52a877347a7c9514cf460ffdabb8a5285a2c032a Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Wed, 8 Sep 2021 07:44:29 +0200
-Subject: [PATCH v2 2/7] ARM: boards: skov-imx6: fixup_machine_compatible() add
+Subject: [PATCH v3 2/7] ARM: boards: skov-imx6: fixup_machine_compatible() add
  optional root node
 
 This will be needed by the next patch
