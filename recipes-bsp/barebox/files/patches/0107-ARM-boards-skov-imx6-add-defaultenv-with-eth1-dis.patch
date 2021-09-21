@@ -51,7 +51,7 @@ new file mode 100644
 index 0000000000..e11a3f9006
 --- /dev/null
 +++ b/arch/arm/boards/skov-imx6/defaultenv-skov-imx6/network/eth1-discover
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,9 @@
 +#!/bin/sh
 +
 +# Some boards doesn't have a ETH port, but may have USB network attached
@@ -59,6 +59,7 @@ index 0000000000..e11a3f9006
 +	exit 0;
 +fi
 +
++global.linux.bootargs.base="${global.linux.bootargs.base} ip=:::::eth1:dhcp"
 +usb
 -- 
 2.30.2
