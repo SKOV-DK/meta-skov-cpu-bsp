@@ -1624,7 +1624,7 @@ CONFIG_NET_CORE=y
 # CONFIG_NETCONSOLE is not set
 # CONFIG_TUN is not set
 # CONFIG_TUN_VNET_CROSS_LE is not set
-# CONFIG_VETH is not set
+CONFIG_VETH=m
 # CONFIG_NLMON is not set
 
 #
