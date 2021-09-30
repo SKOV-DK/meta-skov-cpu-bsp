@@ -10,7 +10,7 @@ SRC_URI += "\
 # umpf-release: 2021.07.0/customers/skov/imx6/20210720-1
 # umpf-topic-range: ede3b78f63eda144cc2f5880823593985c0d898f..afa7e53a70564204a0620a7341427264a3837c56
 SRC_URI += "\
-  file://patches/0201-Release-2021.08.0-customers-skov-imx6-20210921-1.patch \
+  file://patches/0201-Release-2021.08.0-customers-skov-imx6-20210929-1.patch \
   "
 # umpf-end
 SRC_URI += "\
@@ -21,4 +21,5 @@ SRC_URI += "\
   file://patches/0105-ARM-boards-skov-imx6-fixup-different-DTS-variants.patch \
   file://patches/0106-ARM-boards-skov-imx6-start-using-deep-probe.patch \
   file://patches/0107-ARM-boards-skov-imx6-add-defaultenv-with-eth1-dis.patch \
+  file://patches/0108-ARM-boards-skov-imx6-use-separate-DTS-for-the-iMX6-S.patch \
 "
