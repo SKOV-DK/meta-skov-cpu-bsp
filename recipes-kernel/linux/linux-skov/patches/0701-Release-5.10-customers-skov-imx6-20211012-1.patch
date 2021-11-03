@@ -12,8 +12,8 @@ index 7f25cfee84ec..c3cb4f9ca092 100644
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
- PATCHLEVEL = 10
- SUBLEVEL = 69
+ PATCHLEVEL = 15
+ SUBLEVEL = 0
 -EXTRAVERSION =
 +EXTRAVERSION =-20211012-1
  NAME = Dare mighty things
