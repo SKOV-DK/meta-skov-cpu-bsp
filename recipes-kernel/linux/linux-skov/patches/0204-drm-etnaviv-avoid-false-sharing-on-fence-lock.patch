@@ -13,7 +13,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  4 files changed, 11 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-index d05c35994579..dbc1589adebf 100644
+index 5f24cc52c287..4cb7cdd4f275 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 @@ -407,9 +407,9 @@ static void submit_cleanup(struct kref *kref)
@@ -29,10 +29,10 @@ index d05c35994579..dbc1589adebf 100644
  	}
  	kfree(submit->pmrs);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index d02aa1945494..f3df93350893 100644
+index 545910fdb2b0..72ea5be7053b 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -1763,7 +1763,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
+@@ -1770,7 +1770,8 @@ static int etnaviv_gpu_platform_probe(struct platform_device *pdev)
  
  	gpu->dev = &pdev->dev;
  	mutex_init(&gpu->lock);
@@ -43,7 +43,7 @@ index d02aa1945494..f3df93350893 100644
  	/* Map registers: */
  	gpu->mmio = devm_platform_ioremap_resource(pdev, 0);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-index d6f88854cd58..61e61fb54eba 100644
+index 1b31fd03acf9..547033befaab 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 @@ -99,6 +99,7 @@ struct etnaviv_gpu {
@@ -53,8 +53,8 @@ index d6f88854cd58..61e61fb54eba 100644
 +	struct mutex sched_lock;
  	struct drm_gpu_scheduler sched;
  	bool initialized;
- 
-@@ -115,7 +116,7 @@ struct etnaviv_gpu {
+ 	bool fe_running;
+@@ -116,7 +117,7 @@ struct etnaviv_gpu {
  	u32 idle_mask;
  
  	/* Fencing support */

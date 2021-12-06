@@ -15,7 +15,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  5 files changed, 66 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 5162e4ea3b8a..9ea96137d25d 100644
+index 811970410ec4..d9e788501a06 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -103,6 +103,7 @@ static void coda_command_async(struct coda_ctx *ctx, int cmd)
@@ -34,7 +34,7 @@ index 5162e4ea3b8a..9ea96137d25d 100644
  
  	return ret;
  }
-@@ -2702,6 +2704,7 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+@@ -2710,6 +2712,7 @@ irqreturn_t coda_irq_handler(int irq, void *data)
  	}
  
  	trace_coda_bit_done(ctx);

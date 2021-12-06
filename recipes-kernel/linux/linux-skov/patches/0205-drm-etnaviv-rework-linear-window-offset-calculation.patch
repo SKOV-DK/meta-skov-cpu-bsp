@@ -16,7 +16,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 26 insertions(+), 26 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index f3df93350893..affefb7aa58f 100644
+index 72ea5be7053b..84f02accf1d6 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 @@ -27,10 +27,6 @@
@@ -30,7 +30,7 @@ index f3df93350893..affefb7aa58f 100644
  static const struct platform_device_id gpu_ids[] = {
  	{ .name = "etnaviv-gpu,2d" },
  	{ },
-@@ -724,6 +720,7 @@ static void etnaviv_gpu_hw_init(struct etnaviv_gpu *gpu)
+@@ -734,6 +730,7 @@ static void etnaviv_gpu_hw_init(struct etnaviv_gpu *gpu)
  int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
  {
  	struct etnaviv_drm_private *priv = gpu->drm->dev_private;
@@ -38,7 +38,7 @@ index f3df93350893..affefb7aa58f 100644
  	int ret, i;
  
  	ret = pm_runtime_get_sync(gpu->dev);
-@@ -766,28 +763,6 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+@@ -776,28 +773,6 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
  	if (ret)
  		goto fail;
  
@@ -67,7 +67,7 @@ index f3df93350893..affefb7aa58f 100644
  	/*
  	 * If the GPU is part of a system with DMA addressing limitations,
  	 * request pages for our SHM backend buffers from the DMA32 zone to
-@@ -804,6 +779,31 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
+@@ -814,6 +789,31 @@ int etnaviv_gpu_init(struct etnaviv_gpu *gpu)
  		goto fail;
  	}
  

@@ -12,10 +12,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  3 files changed, 50 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 09708b2c7703..855d0fe9af21 100644
+index 73be03f2db9e..50c52ae9de1d 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -2729,13 +2729,49 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+@@ -2737,13 +2737,49 @@ irqreturn_t coda_irq_handler(int irq, void *data)
  {
  	struct coda_dev *dev = data;
  	struct coda_ctx *ctx;

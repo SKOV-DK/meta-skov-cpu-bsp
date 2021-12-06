@@ -55,7 +55,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index a278f04e5f9f..fa406c1ae06a 100644
+index a7e1883ae0b2..2aa863d06d1d 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -1015,6 +1015,26 @@ static int ksz8873mll_config_aneg(struct phy_device *phydev)
@@ -85,7 +85,7 @@ index a278f04e5f9f..fa406c1ae06a 100644
  static int kszphy_get_sset_count(struct phy_device *phydev)
  {
  	return ARRAY_SIZE(kszphy_hw_stats);
-@@ -1383,7 +1403,7 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1384,7 +1404,7 @@ static struct phy_driver ksphy_driver[] = {
  	.config_intr	= genphy_no_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.suspend	= genphy_suspend,

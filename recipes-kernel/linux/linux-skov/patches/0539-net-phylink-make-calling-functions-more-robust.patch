@@ -7,7 +7,7 @@ Subject: [PATCH] net: phylink: make calling functions more robust
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index 26dbd9e4ac6f..caba0326cb6f 100644
+index 882de2effb2b..d143b30318db 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
 @@ -419,7 +419,8 @@ static void phylink_mac_config(struct phylink *pl,

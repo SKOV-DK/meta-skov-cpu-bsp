@@ -10,7 +10,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 101 insertions(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index fa406c1ae06a..3a905b6561d6 100644
+index 2aa863d06d1d..9e7952d77339 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -28,6 +28,19 @@
@@ -133,7 +133,7 @@ index fa406c1ae06a..3a905b6561d6 100644
  static int ksz886x_resume(struct phy_device *phydev)
  {
  	int ret;
-@@ -1395,6 +1494,8 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1396,6 +1495,8 @@ static struct phy_driver ksphy_driver[] = {
  	.name		= "Micrel KSZ886X Switch",
  	/* PHY_BASIC_FEATURES */
  	.config_init	= kszphy_config_init,

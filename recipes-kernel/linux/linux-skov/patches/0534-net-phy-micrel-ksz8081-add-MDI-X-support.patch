@@ -10,7 +10,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 89 insertions(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 6332b34a1754..34d03c5ac2f0 100644
+index e7bf960584fd..61c5e4f05da5 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -68,11 +68,17 @@
@@ -119,7 +119,7 @@ index 6332b34a1754..34d03c5ac2f0 100644
  static int ksz8061_config_init(struct phy_device *phydev)
  {
  	int ret;
-@@ -1423,6 +1510,8 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1424,6 +1511,8 @@ static struct phy_driver ksphy_driver[] = {
  	.probe		= kszphy_probe,
  	.config_init	= ksz8081_config_init,
  	.soft_reset	= genphy_soft_reset,

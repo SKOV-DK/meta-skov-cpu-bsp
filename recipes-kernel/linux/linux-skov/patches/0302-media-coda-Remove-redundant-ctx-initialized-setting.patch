@@ -19,7 +19,7 @@ Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
  1 file changed, 2 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index bf75927bac4e..aa0a47c34413 100644
+index 159c9de85788..468e58ce9f8b 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -2005,21 +2005,13 @@ static void coda_dec_seq_init_work(struct work_struct *work)

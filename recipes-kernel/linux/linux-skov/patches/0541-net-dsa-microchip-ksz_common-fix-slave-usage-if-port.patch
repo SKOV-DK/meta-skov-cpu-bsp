@@ -8,7 +8,7 @@ Subject: [PATCH] net: dsa: microchip: ksz_common: fix slave usage if port is
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
-index 89b87ba14d41..80df099ba97f 100644
+index c4d3828dac8a..3ce14cb8ff40 100644
 --- a/drivers/net/dsa/microchip/ksz_common.c
 +++ b/drivers/net/dsa/microchip/ksz_common.c
 @@ -86,7 +86,7 @@ static void ksz_mib_read_work(struct work_struct *work)

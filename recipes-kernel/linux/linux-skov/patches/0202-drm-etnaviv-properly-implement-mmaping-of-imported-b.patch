@@ -20,7 +20,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 23 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.c b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
-index 2b7e85318a76..1cc5357e5f45 100644
+index 424474041c94..7acba91407c0 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
 @@ -129,6 +129,13 @@ static int etnaviv_gem_mmap_obj(struct etnaviv_gem_object *etnaviv_obj,

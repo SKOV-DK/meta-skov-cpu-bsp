@@ -11,10 +11,10 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index e99366c1df6a..0b6f65228464 100644
+index 08e567dd0d6b..956628b428df 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
-@@ -1696,6 +1696,7 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1697,6 +1697,7 @@ static struct phy_driver ksphy_driver[] = {
  	.resume		= kszphy_resume,
  	.cable_test_start	= ksz886x_cable_test_start,
  	.cable_test_get_status	= ksz886x_cable_test_get_status,

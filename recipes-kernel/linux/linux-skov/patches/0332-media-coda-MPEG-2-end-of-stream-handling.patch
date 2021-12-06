@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 855d0fe9af21..649198e40e46 100644
+index 50c52ae9de1d..18a6c4301922 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -2403,6 +2403,7 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2411,6 +2411,7 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  	int success;
  	u32 err_mb;
  	int err_vdoa = 0;
@@ -25,7 +25,7 @@ index 855d0fe9af21..649198e40e46 100644
  	u32 val;
  
  	if (ctx->aborting)
-@@ -2427,7 +2428,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2435,7 +2436,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  	val = coda_read(dev, CODA_RET_DEC_PIC_SUCCESS);
  	if (val == 0x40001 && src_fourcc == V4L2_PIX_FMT_MPEG2) {
  		coda_dbg(1, ctx, "end of stream signal?\n");
@@ -39,7 +39,7 @@ index 855d0fe9af21..649198e40e46 100644
  	} else if (val != 1) {
  		pr_err("DEC_PIC_SUCCESS = 0x%x\n", val);
  	}
-@@ -2626,7 +2632,8 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2634,7 +2640,8 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  			 */
  			coda_dbg(1, ctx, "last meta, marking as last frame\n");
  			dst_buf->flags |= V4L2_BUF_FLAG_LAST;

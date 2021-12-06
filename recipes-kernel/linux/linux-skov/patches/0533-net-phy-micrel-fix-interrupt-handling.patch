@@ -16,7 +16,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 0977aee7d396..6332b34a1754 100644
+index 22e88c40e5ad..e7bf960584fd 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -221,7 +221,7 @@ static irqreturn_t kszphy_handle_interrupt(struct phy_device *phydev)

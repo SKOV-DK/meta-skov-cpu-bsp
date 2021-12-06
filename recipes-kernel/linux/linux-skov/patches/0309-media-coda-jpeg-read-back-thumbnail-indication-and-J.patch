@@ -12,7 +12,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 9 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 2f42808c43a4..1947aaf64ecc 100644
+index c484c008ab02..8633bc9e4407 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -2016,6 +2016,15 @@ static int __coda_decoder_seq_init(struct coda_ctx *ctx)

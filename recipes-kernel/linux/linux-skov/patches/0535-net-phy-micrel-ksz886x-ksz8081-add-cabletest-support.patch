@@ -38,7 +38,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 177 insertions(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 34d03c5ac2f0..cfe2567e4213 100644
+index 61c5e4f05da5..8d4fd030c16f 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -20,6 +20,7 @@
@@ -233,7 +233,7 @@ index 34d03c5ac2f0..cfe2567e4213 100644
  static struct phy_driver ksphy_driver[] = {
  {
  	.phy_id		= PHY_ID_KS8737,
-@@ -1505,6 +1676,7 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1506,6 +1677,7 @@ static struct phy_driver ksphy_driver[] = {
  	.phy_id		= PHY_ID_KSZ8081,
  	.name		= "Micrel KSZ8081 or KSZ8091",
  	.phy_id_mask	= MICREL_PHY_ID_MASK,
@@ -241,7 +241,7 @@ index 34d03c5ac2f0..cfe2567e4213 100644
  	/* PHY_BASIC_FEATURES */
  	.driver_data	= &ksz8081_type,
  	.probe		= kszphy_probe,
-@@ -1519,6 +1691,8 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1520,6 +1692,8 @@ static struct phy_driver ksphy_driver[] = {
  	.get_stats	= kszphy_get_stats,
  	.suspend	= kszphy_suspend,
  	.resume		= kszphy_resume,
@@ -250,7 +250,7 @@ index 34d03c5ac2f0..cfe2567e4213 100644
  }, {
  	.phy_id		= PHY_ID_KSZ8061,
  	.name		= "Micrel KSZ8061",
-@@ -1615,6 +1789,7 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1616,6 +1790,7 @@ static struct phy_driver ksphy_driver[] = {
  	.phy_id_mask	= MICREL_PHY_ID_MASK,
  	.name		= "Micrel KSZ886X Switch",
  	/* PHY_BASIC_FEATURES */
@@ -258,7 +258,7 @@ index 34d03c5ac2f0..cfe2567e4213 100644
  	.config_init	= kszphy_config_init,
  	.config_aneg	= ksz886x_config_aneg,
  	.read_status	= ksz886x_read_status,
-@@ -1627,6 +1802,8 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1628,6 +1803,8 @@ static struct phy_driver ksphy_driver[] = {
  	.handle_interrupt = kszphy_handle_interrupt,
  	.suspend	= genphy_suspend,
  	.resume		= ksz886x_resume,

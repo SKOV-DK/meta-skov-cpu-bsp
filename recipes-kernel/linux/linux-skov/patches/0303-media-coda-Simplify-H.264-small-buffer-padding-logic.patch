@@ -21,7 +21,7 @@ Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
  1 file changed, 4 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index aa0a47c34413..659fcf77b0ed 100644
+index 468e58ce9f8b..8af91fb5c1c0 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -293,12 +293,11 @@ static bool coda_bitstream_try_queue(struct coda_ctx *ctx,

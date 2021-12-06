@@ -9,10 +9,10 @@ Signed-off-by: Michael Grzeschik <m.grzeschik@pengutronix.de>
  1 file changed, 22 insertions(+)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 69b20a466c61..52863985ef83 100644
+index 92e94ac94a34..1bc83382446f 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
-@@ -1360,6 +1360,13 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1361,6 +1361,13 @@ static struct phy_driver ksphy_driver[] = {
  	.config_init	= kszphy_config_init,
  	.config_aneg	= ksz8873mll_config_aneg,
  	.read_status	= ksz8873mll_read_status,
@@ -26,7 +26,7 @@ index 69b20a466c61..52863985ef83 100644
  	.suspend	= genphy_suspend,
  	.resume		= genphy_resume,
  }, {
-@@ -1368,6 +1375,13 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1369,6 +1376,13 @@ static struct phy_driver ksphy_driver[] = {
  	.name		= "Micrel KSZ886X Switch",
  	/* PHY_BASIC_FEATURES */
  	.config_init	= kszphy_config_init,
@@ -40,7 +40,7 @@ index 69b20a466c61..52863985ef83 100644
  	.suspend	= genphy_suspend,
  	.resume		= genphy_resume,
  }, {
-@@ -1375,6 +1389,13 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1376,6 +1390,13 @@ static struct phy_driver ksphy_driver[] = {
  	/* PHY_BASIC_FEATURES */
  	.config_init	= kszphy_config_init,
  	.match_phy_device = ksz8795_match_phy_device,
@@ -54,7 +54,7 @@ index 69b20a466c61..52863985ef83 100644
  	.suspend	= genphy_suspend,
  	.resume		= genphy_resume,
  }, {
-@@ -1383,6 +1404,7 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1384,6 +1405,7 @@ static struct phy_driver ksphy_driver[] = {
  	.name		= "Microchip KSZ9477",
  	/* PHY_GBIT_FEATURES */
  	.config_init	= kszphy_config_init,

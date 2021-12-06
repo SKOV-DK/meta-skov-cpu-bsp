@@ -11,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index cf076ab1aac4..4594ff5c30f2 100644
+index 2057ab8bfdcc..d43954ce2d7c 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -2358,8 +2358,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2366,8 +2366,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  	src_fourcc = q_data_src->fourcc;
  
  	val = coda_read(dev, CODA_RET_DEC_PIC_SUCCESS);

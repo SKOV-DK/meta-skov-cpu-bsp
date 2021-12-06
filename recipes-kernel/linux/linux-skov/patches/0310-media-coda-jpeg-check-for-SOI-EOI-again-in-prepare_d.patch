@@ -12,10 +12,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 14 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 1947aaf64ecc..15ad82d90d5f 100644
+index 8633bc9e4407..8b7495799b5c 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -2262,6 +2262,9 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+@@ -2270,6 +2270,9 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
  					struct coda_buffer_meta, list);
  
  	if (meta && ctx->codec->src_fourcc == V4L2_PIX_FMT_JPEG) {
@@ -25,7 +25,7 @@ index 1947aaf64ecc..15ad82d90d5f 100644
  
  		/* If this is the last buffer in the bitstream, add padding */
  		if (meta->end == ctx->bitstream_fifo.kfifo.in) {
-@@ -2275,6 +2278,17 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+@@ -2283,6 +2286,17 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
  
  			kfifo_in(&ctx->bitstream_fifo, buf, pad);
  		}

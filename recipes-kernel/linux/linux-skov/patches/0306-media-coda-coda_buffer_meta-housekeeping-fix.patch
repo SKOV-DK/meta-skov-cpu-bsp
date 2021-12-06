@@ -28,7 +28,7 @@ Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
  2 files changed, 39 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 659fcf77b0ed..919b36d753ec 100644
+index 8af91fb5c1c0..065674f81b7e 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -1836,6 +1836,29 @@ static bool coda_reorder_enable(struct coda_ctx *ctx)
@@ -79,7 +79,7 @@ index 659fcf77b0ed..919b36d753ec 100644
  	if (coda_read(dev, CODA_RET_DEC_SEQ_SUCCESS) == 0) {
  		v4l2_err(&dev->v4l2_dev,
  			"CODA_COMMAND_SEQ_INIT failed, error code = 0x%x\n",
-@@ -2395,12 +2425,16 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2403,12 +2433,16 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  		v4l2_err(&dev->v4l2_dev,
  			 "decoded frame index out of range: %d\n", decoded_idx);
  	} else {
@@ -97,7 +97,7 @@ index 659fcf77b0ed..919b36d753ec 100644
  		spin_lock(&ctx->buffer_meta_lock);
  		if (!list_empty(&ctx->buffer_meta_list)) {
  			meta = list_first_entry(&ctx->buffer_meta_list,
-@@ -2415,10 +2449,10 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2423,10 +2457,10 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  			 * should be enough to detect most errors and saves us
  			 * from doing different things based on the format.
  			 */
@@ -110,7 +110,7 @@ index 659fcf77b0ed..919b36d753ec 100644
  					 meta->sequence);
  			}
  			decoded_frame->meta = *meta;
-@@ -2428,7 +2462,7 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2436,7 +2470,7 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  			v4l2_err(&dev->v4l2_dev, "empty timestamp list!\n");
  			memset(&decoded_frame->meta, 0,
  			       sizeof(struct coda_buffer_meta));

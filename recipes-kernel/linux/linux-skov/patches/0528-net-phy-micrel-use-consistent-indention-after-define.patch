@@ -11,7 +11,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 52863985ef83..a278f04e5f9f 100644
+index 1bc83382446f..a7e1883ae0b2 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -38,23 +38,23 @@

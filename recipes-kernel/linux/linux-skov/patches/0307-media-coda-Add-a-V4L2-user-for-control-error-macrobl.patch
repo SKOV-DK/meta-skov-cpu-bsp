@@ -24,7 +24,7 @@ Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
  4 files changed, 41 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 919b36d753ec..2f42808c43a4 100644
+index 065674f81b7e..c484c008ab02 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -13,6 +13,7 @@
@@ -35,7 +35,7 @@ index 919b36d753ec..2f42808c43a4 100644
  #include <linux/reset.h>
  #include <linux/slab.h>
  #include <linux/videodev2.h>
-@@ -2369,9 +2370,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
+@@ -2377,9 +2378,12 @@ static void coda_finish_decode(struct coda_ctx *ctx)
  	}
  
  	err_mb = coda_read(dev, CODA_RET_DEC_PIC_ERR_MB);

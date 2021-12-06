@@ -14,7 +14,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 4594ff5c30f2..211cc2655584 100644
+index d43954ce2d7c..ac21c9413da0 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -1014,9 +1014,13 @@ static void coda9_set_frame_cache(struct coda_ctx *ctx, u32 fourcc)

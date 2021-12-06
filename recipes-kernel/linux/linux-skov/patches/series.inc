@@ -1,9 +1,9 @@
-# umpf-base: v5.10.60
+# umpf-base: v5.10.83
 # umpf-name: 5.10/customers/skov/imx6
-# umpf-version: 5.10/customers/skov/imx6/20210824-1
+# umpf-version: 5.10/customers/skov/imx6/20211206-1
 # umpf-topic: v5.10/customers/skov/imx6_project_specific
 # umpf-hashinfo: df5e77a99f99373b83eea661ef5e4857de7d0e65
-# umpf-topic-range: 2c5bd949b1df3f9fb109107b3d766e2ebabd7238..908d05c4ba737d2c797e7c5d61cca09f8a037f11
+# umpf-topic-range: a324ad794566ae2ad2d5aa7f7e3c1825fb5cd5b7..7f096c009652f24695a4e79c3447726637be89c0
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
@@ -11,7 +11,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: b29b9c7ab43c0570eede2457a77a5e8a67ee6b79
-# umpf-topic-range: 908d05c4ba737d2c797e7c5d61cca09f8a037f11..bed5b4592bc429b99faeaaa5dc580ad7988df966
+# umpf-topic-range: 7f096c009652f24695a4e79c3447726637be89c0..6f8f944562418e90c33760d1bf1a0f44c7a5b13e
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-bindings-for-Logic-Technologie.patch \
   file://patches/0102-drm-panel-add-Logic-Technologies-panels.patch \
@@ -24,7 +24,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/etnaviv
 # umpf-hashinfo: e5198246f6333894dc30a01f09a9aa6bcc98bf7e
-# umpf-topic-range: bed5b4592bc429b99faeaaa5dc580ad7988df966..0ebe3a5248d62e3c93079d00887d0fc0f6665b22
+# umpf-topic-range: 6f8f944562418e90c33760d1bf1a0f44c7a5b13e..f7fddfdc5bca48b5b66e4d56eb3114a7a2d22410
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -34,7 +34,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/coda
 # umpf-hashinfo: 031b55f6159ebafe99b221bbc3fbcfdccb2a82f6
-# umpf-topic-range: 0ebe3a5248d62e3c93079d00887d0fc0f6665b22..68f49ade4f596ef3dae5c072df503c133af5b9e4
+# umpf-topic-range: f7fddfdc5bca48b5b66e4d56eb3114a7a2d22410..a4526c6778230db32e9e473b8ba3d5f5cdfce542
 SRC_URI += "\
   file://patches/0301-media-coda-use-semicolons-rather-than-commas-to-sepa.patch \
   file://patches/0302-media-coda-Remove-redundant-ctx-initialized-setting.patch \
@@ -81,14 +81,14 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/drm-sched-accounting
 # umpf-hashinfo: ee32d16fde4648bc0374b2797998228438493229
-# umpf-topic-range: 68f49ade4f596ef3dae5c072df503c133af5b9e4..4e95a2a32cac952b180ee76aef258b8823227aeb
+# umpf-topic-range: a4526c6778230db32e9e473b8ba3d5f5cdfce542..4260940e61e31cd143af82ae6bb8c7df5adf61db
 SRC_URI += "\
   file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.10/topic/ksz8873
-# umpf-hashinfo: 1920c3fb395ef0d2843726dea203a748f035c917
-# umpf-topic-range: 4e95a2a32cac952b180ee76aef258b8823227aeb..b2a59eba47f45561d758e11c79519e8f09724f4c
+# umpf-hashinfo: 9f6d83418fd0db14e338a16acbc8feea16bcee6a
+# umpf-topic-range: 4260940e61e31cd143af82ae6bb8c7df5adf61db..0acf247c0e652b687b58879f4028171fd7d1055b
 SRC_URI += "\
   file://patches/0501-net-dsa-microchip-ksz8795-remove-unused-last_port-va.patch \
   file://patches/0502-net-dsa-microchip-ksz8795-remove-superfluous-port_cn.patch \
@@ -132,18 +132,19 @@ SRC_URI += "\
   file://patches/0540-net-dsa-microchip-add-mutex-locking-to-vlan-handling.patch \
   file://patches/0541-net-dsa-microchip-ksz_common-fix-slave-usage-if-port.patch \
   file://patches/0542-net-phy-export-phy_error-and-phy_trigger_machine.patch \
+  file://patches/0543-net-dsa-microchip-implement-multi-bridge-support.patch \
   "
 # umpf-topic: v5.10/topic/fec-selftest
 # umpf-hashinfo: 0cea5c78d5adf067e63dd8d9529cd0a80f71a4f6
-# umpf-topic-range: b2a59eba47f45561d758e11c79519e8f09724f4c..d10868458ff8adacc2a5dbd0991072d80db02117
+# umpf-topic-range: 0acf247c0e652b687b58879f4028171fd7d1055b..d288f3bf4e00fc86a6fc537ff3e546e178e9dc6e
 SRC_URI += "\
   file://patches/0601-net-phy-micrel-KSZ8081-add-loopback-support.patch \
   file://patches/0602-net-phy-at803x-AR8085-add-loopback-support.patch \
   file://patches/0603-net-fec-add-basic-selftest-support.patch \
   "
-# umpf-release: 5.10/customers/skov/imx6/20210824-1
-# umpf-topic-range: d10868458ff8adacc2a5dbd0991072d80db02117..a42cd528fba0091d0684ecde10a951b929f66b09
+# umpf-release: 5.10/customers/skov/imx6/20211206-1
+# umpf-topic-range: d288f3bf4e00fc86a6fc537ff3e546e178e9dc6e..a95e427d65b9dbab8afc4b8ef95e36dcd3730a00
 SRC_URI += "\
-  file://patches/0701-Release-5.10-customers-skov-imx6-20211012-1.patch \
+  file://patches/0701-Release-5.10-customers-skov-imx6-20211206-1.patch \
   "
 # umpf-end

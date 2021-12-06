@@ -43,7 +43,7 @@ index cfa4a7b04748..e39a41ee2476 100644
  	.phy_read		= ksz_phy_read16,
  	.phy_write		= ksz_phy_write16,
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index cfe2567e4213..e99366c1df6a 100644
+index 8d4fd030c16f..08e567dd0d6b 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -1414,6 +1414,9 @@ static int kszphy_probe(struct phy_device *phydev)
@@ -57,10 +57,10 @@ index cfe2567e4213..e99366c1df6a 100644
  	 * short. In this case, the PHY will "detect" a link and
  	 * confuse the internal state machine - disable auto neg here.
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index 6072e87ed6c3..26dbd9e4ac6f 100644
+index 57b1b138522e..882de2effb2b 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
-@@ -1024,7 +1024,7 @@ static int phylink_attach_phy(struct phylink *pl, struct phy_device *phy,
+@@ -1048,7 +1048,7 @@ static int phylink_attach_phy(struct phylink *pl, struct phy_device *phy,
  	if (pl->phydev)
  		return -EBUSY;
  
@@ -82,7 +82,7 @@ index ee23acc4d551..0117a2c126eb 100644
  #define MICREL_KSZ9021_EXTREG_CTRL	0xB
  #define MICREL_KSZ9021_EXTREG_DATA_WRITE	0xC
 diff --git a/net/dsa/slave.c b/net/dsa/slave.c
-index 9281c9c6a253..f07299394221 100644
+index 65b125bb3b86..7a9d276e3bad 100644
 --- a/net/dsa/slave.c
 +++ b/net/dsa/slave.c
 @@ -1683,6 +1683,10 @@ static int dsa_slave_phy_connect(struct net_device *slave_dev, int addr)

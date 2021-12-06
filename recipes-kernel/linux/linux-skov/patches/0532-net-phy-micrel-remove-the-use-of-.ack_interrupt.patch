@@ -23,7 +23,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  1 file changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/net/phy/micrel.c b/drivers/net/phy/micrel.c
-index 19a5f4103011..0977aee7d396 100644
+index c0af1afd23ff..22e88c40e5ad 100644
 --- a/drivers/net/phy/micrel.c
 +++ b/drivers/net/phy/micrel.c
 @@ -176,7 +176,7 @@ static int kszphy_ack_interrupt(struct phy_device *phydev)
@@ -94,7 +94,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1371,7 +1378,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1372,7 +1379,6 @@ static struct phy_driver ksphy_driver[] = {
  	.driver_data	= &ksz8041_type,
  	.probe		= kszphy_probe,
  	.config_init	= kszphy_config_init,
@@ -102,7 +102,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1385,7 +1391,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1386,7 +1392,6 @@ static struct phy_driver ksphy_driver[] = {
  	.driver_data	= &ksz8051_type,
  	.probe		= kszphy_probe,
  	.config_init	= kszphy_config_init,
@@ -110,7 +110,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1402,7 +1407,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1403,7 +1408,6 @@ static struct phy_driver ksphy_driver[] = {
  	.driver_data	= &ksz8041_type,
  	.probe		= kszphy_probe,
  	.config_init	= kszphy_config_init,
@@ -118,7 +118,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1418,7 +1422,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1419,7 +1423,6 @@ static struct phy_driver ksphy_driver[] = {
  	.driver_data	= &ksz8081_type,
  	.probe		= kszphy_probe,
  	.config_init	= ksz8081_config_init,
@@ -126,7 +126,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.soft_reset	= genphy_soft_reset,
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
-@@ -1433,7 +1436,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1434,7 +1437,6 @@ static struct phy_driver ksphy_driver[] = {
  	.phy_id_mask	= MICREL_PHY_ID_MASK,
  	/* PHY_BASIC_FEATURES */
  	.config_init	= ksz8061_config_init,
@@ -134,7 +134,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.suspend	= genphy_suspend,
-@@ -1447,7 +1449,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1448,7 +1450,6 @@ static struct phy_driver ksphy_driver[] = {
  	.probe		= kszphy_probe,
  	.get_features	= ksz9031_get_features,
  	.config_init	= ksz9021_config_init,
@@ -142,7 +142,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1467,7 +1468,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1468,7 +1469,6 @@ static struct phy_driver ksphy_driver[] = {
  	.config_init	= ksz9031_config_init,
  	.soft_reset	= genphy_soft_reset,
  	.read_status	= ksz9031_read_status,
@@ -150,7 +150,7 @@ index 19a5f4103011..0977aee7d396 100644
  	.config_intr	= kszphy_config_intr,
  	.handle_interrupt = kszphy_handle_interrupt,
  	.get_sset_count = kszphy_get_sset_count,
-@@ -1497,7 +1497,6 @@ static struct phy_driver ksphy_driver[] = {
+@@ -1498,7 +1498,6 @@ static struct phy_driver ksphy_driver[] = {
  	.probe		= kszphy_probe,
  	.config_init	= ksz9131_config_init,
  	.read_status	= genphy_read_status,

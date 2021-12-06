@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 14 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 15ad82d90d5f..cf076ab1aac4 100644
+index 8b7495799b5c..2057ab8bfdcc 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
 @@ -1771,6 +1771,18 @@ static int coda_alloc_bitstream_buffer(struct coda_ctx *ctx,

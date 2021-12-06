@@ -16,10 +16,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 14 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
-index 649198e40e46..6525f5ba787c 100644
+index 18a6c4301922..5235b3d7e21f 100644
 --- a/drivers/media/platform/coda/coda-bit.c
 +++ b/drivers/media/platform/coda/coda-bit.c
-@@ -2769,6 +2769,20 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+@@ -2777,6 +2777,20 @@ irqreturn_t coda_irq_handler(int irq, void *data)
  			pr_debug("coda: after: rd = 0x%x, wr = 0x%x\n",
  				 kfifo->out & kfifo->mask,
  				 kfifo->in & kfifo->mask);
