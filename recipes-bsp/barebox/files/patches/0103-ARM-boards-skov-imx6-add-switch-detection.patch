@@ -1,18 +1,19 @@
-From 3293db1f87ec2960da164f847c766f06fe686fd7 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
-Date: Mon, 6 Sep 2021 14:50:39 +0200
-Subject: [PATCH v3 3/7] ARM: boards: skov-imx6: add switch detection
+Date: Wed, 6 Oct 2021 10:43:18 +0200
+Subject: [PATCH] ARM: boards: skov-imx6: add switch detection
 
 There are board variants with same board ID but not switch. Detect this
 variants.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://lore.barebox.org/20211006084323.14051-4-o.rempel@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- arch/arm/boards/skov-imx6/board.c | 159 +++++++++++++++++++++++++-----
- 1 file changed, 135 insertions(+), 24 deletions(-)
+ arch/arm/boards/skov-imx6/board.c | 149 +++++++++++++++++++++++++++++++-------
+ 1 file changed, 124 insertions(+), 25 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 030ac62c52..2bd21adaeb 100644
+index 030ac62c5207..1fa691945e34 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -11,6 +11,7 @@
@@ -33,17 +34,20 @@ index 030ac62c52..2bd21adaeb 100644
  #define MAX_V_GPIO 8
  
  struct board_description {
-@@ -303,20 +307,121 @@ static const struct board_description imx6_variants[] = {
+@@ -303,20 +307,110 @@ static const struct board_description imx6_variants[] = {
  };
  
  static int skov_board_no = -1;
-+static bool skov_no_switch = false;
++static bool skov_have_switch = true;
 +static const char *no_switch_suffix = "-noswitch";
  
 -static int skov_imx6_fixup(struct device_node *root, void *unused)
 +static void fixup_machine_compatible(const char *compat,
 +				     struct device_node *root)
  {
+-	int ret;
+-	const char *val;
+-	uint32_t brightness;
 +	int cclen = 0, clen = strlen(compat) + 1;
 +	const char *curcompat;
 +	void *buf;
@@ -76,53 +80,40 @@ index 030ac62c52..2bd21adaeb 100644
 +	const char *generic = "skov,imx6";
 +	size_t size, size_generic;
 +	char *buf;
- 	int ret;
--	const char *val;
--	uint32_t brightness;
 +
 +	size = strlen(compat) + strlen(no_switch_suffix) + 1;
 +	size_generic = strlen(generic) + strlen(no_switch_suffix) + 1;
 +	size = max(size, size_generic);
-+	buf = xzalloc(size);
-+	if (!buf) {
-+		pr_warn("Can't allocate buffer\n");
-+		return;
-+	}
 +
 +	/* add generic compatible, so systemd&co can make right decisions */
-+	ret = snprintf(buf, size, "%s%s", generic, no_switch_suffix);
-+	if (ret >= 0)
-+		fixup_machine_compatible(buf, root);
-+	else
-+		pr_warn("Can't prepare generic compatible string\n");
++	buf = xasprintf("%s%s", generic, no_switch_suffix);
++	fixup_machine_compatible(buf, root);
 +
 +	/* add specific compatible as fallback, in case this board has new
 +	 * challenges.
 +	 */
-+	ret = snprintf(buf, size, "%s%s", compat, no_switch_suffix);
-+	if (ret >= 0)
-+		fixup_machine_compatible(buf, root);
-+	else
-+		pr_warn("Can't prepare specific compatible string\n");
++	buf = xasprintf("%s%s", compat, no_switch_suffix);
++	fixup_machine_compatible(buf, root);
 +
 +	free(buf);
 +}
 +
 +static void skov_imx6_no_switch(struct device_node *root)
 +{
++	const char *fec_alias = "ethernet0";
  	struct device_node *node;
 -	struct device_node *chosen = of_create_node(root, "/chosen");
 +	int ret;
 +
 +	fixup_noswitch_machine_compatible(root);
  
-+	node = of_find_node_by_path_from(root, "/soc/bus@2100000/ethernet@2188000");
-+	if (!node) {
-+		pr_warn("Did not find node to disable it\n");
-+	} else {
++	node = of_find_node_by_alias(root, fec_alias);
++	if (node) {
 +		ret = of_device_disable(node);
 +		if (ret)
-+			pr_warn("Can't disable ethernet node\n");
++			pr_warn("Can't disable %s\n", fec_alias);
++	} else {
++		pr_warn("Can't find node by alias: %s\n", fec_alias);
 +	}
 +
 +	node = of_find_node_by_alias(root, "mdio-gpio0");
@@ -152,14 +143,14 @@ index 030ac62c52..2bd21adaeb 100644
 +	const char *val;
 +	int ret;
 +
-+	if (skov_no_switch)
-+		skov_imx6_no_switch(root);
-+	else
++	if (skov_have_switch)
 +		skov_imx6_switch(root);
++	else
++		skov_imx6_no_switch(root);
  
  	switch (bootsource_get()) {
  	case BOOTSOURCE_MMC:
-@@ -432,34 +537,40 @@ static void skov_init_board(const struct board_description *variant)
+@@ -432,34 +526,39 @@ static void skov_init_board(const struct board_description *variant)
  	}
  }
  
@@ -208,8 +199,7 @@ index 030ac62c52..2bd21adaeb 100644
 -	 */
 -	of_set_property(root, "compatible", buf, cclen + clen, true);
 +no_switch:
-+	skov_no_switch = true;
-+	fixup_noswitch_machine_compatible(NULL);
++	skov_have_switch = false;
  
 -	free(buf);
 +	pr_notice("No-switch variant is detected\n");
@@ -220,6 +210,3 @@ index 030ac62c52..2bd21adaeb 100644
  
  static int skov_imx6_probe(struct device_d *dev)
  {
--- 
-2.30.2
-

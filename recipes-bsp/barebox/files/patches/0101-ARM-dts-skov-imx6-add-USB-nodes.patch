@@ -1,17 +1,18 @@
-From ba647dd84fdc5f30c0185333a41132b608163213 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
-Date: Tue, 7 Sep 2021 10:47:07 +0200
-Subject: [PATCH v3 1/7] ARM: dts: skov-imx6: add USB nodes
+Date: Wed, 6 Oct 2021 10:43:16 +0200
+Subject: [PATCH] ARM: dts: skov-imx6: add USB nodes
 
 We need USB working to make use of USB ethernet adapters.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://lore.barebox.org/20211006084323.14051-2-o.rempel@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
  arch/arm/dts/imx6qdl-skov-imx6.dtsi | 20 ++++++++++++++++++++
  1 file changed, 20 insertions(+)
 
 diff --git a/arch/arm/dts/imx6qdl-skov-imx6.dtsi b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
-index 03f3cb02fc..371a931e53 100644
+index 03f3cb02fca6..371a931e539f 100644
 --- a/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 +++ b/arch/arm/dts/imx6qdl-skov-imx6.dtsi
 @@ -273,6 +273,26 @@
@@ -41,6 +42,3 @@ index 03f3cb02fc..371a931e53 100644
  &iomuxc {
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_hog>;
--- 
-2.30.2
-

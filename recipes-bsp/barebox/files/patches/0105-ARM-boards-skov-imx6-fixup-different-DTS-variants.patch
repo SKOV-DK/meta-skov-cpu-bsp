@@ -1,18 +1,19 @@
-From 5174bf1a7bc8622cdfa4bf4d26ab99e1ebb17154 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
-Date: Tue, 7 Sep 2021 14:27:09 +0200
-Subject: [PATCH v3 5/7] ARM: boards: skov-imx6: fixup different DTS variants
+Date: Wed, 6 Oct 2021 10:43:20 +0200
+Subject: [PATCH] ARM: boards: skov-imx6: fixup different DTS variants
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://lore.barebox.org/20211006084323.14051-6-o.rempel@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- arch/arm/boards/skov-imx6/board.c | 48 +++++++++++++++++++++++++++----
+ arch/arm/boards/skov-imx6/board.c | 48 +++++++++++++++++++++++++++++++++++----
  1 file changed, 43 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 4044bacb28..44c776f9cf 100644
+index f42a0cad0009..c09a2cd89839 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
-@@ -401,13 +401,51 @@ static void skov_imx6_no_switch(struct device_node *root)
+@@ -390,13 +390,51 @@ static void skov_imx6_no_switch(struct device_node *root)
  	}
  }
  
@@ -69,6 +70,3 @@ index 4044bacb28..44c776f9cf 100644
  }
  
  static int skov_imx6_fixup(struct device_node *root, void *unused)
--- 
-2.30.2
-
