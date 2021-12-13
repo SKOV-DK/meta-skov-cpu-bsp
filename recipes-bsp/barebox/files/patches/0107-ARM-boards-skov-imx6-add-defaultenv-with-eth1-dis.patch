@@ -59,7 +59,6 @@ index 0000000000..e11a3f9006
 +	exit 0;
 +fi
 +
-+global.linux.bootargs.base="${global.linux.bootargs.base} ip=:::::eth1:dhcp"
 +usb
 -- 
 2.30.2
