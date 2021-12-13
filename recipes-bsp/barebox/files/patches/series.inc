@@ -18,7 +18,6 @@ SRC_URI += "\
   file://patches/0105-ARM-boards-skov-imx6-fixup-different-DTS-variants.patch \
   file://patches/0106-ARM-boards-skov-imx6-start-using-deep-probe.patch \
   file://patches/0107-ARM-boards-skov-imx6-add-defaultenv-with-eth1-discov.patch \
-  file://patches/0108-CORE-9371-make-sure-boards-with-usb-to-Ethernet-are-.patch \
   file://patches/0109-ARM-boards-skov-imx6-use-separate-DTS-for-the-iMX6-S.patch \
   file://patches/0110-usb-net-Add-support-for-the-Realtek-RTL8152B-RTL8153.patch \
   "
