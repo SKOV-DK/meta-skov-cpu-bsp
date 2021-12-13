@@ -1,17 +1,18 @@
-From f9901685d078cd29d845d287737639d74f089303 Mon Sep 17 00:00:00 2001
 From: Oleksij Rempel <o.rempel@pengutronix.de>
-Date: Wed, 8 Sep 2021 12:44:08 +0200
-Subject: [PATCH v3 6/7] ARM: boards: skov-imx6: start using deep-probe
+Date: Wed, 6 Oct 2021 10:43:21 +0200
+Subject: [PATCH] ARM: boards: skov-imx6: start using deep-probe
 
 Port Skov boards to the deep-propbe and reduce boot time by 100msec.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://lore.barebox.org/20211006084323.14051-7-o.rempel@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
  arch/arm/boards/skov-imx6/board.c | 22 +++++++++++++++++-----
  1 file changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index 44c776f9cf..6a9055757c 100644
+index c09a2cd89839..b91033afc10c 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -2,16 +2,17 @@
@@ -37,7 +38,7 @@ index 44c776f9cf..6a9055757c 100644
  
  #include "version.h"
  
-@@ -500,10 +501,20 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
+@@ -489,10 +490,20 @@ static int skov_imx6_fixup(struct device_node *root, void *unused)
   */
  static void skov_init_board(const struct board_description *variant)
  {
@@ -58,7 +59,7 @@ index 44c776f9cf..6a9055757c 100644
  	imx6_bbu_internal_spi_i2c_register_handler("spiflash", "/dev/m25p0.barebox",
  		BBU_HANDLER_FLAG_DEFAULT);
  
-@@ -661,6 +672,7 @@ static __maybe_unused struct of_device_id skov_version_ids[] = {
+@@ -650,6 +661,7 @@ static __maybe_unused struct of_device_id skov_version_ids[] = {
  		/* sentinel */
  	}
  };
@@ -66,6 +67,3 @@ index 44c776f9cf..6a9055757c 100644
  
  static struct driver_d skov_version_driver = {
  	.name = "skov-imx6",
--- 
-2.30.2
-
