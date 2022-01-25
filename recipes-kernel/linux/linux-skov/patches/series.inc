@@ -148,3 +148,7 @@ SRC_URI += "\
   file://patches/0701-Release-5.10-customers-skov-imx6-20211206-1.patch \
   "
 # umpf-end
+#Marc Kleine-Budde Patch for watchdog BUG soft lockup, mailing subject
+SRC_URI += "\
+  file://patches/9900-HACK-watchdog-trigger-sysrq-in-case-of-soft-lockup.patch \
+"
