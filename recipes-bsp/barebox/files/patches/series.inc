@@ -13,6 +13,6 @@ SRC_URI += "\
   file://patches/0201-Release-2021.12.0-customers-skov-imx6-20220111-1.patch \
   "
 # umpf-end
-#SRC_URI += "\
-#  file://patches/0002-remove-deep-probe.patch \
-#"
+SRC_URI += "\
+  file://patches/0002-remove-deep-probe.patch \
+"
