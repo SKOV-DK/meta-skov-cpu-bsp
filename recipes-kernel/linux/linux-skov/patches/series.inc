@@ -152,3 +152,8 @@ SRC_URI += "\
 SRC_URI += "\
   file://patches/9900-HACK-watchdog-trigger-sysrq-in-case-of-soft-lockup.patch \
 "
+#SAN UBI patches from 5.10.95
+SRC_URI += "\
+  file://patches/0800-mtd-rawnand-gpmi-Remove-explicit-default-gpmi-clock-setting-for-i.MX6.patch \
+  file://patches/0801-mtd-rawnand-gpmi-mtd-Add-ERR007117-protection-for-nfc_apply_timings.patch \
+"
