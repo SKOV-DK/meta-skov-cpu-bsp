@@ -1,5 +1,24 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 21 Feb 2022 21:30:36 +0100
+Subject: [PATCH] Revert "ARM: boards: skov-imx6: start using deep-probe"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 472ebb187d55be0819f0f71c6afb27837a4be383.
+
+Barebox' "deep probe" mechanism is under strong suspicion of being responsible
+for different issues seen on Skov's imx6 board: no barebox splash screen on HDMI
+anymore (runs into timeout after approximately 30 s), bad performance of USB
+devices and particularly diverse soft lockups of the running Linux kernel.
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ arch/arm/boards/skov-imx6/board.c | 12 ------------
+ 1 file changed, 12 deletions(-)
+
 diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
-index cd7b8e208..aea6596c0 100644
+index cd7b8e208d0a..aea6596c05dd 100644
 --- a/arch/arm/boards/skov-imx6/board.c
 +++ b/arch/arm/boards/skov-imx6/board.c
 @@ -4,7 +4,6 @@

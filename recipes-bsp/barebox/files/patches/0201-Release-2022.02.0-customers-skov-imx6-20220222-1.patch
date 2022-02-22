@@ -1,21 +1,21 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 8 Dec 2021 22:39:45 +0100
-Subject: [PATCH] Release 2021.11.0/customers/skov/imx6/20211208-1
+Date: Tue, 22 Feb 2022 07:39:15 +0100
+Subject: [PATCH] Release 2022.02.0/customers/skov/imx6/20220222-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 77edecd1f72f..8819dba5085b 100644
+index f81cb18a0868..284239720bcf 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
- VERSION = 2021
- PATCHLEVEL = 12
+ VERSION = 2022
+ PATCHLEVEL = 02
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20220111-1
++EXTRAVERSION =-20220222-1
  NAME = None
  
  # *DOCUMENTATION*
