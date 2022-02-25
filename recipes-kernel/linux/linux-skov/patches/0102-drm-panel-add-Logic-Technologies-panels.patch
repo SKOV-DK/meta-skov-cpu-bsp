@@ -21,10 +21,10 @@ Cc: Thierry Reding <thierry.reding@gmail.com>
  1 file changed, 70 insertions(+)
 
 diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
-index 204674fccd64..dbd7025733fa 100644
+index 7ffd2a04ab23..97526e4719de 100644
 --- a/drivers/gpu/drm/panel/panel-simple.c
 +++ b/drivers/gpu/drm/panel/panel-simple.c
-@@ -2691,6 +2691,70 @@ static const struct panel_desc logictechno_lt170410_2whc = {
+@@ -2692,6 +2692,70 @@ static const struct panel_desc logictechno_lt170410_2whc = {
  	.connector_type = DRM_MODE_CONNECTOR_LVDS,
  };
  
@@ -95,7 +95,7 @@ index 204674fccd64..dbd7025733fa 100644
  static const struct drm_display_mode mitsubishi_aa070mc01_mode = {
  	.clock = 30400,
  	.hdisplay = 800,
-@@ -4150,6 +4214,12 @@ static const struct of_device_id platform_of_match[] = {
+@@ -4151,6 +4215,12 @@ static const struct of_device_id platform_of_match[] = {
  	}, {
  		.compatible = "logictechno,lt170410-2whc",
  		.data = &logictechno_lt170410_2whc,

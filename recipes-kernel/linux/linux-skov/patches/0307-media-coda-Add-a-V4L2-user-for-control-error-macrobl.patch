@@ -52,7 +52,7 @@ index 065674f81b7e..c484c008ab02 100644
  	if (dev->devtype->product == CODA_HX4 ||
  	    dev->devtype->product == CODA_7541) {
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index f9e66247e92a..d30eafea701d 100644
+index 58464eadace8..f05c8ede1c76 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -26,6 +26,7 @@
@@ -63,7 +63,7 @@ index f9e66247e92a..d30eafea701d 100644
  #include <linux/reset.h>
  
  #include <media/v4l2-ctrls.h>
-@@ -2062,6 +2063,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -2064,6 +2065,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  	if (q_data_dst->fourcc == V4L2_PIX_FMT_JPEG)
  		ctx->params.gop_size = 1;
  	ctx->gopcounter = ctx->params.gop_size - 1;
@@ -71,7 +71,7 @@ index f9e66247e92a..d30eafea701d 100644
  
  	ret = ctx->ops->start_streaming(ctx);
  	if (ctx->inst_type == CODA_INST_DECODER) {
-@@ -2462,6 +2464,15 @@ static void coda_decode_ctrls(struct coda_ctx *ctx)
+@@ -2464,6 +2466,15 @@ static void coda_decode_ctrls(struct coda_ctx *ctx)
  		ctx->mpeg4_level_ctrl->flags |= V4L2_CTRL_FLAG_READ_ONLY;
  }
  
@@ -87,7 +87,7 @@ index f9e66247e92a..d30eafea701d 100644
  static int coda_ctrls_setup(struct coda_ctx *ctx)
  {
  	v4l2_ctrl_handler_init(&ctx->ctrls, 2);
-@@ -2484,6 +2495,12 @@ static int coda_ctrls_setup(struct coda_ctx *ctx)
+@@ -2486,6 +2497,12 @@ static int coda_ctrls_setup(struct coda_ctx *ctx)
  				  1, 1, 1, 1);
  		if (ctx->cvd->src_formats[0] == V4L2_PIX_FMT_H264)
  			coda_decode_ctrls(ctx);
@@ -100,7 +100,7 @@ index f9e66247e92a..d30eafea701d 100644
  	}
  
  	if (ctx->ctrls.error) {
-@@ -3202,6 +3219,7 @@ static int coda_probe(struct platform_device *pdev)
+@@ -3204,6 +3221,7 @@ static int coda_probe(struct platform_device *pdev)
  	if (ret)
  		return ret;
  

@@ -14,7 +14,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 283 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index a6ceff4fb21b..57c5092b9615 100644
+index 9cab1a7523f9..aafcb54efab7 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -80,6 +80,35 @@ static int enable_bwb = 0;
@@ -333,7 +333,7 @@ index a6ceff4fb21b..57c5092b9615 100644
  	.vidioc_try_fmt_vid_out	= coda_try_fmt_vid_out,
  	.vidioc_s_fmt_vid_out	= coda_s_fmt_vid_out,
  
-@@ -2003,8 +2186,19 @@ static void coda_buf_queue(struct vb2_buffer *vb)
+@@ -2001,8 +2184,19 @@ static void coda_buf_queue(struct vb2_buffer *vb)
  				flush_work(&ctx->seq_init_work);
  			}
  
@@ -354,7 +354,7 @@ index a6ceff4fb21b..57c5092b9615 100644
  		}
  	} else {
  		if ((ctx->inst_type == CODA_INST_ENCODER || !ctx->use_bit) &&
-@@ -2180,6 +2374,34 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -2178,6 +2372,34 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  			list_del(&m2m_buf->list);
  			v4l2_m2m_buf_done(&m2m_buf->vb, VB2_BUF_STATE_DONE);
  		}
@@ -389,7 +389,7 @@ index a6ceff4fb21b..57c5092b9615 100644
  	}
  	return 0;
  
-@@ -2216,6 +2438,16 @@ static void coda_stop_streaming(struct vb2_queue *q)
+@@ -2214,6 +2436,16 @@ static void coda_stop_streaming(struct vb2_queue *q)
  
  		ctx->qsequence = 0;
  
@@ -406,7 +406,7 @@ index a6ceff4fb21b..57c5092b9615 100644
  		while ((buf = v4l2_m2m_src_buf_remove(ctx->fh.m2m_ctx)))
  			v4l2_m2m_buf_done(buf, VB2_BUF_STATE_ERROR);
  	} else {
-@@ -2224,6 +2456,29 @@ static void coda_stop_streaming(struct vb2_queue *q)
+@@ -2222,6 +2454,29 @@ static void coda_stop_streaming(struct vb2_queue *q)
  		ctx->osequence = 0;
  		ctx->sequence_offset = 0;
  
@@ -436,7 +436,7 @@ index a6ceff4fb21b..57c5092b9615 100644
  		while ((buf = v4l2_m2m_dst_buf_remove(ctx->fh.m2m_ctx)))
  			v4l2_m2m_buf_done(buf, VB2_BUF_STATE_ERROR);
  	}
-@@ -2733,6 +2988,7 @@ static int coda_open(struct file *file)
+@@ -2731,6 +2986,7 @@ static int coda_open(struct file *file)
  	v4l2_fh_add(&ctx->fh);
  	ctx->dev = dev;
  	ctx->idx = idx;

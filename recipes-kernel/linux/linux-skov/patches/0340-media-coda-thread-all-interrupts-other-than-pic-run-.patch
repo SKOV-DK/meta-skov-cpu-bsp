@@ -154,10 +154,10 @@ index 655c656f4f8a..d0bd93102f63 100644
  	return IRQ_HANDLED;
  }
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b8685eef6b90..13fc01669224 100644
+index d680a368ab18..418446f876ed 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -3611,8 +3611,9 @@ static int coda_probe(struct platform_device *pdev)
+@@ -3609,8 +3609,9 @@ static int coda_probe(struct platform_device *pdev)
  	if (irq < 0)
  		return irq;
  

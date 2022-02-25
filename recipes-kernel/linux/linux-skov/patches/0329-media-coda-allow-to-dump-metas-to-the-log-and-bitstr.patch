@@ -15,7 +15,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 58 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b1064079c3c6..720e605e1b0e 100644
+index 20fe6dba10d4..02c4ad5564c3 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -10,6 +10,7 @@
@@ -87,10 +87,10 @@ index b1064079c3c6..720e605e1b0e 100644
  			coda_bit_debug_timeout(ctx);
 +			coda_dump_metas(ctx);
 +			coda_dump_payload(ctx);
- 		} else {
- 			dev_err(dev->dev, "CODA JPEG timeout\n");
- 		}
-@@ -2005,6 +2056,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+ 
+ 			ctx->hold = true;
+ 
+@@ -2003,6 +2054,7 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  	struct coda_q_data *q_data_src, *q_data_dst;
  	struct v4l2_m2m_buffer *m2m_buf, *tmp;
  	struct vb2_v4l2_buffer *buf;
@@ -98,7 +98,7 @@ index b1064079c3c6..720e605e1b0e 100644
  	struct list_head list;
  	int ret = 0;
  
-@@ -2024,9 +2076,13 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+@@ -2022,9 +2074,13 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
  			coda_fill_bitstream(ctx, &list);
  			mutex_unlock(&ctx->bitstream_mutex);
  

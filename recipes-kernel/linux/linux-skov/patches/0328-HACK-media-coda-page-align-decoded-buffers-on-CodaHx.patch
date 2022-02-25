@@ -12,7 +12,7 @@ the horizontal line stride achieve the same effect.
  1 file changed, 17 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 36820aff7258..b1064079c3c6 100644
+index dc8bf3ced42c..20fe6dba10d4 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -726,6 +726,23 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,

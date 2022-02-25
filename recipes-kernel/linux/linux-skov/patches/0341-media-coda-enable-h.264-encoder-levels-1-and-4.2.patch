@@ -11,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 13fc01669224..b4ee80911ebd 100644
+index 418446f876ed..1f9eb9ea2d5a 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -2724,12 +2724,14 @@ static void coda_encode_ctrls(struct coda_ctx *ctx)
+@@ -2722,12 +2722,14 @@ static void coda_encode_ctrls(struct coda_ctx *ctx)
  	if (ctx->dev->devtype->product == CODA_960) {
  		v4l2_ctrl_new_std_menu(&ctx->ctrls, &coda_ctrl_ops,
  			V4L2_CID_MPEG_VIDEO_H264_LEVEL,

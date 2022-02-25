@@ -67,10 +67,10 @@ index 73be03f2db9e..50c52ae9de1d 100644
  	if (ctx == NULL) {
  		v4l2_err(&dev->v4l2_dev,
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b03811dd50c9..a6ceff4fb21b 100644
+index 2322efccce48..9cab1a7523f9 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -2946,8 +2946,8 @@ static int coda_hw_init(struct coda_dev *dev)
+@@ -2944,8 +2944,8 @@ static int coda_hw_init(struct coda_dev *dev)
  	if (dev->devtype->product != CODA_DX6)
  		coda_write(dev, 0, CODA7_REG_BIT_AXI_SRAM_USE);
  

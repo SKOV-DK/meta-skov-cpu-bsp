@@ -26,10 +26,10 @@ Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 87a2c706f747..547ad34b1424 100644
+index 1eed69d29149..4ac7ef7979c7 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -2861,7 +2861,7 @@ static int coda_register_device(struct coda_dev *dev, int i)
+@@ -2863,7 +2863,7 @@ static int coda_register_device(struct coda_dev *dev, int i)
  	strscpy(vfd->name, dev->devtype->vdevs[i]->name, sizeof(vfd->name));
  	vfd->fops	= &coda_fops;
  	vfd->ioctl_ops	= &coda_ioctl_ops;

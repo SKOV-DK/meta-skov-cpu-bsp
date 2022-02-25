@@ -9,9 +9,9 @@ debugging purposes, but only for BIT processor contexts.
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/media/platform/coda/coda-bit.c    | 40 +++++++++++++++++++++++++++++++
- drivers/media/platform/coda/coda-common.c |  7 +++++-
+ drivers/media/platform/coda/coda-common.c |  1 +
  drivers/media/platform/coda/coda.h        |  1 +
- 3 files changed, 47 insertions(+), 1 deletion(-)
+ 3 files changed, 42 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-bit.c b/drivers/media/platform/coda/coda-bit.c
 index d9e788501a06..73be03f2db9e 100644
@@ -65,22 +65,16 @@ index d9e788501a06..73be03f2db9e 100644
  {
  	struct coda_dev *dev = ctx->dev;
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 4e96b9a8f579..36820aff7258 100644
+index 7a937087817d..dc8bf3ced42c 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -1554,7 +1554,12 @@ static void coda_pic_run_work(struct work_struct *work)
- 
- 	if (!wait_for_completion_timeout(&ctx->completion,
+@@ -1556,6 +1556,7 @@ static void coda_pic_run_work(struct work_struct *work)
  					 msecs_to_jiffies(coda_timeout_msec))) {
--		dev_err(dev->dev, "CODA PIC_RUN timeout\n");
-+		if (ctx->use_bit) {
-+			dev_err(dev->dev, "CODA PIC_RUN timeout\n");
+ 		if (ctx->use_bit) {
+ 			dev_err(dev->dev, "CODA PIC_RUN timeout\n");
 +			coda_bit_debug_timeout(ctx);
-+		} else {
-+			dev_err(dev->dev, "CODA JPEG timeout\n");
-+		}
  
- 		ctx->hold = true;
+ 			ctx->hold = true;
  
 diff --git a/drivers/media/platform/coda/coda.h b/drivers/media/platform/coda/coda.h
 index 877941e263fe..ffd0bdcf7292 100644

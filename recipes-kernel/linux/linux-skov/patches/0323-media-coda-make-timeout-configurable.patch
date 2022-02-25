@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 682a7e390f66..b2f28a528c21 100644
+index fb0ada9198cd..a59073ee7b17 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -62,6 +62,10 @@ int coda_debug;
@@ -31,6 +31,6 @@ index 682a7e390f66..b2f28a528c21 100644
  	if (!wait_for_completion_timeout(&ctx->completion,
 -					 msecs_to_jiffies(1000))) {
 +					 msecs_to_jiffies(coda_timeout_msec))) {
- 		dev_err(dev->dev, "CODA PIC_RUN timeout\n");
+ 		if (ctx->use_bit) {
+ 			dev_err(dev->dev, "CODA PIC_RUN timeout\n");
  
- 		ctx->hold = true;

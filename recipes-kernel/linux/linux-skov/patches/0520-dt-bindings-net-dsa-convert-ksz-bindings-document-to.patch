@@ -302,10 +302,10 @@ index 000000000000..9f7d131bbcef
 +    };
 +...
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4fef10dd2975..f2a52ce6ab6a 100644
+index c64c9354c287..39d9d72bc0e7 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -11519,7 +11519,7 @@ M:	Woojung Huh <woojung.huh@microchip.com>
+@@ -11518,7 +11518,7 @@ M:	Woojung Huh <woojung.huh@microchip.com>
  M:	Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>
  L:	netdev@vger.kernel.org
  S:	Maintained

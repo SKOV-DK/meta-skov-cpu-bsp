@@ -12,7 +12,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 40 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 9246bb6deee3..682a7e390f66 100644
+index f08a22a423f3..fb0ada9198cd 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -40,6 +40,7 @@
@@ -23,7 +23,7 @@ index 9246bb6deee3..682a7e390f66 100644
  
  #define CODA_NAME		"coda"
  
-@@ -1575,6 +1576,7 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1577,6 +1578,7 @@ static int coda_job_ready(void *m2m_priv)
  {
  	struct coda_ctx *ctx = m2m_priv;
  	int src_bufs = v4l2_m2m_num_src_bufs_ready(ctx->fh.m2m_ctx);
@@ -31,7 +31,7 @@ index 9246bb6deee3..682a7e390f66 100644
  
  	/*
  	 * For both 'P' and 'key' frame cases 1 picture
-@@ -1582,20 +1584,21 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1584,20 +1586,21 @@ static int coda_job_ready(void *m2m_priv)
  	 * the compressed frame can be in the bitstream.
  	 */
  	if (!src_bufs && ctx->inst_type != CODA_INST_DECODER) {
@@ -55,7 +55,7 @@ index 9246bb6deee3..682a7e390f66 100644
  		unsigned int count;
  
  		count = hweight32(ctx->frm_dis_flg);
-@@ -1608,12 +1611,14 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1610,12 +1613,14 @@ static int coda_job_ready(void *m2m_priv)
  		}
  
  		if (ctx->hold && !src_bufs) {
@@ -70,7 +70,7 @@ index 9246bb6deee3..682a7e390f66 100644
  			coda_dbg(1, ctx,
  				 "not ready: need 2 buffers available (queue:%d + bitstream:%d)\n",
  				 num_metas, src_bufs);
-@@ -1624,6 +1629,7 @@ static int coda_job_ready(void *m2m_priv)
+@@ -1626,6 +1631,7 @@ static int coda_job_ready(void *m2m_priv)
  					struct coda_buffer_meta, list);
  		if (!coda_bitstream_can_fetch_past(ctx, meta->end) &&
  		    !stream_end) {

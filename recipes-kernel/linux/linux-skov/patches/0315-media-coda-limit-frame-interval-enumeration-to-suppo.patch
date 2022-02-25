@@ -13,7 +13,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 17 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index a444444c5063..9246bb6deee3 100644
+index 8b8a02063f5b..f08a22a423f3 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
 @@ -1318,7 +1318,11 @@ static int coda_enum_frameintervals(struct file *file, void *fh,

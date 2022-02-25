@@ -13,7 +13,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  4 files changed, 11 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-index 5f24cc52c287..4cb7cdd4f275 100644
+index ddf539f26f2d..f6525f69b03a 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 @@ -407,9 +407,9 @@ static void submit_cleanup(struct kref *kref)
@@ -43,7 +43,7 @@ index 545910fdb2b0..72ea5be7053b 100644
  	/* Map registers: */
  	gpu->mmio = devm_platform_ioremap_resource(pdev, 0);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-index 1b31fd03acf9..547033befaab 100644
+index 3462e949a836..c55a270e89b6 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 @@ -99,6 +99,7 @@ struct etnaviv_gpu {
@@ -64,10 +64,10 @@ index 1b31fd03acf9..547033befaab 100644
  	u32 next_fence;
  	u32 completed_fence;
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-index cd46c882269c..b41d62754294 100644
+index 026b6c073119..57926b84b8b0 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-@@ -147,11 +147,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -149,11 +149,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  	int ret = 0;
  
  	/*
@@ -81,7 +81,7 @@ index cd46c882269c..b41d62754294 100644
  
  	ret = drm_sched_job_init(&submit->sched_job, sched_entity,
  				 submit->ctx);
-@@ -159,9 +159,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -161,9 +161,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  		goto out_unlock;
  
  	submit->out_fence = dma_fence_get(&submit->sched_job.s_fence->finished);
@@ -93,7 +93,7 @@ index cd46c882269c..b41d62754294 100644
  	if (submit->out_fence_id < 0) {
  		drm_sched_job_cleanup(&submit->sched_job);
  		ret = -ENOMEM;
-@@ -174,7 +176,7 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
+@@ -176,7 +178,7 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,
  	drm_sched_entity_push_job(&submit->sched_job, sched_entity);
  
  out_unlock:

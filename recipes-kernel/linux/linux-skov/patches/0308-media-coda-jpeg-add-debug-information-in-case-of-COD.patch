@@ -9,10 +9,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-jpeg.c b/drivers/media/platform/coda/coda-jpeg.c
-index b11cfbe166dd..14bd4d42aaf4 100644
+index a72f4655e5ad..8a2913a08267 100644
 --- a/drivers/media/platform/coda/coda-jpeg.c
 +++ b/drivers/media/platform/coda/coda-jpeg.c
-@@ -1511,6 +1511,16 @@ irqreturn_t coda9_jpeg_irq_handler(int irq, void *data)
+@@ -1530,6 +1530,16 @@ irqreturn_t coda9_jpeg_irq_handler(int irq, void *data)
  				 err_mb, err_mb >> 24, (err_mb >> 12) & 0xfff,
  				 err_mb & 0xfff);
  		}

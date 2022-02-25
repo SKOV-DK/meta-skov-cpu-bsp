@@ -43,10 +43,10 @@ index 811970410ec4..d9e788501a06 100644
  	if (ctx->aborting) {
  		coda_dbg(1, ctx, "task has been aborted\n");
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index 8d5082c52793..4e96b9a8f579 100644
+index e063defe77cf..7a937087817d 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -3031,9 +3031,21 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+@@ -3033,9 +3033,21 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
  		}
  	}
  
@@ -68,7 +68,7 @@ index 8d5082c52793..4e96b9a8f579 100644
  rel_vfd:
  	while (--i >= 0)
  		video_unregister_device(&dev->vfd[i]);
-@@ -3319,6 +3331,9 @@ static int coda_remove(struct platform_device *pdev)
+@@ -3321,6 +3333,9 @@ static int coda_remove(struct platform_device *pdev)
  	struct coda_dev *dev = platform_get_drvdata(pdev);
  	int i;
  
@@ -79,10 +79,10 @@ index 8d5082c52793..4e96b9a8f579 100644
  		if (video_get_drvdata(&dev->vfd[i]))
  			video_unregister_device(&dev->vfd[i]);
 diff --git a/drivers/media/platform/coda/coda-jpeg.c b/drivers/media/platform/coda/coda-jpeg.c
-index 14bd4d42aaf4..69e925499e5e 100644
+index 8a2913a08267..2a97fe654a86 100644
 --- a/drivers/media/platform/coda/coda-jpeg.c
 +++ b/drivers/media/platform/coda/coda-jpeg.c
-@@ -1191,6 +1191,7 @@ static int coda9_jpeg_prepare_encode(struct coda_ctx *ctx)
+@@ -1192,6 +1192,7 @@ static int coda9_jpeg_prepare_encode(struct coda_ctx *ctx)
  	coda_write(dev, 0, CODA9_GDI_WPROT_RGN_EN);
  
  	trace_coda_jpeg_run(ctx, src_buf);
@@ -90,7 +90,7 @@ index 14bd4d42aaf4..69e925499e5e 100644
  
  	coda_write(dev, 1, CODA9_REG_JPEG_PIC_START);
  
-@@ -1531,6 +1532,8 @@ v4l2_err(&dev->v4l2_dev, "word_ptr = %d bit_ptr = %d\n",
+@@ -1550,6 +1551,8 @@ v4l2_err(&dev->v4l2_dev, "word_ptr = %d bit_ptr = %d\n",
  		return IRQ_HANDLED;
  	}
  
@@ -146,7 +146,7 @@ index e43fb17988be..877941e263fe 100644
 +
  #endif /* __CODA_H__ */
 diff --git a/drivers/media/platform/coda/imx-vdoa.c b/drivers/media/platform/coda/imx-vdoa.c
-index 8bc0d8371819..dea382dc35f7 100644
+index dd6e2e320264..c468672a8a75 100644
 --- a/drivers/media/platform/coda/imx-vdoa.c
 +++ b/drivers/media/platform/coda/imx-vdoa.c
 @@ -16,6 +16,8 @@
@@ -205,7 +205,7 @@ index 8bc0d8371819..dea382dc35f7 100644
  	/* Enable interrupts and start transfer */
  	writel(VDOAIE_EITERR | VDOAIE_EIEOT, vdoa->regs + VDOAIE);
  	writel(VDOASRR_START, vdoa->regs + VDOASRR);
-@@ -317,6 +331,10 @@ static int vdoa_probe(struct platform_device *pdev)
+@@ -321,6 +335,10 @@ static int vdoa_probe(struct platform_device *pdev)
  		return ret;
  	}
  
@@ -216,7 +216,7 @@ index 8bc0d8371819..dea382dc35f7 100644
  	platform_set_drvdata(pdev, vdoa);
  
  	return 0;
-@@ -324,6 +342,10 @@ static int vdoa_probe(struct platform_device *pdev)
+@@ -328,6 +346,10 @@ static int vdoa_probe(struct platform_device *pdev)
  
  static int vdoa_remove(struct platform_device *pdev)
  {

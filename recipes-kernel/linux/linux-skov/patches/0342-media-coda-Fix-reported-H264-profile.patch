@@ -21,10 +21,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b4ee80911ebd..1717177966b8 100644
+index 1f9eb9ea2d5a..e4ec4a67d26c 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -2709,8 +2709,9 @@ static void coda_encode_ctrls(struct coda_ctx *ctx)
+@@ -2707,8 +2707,9 @@ static void coda_encode_ctrls(struct coda_ctx *ctx)
  		V4L2_CID_MPEG_VIDEO_H264_CHROMA_QP_INDEX_OFFSET, -12, 12, 1, 0);
  	v4l2_ctrl_new_std_menu(&ctx->ctrls, &coda_ctrl_ops,
  		V4L2_CID_MPEG_VIDEO_H264_PROFILE,
@@ -36,7 +36,7 @@ index b4ee80911ebd..1717177966b8 100644
  	if (ctx->dev->devtype->product == CODA_HX4 ||
  	    ctx->dev->devtype->product == CODA_7541) {
  		v4l2_ctrl_new_std_menu(&ctx->ctrls, &coda_ctrl_ops,
-@@ -2793,7 +2794,11 @@ static void coda_decode_ctrls(struct coda_ctx *ctx)
+@@ -2791,7 +2792,11 @@ static void coda_decode_ctrls(struct coda_ctx *ctx)
  	ctx->h264_profile_ctrl = v4l2_ctrl_new_std_menu(&ctx->ctrls,
  		&coda_ctrl_ops, V4L2_CID_MPEG_VIDEO_H264_PROFILE,
  		V4L2_MPEG_VIDEO_H264_PROFILE_HIGH,

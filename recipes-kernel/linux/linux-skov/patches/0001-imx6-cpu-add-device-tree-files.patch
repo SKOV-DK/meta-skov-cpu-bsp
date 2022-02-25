@@ -21,10 +21,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts         |  19 +
  arch/arm/boot/dts/imx6q-skov-revc-lt2.dts          |  24 +
  arch/arm/boot/dts/imx6q-skov-revc-lt6.dts          |  28 +
- .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    |  92 +++
+ .../boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts    | 100 ++++
  arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi       | 137 +++++
- arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 617 +++++++++++++++++++++
- 8 files changed, 937 insertions(+)
+ arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi            | 629 +++++++++++++++++++++
+ 8 files changed, 957 insertions(+)
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt2.dts
  create mode 100644 arch/arm/boot/dts/imx6dl-skov-revc-lt6.dts
  create mode 100644 arch/arm/boot/dts/imx6q-skov-revc-lt2.dts
@@ -34,7 +34,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  create mode 100644 arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index ce66ffd5a1bb..3f2499abd27f 100644
+index 7e8151681597..b10f4acde1f7 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
 @@ -467,6 +467,8 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
@@ -168,10 +168,10 @@ index 000000000000..0f335efd93c7
 +};
 diff --git a/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
 new file mode 100644
-index 000000000000..96317c336c2f
+index 000000000000..627b7740499c
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6q-skov-reve-mi1010ait-1cp1.dts
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,100 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
 +// Copyright (C) 2020 Pengutronix, Ulrich Oelmann <kernel@pengutronix.de>
@@ -263,6 +263,14 @@ index 000000000000..96317c336c2f
 +			MX6QDL_PAD_EIM_D23__GPIO3_IO23		0x1b0b0		/* CTP_RST */
 +		>;
 +	};
++};
++
++&reg_disp_vcom {
++	regulator-min-microvolt = <3160000>;
++	regulator-max-microvolt = <3160000>;
++
++	/* voltage in uV and relative duty-cycle in % */
++	voltage-table = <3160000 73>;
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 new file mode 100644
@@ -409,10 +417,10 @@ index 000000000000..9a65afcd2702
 +};
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
 new file mode 100644
-index 000000000000..a9a45bcdee10
+index 000000000000..62c987c23df7
 --- /dev/null
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu.dtsi
-@@ -0,0 +1,617 @@
+@@ -0,0 +1,629 @@
 +// SPDX-License-Identifier: GPL-2.0
 +//
 +// Copyright 2014 Rose Technology
@@ -648,6 +656,19 @@ index 000000000000..a9a45bcdee10
 +				  3300000 0x0>;
 +			startup-delay-us = <100>;
 +		};
++
++		/* VCOM voltage select */
++		reg_disp_vcom: disp_vcom {
++			compatible = "pwm-regulator";
++			pwms = <&pwm3 0 20000 0>;
++			regulator-min-microvolt = <3600000>;
++			regulator-max-microvolt = <3600000>;
++			regulator-name = "vcom_supply";
++			regulator-always-on;
++
++			/* voltage in uV and relative duty-cycle in % */
++			voltage-table = <3600000 26>;
++		};
 +	};
 +
 +	backlight_lcd: backlight_lcd {
@@ -655,7 +676,7 @@ index 000000000000..a9a45bcdee10
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_backlight>;
 +		enable-gpios = <&gpio6 23 GPIO_ACTIVE_LOW>;
-+		pwms = <&pwm2 0 20000>;
++		pwms = <&pwm2 0 20000 0>;
 +		brightness-levels = <0 16 32 48 64 80 96 112 128 144 160 176 192 208 224 240 255>;
 +		default-brightness-level = <8>;
 +		power-supply = <&reg_24p0v>;
@@ -956,7 +977,6 @@ index 000000000000..a9a45bcdee10
 +
 +&pwm2 {
 +	/* used for backlight brightness */
-+	#pwm-cells = <2>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_pwm2_2>;
 +	status = "okay";

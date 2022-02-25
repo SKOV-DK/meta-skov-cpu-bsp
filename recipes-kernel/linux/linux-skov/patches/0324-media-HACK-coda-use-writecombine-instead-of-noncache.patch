@@ -15,10 +15,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 4 insertions(+)
 
 diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
-index b2f28a528c21..8d5082c52793 100644
+index a59073ee7b17..e063defe77cf 100644
 --- a/drivers/media/platform/coda/coda-common.c
 +++ b/drivers/media/platform/coda/coda-common.c
-@@ -2556,6 +2556,7 @@ static int coda_queue_init(struct coda_ctx *ctx, struct vb2_queue *vq)
+@@ -2558,6 +2558,7 @@ static int coda_queue_init(struct coda_ctx *ctx, struct vb2_queue *vq)
  	 */
  	vq->min_buffers_needed = 1;
  	vq->dev = ctx->dev->dev;
@@ -26,7 +26,7 @@ index b2f28a528c21..8d5082c52793 100644
  
  	return vb2_queue_init(vq);
  }
-@@ -2633,6 +2634,8 @@ static int coda_open(struct file *file)
+@@ -2635,6 +2636,8 @@ static int coda_open(struct file *file)
  		goto err_coda_name_init;
  	}
  

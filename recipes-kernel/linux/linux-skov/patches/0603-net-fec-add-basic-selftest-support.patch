@@ -31,10 +31,10 @@ index de7b31842233..ca02c386e900 100644
  obj-$(CONFIG_FEC_MPC52xx) += fec_mpc52xx.o
  ifeq ($(CONFIG_FEC_MPC52xx_MDIO),y)
 diff --git a/drivers/net/ethernet/freescale/fec.h b/drivers/net/ethernet/freescale/fec.h
-index c527f4ee1d3a..5bcd80dd45ad 100644
+index 6ea98af63b34..0bf5ddf8afa4 100644
 --- a/drivers/net/ethernet/freescale/fec.h
 +++ b/drivers/net/ethernet/freescale/fec.h
-@@ -462,6 +462,9 @@ struct bufdesc_ex {
+@@ -465,6 +465,9 @@ struct bufdesc_ex {
   */
  #define FEC_QUIRK_CLEAR_SETUP_MII	(1 << 17)
  
@@ -44,7 +44,7 @@ index c527f4ee1d3a..5bcd80dd45ad 100644
  struct bufdesc_prop {
  	int qid;
  	/* Address of Rx and Tx buffers */
-@@ -599,6 +602,9 @@ void fec_ptp_start_cyclecounter(struct net_device *ndev);
+@@ -602,6 +605,9 @@ void fec_ptp_start_cyclecounter(struct net_device *ndev);
  void fec_ptp_disable_hwts(struct net_device *ndev);
  int fec_ptp_set(struct net_device *ndev, struct ifreq *ifr);
  int fec_ptp_get(struct net_device *ndev, struct ifreq *ifr);
@@ -55,7 +55,7 @@ index c527f4ee1d3a..5bcd80dd45ad 100644
  /****************************************************************************/
  #endif /* FEC_H */
 diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
-index 94eb838a0176..7022763d0516 100644
+index 166bc3f3b34c..b4da8f36ac8e 100644
 --- a/drivers/net/ethernet/freescale/fec_main.c
 +++ b/drivers/net/ethernet/freescale/fec_main.c
 @@ -2473,6 +2473,9 @@ static void fec_enet_get_strings(struct net_device *netdev,

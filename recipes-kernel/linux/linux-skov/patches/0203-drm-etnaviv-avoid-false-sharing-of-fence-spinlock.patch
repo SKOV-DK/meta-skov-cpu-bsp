@@ -42,7 +42,7 @@ index 2520b7dad6ce..545910fdb2b0 100644
  	INIT_WORK(&gpu->sync_point_work, sync_point_worker);
  	init_waitqueue_head(&gpu->fence_event);
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
-index 1c75c8ed5bce..1b31fd03acf9 100644
+index 85eddd492774..3462e949a836 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
 @@ -122,7 +122,6 @@ struct etnaviv_gpu {

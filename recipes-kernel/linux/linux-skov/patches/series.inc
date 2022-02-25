@@ -1,17 +1,18 @@
-# umpf-base: v5.10.83
+# umpf-base: v5.10.102
 # umpf-name: 5.10/customers/skov/imx6
-# umpf-version: 5.10/customers/skov/imx6/20211206-1
+# umpf-version: 5.10/customers/skov/imx6/20220225-1
 # umpf-topic: v5.10/customers/skov/imx6_project_specific
-# umpf-hashinfo: df5e77a99f99373b83eea661ef5e4857de7d0e65
-# umpf-topic-range: a324ad794566ae2ad2d5aa7f7e3c1825fb5cd5b7..7f096c009652f24695a4e79c3447726637be89c0
+# umpf-hashinfo: 9e09cfc4debc794503a83dda463c5e38fe844a6a
+# umpf-topic-range: 47667effb7d2f54dab3be33749c5a05152c07db0..58c0a89f7a4503c1be1da8da267c7199f6a72ab5
 SRC_URI += "\
   file://patches/0001-imx6-cpu-add-device-tree-files.patch \
   file://patches/0002-imx6-cpu-add-SKOV-specific-skov_version-driver.patch \
   file://patches/0003-imx6-cpu-add-SKOV-specific-touchtoy-driver.patch \
+  file://patches/0004-HACK-watchdog-trigger-sysrq-in-case-of-soft-lockup.patch \
   "
 # umpf-topic: v5.10/customers/skov/imx6_suitable_for_upstream
 # umpf-hashinfo: b29b9c7ab43c0570eede2457a77a5e8a67ee6b79
-# umpf-topic-range: 7f096c009652f24695a4e79c3447726637be89c0..6f8f944562418e90c33760d1bf1a0f44c7a5b13e
+# umpf-topic-range: 58c0a89f7a4503c1be1da8da267c7199f6a72ab5..48791d641100f55e42e846598754c968b4ccfcbc
 SRC_URI += "\
   file://patches/0101-dt-bindings-panel-add-bindings-for-Logic-Technologie.patch \
   file://patches/0102-drm-panel-add-Logic-Technologies-panels.patch \
@@ -24,7 +25,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/etnaviv
 # umpf-hashinfo: e5198246f6333894dc30a01f09a9aa6bcc98bf7e
-# umpf-topic-range: 6f8f944562418e90c33760d1bf1a0f44c7a5b13e..f7fddfdc5bca48b5b66e4d56eb3114a7a2d22410
+# umpf-topic-range: 48791d641100f55e42e846598754c968b4ccfcbc..ee946d9904921e50c103a671dd989d3481a24c37
 SRC_URI += "\
   file://patches/0201-drm-split-out-buffer-lookup-from-fake-VMA-offset.patch \
   file://patches/0202-drm-etnaviv-properly-implement-mmaping-of-imported-b.patch \
@@ -33,8 +34,8 @@ SRC_URI += "\
   file://patches/0205-drm-etnaviv-rework-linear-window-offset-calculation.patch \
   "
 # umpf-topic: v5.10/topic/coda
-# umpf-hashinfo: 031b55f6159ebafe99b221bbc3fbcfdccb2a82f6
-# umpf-topic-range: f7fddfdc5bca48b5b66e4d56eb3114a7a2d22410..a4526c6778230db32e9e473b8ba3d5f5cdfce542
+# umpf-hashinfo: 3bee330cdc1e4a4e95b026b5a72a68f79596494b
+# umpf-topic-range: ee946d9904921e50c103a671dd989d3481a24c37..b436f5152ef82d79794ab0b3232a008272801da6
 SRC_URI += "\
   file://patches/0301-media-coda-use-semicolons-rather-than-commas-to-sepa.patch \
   file://patches/0302-media-coda-Remove-redundant-ctx-initialized-setting.patch \
@@ -81,14 +82,14 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/drm-sched-accounting
 # umpf-hashinfo: ee32d16fde4648bc0374b2797998228438493229
-# umpf-topic-range: a4526c6778230db32e9e473b8ba3d5f5cdfce542..4260940e61e31cd143af82ae6bb8c7df5adf61db
+# umpf-topic-range: b436f5152ef82d79794ab0b3232a008272801da6..f3735ab8e9bc80721c901534cc6d1e827b588ee2
 SRC_URI += "\
   file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
   "
 # umpf-topic: v5.10/topic/ksz8873
 # umpf-hashinfo: 9f6d83418fd0db14e338a16acbc8feea16bcee6a
-# umpf-topic-range: 4260940e61e31cd143af82ae6bb8c7df5adf61db..0acf247c0e652b687b58879f4028171fd7d1055b
+# umpf-topic-range: f3735ab8e9bc80721c901534cc6d1e827b588ee2..42826c3d070b46a5a1999d0fc0879f2db19b0618
 SRC_URI += "\
   file://patches/0501-net-dsa-microchip-ksz8795-remove-unused-last_port-va.patch \
   file://patches/0502-net-dsa-microchip-ksz8795-remove-superfluous-port_cn.patch \
@@ -136,24 +137,15 @@ SRC_URI += "\
   "
 # umpf-topic: v5.10/topic/fec-selftest
 # umpf-hashinfo: 0cea5c78d5adf067e63dd8d9529cd0a80f71a4f6
-# umpf-topic-range: 0acf247c0e652b687b58879f4028171fd7d1055b..d288f3bf4e00fc86a6fc537ff3e546e178e9dc6e
+# umpf-topic-range: 42826c3d070b46a5a1999d0fc0879f2db19b0618..0762af3e8b192b05b2036206c620e9d0d6ef502d
 SRC_URI += "\
   file://patches/0601-net-phy-micrel-KSZ8081-add-loopback-support.patch \
   file://patches/0602-net-phy-at803x-AR8085-add-loopback-support.patch \
   file://patches/0603-net-fec-add-basic-selftest-support.patch \
   "
-# umpf-release: 5.10/customers/skov/imx6/20211206-1
-# umpf-topic-range: d288f3bf4e00fc86a6fc537ff3e546e178e9dc6e..a95e427d65b9dbab8afc4b8ef95e36dcd3730a00
+# umpf-release: 5.10/customers/skov/imx6/20220225-1
+# umpf-topic-range: 0762af3e8b192b05b2036206c620e9d0d6ef502d..8138be139f9767ac6b6d61b8d86223c25cb011d7
 SRC_URI += "\
-  file://patches/0701-Release-5.10-customers-skov-imx6-20211206-1.patch \
+  file://patches/0701-Release-5.10-customers-skov-imx6-20220225-1.patch \
   "
 # umpf-end
-#Marc Kleine-Budde Patch for watchdog BUG soft lockup, mailing subject
-SRC_URI += "\
-  file://patches/9900-HACK-watchdog-trigger-sysrq-in-case-of-soft-lockup.patch \
-"
-#SAN UBI patches from 5.10.95
-SRC_URI += "\
-  file://patches/0800-mtd-rawnand-gpmi-Remove-explicit-default-gpmi-clock-setting-for-i.MX6.patch \
-  file://patches/0801-mtd-rawnand-gpmi-mtd-Add-ERR007117-protection-for-nfc_apply_timings.patch \
-"
