@@ -1,0 +1,53 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Thu, 10 Mar 2022 22:03:56 +0100
+Subject: [PATCH] power: reset: reboot-mode: Fix resetting to normal mode
+
+To clear the reboot mode for next reboot during registration of a reboot
+mode driver we call reboot->write() with a zero initialized u32 array
+with a single entry. This is wrong for two reasons. First the array is
+too short, for i.MX6 we need to entries. Then it is assumed that the
+magic to write to the register is '0' for normal boot, but it could be
+an arbitrary value.
+
+To fix this pick the index of the normal boot entry and pass the
+corresponding magic values to reboot->write(). While at it only do
+this when a normal boot entry actually exists.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/power/reset/reboot-mode.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/power/reset/reboot-mode.c b/drivers/power/reset/reboot-mode.c
+index d9b51dfea677..01709e00191e 100644
+--- a/drivers/power/reset/reboot-mode.c
++++ b/drivers/power/reset/reboot-mode.c
+@@ -127,7 +127,7 @@ int reboot_mode_register(struct reboot_mode_driver *reboot,
+ 	const char *alias;
+ 	size_t nmodes = 0;
+ 	int i = 0;
+-	int ret;
++	int ret, normal = -1;
+ 
+ 	for_each_property_of_node(np, prop) {
+ 		u32 magic;
+@@ -171,6 +171,9 @@ int reboot_mode_register(struct reboot_mode_driver *reboot,
+ 			goto error;
+ 		}
+ 
++		if (!strcmp(*mode, "normal"))
++			normal = i;
++
+ 		reboot_mode_print(reboot, *mode, magic);
+ 
+ 		i++;
+@@ -187,7 +190,8 @@ int reboot_mode_register(struct reboot_mode_driver *reboot,
+ 	reboot_mode_add_param(reboot->dev, "", reboot);
+ 
+ 	/* clear mode for next reboot */
+-	reboot->write(reboot, &(u32) { 0 });
++	if (normal >= 0)
++		reboot->write(reboot, &reboot->magics[normal]);
+ 
+ 	if (!reboot->priority)
+ 		reboot->priority = REBOOT_MODE_DEFAULT_PRIORITY;

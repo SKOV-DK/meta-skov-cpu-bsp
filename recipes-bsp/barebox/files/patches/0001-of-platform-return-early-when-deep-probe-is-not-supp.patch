@@ -1,0 +1,47 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Tue, 8 Mar 2022 12:26:47 +0100
+Subject: [PATCH] of: platform: return early when deep probe is not supported
+
+When deep probe is not supported we can bail out early from the
+of_devices_ensure_probed_by_* functions. This saves us from iterating
+over the whole device tree and then doing nothing on the found nodes.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/of/platform.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/of/platform.c b/drivers/of/platform.c
+index 3a82809cb37c..4c31de1ecc06 100644
+--- a/drivers/of/platform.c
++++ b/drivers/of/platform.c
+@@ -454,6 +454,9 @@ int of_device_ensure_probed_by_alias(const char *alias)
+ {
+ 	struct device_node *dev_node;
+ 
++	if (!deep_probe_is_supported())
++		return 0;
++
+ 	dev_node = of_find_node_by_alias(NULL, alias);
+ 	if (!dev_node)
+ 		return -EINVAL;
+@@ -479,6 +482,9 @@ int of_devices_ensure_probed_by_dev_id(const struct of_device_id *ids)
+ 	struct device_node *np;
+ 	int err, ret = 0;
+ 
++	if (!deep_probe_is_supported())
++		return 0;
++
+ 	for_each_matching_node(np, ids) {
+ 		if (!of_device_is_available(np))
+ 			continue;
+@@ -508,6 +514,9 @@ int of_devices_ensure_probed_by_property(const char *property_name)
+ {
+ 	struct device_node *node;
+ 
++	if (!deep_probe_is_supported())
++		return 0;
++
+ 	for_each_node_with_property(node, property_name) {
+ 		int ret;
+ 

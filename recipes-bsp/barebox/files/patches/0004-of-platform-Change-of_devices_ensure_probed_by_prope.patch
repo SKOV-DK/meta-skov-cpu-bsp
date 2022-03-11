@@ -1,0 +1,40 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Mon, 7 Mar 2022 16:17:29 +0100
+Subject: [PATCH] of: platform: Change of_devices_ensure_probed_by_property()
+ return value
+
+of_devices_ensure_probed_by_property() returns with an error immediately
+when one the calls to of_device_ensure_probed() fails. This is not the
+desired behaviour. Instead, always call of_device_ensure_probed() on all
+found nodes and return unsuccessfully when at least one of the nodes
+failed.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/of/platform.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/of/platform.c b/drivers/of/platform.c
+index ccaed5d603d7..27fe6fe6d0d9 100644
+--- a/drivers/of/platform.c
++++ b/drivers/of/platform.c
+@@ -513,16 +513,15 @@ EXPORT_SYMBOL_GPL(of_devices_ensure_probed_by_dev_id);
+ int of_devices_ensure_probed_by_property(const char *property_name)
+ {
+ 	struct device_node *node;
++	int err, ret = 0;
+ 
+ 	if (!deep_probe_is_supported())
+ 		return 0;
+ 
+ 	for_each_node_with_property(node, property_name) {
+-		int ret;
+-
+ 		ret = of_device_ensure_probed(node);
+-		if (ret)
+-			return ret;
++		if (err)
++			ret = err;
+ 	}
+ 
+ 	return 0;

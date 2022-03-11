@@ -1,0 +1,37 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Tue, 8 Mar 2022 12:00:36 +0100
+Subject: [PATCH] clk: imx6: fix axi_sels
+
+Adaption of Kernel commit:
+
+| commit a08b9bc586a7810cdebbc316d5cbaed56a2a04a9
+| Author:     Anson Huang <b20788@freescale.com>
+| Commit:     Shawn Guo <shawn.guo@linaro.org>
+| CommitDate: Mon Jun 3 13:47:12 2013 +0800
+|
+| ARM: imx: clk-imx6q: AXI clock select index is incorrect
+|
+| The AXI clock mux should be as below:
+|
+|  00: periph;
+|  01: pll2_pfd2_396m;
+|  10: periph;
+|  11: pll3_pfd1_540m;
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/clk/imx/clk-imx6.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/clk/imx/clk-imx6.c b/drivers/clk/imx/clk-imx6.c
+index aa5876d21ba0..8cc4c2a08fff 100644
+--- a/drivers/clk/imx/clk-imx6.c
++++ b/drivers/clk/imx/clk-imx6.c
+@@ -106,6 +106,7 @@ static const char *periph2_sels[] = {
+ static const char *axi_sels[] = {
+ 	"periph",
+ 	"pll2_pfd2_396m",
++	"periph",
+ 	"pll3_pfd1_540m",
+ };
+ 
