@@ -1,13 +1,13 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Date: Thu, 10 Mar 2022 22:13:58 +0100
-Subject: [PATCH] Release 2022.02.0/customers/skov/imx6/20220310-1
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 29 Mar 2022 12:56:22 +0200
+Subject: [PATCH] Release 2022.02.0/customers/skov/imx6/20220329-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index f81cb18a0868..2aa11353d9e3 100644
+index f81cb18a0868..d1ad63280fd4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -15,7 +15,7 @@ index f81cb18a0868..2aa11353d9e3 100644
  PATCHLEVEL = 02
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20220310-1
++EXTRAVERSION =-20220329-1
  NAME = None
  
  # *DOCUMENTATION*

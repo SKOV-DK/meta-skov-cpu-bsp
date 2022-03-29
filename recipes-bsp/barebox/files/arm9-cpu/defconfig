@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Barebox/arm 2021.07.0-20210720-1 Configuration
+# Barebox/arm 2022.02.0-20220329-1 Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_LINUX=y
@@ -70,6 +70,7 @@ CONFIG_MACH_SKOV_ARM9CPU=y
 # CONFIG_MACH_AT91SAM9263EK is not set
 # CONFIG_MACH_AT91SAM9X5EK is not set
 # CONFIG_MACH_MICROCHIP_KSZ9477_EVB is not set
+# CONFIG_MACH_SAMA5D3_XPLAINED is not set
 # CONFIG_MACH_SAMA5D27_SOM1 is not set
 # CONFIG_MACH_SAMA5D27_GIANTBOARD is not set
 
@@ -183,8 +184,6 @@ CONFIG_FLEXIBLE_BOOTARGS=y
 # CONFIG_BAREBOX_UPDATE is not set
 # CONFIG_SYSTEM_PARTITIONS is not set
 CONFIG_IMD=y
-# CONFIG_IMD_TARGET is not set
-# CONFIG_KERNEL_INSTALL_TARGET is not set
 CONFIG_CONSOLE_FULL=y
 # CONFIG_CONSOLE_SIMPLE is not set
 # CONFIG_CONSOLE_NONE is not set
@@ -192,6 +191,7 @@ CONFIG_CONSOLE_FULL=y
 CONFIG_CONSOLE_ACTIVATE_ALL=y
 # CONFIG_CONSOLE_ACTIVATE_NONE is not set
 # CONFIG_CONSOLE_ALLOW_COLOR is not set
+# CONFIG_CONSOLE_DISABLE_INPUT is not set
 # CONFIG_PBL_CONSOLE is not set
 # CONFIG_CONSOLE_RATP is not set
 CONFIG_PARTITION=y
@@ -206,13 +206,13 @@ CONFIG_DEFAULT_COMPRESSION_NONE=y
 CONFIG_DEFAULT_ENVIRONMENT_GENERIC_NEW=y
 # CONFIG_DEFAULT_ENVIRONMENT_GENERIC_NEW_IKCONFIG is not set
 CONFIG_DEFAULT_ENVIRONMENT_PATH=""
-# CONFIG_BAREBOXENV_TARGET is not set
-# CONFIG_BAREBOXCRC32_TARGET is not set
+CONFIG_HAS_SCHED=y
 CONFIG_POLLER=y
 # CONFIG_BTHREAD is not set
 # CONFIG_STATE is not set
 # CONFIG_BOOTCHOOSER is not set
 # CONFIG_RESET_SOURCE is not set
+CONFIG_EXTERNAL_DTS_FRAGMENTS=""
 
 #
 # OP-TEE loading
@@ -230,13 +230,20 @@ CONFIG_DEFAULT_LOGLEVEL=7
 # CONFIG_DEBUG_LL is not set
 CONFIG_DEBUG_AT91_UART_BASE=0xffffee00
 # CONFIG_DEBUG_INITCALLS is not set
+# CONFIG_DEBUG_PROBES is not set
 # CONFIG_PBL_BREAK is not set
+# CONFIG_PRINTF_FULL is not set
 # CONFIG_UBSAN is not set
 CONFIG_HAVE_ARCH_KASAN=y
 CONFIG_CC_HAS_KASAN_GENERIC=y
 # CONFIG_KASAN is not set
 # CONFIG_COMPILE_TEST is not set
 # end of Debugging
+
+#
+# EFI (Extensible Firmware Interface) Support
+#
+# end of EFI (Extensible Firmware Interface) Support
 
 CONFIG_HAS_DEBUG_LL=y
 CONFIG_COMMAND_SUPPORT=y
@@ -248,9 +255,11 @@ CONFIG_COMMAND_SUPPORT=y
 #
 # Information
 #
+# CONFIG_CMD_TUTORIAL is not set
 CONFIG_CMD_AT91CLK=y
 CONFIG_CMD_ARM_CPUINFO=y
 CONFIG_CMD_DEVINFO=y
+# CONFIG_CMD_DEVUNBIND is not set
 CONFIG_CMD_DMESG=y
 CONFIG_CMD_DRVINFO=y
 CONFIG_CMD_HELP=y
@@ -459,8 +468,6 @@ CONFIG_PHYLIB=y
 #
 # Network drivers
 #
-# CONFIG_DRIVER_NET_ARC_EMAC is not set
-# CONFIG_DRIVER_NET_CALXEDA_XGMAC is not set
 # CONFIG_DRIVER_NET_DESIGNWARE is not set
 # CONFIG_DRIVER_NET_DESIGNWARE_EQOS is not set
 # CONFIG_DRIVER_NET_FSL_FMAN is not set
@@ -468,6 +475,7 @@ CONFIG_PHYLIB=y
 CONFIG_DRIVER_NET_MACB=y
 # CONFIG_DRIVER_NET_SMC911X is not set
 # CONFIG_DRIVER_NET_SMC91111 is not set
+# CONFIG_DRIVER_NET_LITEETH is not set
 
 #
 # phylib
@@ -645,6 +653,7 @@ CONFIG_GPIOLIB=y
 #
 # GPIO
 #
+# CONFIG_GPIO_74XX_MMIO is not set
 # CONFIG_GPIO_GENERIC_PLATFORM is not set
 # CONFIG_GPIO_DESIGNWARE is not set
 # CONFIG_GPIO_SIFIVE is not set
@@ -684,6 +693,12 @@ CONFIG_PINCTRL_AT91=y
 #
 # end of Firmware Drivers
 
+#
+# FPGA Configuration Support
+#
+# CONFIG_FPGA is not set
+# end of FPGA Configuration Support
+
 # CONFIG_GENERIC_PHY is not set
 # CONFIG_CRYPTO_HW is not set
 
@@ -693,9 +708,19 @@ CONFIG_PINCTRL_AT91=y
 # end of Memory controller drivers
 
 #
+# SoC drivers
+#
+
+#
 # i.MX SoC drivers
 #
 # end of i.MX SoC drivers
+
+#
+# KVX SoC drivers
+#
+# end of KVX SoC drivers
+# end of SoC drivers
 
 #
 # NVME Support
@@ -815,5 +840,15 @@ CONFIG_EXTRA_FIRMWARE_DIR="firmware"
 #
 # CONFIG_COMPILE_HOST_TOOLS is not set
 # end of Host Tools
+
+#
+# Target Tools
+#
+# CONFIG_IMD_TARGET is not set
+# CONFIG_KERNEL_INSTALL_TARGET is not set
+# CONFIG_BAREBOXENV_TARGET is not set
+# CONFIG_BAREBOXCRC32_TARGET is not set
+# CONFIG_MVEBU_KWBOOT_TARGET is not set
+# end of Target Tools
 
 # CONFIG_TEST is not set
