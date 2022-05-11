@@ -1,0 +1,100 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 13 Oct 2021 15:05:26 +0200
+Subject: [PATCH] media: coda: add VDOA tracepoints
+
+Add tracepoints to allow recording when the VDOA is active.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/imx-vdoa.c   |  6 ++++
+ drivers/media/platform/coda/trace-vdoa.h | 50 ++++++++++++++++++++++++++++++++
+ 2 files changed, 56 insertions(+)
+ create mode 100644 drivers/media/platform/coda/trace-vdoa.h
+
+diff --git a/drivers/media/platform/coda/imx-vdoa.c b/drivers/media/platform/coda/imx-vdoa.c
+index 9598024bb24a..c65a7c353bba 100644
+--- a/drivers/media/platform/coda/imx-vdoa.c
++++ b/drivers/media/platform/coda/imx-vdoa.c
+@@ -19,6 +19,8 @@
+ #include <media/v4l2-dev.h>
+ 
+ #include "imx-vdoa.h"
++#define CREATE_TRACE_POINTS
++#include "trace-vdoa.h"
+ 
+ #define VDOA_NAME "imx-vdoa"
+ 
+@@ -127,6 +129,8 @@ static irqreturn_t vdoa_irq_handler(int irq, void *data)
+ 	}
+ 	curr_ctx->completed_job++;
+ 
++	trace_vdoa_done(curr_ctx->completed_job - 1);
++
+ 	spin_lock_irqsave(&vdoa->stats->lock, flags);
+ 	__v4l2_stats_stop(vdoa->stats, ktime_get());
+ 	spin_unlock_irqrestore(&vdoa->stats->lock, flags);
+@@ -204,6 +208,8 @@ void vdoa_device_run(struct vdoa_ctx *ctx, dma_addr_t dst, dma_addr_t src)
+ 	__v4l2_stats_start(vdoa->stats, ktime_get());
+ 	spin_unlock_irqrestore(&vdoa->stats->lock, flags);
+ 
++	trace_vdoa_run(ctx->submitted_job - 1);
++
+ 	/* Enable interrupts and start transfer */
+ 	writel(VDOAIE_EITERR | VDOAIE_EIEOT, vdoa->regs + VDOAIE);
+ 	writel(VDOASRR_START, vdoa->regs + VDOASRR);
+diff --git a/drivers/media/platform/coda/trace-vdoa.h b/drivers/media/platform/coda/trace-vdoa.h
+new file mode 100644
+index 000000000000..7f17df27772b
+--- /dev/null
++++ b/drivers/media/platform/coda/trace-vdoa.h
+@@ -0,0 +1,50 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#undef TRACE_SYSTEM
++#define TRACE_SYSTEM vdoa
++
++#if !defined(__VDOA_TRACE_H__) || defined(TRACE_HEADER_MULTI_READ)
++#define __VDOA_TRACE_H__
++
++#include <linux/tracepoint.h>
++
++TRACE_EVENT(vdoa_run,
++	TP_PROTO(int job),
++
++	TP_ARGS(job),
++
++	TP_STRUCT__entry(
++		__field(int, job)
++	),
++
++	TP_fast_assign(
++		__entry->job = job;
++	),
++
++	TP_printk("job = %d", __entry->job)
++);
++
++TRACE_EVENT(vdoa_done,
++	TP_PROTO(int job),
++
++	TP_ARGS(job),
++
++	TP_STRUCT__entry(
++		__field(int, job)
++	),
++
++	TP_fast_assign(
++		__entry->job = job;
++	),
++
++	TP_printk("job = %d", __entry->job)
++);
++
++#endif /* __VDOA_TRACE_H__ */
++
++#undef TRACE_INCLUDE_PATH
++#define TRACE_INCLUDE_PATH ../../drivers/media/platform/coda
++#undef TRACE_INCLUDE_FILE
++#define TRACE_INCLUDE_FILE trace-vdoa
++
++/* This part must be outside protection */
++#include <trace/define_trace.h>

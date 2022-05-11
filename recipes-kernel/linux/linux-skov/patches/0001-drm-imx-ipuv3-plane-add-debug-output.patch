@@ -1,0 +1,165 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 19 Oct 2016 12:24:31 +0200
+Subject: [PATCH] drm/imx: ipuv3-plane: add debug output
+
+Add detailed debug output to ipu_plane_atomic_check.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/gpu/drm/imx/ipuv3-plane.c | 61 +++++++++++++++++++++++++++++++--------
+ 1 file changed, 49 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/gpu/drm/imx/ipuv3-plane.c b/drivers/gpu/drm/imx/ipuv3-plane.c
+index 846c1aae69c8..36b086247708 100644
+--- a/drivers/gpu/drm/imx/ipuv3-plane.c
++++ b/drivers/gpu/drm/imx/ipuv3-plane.c
+@@ -376,7 +376,8 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 	struct drm_plane_state *old_state = drm_atomic_get_old_plane_state(state,
+ 									   plane);
+ 	struct drm_crtc_state *crtc_state;
+-	struct device *dev = plane->dev->dev;
++	struct drm_device *drm = plane->dev;
++	struct device *dev = drm->dev;
+ 	struct drm_framebuffer *fb = new_state->fb;
+ 	struct drm_framebuffer *old_fb = old_state->fb;
+ 	unsigned long eba, ubo, vbo, old_ubo, old_vbo, alpha_eba;
+@@ -403,6 +404,13 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 	if (ret)
+ 		return ret;
+ 
++	drm_dbg_kms(drm, "%.4s pitch(%u %u %u) offset(%u %u %u)\n",
++		    (char *)&fb->format->format,
++		    fb->pitches[0], fb->pitches[1], fb->pitches[2],
++		    fb->offsets[0], fb->offsets[1], fb->offsets[2]);
++	drm_rect_debug_print("src: ", &new_state->src, true);
++	drm_rect_debug_print("dst: ", &new_state->dst, false);
++
+ 	/* nothing to check when disabling or disabled */
+ 	if (!crtc_state->enable)
+ 		return 0;
+@@ -410,8 +418,12 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 	switch (plane->type) {
+ 	case DRM_PLANE_TYPE_PRIMARY:
+ 		/* full plane minimum width is 13 pixels */
+-		if (drm_rect_width(&new_state->dst) < 13)
++		if (drm_rect_width(&new_state->dst) < 13) {
++			drm_dbg_kms(drm, "Full plane minimum width is 13 pixels\n");
++			drm_rect_debug_print("src: ", &new_state->src, true);
++			drm_rect_debug_print("dst: ", &new_state->dst, false);
+ 			return -EINVAL;
++		}
+ 		break;
+ 	case DRM_PLANE_TYPE_OVERLAY:
+ 		break;
+@@ -420,8 +432,12 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 		return -EINVAL;
+ 	}
+ 
+-	if (drm_rect_height(&new_state->dst) < 2)
++	if (drm_rect_height(&new_state->dst) < 2) {
++		drm_dbg_kms(drm, "Plane minimum height is 2 pixels\n");
++		drm_rect_debug_print("src: ", &new_state->src, true);
++		drm_rect_debug_print("dst: ", &new_state->dst, false);
+ 		return -EINVAL;
++	}
+ 
+ 	/*
+ 	 * We support resizing active plane or changing its format by
+@@ -438,11 +454,16 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 
+ 	eba = drm_plane_state_to_eba(new_state, 0);
+ 
+-	if (eba & 0x7)
++	if (eba & 0x7) {
++		drm_dbg_kms(drm, "EBA must be a multiple of 8 bytes\neba: 0x%lx",
++			    eba);
+ 		return -EINVAL;
++	}
+ 
+-	if (fb->pitches[0] < 1 || fb->pitches[0] > 16384)
++	if (fb->pitches[0] < 1 || fb->pitches[0] > 16384) {
++		drm_dbg_kms(drm, "Pitch %u out of range\n", fb->pitches[0]);
+ 		return -EINVAL;
++	}
+ 
+ 	if (old_fb && fb->pitches[0] != old_fb->pitches[0])
+ 		crtc_state->mode_changed = true;
+@@ -470,8 +491,11 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 		 */
+ 		vbo = drm_plane_state_to_vbo(new_state);
+ 
+-		if (vbo & 0x7 || vbo > 0xfffff8)
++		if (vbo & 0x7 || vbo > 0xfffff8) {
++			drm_dbg_kms(drm, "VBO %lu must be a multiple of 8 bytes and < 16 MiB\n",
++				    vbo);
+ 			return -EINVAL;
++		}
+ 
+ 		if (old_fb && (fb->format == old_fb->format)) {
+ 			old_vbo = drm_plane_state_to_vbo(old_state);
+@@ -479,16 +503,21 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 				crtc_state->mode_changed = true;
+ 		}
+ 
+-		if (fb->pitches[1] != fb->pitches[2])
++		if (fb->pitches[1] != fb->pitches[2]) {
++			drm_dbg_kms(drm, "U/V pitches differ\n");
+ 			return -EINVAL;
++		}
+ 
+ 		fallthrough;
+ 	case DRM_FORMAT_NV12:
+ 	case DRM_FORMAT_NV16:
+ 		ubo = drm_plane_state_to_ubo(new_state);
+ 
+-		if (ubo & 0x7 || ubo > 0xfffff8)
++		if (ubo & 0x7 || ubo > 0xfffff8) {
++			drm_dbg_kms(drm, "UBO %lu must be a multiple of 8 bytes and < 16 MiB\n",
++				    ubo);
+ 			return -EINVAL;
++		}
+ 
+ 		if (old_fb && (fb->format == old_fb->format)) {
+ 			old_ubo = drm_plane_state_to_ubo(old_state);
+@@ -496,8 +525,10 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 				crtc_state->mode_changed = true;
+ 		}
+ 
+-		if (fb->pitches[1] < 1 || fb->pitches[1] > 16384)
++		if (fb->pitches[1] < 1 || fb->pitches[1] > 16384) {
++			drm_dbg_kms(drm, "U/V pitches out of range\n");
+ 			return -EINVAL;
++		}
+ 
+ 		if (old_fb && old_fb->pitches[1] != fb->pitches[1])
+ 			crtc_state->mode_changed = true;
+@@ -507,8 +538,10 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 		 * chroma subsampling.
+ 		 */
+ 		if (((new_state->src.x1 >> 16) & (fb->format->hsub - 1)) ||
+-		    ((new_state->src.y1 >> 16) & (fb->format->vsub - 1)))
++		    ((new_state->src.y1 >> 16) & (fb->format->vsub - 1))) {
++			drm_dbg_kms(drm, "Odd offsets not allowed due to chroma subsampling\n");
+ 			return -EINVAL;
++		}
+ 		break;
+ 	case DRM_FORMAT_RGB565_A8:
+ 	case DRM_FORMAT_BGR565_A8:
+@@ -517,11 +550,15 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,
+ 	case DRM_FORMAT_RGBX8888_A8:
+ 	case DRM_FORMAT_BGRX8888_A8:
+ 		alpha_eba = drm_plane_state_to_eba(new_state, 1);
+-		if (alpha_eba & 0x7)
++		if (alpha_eba & 0x7) {
++			drm_dbg_kms(drm, "Alpha EBA must be a multiple of 8 bytes\n");
+ 			return -EINVAL;
++		}
+ 
+-		if (fb->pitches[1] < 1 || fb->pitches[1] > 16384)
++		if (fb->pitches[1] < 1 || fb->pitches[1] > 16384) {
++			drm_dbg_kms(drm, "Pitch %u out of range\n", fb->pitches[1]);
+ 			return -EINVAL;
++		}
+ 
+ 		if (old_fb && old_fb->pitches[1] != fb->pitches[1])
+ 			crtc_state->mode_changed = true;

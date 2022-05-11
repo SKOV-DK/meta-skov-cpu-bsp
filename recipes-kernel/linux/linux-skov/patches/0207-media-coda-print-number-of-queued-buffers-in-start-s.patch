@@ -1,0 +1,27 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 27 Mar 2019 19:19:39 +0100
+Subject: [PATCH] media: coda: print number of queued buffers in start
+ streaming debug message
+
+Extend the start streaming debug message to include the initial queued
+buffer count.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index a57822b05070..6d930ee7794c 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1976,7 +1976,8 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+ 	if (count < 1)
+ 		return -EINVAL;
+ 
+-	coda_dbg(1, ctx, "start streaming %s\n", v4l2_type_names[q->type]);
++	coda_dbg(1, ctx, "start streaming %s (count: %u)\n",
++		 v4l2_type_names[q->type], count);
+ 
+ 	INIT_LIST_HEAD(&list);
+ 

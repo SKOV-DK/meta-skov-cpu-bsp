@@ -1,0 +1,29 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Fri, 26 Nov 2021 15:51:50 +0100
+Subject: [PATCH] media: coda: enable capture S_PARM for stateful encoder
+
+Allow to call S_PARM with type == V4L2_BUF_TYPE_VIDEO_OUTPUT,
+to fix the following v4l2-compliance test failure:
+
+		fail: v4l2-test-formats.cpp(1413): got error 22 when setting parms for buftype 1
+	test VIDIOC_G/S_PARM: FAIL
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/coda/coda-common.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 1c7f3fa8df1e..66edaab5bfc4 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -1669,9 +1669,6 @@ static int coda_s_parm(struct file *file, void *fh, struct v4l2_streamparm *a)
+ 	struct coda_ctx *ctx = fh_to_ctx(fh);
+ 	struct v4l2_fract *tpf;
+ 
+-	if (a->type != V4L2_BUF_TYPE_VIDEO_OUTPUT)
+-		return -EINVAL;
+-
+ 	a->parm.output.capability = V4L2_CAP_TIMEPERFRAME;
+ 	tpf = &a->parm.output.timeperframe;
+ 	coda_approximate_timeperframe(tpf);

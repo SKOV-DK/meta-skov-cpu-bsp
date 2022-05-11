@@ -1,0 +1,57 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 29 Jul 2019 14:32:42 +0200
+Subject: [PATCH] gpu: ipu-v3: remove legacy V4L2_PIX_FMT_RGB32 and _BGR32
+ support
+
+The V4L2_PIX_FMT_RGB32 and V4L2_PIX_FMT_BGR32 pixel formats are
+poorly defined, deprecated, and not used anymore.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/gpu/ipu-v3/ipu-cpmem.c         | 8 --------
+ drivers/gpu/ipu-v3/ipu-image-convert.c | 6 ------
+ 2 files changed, 14 deletions(-)
+
+diff --git a/drivers/gpu/ipu-v3/ipu-cpmem.c b/drivers/gpu/ipu-v3/ipu-cpmem.c
+index 82b244cb313e..7a87658601ef 100644
+--- a/drivers/gpu/ipu-v3/ipu-cpmem.c
++++ b/drivers/gpu/ipu-v3/ipu-cpmem.c
+@@ -176,12 +176,6 @@ static int v4l2_pix_fmt_to_drm_fourcc(u32 pixelformat)
+ 	case V4L2_PIX_FMT_RGB24:
+ 		/* R G B <=> [24:0] B:G:R */
+ 		return DRM_FORMAT_BGR888;
+-	case V4L2_PIX_FMT_BGR32:
+-		/* B G R A <=> [32:0] A:B:G:R */
+-		return DRM_FORMAT_XRGB8888;
+-	case V4L2_PIX_FMT_RGB32:
+-		/* R G B A <=> [32:0] A:B:G:R */
+-		return DRM_FORMAT_XBGR8888;
+ 	case V4L2_PIX_FMT_ABGR32:
+ 		/* B G R A <=> [32:0] A:R:G:B */
+ 		return DRM_FORMAT_ARGB8888;
+@@ -839,8 +833,6 @@ int ipu_cpmem_set_image(struct ipuv3_channel *ch, struct ipu_image *image)
+ 		offset = image->rect.left * 2 +
+ 			image->rect.top * pix->bytesperline;
+ 		break;
+-	case V4L2_PIX_FMT_RGB32:
+-	case V4L2_PIX_FMT_BGR32:
+ 	case V4L2_PIX_FMT_ABGR32:
+ 	case V4L2_PIX_FMT_XBGR32:
+ 	case V4L2_PIX_FMT_BGRA32:
+diff --git a/drivers/gpu/ipu-v3/ipu-image-convert.c b/drivers/gpu/ipu-v3/ipu-image-convert.c
+index aa1d4b6d278f..45d5aa805470 100644
+--- a/drivers/gpu/ipu-v3/ipu-image-convert.c
++++ b/drivers/gpu/ipu-v3/ipu-image-convert.c
+@@ -255,12 +255,6 @@ static const struct ipu_image_pixfmt image_convert_formats[] = {
+ 	}, {
+ 		.fourcc	= V4L2_PIX_FMT_BGR24,
+ 		.bpp    = 24,
+-	}, {
+-		.fourcc	= V4L2_PIX_FMT_RGB32,
+-		.bpp    = 32,
+-	}, {
+-		.fourcc	= V4L2_PIX_FMT_BGR32,
+-		.bpp    = 32,
+ 	}, {
+ 		.fourcc	= V4L2_PIX_FMT_XRGB32,
+ 		.bpp    = 32,
