@@ -1,21 +1,21 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Wed, 11 May 2022 12:21:30 +0200
-Subject: [PATCH] Release 5.17/customers/skov/imx6/20220511-1
+Date: Fri, 13 May 2022 17:44:49 +0200
+Subject: [PATCH] Release 5.17/customers/skov/imx6/20220513-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 7ef8dd5ab6f2..92b232257946 100644
+index ce65b393a2b4..d6ff714e6ec1 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
  PATCHLEVEL = 17
- SUBLEVEL = 6
+ SUBLEVEL = 7
 -EXTRAVERSION =
-+EXTRAVERSION =-20220511-1
++EXTRAVERSION =-20220513-1
  NAME = Superb Owl
  
  # *DOCUMENTATION*

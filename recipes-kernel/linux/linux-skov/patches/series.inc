@@ -1,9 +1,9 @@
-# umpf-base: v5.17.6
+# umpf-base: v5.17.7
 # umpf-name: 5.17/customers/skov/imx6
-# umpf-version: 5.17/customers/skov/imx6/20220511-1
+# umpf-version: 5.17/customers/skov/imx6/20220513-1
 # umpf-topic: v5.17/topic/imx-drm
 # umpf-hashinfo: 773b56ea7f5cf59be1e90c0fe476e423c962c9f7
-# umpf-topic-range: 431b2c01a1103b63d026c3d8c7c286e4f4d9c918..98fbff016e5a48c59235bacfdaf102c425bea6b5
+# umpf-topic-range: 7651bb70fe5d2bc9b1b45890d990cb670b23a51c..8b6ce4309718e725369dc0b260e6b556f03a127a
 SRC_URI += "\
   file://patches/0001-drm-imx-ipuv3-plane-add-debug-output.patch \
   file://patches/0002-drm-imx-Add-support-for-non-RGB-output-colorspace.patch \
@@ -15,7 +15,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.17/topic/etnaviv
 # umpf-hashinfo: eb4612f3e8ba19585a5cca72d2b47f94b83bf3b6
-# umpf-topic-range: 98fbff016e5a48c59235bacfdaf102c425bea6b5..4ed264b233067f28421e66104b4af2e805f7709a
+# umpf-topic-range: 8b6ce4309718e725369dc0b260e6b556f03a127a..ad7db7a2ccdd474131e3e623ae999842e3ce8048
 SRC_URI += "\
   file://patches/0101-drm-etnaviv-avoid-false-sharing-of-fence-spinlock.patch \
   file://patches/0102-drm-etnaviv-avoid-false-sharing-on-fence-lock.patch \
@@ -26,7 +26,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.17/topic/coda
 # umpf-hashinfo: 0adc06acdfc5900077b643dc73cf45222e7c3bf4
-# umpf-topic-range: 4ed264b233067f28421e66104b4af2e805f7709a..c1e9c8b5ac2a80671df3e86077b0d375316e8598
+# umpf-topic-range: ad7db7a2ccdd474131e3e623ae999842e3ce8048..9ea891a50dc049c38a3e504efa66ec71b91ed01a
 SRC_URI += "\
   file://patches/0201-media-coda-jpeg-add-debug-information-in-case-of-COD.patch \
   file://patches/0202-media-coda-jpeg-read-back-thumbnail-indication-and-J.patch \
@@ -82,14 +82,14 @@ SRC_URI += "\
   "
 # umpf-topic: v5.17/topic/imx-sdma
 # umpf-hashinfo: 92076facd93b8143145b969f1068a58fd8230e56
-# umpf-topic-range: c1e9c8b5ac2a80671df3e86077b0d375316e8598..d88e1858859ba657f4a6323ec775c401cc0576e1
+# umpf-topic-range: 9ea891a50dc049c38a3e504efa66ec71b91ed01a..e93c642e6a068a4cc3d315b147a828790d8bb50b
 SRC_URI += "\
   file://patches/0301-firmware-add-nowarn-variant-of-request_firmware_nowa.patch \
   file://patches/0302-dmaengine-imx-sdma-don-t-print-warning-when-firmware.patch \
   "
 # umpf-topic: v5.17/topic/iio-adc-touchscreen
 # umpf-hashinfo: a8ba581091cba06e692344682739c6ececb8a3ae
-# umpf-topic-range: d88e1858859ba657f4a6323ec775c401cc0576e1..db439b025ec96baa6fb811d97354f40e46c46eaf
+# umpf-topic-range: e93c642e6a068a4cc3d315b147a828790d8bb50b..842b7525bb9695ea981991cb6a0b827a7e7e0459
 SRC_URI += "\
   file://patches/0401-iio-adc-tsc2046-rework-the-trigger-state-machine.patch \
   file://patches/0402-iio-adc-tsc2046-add-.read_raw-support.patch \
@@ -97,26 +97,27 @@ SRC_URI += "\
   "
 # umpf-topic: v5.17/topic/usb-storage-fixes
 # umpf-hashinfo: 8b1b5b3311d0bac43a07a0642d36273d650b2320
-# umpf-topic-range: db439b025ec96baa6fb811d97354f40e46c46eaf..6b744c1dbf9fc65451c05a6fb2bd9c67c76fb73d
+# umpf-topic-range: 842b7525bb9695ea981991cb6a0b827a7e7e0459..02153e3ee20989023546cfdc42a4cf8e3c41c041
 SRC_URI += "\
   file://patches/0501-Revert-block-mq-deadline-Prioritize-high-priority-re.patch \
   "
 # umpf-topic: v5.17/topic/skov-dts
-# umpf-hashinfo: d804278d18feb69b4acc17c9d9237f8f313a62b5
-# umpf-topic-range: 6b744c1dbf9fc65451c05a6fb2bd9c67c76fb73d..d0c763cb0e8460e683549c3b57e052b9967fa9c8
+# umpf-hashinfo: e5306c27c5df1bbed940df8c84981e26182a82ce
+# umpf-topic-range: 02153e3ee20989023546cfdc42a4cf8e3c41c041..6493a121021764e73f284926e9d0246efdeb578d
 SRC_URI += "\
   file://patches/0601-ARM-dts-imx6-skov-migrate-to-resistive-adc-touch.patch \
+  file://patches/0602-ARM-dts-imx6-skov-add-pwm-regulator-to-control-the-p.patch \
   "
 # umpf-topic: v5.17/topic/drm-sched-accounting
 # umpf-hashinfo: 68940949940b47afd4c596d574ea01596be1d529
-# umpf-topic-range: d0c763cb0e8460e683549c3b57e052b9967fa9c8..8388a17befb1f7bf7831b730b52e13b775385c03
+# umpf-topic-range: 6493a121021764e73f284926e9d0246efdeb578d..1211477bfddb7592adf65cd59e8bd147010da25c
 SRC_URI += "\
   file://patches/0701-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0702-drm-sched-track-execution-time-per-scheduler.patch \
   "
-# umpf-release: 5.17/customers/skov/imx6/20220511-1
-# umpf-topic-range: 8388a17befb1f7bf7831b730b52e13b775385c03..033eb8b79b1ac8a87d920e643463c02f40135c4e
+# umpf-release: 5.17/customers/skov/imx6/20220513-1
+# umpf-topic-range: 1211477bfddb7592adf65cd59e8bd147010da25c..93b92c26a0ae40f7a047d7375f21663343545f97
 SRC_URI += "\
-  file://patches/0801-Release-5.17-customers-skov-imx6-20220511-1.patch \
+  file://patches/0801-Release-5.17-customers-skov-imx6-20220513-1.patch \
   "
 # umpf-end
