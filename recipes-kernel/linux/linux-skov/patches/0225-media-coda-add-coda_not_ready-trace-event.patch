@@ -1,0 +1,123 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 6 Jul 2015 16:17:48 +0200
+Subject: [PATCH] media: coda: add coda_not_ready trace event
+
+Add a trace event to signal that decoding was held back by low
+bitstream buffer payload.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/chips-media/coda-common.c | 10 ++++++--
+ drivers/media/platform/chips-media/trace.h       | 32 ++++++++++++++++++++++++
+ 2 files changed, 40 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index 54a85d36ee56..1b220c4e4cd4 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -39,6 +39,7 @@
+ 
+ #include "coda.h"
+ #include "imx-vdoa.h"
++#include "trace.h"
+ 
+ #define CODA_NAME		"coda"
+ 
+@@ -1568,6 +1569,7 @@ static int coda_job_ready(void *m2m_priv)
+ {
+ 	struct coda_ctx *ctx = m2m_priv;
+ 	int src_bufs = v4l2_m2m_num_src_bufs_ready(ctx->fh.m2m_ctx);
++	bool stream_end = ctx->bit_stream_param & CODA_BIT_STREAM_END_FLAG;
+ 
+ 	/*
+ 	 * For both 'P' and 'key' frame cases 1 picture
+@@ -1575,20 +1577,21 @@ static int coda_job_ready(void *m2m_priv)
+ 	 * the compressed frame can be in the bitstream.
+ 	 */
+ 	if (!src_bufs && ctx->inst_type != CODA_INST_DECODER) {
++		trace_coda_not_ready(ctx, stream_end, src_bufs, -1, -1);
+ 		coda_dbg(1, ctx, "not ready: not enough vid-out buffers.\n");
+ 		return 0;
+ 	}
+ 
+ 	if (!v4l2_m2m_num_dst_bufs_ready(ctx->fh.m2m_ctx)) {
++		trace_coda_not_ready(ctx, stream_end, src_bufs, -2, -2);
+ 		coda_dbg(1, ctx, "not ready: not enough vid-cap buffers.\n");
+ 		return 0;
+ 	}
+ 
+ 	if (ctx->inst_type == CODA_INST_DECODER && ctx->use_bit) {
+-		bool stream_end = ctx->bit_stream_param &
+-				  CODA_BIT_STREAM_END_FLAG;
+ 		int num_metas = ctx->num_metas;
+ 		struct coda_buffer_meta *meta;
++		unsigned int payload = coda_get_bitstream_payload(ctx);
+ 		unsigned int count;
+ 
+ 		count = hweight32(ctx->frm_dis_flg);
+@@ -1601,12 +1604,14 @@ static int coda_job_ready(void *m2m_priv)
+ 		}
+ 
+ 		if (ctx->hold && !src_bufs) {
++			trace_coda_not_ready(ctx, stream_end, src_bufs, num_metas, payload);
+ 			coda_dbg(1, ctx,
+ 				 "not ready: on hold for more buffers.\n");
+ 			return 0;
+ 		}
+ 
+ 		if (!stream_end && (num_metas + src_bufs) < 2) {
++			trace_coda_not_ready(ctx, stream_end, src_bufs, num_metas, payload);
+ 			coda_dbg(1, ctx,
+ 				 "not ready: need 2 buffers available (queue:%d + bitstream:%d)\n",
+ 				 num_metas, src_bufs);
+@@ -1617,6 +1622,7 @@ static int coda_job_ready(void *m2m_priv)
+ 					struct coda_buffer_meta, list);
+ 		if (!coda_bitstream_can_fetch_past(ctx, meta->end) &&
+ 		    !stream_end) {
++			trace_coda_not_ready(ctx, stream_end, src_bufs, num_metas, payload);
+ 			coda_dbg(1, ctx,
+ 				 "not ready: not enough bitstream data to read past %u (%u)\n",
+ 				 meta->end, ctx->bitstream_fifo.kfifo.in);
+diff --git a/drivers/media/platform/chips-media/trace.h b/drivers/media/platform/chips-media/trace.h
+index 501a35c699c8..ed44461f7066 100644
+--- a/drivers/media/platform/chips-media/trace.h
++++ b/drivers/media/platform/chips-media/trace.h
+@@ -156,6 +156,38 @@ DEFINE_EVENT(coda_buf_meta_class, coda_dec_rot_done,
+ 	TP_ARGS(ctx, buf, meta)
+ );
+ 
++TRACE_EVENT(coda_not_ready,
++	TP_PROTO(struct coda_ctx *ctx, bool stream_end, int src_bufs,
++		 int num_metas, int payload),
++
++	TP_ARGS(ctx, stream_end, src_bufs, num_metas, payload),
++
++	TP_STRUCT__entry(
++		__field(int, minor)
++		__field(bool, hold)
++		__field(bool, stream_end)
++		__field(int, src_bufs)
++		__field(int, num_metas)
++		__field(int, payload)
++		__field(int, ctx)
++	),
++
++	TP_fast_assign(
++		__entry->minor = ctx->fh.vdev->minor;
++		__entry->hold = ctx->hold;
++		__entry->stream_end = stream_end;
++		__entry->src_bufs = src_bufs;
++		__entry->num_metas = num_metas;
++		__entry->payload = payload;
++		__entry->ctx = ctx->idx;
++	),
++
++	TP_printk("minor = %d, hold = %d, stream_end = %d, src_bufs = %d, metas = %d, payload = %d, ctx = %d",
++		  __entry->minor, __entry->hold, __entry->stream_end,
++		  __entry->src_bufs, __entry->num_metas, __entry->payload,
++		  __entry->ctx)
++);
++
+ DEFINE_EVENT(coda_buf_class, coda_jpeg_run,
+ 	TP_PROTO(struct coda_ctx *ctx, struct vb2_v4l2_buffer *buf),
+ 	TP_ARGS(ctx, buf)

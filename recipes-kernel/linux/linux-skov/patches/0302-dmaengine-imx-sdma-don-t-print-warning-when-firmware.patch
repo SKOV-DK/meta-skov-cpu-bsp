@@ -15,10 +15,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/dma/imx-sdma.c b/drivers/dma/imx-sdma.c
-index b1e6173fcc27..adcb3183a1a2 100644
+index 6196a7b3956b..19fe105a797b 100644
 --- a/drivers/dma/imx-sdma.c
 +++ b/drivers/dma/imx-sdma.c
-@@ -1928,7 +1928,7 @@ static int sdma_get_firmware(struct sdma_engine *sdma,
+@@ -1944,7 +1944,7 @@ static int sdma_get_firmware(struct sdma_engine *sdma,
  {
  	int ret;
  

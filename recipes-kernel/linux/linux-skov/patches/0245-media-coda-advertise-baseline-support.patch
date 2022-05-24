@@ -1,0 +1,21 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 18 Oct 2021 14:20:49 +0200
+Subject: [PATCH] media: coda: advertise baseline support
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/chips-media/coda-common.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index e0330bca8508..f964d625d2a1 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -2789,6 +2789,7 @@ static void coda_decode_ctrls(struct coda_ctx *ctx)
+ 		&coda_ctrl_ops, V4L2_CID_MPEG_VIDEO_H264_PROFILE,
+ 		V4L2_MPEG_VIDEO_H264_PROFILE_HIGH,
+ 		~((1 << V4L2_MPEG_VIDEO_H264_PROFILE_CONSTRAINED_BASELINE) |
++		  (1 << V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE) |
+ 		  (1 << V4L2_MPEG_VIDEO_H264_PROFILE_MAIN) |
+ 		  (1 << V4L2_MPEG_VIDEO_H264_PROFILE_HIGH)),
+ 		V4L2_MPEG_VIDEO_H264_PROFILE_HIGH);

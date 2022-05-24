@@ -1,0 +1,38 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 6 Apr 2022 10:53:53 +0200
+Subject: [PATCH] media: coda: jpeg: start streaming without valid header
+
+Stop bailing out on JPEG header parsing errors during streamon.
+This allows userspace to provide valid output buffers later and
+fixes a v4l2-compliance streaming test failure:
+
+		fail: v4l2-test-buffers.cpp(1429): node->streamon(q.g_type())
+	test MMAP (no poll): FAIL
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+Link: https://lore.kernel.org/r/20220406085353.2369313-3-p.zabel@pengutronix.de
+---
+ drivers/media/platform/chips-media/coda-common.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index 3eaf0e7e6b20..7b4942bb6c2c 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -1999,9 +1999,13 @@ static int coda_start_streaming(struct vb2_queue *q, unsigned int count)
+ 		 */
+ 		if (q_data_src->fourcc == V4L2_PIX_FMT_JPEG) {
+ 			buf = v4l2_m2m_next_src_buf(ctx->fh.m2m_ctx);
+-			ret = coda_jpeg_decode_header(ctx, &buf->vb2_buf);
+-			if (ret < 0)
+-				goto err;
++			coda_jpeg_decode_header(ctx, &buf->vb2_buf);
++			/*
++			 * We have to start streaming even if the first buffer
++			 * does not contain a valid JPEG image. The error will
++			 * be caught during device run and will be signalled
++			 * via the capture buffer error flag.
++			 */
+ 
+ 			q_data_dst = get_q_data(ctx, V4L2_BUF_TYPE_VIDEO_CAPTURE);
+ 			q_data_dst->width = round_up(q_data_src->width, 16);

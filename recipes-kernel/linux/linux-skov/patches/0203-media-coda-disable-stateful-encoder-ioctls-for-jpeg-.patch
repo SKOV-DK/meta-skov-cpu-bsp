@@ -1,0 +1,36 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Mon, 4 Apr 2022 18:35:30 +0200
+Subject: [PATCH] media: coda: disable stateful encoder ioctls for jpeg encoder
+
+Use v4l2_disable_ioctl() to disable the stateful encoder ioctls
+VIDIOC_ENUM_FRAMEINTERVALS, VIDIOC_G_PARM, and VIDIOC_S_PARM for
+the jpeg encoder device, to fix this v4l2-compliance test failure:
+
+		fail: v4l2-test-formats.cpp(68): node->is_m2m && !(node->codec_mask & STATEFUL_ENCODER)
+	test VIDIOC_ENUM_FMT/FRAMESIZES/FRAMEINTERVALS: FAIL
+		fail: v4l2-test-formats.cpp(1363): node->is_m2m && !is_stateful_enc
+	test VIDIOC_G/S_PARM: FAIL
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+Reviewed-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Link: https://lore.kernel.org/r/20220404163533.707508-4-p.zabel@pengutronix.de
+---
+ drivers/media/platform/chips-media/coda-common.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index c6f8f954914c..bf8513eb84be 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -2879,6 +2879,11 @@ static int coda_register_device(struct coda_dev *dev, int i)
+ 	if (dev->devtype->vdevs[i]->type == CODA_INST_ENCODER) {
+ 		v4l2_disable_ioctl(vfd, VIDIOC_DECODER_CMD);
+ 		v4l2_disable_ioctl(vfd, VIDIOC_TRY_DECODER_CMD);
++		if (dev->devtype->vdevs[i]->dst_formats[0] == V4L2_PIX_FMT_JPEG) {
++			v4l2_disable_ioctl(vfd, VIDIOC_ENUM_FRAMEINTERVALS);
++			v4l2_disable_ioctl(vfd, VIDIOC_G_PARM);
++			v4l2_disable_ioctl(vfd, VIDIOC_S_PARM);
++		}
+ 	} else {
+ 		v4l2_disable_ioctl(vfd, VIDIOC_ENCODER_CMD);
+ 		v4l2_disable_ioctl(vfd, VIDIOC_TRY_ENCODER_CMD);

@@ -13,10 +13,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  4 files changed, 11 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-index a17313282e8b..9247fc259d3f 100644
+index 4eb00a0cb650..78b27a2e881b 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
-@@ -407,9 +407,9 @@ static void submit_cleanup(struct kref *kref)
+@@ -406,9 +406,9 @@ static void submit_cleanup(struct kref *kref)
  		dma_fence_put(submit->in_fence);
  	if (submit->out_fence) {
  		/* first remove from IDR, so fence can not be found anymore */
@@ -64,7 +64,7 @@ index 3462e949a836..c55a270e89b6 100644
  	u32 next_fence;
  	u32 completed_fence;
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-index 58f593b278c1..d27ba1b437fe 100644
+index 35e5ef7dbdcc..1eb7c49ab670 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 @@ -154,11 +154,11 @@ int etnaviv_sched_push_job(struct drm_sched_entity *sched_entity,

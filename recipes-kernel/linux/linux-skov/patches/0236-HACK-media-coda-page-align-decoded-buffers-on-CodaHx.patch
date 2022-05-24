@@ -1,0 +1,41 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 12 Dec 2018 10:41:15 +0100
+Subject: [PATCH] HACK: media: coda: page align decoded buffers on CodaHx4
+
+To import decoded buffers directly into freedreno running on the Z460
+GPU on i.MX51, the chroma page offsets must be page aligned. The proper
+way to achieve this would be to add V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE
+support to the coda driver. For now, waste some memory and increase
+the horizontal line stride achieve the same effect.
+---
+ drivers/media/platform/chips-media/coda-common.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index 7346e5307b96..46e441354e62 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -739,6 +739,23 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,
+ 			f->fmt.pix.sizeimage = f->fmt.pix.bytesperline *
+ 				f->fmt.pix.height;
+ 		}
++
++		/*
++		 * HACK: For CodaHx4 we round up to a multiple of 256 (NV12) or
++		 * 1024 (YUV420, YVU420). Given macroblock aligned height, this
++		 * guarantees that all plane offsets are page aligned, so that
++		 * the GPU can import decoded buffers directly.
++		 */
++		if (ctx->dev->devtype->product == CODA_HX4) {
++			if (f->fmt.pix.pixelformat == V4L2_PIX_FMT_NV12)
++				f->fmt.pix.bytesperline =
++					round_up(f->fmt.pix.width, 256);
++			else
++				f->fmt.pix.bytesperline =
++					round_up(f->fmt.pix.width, 1024);
++			f->fmt.pix.sizeimage = f->fmt.pix.bytesperline *
++						f->fmt.pix.height * 3 / 2;
++		}
+ 	}
+ 
+ 	return 0;

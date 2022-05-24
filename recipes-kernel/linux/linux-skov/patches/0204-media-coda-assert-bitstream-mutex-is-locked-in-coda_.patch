@@ -1,0 +1,26 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 5 Apr 2022 15:50:35 +0200
+Subject: [PATCH] media: coda: assert bitstream mutex is locked in
+ coda_fill_bitstream
+
+coda_fill_bitstream() must be called under the bitstream mutex.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+Link: https://lore.kernel.org/r/20220405135035.3428144-1-p.zabel@pengutronix.de
+---
+ drivers/media/platform/chips-media/coda-bit.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-bit.c b/drivers/media/platform/chips-media/coda-bit.c
+index c484c008ab02..804fc84d5966 100644
+--- a/drivers/media/platform/chips-media/coda-bit.c
++++ b/drivers/media/platform/chips-media/coda-bit.c
+@@ -326,6 +326,8 @@ void coda_fill_bitstream(struct coda_ctx *ctx, struct list_head *buffer_list)
+ 	struct coda_buffer_meta *meta;
+ 	u32 start;
+ 
++	lockdep_assert_held(&ctx->bitstream_mutex);
++
+ 	if (ctx->bit_stream_param & CODA_BIT_STREAM_END_FLAG)
+ 		return;
+ 
