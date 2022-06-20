@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 5.18.0-20220524-1 Kernel Configuration
+# Linux/arm64 5.18.5-20220620-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="aarch64-pmc-linux-gcc (GCC) 9.3.0"
 CONFIG_CC_IS_GCC=y
@@ -1731,6 +1731,7 @@ CONFIG_UEFI_CPER=y
 CONFIG_UEFI_CPER_ARM=y
 CONFIG_EFI_EARLYCON=y
 CONFIG_EFI_CUSTOM_SSDT_OVERLAYS=y
+# CONFIG_EFI_DISABLE_RUNTIME is not set
 # CONFIG_IMX_DSP is not set
 CONFIG_IMX_SCU=y
 CONFIG_IMX_SCU_PD=y

@@ -20,10 +20,10 @@ v2: Drop the S_FMT(V4L2_COLORSPACE_DEFAULT) modifications,
  1 file changed, 11 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index d246afcb3f49..7528f2718c4d 100644
+index c27ef3b3d299..af71eea04dbd 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
-@@ -1653,13 +1653,18 @@ static void set_default_params(struct coda_ctx *ctx)
+@@ -1661,13 +1661,18 @@ static void set_default_params(struct coda_ctx *ctx)
  	csize = coda_estimate_sizeimage(ctx, usize, max_w, max_h);
  
  	ctx->params.codec_mode = ctx->codec->mode;

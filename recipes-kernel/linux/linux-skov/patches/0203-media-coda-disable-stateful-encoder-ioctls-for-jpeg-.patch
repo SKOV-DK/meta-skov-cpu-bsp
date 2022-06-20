@@ -19,10 +19,10 @@ Link: https://lore.kernel.org/r/20220404163533.707508-4-p.zabel@pengutronix.de
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index c6f8f954914c..bf8513eb84be 100644
+index ab3ded73890d..b7787d890d8e 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
-@@ -2879,6 +2879,11 @@ static int coda_register_device(struct coda_dev *dev, int i)
+@@ -2890,6 +2890,11 @@ static int coda_register_device(struct coda_dev *dev, int i)
  	if (dev->devtype->vdevs[i]->type == CODA_INST_ENCODER) {
  		v4l2_disable_ioctl(vfd, VIDIOC_DECODER_CMD);
  		v4l2_disable_ioctl(vfd, VIDIOC_TRY_DECODER_CMD);

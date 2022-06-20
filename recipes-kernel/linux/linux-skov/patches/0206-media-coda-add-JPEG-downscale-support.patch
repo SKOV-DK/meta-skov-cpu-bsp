@@ -14,7 +14,7 @@ Link: https://lore.kernel.org/r/20220406085145.2365446-1-p.zabel@pengutronix.de
  3 files changed, 39 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index a5c20d54d0a9..93ac519ae2f1 100644
+index 0580fbabb0e3..580cef196b55 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -657,6 +657,8 @@ static int coda_try_fmt_vid_cap(struct file *file, void *priv,

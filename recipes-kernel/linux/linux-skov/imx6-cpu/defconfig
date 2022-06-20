@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 5.18.0-20220524-1 Kernel Configuration
+# Linux/arm 5.18.5-20220620-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-pmc-linux-gnueabi-gcc (GCC) 9.3.0"
 CONFIG_CC_IS_GCC=y
@@ -1433,6 +1433,7 @@ CONFIG_IMX_WEIM=y
 # CONFIG_FW_CFG_SYSFS is not set
 # CONFIG_TRUSTED_FOUNDATIONS is not set
 # CONFIG_GOOGLE_FIRMWARE is not set
+# CONFIG_EFI_DISABLE_RUNTIME is not set
 CONFIG_HAVE_ARM_SMCCC=y
 
 #
