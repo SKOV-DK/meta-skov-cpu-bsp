@@ -1,16 +1,16 @@
-# umpf-base: v5.18.5
+# umpf-base: v5.18.9
 # umpf-name: 5.18/customers/skov/imx6
-# umpf-version: 5.18/customers/skov/imx6/20220620-1
+# umpf-version: 5.18/customers/skov/imx6/20220706-1
 # umpf-topic: v5.18/topic/imx-drm
 # umpf-hashinfo: 30885541cba4b94b7d07be26c70a61ee03ed9cfd
-# umpf-topic-range: 71563d69a8ec34d41857aca6040e90d54f566ee4..54fe2990ee274978928dd26f20d883df4df1ae39
+# umpf-topic-range: 64ef7e725db41552c219a155ab8c1f6caf2e7cb4..d7e84da1b52ead781cb2581492ce9b28df4e4be2
 SRC_URI += "\
   file://patches/0001-drm-imx-ipuv3-plane-add-debug-output.patch \
   file://patches/0002-gpu-ipu-v3-ipu-dc-setup-microcode-from-u64-array.patch \
   "
 # umpf-topic: v5.18/topic/etnaviv
 # umpf-hashinfo: 4d09a53f8fd9be4af79e7ce7006db58494c6d6b3
-# umpf-topic-range: 54fe2990ee274978928dd26f20d883df4df1ae39..2ad70ac15ce16d1308717ef139fbf38c5ddcbb23
+# umpf-topic-range: d7e84da1b52ead781cb2581492ce9b28df4e4be2..848e0367dc446649b454024a9c41a19ab29f06bd
 SRC_URI += "\
   file://patches/0101-drm-etnaviv-avoid-false-sharing-of-fence-spinlock.patch \
   file://patches/0102-drm-etnaviv-avoid-false-sharing-on-fence-lock.patch \
@@ -20,7 +20,7 @@ SRC_URI += "\
   "
 # umpf-topic: v5.18/topic/coda
 # umpf-hashinfo: 3a838b6e7f2b74a55aa38e0eca4f21efd1509a8f
-# umpf-topic-range: 2ad70ac15ce16d1308717ef139fbf38c5ddcbb23..a0de164e6d92f2697eb4e22f8ac69d29f212c7f9
+# umpf-topic-range: 848e0367dc446649b454024a9c41a19ab29f06bd..a5f5fd5509b7c8997919f4e93640213246b35232
 SRC_URI += "\
   file://patches/0201-media-coda-disable-encoder-cmd-ioctl-on-decoder-and-.patch \
   file://patches/0202-media-coda-disable-encoder-ioctls-for-decoder-device.patch \
@@ -68,34 +68,40 @@ SRC_URI += "\
   "
 # umpf-topic: v5.18/topic/imx-sdma
 # umpf-hashinfo: baa2fd37f647a9073a75cac4cff85a1bf9e35be5
-# umpf-topic-range: a0de164e6d92f2697eb4e22f8ac69d29f212c7f9..6a2864cbe236d6b57824ade7d246f5ff375e61ad
+# umpf-topic-range: a5f5fd5509b7c8997919f4e93640213246b35232..d4f87f1bb5f6d49e647a515a2a42fc52f1f65276
 SRC_URI += "\
   file://patches/0301-firmware-add-nowarn-variant-of-request_firmware_nowa.patch \
   file://patches/0302-dmaengine-imx-sdma-don-t-print-warning-when-firmware.patch \
   "
 # umpf-topic: v5.18/topic/usb-storage-fixes
 # umpf-hashinfo: bc94cdad5670edd0c4a81cbfbe3a2d60aebc0a24
-# umpf-topic-range: 6a2864cbe236d6b57824ade7d246f5ff375e61ad..4a28a643bba86736a30be8c5362329fee4c9bdc5
+# umpf-topic-range: d4f87f1bb5f6d49e647a515a2a42fc52f1f65276..8ff98420e769d0464c58fd3fdd0464cde45ea955
 SRC_URI += "\
   file://patches/0401-Revert-block-mq-deadline-Prioritize-high-priority-re.patch \
   "
 # umpf-topic: v5.18/topic/skov-dts
 # umpf-hashinfo: 77ac9ebe3e767403c66325f4de86d7c03e2fac4b
-# umpf-topic-range: 4a28a643bba86736a30be8c5362329fee4c9bdc5..47623cf79b8db5c92ead6187f066e45015810c17
+# umpf-topic-range: 8ff98420e769d0464c58fd3fdd0464cde45ea955..f1a0cce006ab649df47f8389fdf00a35780bf058
 SRC_URI += "\
   file://patches/0501-ARM-dts-imx6-skov-migrate-to-resistive-adc-touch.patch \
   file://patches/0502-ARM-dts-imx6-skov-add-pwm-regulator-to-control-the-p.patch \
   "
 # umpf-topic: v5.18/topic/drm-sched-accounting
-# umpf-hashinfo: b08f90b9fdd2725499e6e18593747ea48d666989
-# umpf-topic-range: 47623cf79b8db5c92ead6187f066e45015810c17..321c180afd4a62335cd99e4faa6903d48cf23142
+# umpf-hashinfo: e53b51c107a100c535dae15d5279de577a5ea88b
+# umpf-topic-range: f1a0cce006ab649df47f8389fdf00a35780bf058..2dcd6643b593232843df0183356e585e3cc59a37
 SRC_URI += "\
   file://patches/0601-drm-sched-add-sysfs-stats-output.patch \
   file://patches/0602-drm-sched-track-execution-time-per-scheduler.patch \
   "
-# umpf-release: 5.18/customers/skov/imx6/20220620-1
-# umpf-topic-range: 321c180afd4a62335cd99e4faa6903d48cf23142..0e00a24f78a452b8b2de32aa3c466793ad84d534
+# umpf-topic: v5.18/topic/rawnand_fix_WAIT_FOR_READY_timeout
+# umpf-hashinfo: c95720942eeb24ff785047f3b6bc8c65a0a25e21
+# umpf-topic-range: 2dcd6643b593232843df0183356e585e3cc59a37..fcedf152f36f1148dad750a2259b5423bbb284ba
 SRC_URI += "\
-  file://patches/0701-Release-5.18-customers-skov-imx6-20220620-1.patch \
+  file://patches/0701-mtd-rawnand-gpmi-Set-WAIT_FOR_READY-timeout-based-on.patch \
+  "
+# umpf-release: 5.18/customers/skov/imx6/20220706-1
+# umpf-topic-range: fcedf152f36f1148dad750a2259b5423bbb284ba..98fb414de8460e31ea8ace93fd5b2e310e1d9fd3
+SRC_URI += "\
+  file://patches/0801-Release-5.18-customers-skov-imx6-20220706-1.patch \
   "
 # umpf-end

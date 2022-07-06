@@ -10,11 +10,11 @@ ordering.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
- drivers/gpu/drm/scheduler/sched_main.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/gpu/drm/scheduler/sched_main.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 17715f69e774..d7d7bd59ef4e 100644
+index 17715f69e774..c813f743fd0b 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -311,6 +311,11 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)
@@ -29,24 +29,28 @@ index 17715f69e774..d7d7bd59ef4e 100644
  	spin_unlock(&sched->job_list_lock);
  }
  
-@@ -817,6 +822,8 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
+@@ -817,6 +822,7 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
  static struct drm_sched_job *
  drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  {
 +	struct drm_gpu_scheduler_stats *stats = sched->stats;
-+	ktime_t now = ktime_get();
  	struct drm_sched_job *job, *next;
  
  	spin_lock(&sched->job_list_lock);
-@@ -846,6 +853,12 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+@@ -846,6 +852,17 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  
  	spin_unlock(&sched->job_list_lock);
  
-+	spin_lock(&stats->lock);
-+	stats->active_time_us += ktime_to_us(ktime_sub(now, stats->active_ts));
-+	stats->active_ts = now;
-+	stats->active = false;
-+	spin_unlock(&stats->lock);
++	if (job) {
++		spin_lock(&stats->lock);
++		stats->active_time_us +=
++			ktime_to_us(ktime_sub(job->s_fence->finished.timestamp,
++					      job->s_fence->scheduled.timestamp));
++		stats->active_ts = job->s_fence->finished.timestamp;
++		if (!next)
++			stats->active = false;
++		spin_unlock(&stats->lock);
++	}
 +
  	return job;
  }
