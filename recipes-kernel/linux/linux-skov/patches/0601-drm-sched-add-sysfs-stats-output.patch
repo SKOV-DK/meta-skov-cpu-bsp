@@ -348,7 +348,7 @@ index 000000000000..e3e3e73bf279
 +
 +#endif
 diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
-index 944f83ef9f2e..a9cfea9cb608 100644
+index dcd15e024976..f37e3e2435ae 100644
 --- a/include/drm/gpu_scheduler.h
 +++ b/include/drm/gpu_scheduler.h
 @@ -27,6 +27,7 @@
@@ -357,7 +357,7 @@ index 944f83ef9f2e..a9cfea9cb608 100644
  #include <linux/completion.h>
 +#include <linux/kobject.h>
  #include <linux/xarray.h>
- #include <linux/irq_work.h>
+ #include <linux/workqueue.h>
  
 @@ -407,6 +408,16 @@ struct drm_sched_backend_ops {
  	void (*free_job)(struct drm_sched_job *sched_job);
