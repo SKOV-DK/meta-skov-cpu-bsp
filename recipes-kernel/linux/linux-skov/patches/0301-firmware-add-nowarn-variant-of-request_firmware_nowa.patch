@@ -14,10 +14,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  2 files changed, 77 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index 406a907a4cae..508ba2fd5305 100644
+index ac3f34e80194..d48949f5582a 100644
 --- a/drivers/base/firmware_loader/main.c
 +++ b/drivers/base/firmware_loader/main.c
-@@ -1044,34 +1044,11 @@ static void request_firmware_work_func(struct work_struct *work)
+@@ -1112,34 +1112,11 @@ static void request_firmware_work_func(struct work_struct *work)
  	kfree(fw_work);
  }
  
@@ -55,7 +55,7 @@ index 406a907a4cae..508ba2fd5305 100644
  {
  	struct firmware_work *fw_work;
  
-@@ -1089,7 +1066,8 @@ request_firmware_nowait(
+@@ -1157,7 +1134,8 @@ request_firmware_nowait(
  	fw_work->context = context;
  	fw_work->cont = cont;
  	fw_work->opt_flags = FW_OPT_NOWAIT |
@@ -65,7 +65,7 @@ index 406a907a4cae..508ba2fd5305 100644
  
  	if (!uevent && fw_cache_is_setup(device, name)) {
  		kfree_const(fw_work->name);
-@@ -1108,8 +1086,68 @@ request_firmware_nowait(
+@@ -1176,8 +1154,68 @@ request_firmware_nowait(
  	schedule_work(&fw_work->work);
  	return 0;
  }
@@ -135,10 +135,10 @@ index 406a907a4cae..508ba2fd5305 100644
  static ASYNC_DOMAIN_EXCLUSIVE(fw_cache_domain);
  
 diff --git a/include/linux/firmware.h b/include/linux/firmware.h
-index ec2ccfebef65..55126b2df6f4 100644
+index de7fea3bca51..f19050c1a6b5 100644
 --- a/include/linux/firmware.h
 +++ b/include/linux/firmware.h
-@@ -45,6 +45,10 @@ int request_firmware_nowait(
+@@ -103,6 +103,10 @@ int request_firmware_nowait(
  	struct module *module, bool uevent,
  	const char *name, struct device *device, gfp_t gfp, void *context,
  	void (*cont)(const struct firmware *fw, void *context));
@@ -149,7 +149,7 @@ index ec2ccfebef65..55126b2df6f4 100644
  int request_firmware_direct(const struct firmware **fw, const char *name,
  			    struct device *device);
  int request_firmware_into_buf(const struct firmware **firmware_p,
-@@ -84,6 +88,14 @@ static inline int request_firmware_nowait(
+@@ -142,6 +146,14 @@ static inline int request_firmware_nowait(
  	return -EINVAL;
  }
  

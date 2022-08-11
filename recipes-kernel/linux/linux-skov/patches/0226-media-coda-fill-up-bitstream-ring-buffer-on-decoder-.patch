@@ -11,7 +11,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 13 insertions(+)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index 8c799ce50f01..0afd737eb935 100644
+index a4d86de9ae3f..dca7c25f75e8 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -1438,6 +1438,19 @@ static int coda_decoder_cmd(struct file *file, void *fh,

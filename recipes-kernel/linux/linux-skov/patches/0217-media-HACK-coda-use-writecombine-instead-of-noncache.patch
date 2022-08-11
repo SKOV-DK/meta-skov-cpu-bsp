@@ -15,7 +15,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 4 insertions(+)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index ccda77fcc50e..2e7d7be85386 100644
+index d6c4712ec316..8313d162baa8 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -2559,6 +2559,7 @@ static int coda_queue_init(struct coda_ctx *ctx, struct vb2_queue *vq)
@@ -36,10 +36,10 @@ index ccda77fcc50e..2e7d7be85386 100644
  	kfree(name);
  
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index b9e590e7059d..5036272ab98c 100644
+index 6ae5817e34a2..f726b0e7fe83 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -230,6 +230,7 @@ struct coda_ctx {
+@@ -227,6 +227,7 @@ struct coda_ctx {
  	struct work_struct		seq_init_work;
  	struct work_struct		seq_end_work;
  	struct completion		completion;

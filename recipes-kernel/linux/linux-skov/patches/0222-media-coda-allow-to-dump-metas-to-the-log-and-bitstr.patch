@@ -15,7 +15,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 58 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index 46e441354e62..d04541bfa2b9 100644
+index 6a5a082cbd08..504bf17405e8 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -10,6 +10,7 @@

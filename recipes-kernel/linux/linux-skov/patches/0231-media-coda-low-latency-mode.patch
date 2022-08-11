@@ -144,7 +144,7 @@ index 3d7c299650ac..98529ff64321 100644
  			 * If there is no designated presentation frame anymore,
  			 * this frame has to be the last one.
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index f964d625d2a1..a88d70e2d545 100644
+index 65dc76892ea3..1b7ee20d440b 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -1867,6 +1867,7 @@ static int coda_job_ready(void *m2m_priv)
@@ -195,10 +195,10 @@ index f964d625d2a1..a88d70e2d545 100644
  			coda_dbg(1, ctx,
  				 "not ready: not enough bitstream data to read past %u (%u)\n",
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index 65b197a1274d..d0e0ec9496fc 100644
+index e6b96132a504..ead14bdb5d03 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -318,6 +318,7 @@ struct coda_ctx {
+@@ -315,6 +315,7 @@ struct coda_ctx {
  	struct dentry			*debugfs_entry;
  	bool				use_bit;
  	bool				use_vdoa;

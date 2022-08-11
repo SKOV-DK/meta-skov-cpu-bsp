@@ -8,11 +8,11 @@ BIT processor, JPEG encoder/decoder, and VDOA units.
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/media/platform/chips-media/coda-bit.c    |  3 +++
- drivers/media/platform/chips-media/coda-common.c | 17 +++++++++++++++++
+ drivers/media/platform/chips-media/coda-common.c | 15 +++++++++++++++
  drivers/media/platform/chips-media/coda-jpeg.c   |  3 +++
  drivers/media/platform/chips-media/coda.h        | 23 +++++++++++++++++++++++
  drivers/media/platform/chips-media/imx-vdoa.c    | 21 +++++++++++++++++++++
- 5 files changed, 67 insertions(+)
+ 5 files changed, 65 insertions(+)
 
 diff --git a/drivers/media/platform/chips-media/coda-bit.c b/drivers/media/platform/chips-media/coda-bit.c
 index 93398131f94e..375d80649301 100644
@@ -43,16 +43,16 @@ index 93398131f94e..375d80649301 100644
  	if (ctx->aborting) {
  		coda_dbg(1, ctx, "task has been aborted\n");
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index 2e7d7be85386..1a64fee50ab5 100644
+index 8313d162baa8..ecac36eead37 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
-@@ -3081,10 +3081,24 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+@@ -3052,9 +3052,21 @@ static void coda_fw_callback(const struct firmware *fw, void *context)
+ 		}
  	}
- #endif
  
 +	dev->bit_stats = v4l2_register_stats("coda-bit");
 +	if (IS_ERR(dev->bit_stats))
-+		goto rel_mdev;
++		goto rel_vfd;
 +
 +	if (dev->devtype->product == CODA_960) {
 +		dev->jpeg_stats = v4l2_register_stats("coda-jpeg");
@@ -65,22 +65,19 @@ index 2e7d7be85386..1a64fee50ab5 100644
  
 +unreg_bit:
 +	v4l2_unregister_stats(dev->bit_stats);
- #ifdef CONFIG_MEDIA_CONTROLLER
-+rel_mdev:
-+	media_device_unregister(&dev->mdev);
- rel_func:
+ rel_vfd:
  	while (--i >= 0)
- 		v4l2_m2m_unregister_media_function(&dev->m2m_func[i]);
-@@ -3354,6 +3368,9 @@ static int coda_remove(struct platform_device *pdev)
+ 		video_unregister_device(&dev->vfd[i]);
+@@ -3319,6 +3331,9 @@ static int coda_remove(struct platform_device *pdev)
  	struct coda_dev *dev = platform_get_drvdata(pdev);
  	int i;
  
 +	if (dev->devtype->product == CODA_960)
 +		v4l2_unregister_stats(dev->jpeg_stats);
 +	v4l2_unregister_stats(dev->bit_stats);
- #ifdef CONFIG_MEDIA_CONTROLLER
- 	if (media_devnode_is_registered(dev->mdev.devnode)) {
- 		media_device_unregister(&dev->mdev);
+ 	for (i = 0; i < ARRAY_SIZE(dev->vfd); i++) {
+ 		if (video_get_drvdata(&dev->vfd[i]))
+ 			video_unregister_device(&dev->vfd[i]);
 diff --git a/drivers/media/platform/chips-media/coda-jpeg.c b/drivers/media/platform/chips-media/coda-jpeg.c
 index 0d9be2dc20e0..6c9e84929784 100644
 --- a/drivers/media/platform/chips-media/coda-jpeg.c
@@ -103,7 +100,7 @@ index 0d9be2dc20e0..6c9e84929784 100644
  
  	return IRQ_HANDLED;
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index 5036272ab98c..f222b4a23115 100644
+index f726b0e7fe83..bc907a2d1ad9 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
 @@ -16,6 +16,7 @@
@@ -114,7 +111,7 @@ index 5036272ab98c..f222b4a23115 100644
  #include <linux/videodev2.h>
  #include <linux/ratelimit.h>
  
-@@ -104,6 +105,9 @@ struct coda_dev {
+@@ -101,6 +102,9 @@ struct coda_dev {
  	struct ida		ida;
  	struct dentry		*debugfs_root;
  	struct ratelimit_state	mb_err_rs;
@@ -124,7 +121,7 @@ index 5036272ab98c..f222b4a23115 100644
  };
  
  struct coda_codec {
-@@ -406,4 +410,23 @@ extern const struct coda_context_ops coda9_jpeg_decode_ops;
+@@ -403,4 +407,23 @@ extern const struct coda_context_ops coda9_jpeg_decode_ops;
  irqreturn_t coda_irq_handler(int irq, void *data);
  irqreturn_t coda9_jpeg_irq_handler(int irq, void *data);
  

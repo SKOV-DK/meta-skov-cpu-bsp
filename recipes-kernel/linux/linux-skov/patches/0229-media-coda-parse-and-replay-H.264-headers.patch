@@ -143,10 +143,10 @@ index 8bd0aa8af114..7652a5a613aa 100644
  {
  	if (size < 6)
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index 65df1c2bb2b6..65b197a1274d 100644
+index 6303d6238d05..e6b96132a504 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -55,6 +55,16 @@ enum coda_product {
+@@ -54,6 +54,16 @@ enum coda_product {
  	CODA_960 = 0xf020,
  };
  
@@ -163,7 +163,7 @@ index 65df1c2bb2b6..65b197a1274d 100644
  struct coda_video_device;
  
  struct coda_devtype {
-@@ -394,6 +404,7 @@ int coda_h264_padding(int size, char *p);
+@@ -391,6 +401,7 @@ int coda_h264_padding(int size, char *p);
  int coda_h264_profile(int profile_idc);
  int coda_h264_level(int level_idc);
  int coda_sps_parse_profile(struct coda_ctx *ctx, struct vb2_buffer *vb);

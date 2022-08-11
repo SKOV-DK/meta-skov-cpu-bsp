@@ -15,7 +15,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 40 insertions(+), 42 deletions(-)
 
 diff --git a/drivers/gpu/ipu-v3/ipu-dc.c b/drivers/gpu/ipu-v3/ipu-dc.c
-index ca96b235491a..6b6aad6e775a 100644
+index b038a6d7307b..8b758da5e4f5 100644
 --- a/drivers/gpu/ipu-v3/ipu-dc.c
 +++ b/drivers/gpu/ipu-v3/ipu-dc.c
 @@ -50,9 +50,15 @@
@@ -106,13 +106,13 @@ index ca96b235491a..6b6aad6e775a 100644
 +		WROD(0x0000, map, SYNC_WAVE, 4, sync, 0), /* EOL */
 +		WRG(0x000000, NULL_WAVE, 0, 0, 1),
 +	};
-+
+ 
+-	/* Reserve 5 microcode template words for each DI */
 +	if (!IS_ALIGNED(width, 8)) {
 +		dev_warn(priv->dev,
 +			 "%s: hactive does not align to 8 byte\n", __func__);
 +	}
- 
--	/* Reserve 5 microcode template words for each DI */
++
 +	/* Separate microcode for each DI */
 +	dc->di = ipu_di_get_num(di);
  	if (dc->di)

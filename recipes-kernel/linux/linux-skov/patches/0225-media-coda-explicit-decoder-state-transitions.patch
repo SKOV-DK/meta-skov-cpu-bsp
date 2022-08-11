@@ -14,7 +14,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  2 files changed, 282 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index 312251537909..8c799ce50f01 100644
+index 799c5f9df8be..a4d86de9ae3f 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -78,6 +78,35 @@ static int enable_bwb = 0;
@@ -437,10 +437,10 @@ index 312251537909..8c799ce50f01 100644
  	coda_dbg(1, ctx, "open instance (%p)\n", ctx);
  
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index 24f7155dd1c0..65df1c2bb2b6 100644
+index eb48fd76a923..6303d6238d05 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -221,6 +221,20 @@ struct coda_context_ops {
+@@ -218,6 +218,20 @@ struct coda_context_ops {
  	void (*release)(struct coda_ctx *ctx);
  };
  
@@ -461,7 +461,7 @@ index 24f7155dd1c0..65df1c2bb2b6 100644
  struct coda_internal_frame {
  	struct coda_aux_buf		buf;
  	struct coda_buffer_meta		meta;
-@@ -238,6 +252,7 @@ struct coda_ctx {
+@@ -235,6 +249,7 @@ struct coda_ctx {
  	unsigned long			dma_attrs;
  	const struct coda_video_device	*cvd;
  	const struct coda_context_ops	*ops;

@@ -65,7 +65,7 @@ index 375d80649301..a85732b792be 100644
  {
  	struct coda_dev *dev = ctx->dev;
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index 1a64fee50ab5..7346e5307b96 100644
+index ecac36eead37..fc8f6314a695 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -1546,6 +1546,7 @@ static void coda_pic_run_work(struct work_struct *work)
@@ -77,10 +77,10 @@ index 1a64fee50ab5..7346e5307b96 100644
  			ctx->hold = true;
  
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index f222b4a23115..4fab6601f53b 100644
+index bc907a2d1ad9..bce7598c96c4 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -368,6 +368,7 @@ bool coda_bitstream_can_fetch_past(struct coda_ctx *ctx, unsigned int pos);
+@@ -365,6 +365,7 @@ bool coda_bitstream_can_fetch_past(struct coda_ctx *ctx, unsigned int pos);
  int coda_bitstream_flush(struct coda_ctx *ctx);
  
  void coda_bit_stream_end_flag(struct coda_ctx *ctx);

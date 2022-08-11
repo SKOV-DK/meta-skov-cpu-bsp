@@ -118,7 +118,7 @@ index a85732b792be..c3429ab1287b 100644
  	return IRQ_HANDLED;
  }
 diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
-index d04541bfa2b9..312251537909 100644
+index 504bf17405e8..799c5f9df8be 100644
 --- a/drivers/media/platform/chips-media/coda-common.c
 +++ b/drivers/media/platform/chips-media/coda-common.c
 @@ -2945,8 +2945,8 @@ static int coda_hw_init(struct coda_dev *dev)
@@ -132,7 +132,7 @@ index d04541bfa2b9..312251537909 100644
  
  	/* Reset VPU and start processor */
  	data = coda_read(dev, CODA_REG_BIT_CODE_RESET);
-@@ -3319,8 +3319,9 @@ static int coda_probe(struct platform_device *pdev)
+@@ -3282,8 +3282,9 @@ static int coda_probe(struct platform_device *pdev)
  	if (irq < 0)
  		return irq;
  
@@ -145,10 +145,10 @@ index d04541bfa2b9..312251537909 100644
  		dev_err(&pdev->dev, "failed to request irq: %d\n", ret);
  		return ret;
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index 4fab6601f53b..24f7155dd1c0 100644
+index bce7598c96c4..eb48fd76a923 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -102,6 +102,7 @@ struct coda_dev {
+@@ -99,6 +99,7 @@ struct coda_dev {
  	struct mutex		coda_mutex;
  	struct workqueue_struct	*workqueue;
  	struct v4l2_m2m_dev	*m2m_dev;
@@ -156,7 +156,7 @@ index 4fab6601f53b..24f7155dd1c0 100644
  	struct ida		ida;
  	struct dentry		*debugfs_root;
  	struct ratelimit_state	mb_err_rs;
-@@ -409,6 +410,7 @@ extern const struct coda_context_ops coda9_jpeg_encode_ops;
+@@ -406,6 +407,7 @@ extern const struct coda_context_ops coda9_jpeg_encode_ops;
  extern const struct coda_context_ops coda9_jpeg_decode_ops;
  
  irqreturn_t coda_irq_handler(int irq, void *data);

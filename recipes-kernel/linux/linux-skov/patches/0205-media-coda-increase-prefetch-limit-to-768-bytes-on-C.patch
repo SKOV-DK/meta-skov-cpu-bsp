@@ -8,10 +8,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
-index df86c37bc373..b9e590e7059d 100644
+index ddfd0a32c653..6ae5817e34a2 100644
 --- a/drivers/media/platform/chips-media/coda.h
 +++ b/drivers/media/platform/chips-media/coda.h
-@@ -349,12 +349,14 @@ static inline unsigned int coda_get_bitstream_payload(struct coda_ctx *ctx)
+@@ -346,12 +346,14 @@ static inline unsigned int coda_get_bitstream_payload(struct coda_ctx *ctx)
  
  /*
   * The bitstream prefetcher needs to read at least 2 256 byte periods past
