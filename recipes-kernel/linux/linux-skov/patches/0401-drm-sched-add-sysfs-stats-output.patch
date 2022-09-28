@@ -84,7 +84,7 @@ index 7fd869520ef2..c4097c05a72f 100644
  MODULE_DESCRIPTION("DRM GPU scheduler");
  MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 76fd2904c7c6..02b2b8827047 100644
+index 5dbe826d498d..0964c9613e9b 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -59,6 +59,8 @@
@@ -96,7 +96,7 @@ index 76fd2904c7c6..02b2b8827047 100644
  #define to_drm_sched_job(sched_job)		\
  		container_of((sched_job), struct drm_sched_job, queue_node)
  
-@@ -1017,12 +1019,17 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
+@@ -1030,12 +1032,17 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
  	atomic_set(&sched->_score, 0);
  	atomic64_set(&sched->job_id_count, 0);
  
@@ -114,7 +114,7 @@ index 76fd2904c7c6..02b2b8827047 100644
  		return ret;
  	}
  
-@@ -1043,6 +1050,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
+@@ -1056,6 +1063,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
  	struct drm_sched_entity *s_entity;
  	int i;
  
@@ -348,7 +348,7 @@ index 000000000000..e3e3e73bf279
 +
 +#endif
 diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
-index addb135eeea6..4f86aa454a2d 100644
+index 573bef640664..40311321dd7f 100644
 --- a/include/drm/gpu_scheduler.h
 +++ b/include/drm/gpu_scheduler.h
 @@ -27,6 +27,7 @@
@@ -359,7 +359,7 @@ index addb135eeea6..4f86aa454a2d 100644
  #include <linux/xarray.h>
  #include <linux/workqueue.h>
  
-@@ -408,6 +409,16 @@ struct drm_sched_backend_ops {
+@@ -415,6 +416,16 @@ struct drm_sched_backend_ops {
  	void (*free_job)(struct drm_sched_job *sched_job);
  };
  
@@ -376,7 +376,7 @@ index addb135eeea6..4f86aa454a2d 100644
  /**
   * struct drm_gpu_scheduler
   *
-@@ -459,6 +470,7 @@ struct drm_gpu_scheduler {
+@@ -466,6 +477,7 @@ struct drm_gpu_scheduler {
  	bool				ready;
  	bool				free_guilty;
  	struct device			*dev;

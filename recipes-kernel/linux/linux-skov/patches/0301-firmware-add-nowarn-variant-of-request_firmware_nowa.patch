@@ -14,7 +14,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  2 files changed, 77 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index ac3f34e80194..d48949f5582a 100644
+index 7c3590fd97c2..aa2589cc6588 100644
 --- a/drivers/base/firmware_loader/main.c
 +++ b/drivers/base/firmware_loader/main.c
 @@ -1112,34 +1112,11 @@ static void request_firmware_work_func(struct work_struct *work)

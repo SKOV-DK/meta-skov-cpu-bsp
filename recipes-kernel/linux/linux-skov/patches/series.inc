@@ -1,16 +1,16 @@
-# umpf-base: v5.19.1
-# umpf-name: 5.19/customers/skov/imx6
-# umpf-version: 5.19/customers/skov/imx6/20220811-1
-# umpf-topic: v5.19/topic/imx-drm
-# umpf-hashinfo: 922e8158bf3bf1134d31aa261c51b902f8b39330
-# umpf-topic-range: d654f7e29909ce602942a1cd927d56d5aa397ed8..6fa0f020a49c0d85b87bbcec1566d9ee421b8732
+# umpf-base: v6.0-rc7
+# umpf-name: 6.0/customers/skov/imx6
+# umpf-version: 6.0/customers/skov/imx6/20220927-1
+# umpf-topic: v6.0/topic/imx-drm
+# umpf-hashinfo: 6c75ded333c97f9c8ab09d275baa15df4c4fc6ca
+# umpf-topic-range: f76349cf41451c5c42a99f18a9163377e4b364ff..0b4a93507b67e4d62b30ee7c0401e437b8d04f13
 SRC_URI += "\
   file://patches/0001-drm-imx-ipuv3-plane-add-debug-output.patch \
   file://patches/0002-gpu-ipu-v3-ipu-dc-setup-microcode-from-u64-array.patch \
   "
-# umpf-topic: v5.19/topic/etnaviv
-# umpf-hashinfo: ef1be2f5dfec85593968f43b1261930b8c3a1016
-# umpf-topic-range: 6fa0f020a49c0d85b87bbcec1566d9ee421b8732..bdd1d0baa75e749f052b8e99d824540368433d1a
+# umpf-topic: v6.0/topic/etnaviv
+# umpf-hashinfo: dce6eeb4e4af0dc5b74435fafca05838910ab805
+# umpf-topic-range: 0b4a93507b67e4d62b30ee7c0401e437b8d04f13..97eebd8e2a0bc39d2a01d2295e60a83d8f0e2128
 SRC_URI += "\
   file://patches/0101-drm-etnaviv-avoid-false-sharing-of-fence-spinlock.patch \
   file://patches/0102-drm-etnaviv-avoid-false-sharing-on-fence-lock.patch \
@@ -19,10 +19,15 @@ SRC_URI += "\
   file://patches/0105-drm-etnaviv-reap-idle-mapping-if-it-doesn-t-match-th.patch \
   file://patches/0106-drm-etnaviv-add-HWDB-entry-for-GC7000-r6203.patch \
   file://patches/0107-drm-etnaviv-disable-tx-clock-gating-for-GC7000-rev62.patch \
+  file://patches/0108-drm-scheduler-track-GPU-active-time-per-entity.patch \
+  file://patches/0109-drm-etnaviv-allocate-unique-ID-per-drm_file.patch \
+  file://patches/0110-drm-etnaviv-export-client-GPU-usage-statistics-via-f.patch \
+  file://patches/0111-drm-etnaviv-switch-to-PFN-mappings.patch \
+  file://patches/0112-drm-etnaviv-don-t-truncate-physical-page-address.patch \
   "
-# umpf-topic: v5.19/topic/coda
-# umpf-hashinfo: 8e46946e58611751660bdb5bfcf449a917a71fe3
-# umpf-topic-range: bdd1d0baa75e749f052b8e99d824540368433d1a..bd76ba94a1c720649f0aa86bbcc6e541fbba09e3
+# umpf-topic: v6.0/topic/coda
+# umpf-hashinfo: a17a0b19de2bfd9f72c52342c9b5f62a600f80d9
+# umpf-topic-range: 97eebd8e2a0bc39d2a01d2295e60a83d8f0e2128..b28f4a79589ac38f3804c09ba6d09662076c72a4
 SRC_URI += "\
   file://patches/0201-media-coda-jpeg-drop-coda9_jpeg_dec_huff_setup-retur.patch \
   file://patches/0202-media-coda-jpeg-add-debug-information-in-case-of-COD.patch \
@@ -56,30 +61,29 @@ SRC_URI += "\
   file://patches/0230-media-coda-advertise-baseline-support.patch \
   file://patches/0231-media-coda-low-latency-mode.patch \
   "
-# umpf-topic: v5.19/topic/imx-sdma
-# umpf-hashinfo: ec598e043c646a4f19df74684ff4ee3db071fa69
-# umpf-topic-range: bd76ba94a1c720649f0aa86bbcc6e541fbba09e3..20878d70f10c10bc564aa09b109fbe5acb9b41ed
+# umpf-topic: v6.0/topic/imx-sdma
+# umpf-hashinfo: 570c90a6e86b778fa2f76a477a49bb51a351d717
+# umpf-topic-range: b28f4a79589ac38f3804c09ba6d09662076c72a4..63b07757cc5914f58a8573a76e45dae23d532b80
 SRC_URI += "\
   file://patches/0301-firmware-add-nowarn-variant-of-request_firmware_nowa.patch \
   file://patches/0302-dmaengine-imx-sdma-don-t-print-warning-when-firmware.patch \
   "
-# umpf-topic: v5.19/topic/skov-dts
-# umpf-hashinfo: b41f354bdcf3852af225e975831055c522b8f0a3
-# umpf-topic-range: 20878d70f10c10bc564aa09b109fbe5acb9b41ed..2db8d9c3916ac1c4d86c0597a5196a7490459c15
+# umpf-topic: v6.0/topic/drm-sched-accounting
+# umpf-hashinfo: 998cc29b6a124bea6f53fea2b54b4916fdfe0b08
+# umpf-topic-range: 63b07757cc5914f58a8573a76e45dae23d532b80..143c40c8ad6f1cd9cce6e1ebdd43b775ce1af71f
 SRC_URI += "\
-  file://patches/0401-ARM-dts-imx6-skov-migrate-to-resistive-adc-touch.patch \
-  file://patches/0402-ARM-dts-imx6-skov-add-pwm-regulator-to-control-the-p.patch \
+  file://patches/0401-drm-sched-add-sysfs-stats-output.patch \
+  file://patches/0402-drm-sched-track-execution-time-per-scheduler.patch \
   "
-# umpf-topic: v5.19/topic/drm-sched-accounting
-# umpf-hashinfo: 00b75af9ec508f36a60b3b8d1708efbe1e9a882b
-# umpf-topic-range: 2db8d9c3916ac1c4d86c0597a5196a7490459c15..320cea9ba3e161612c486c1d3152f49accf35a01
+# umpf-topic: v6.0/topic/skov-dts
+# umpf-hashinfo: abe1aa48321432272521eec63512512a1c29cdce
+# umpf-topic-range: 143c40c8ad6f1cd9cce6e1ebdd43b775ce1af71f..25a0491c9735e7d8f03c9af7e5d52298c6bbd582
 SRC_URI += "\
-  file://patches/0501-drm-sched-add-sysfs-stats-output.patch \
-  file://patches/0502-drm-sched-track-execution-time-per-scheduler.patch \
+  file://patches/0501-ARM-dts-imx6-skov-migrate-to-resistive-adc-touch.patch \
   "
-# umpf-release: 5.19/customers/skov/imx6/20220811-1
-# umpf-topic-range: 320cea9ba3e161612c486c1d3152f49accf35a01..928e19615109eff3044eaf99a395de9b6ca67713
+# umpf-release: 6.0/customers/skov/imx6/20220927-1
+# umpf-topic-range: 25a0491c9735e7d8f03c9af7e5d52298c6bbd582..9e09d5efdee247f020775c64fca848a7a1bc82d7
 SRC_URI += "\
-  file://patches/0601-Release-5.19-customers-skov-imx6-20220811-1.patch \
+  file://patches/0601-Release-6.0-customers-skov-imx6-20220927-1.patch \
   "
 # umpf-end

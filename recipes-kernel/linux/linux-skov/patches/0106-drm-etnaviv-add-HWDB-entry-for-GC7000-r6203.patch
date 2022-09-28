@@ -11,7 +11,7 @@ Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
  1 file changed, 31 insertions(+)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_hwdb.c b/drivers/gpu/drm/etnaviv/etnaviv_hwdb.c
-index f2fc645c7956..eaed08a3d281 100644
+index f2fc645c7956..57f334e24189 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_hwdb.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_hwdb.c
 @@ -68,6 +68,37 @@ static const struct etnaviv_chip_identity etnaviv_chip_identities[] = {
@@ -21,9 +21,9 @@ index f2fc645c7956..eaed08a3d281 100644
 +	{
 +		.model = 0x7000,
 +		.revision = 0x6203,
-+		.product_id = ~0U,
-+		.customer_id = ~0U,
-+		.eco_id = ~0U,
++		.product_id = 0x70003,
++		.customer_id = 0x4,
++		.eco_id = 0,
 +		.stream_count = 16,
 +		.register_max = 64,
 +		.thread_count = 512,

@@ -12,7 +12,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 42 insertions(+), 20 deletions(-)
 
 diff --git a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
-index 69ae430a53bd..aba02560fade 100644
+index 8254bce1b8a2..aba02560fade 100644
 --- a/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 +++ b/arch/arm/boot/dts/imx6qdl-skov-cpu-revc.dtsi
 @@ -2,35 +2,57 @@
@@ -49,13 +49,13 @@ index 69ae430a53bd..aba02560fade 100644
 +		pinctrl-names ="default";
  		spi-max-frequency = <1000000>;
  		interrupts-extended = <&gpio3 19 IRQ_TYPE_LEVEL_LOW>;
--		vcc-supply  = <&reg_3v3>;
+-		vcc-supply = <&reg_3v3>;
 -		pendown-gpio = <&gpio3 19 GPIO_ACTIVE_LOW>;
 -		ti,x-plate-ohms = /bits/ 16 <850>;
 -		ti,y-plate-ohms = /bits/ 16 <295>;
 -		ti,pressure-min = /bits/ 16 <2>;
 -		ti,pressure-max = /bits/ 16 <1500>;
--		ti,vref-mv	= /bits/ 16 <3300>;
+-		ti,vref-mv = /bits/ 16 <3300>;
 -		ti,settle-delay-usec = /bits/ 16 <15>;
 -		ti,vref-delay-usecs = /bits/ 16 <0>;
 -		ti,penirq-recheck-delay-usecs = /bits/ 16 <100>;

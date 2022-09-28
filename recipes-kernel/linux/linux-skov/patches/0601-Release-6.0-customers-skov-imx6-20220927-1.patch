@@ -1,0 +1,21 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 27 Sep 2022 11:24:47 +0200
+Subject: [PATCH] Release 6.0/customers/skov/imx6/20220927-1
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 647a42a1f800..2d5efc9bdfc2 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 6
+ PATCHLEVEL = 0
+ SUBLEVEL = 0
+-EXTRAVERSION = -rc7
++EXTRAVERSION = -rc7-20220927-1
+ NAME = Hurr durr I'ma ninja sloth
+ 
+ # *DOCUMENTATION*

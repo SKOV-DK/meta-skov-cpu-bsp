@@ -1,5 +1,5 @@
 From: Philipp Zabel <p.zabel@pengutronix.de>
-Date: Wed, 12 Jan 2022 16:56:41 +0100
+Date: Thu, 25 Aug 2022 12:41:49 +0200
 Subject: [PATCH] media: coda: jpeg: drop coda9_jpeg_dec_huff_setup() return
  value
 
@@ -7,6 +7,7 @@ coda9_jpeg_dec_huff_setup() never returns anything but 0. Drop
 return value and superfluous error handling at the call site.
 
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+Link: https://lore.kernel.org/r/20220825104149.2447484-1-p.zabel@pengutronix.de
 ---
  drivers/media/platform/chips-media/coda-jpeg.c | 13 +++----------
  1 file changed, 3 insertions(+), 10 deletions(-)
