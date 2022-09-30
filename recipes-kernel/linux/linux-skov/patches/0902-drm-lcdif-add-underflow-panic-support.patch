@@ -1,0 +1,74 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 21 Jul 2022 16:24:49 +0200
+Subject: [PATCH] drm: lcdif: add underflow panic support
+
+Status: WIP, needs clarification with NXP first.
+
+In case of a potential underflow the LCDIF hardware can trigger a panic
+signal. This signals is received by the BLK-CTRL and increases the LCDIF
+NoC priority as long as the signal is present. Therefore the panic
+signal generator has a hysteresis which can be configured.
+
+The threshold values are taken from the downstream NXP kernel for a 4K
+use-case, so this is a best effort approach.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ drivers/gpu/drm/mxsfb/lcdif_drv.c  | 22 ++++++++++++++++++++++
+ drivers/gpu/drm/mxsfb/lcdif_regs.h |  2 ++
+ 2 files changed, 24 insertions(+)
+
+diff --git a/drivers/gpu/drm/mxsfb/lcdif_drv.c b/drivers/gpu/drm/mxsfb/lcdif_drv.c
+index befad33dcb95..474fe018e996 100644
+--- a/drivers/gpu/drm/mxsfb/lcdif_drv.c
++++ b/drivers/gpu/drm/mxsfb/lcdif_drv.c
+@@ -93,6 +93,26 @@ static irqreturn_t lcdif_irq_handler(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
+ 
++static void lcdif_set_underflow_panic(struct lcdif_drm_private *lcdif)
++{
++
++	/*
++	 * As of now we have no QoS support which allows to request a minium
++	 * bandwidth. Therefore this is a best effort approach based on the
++	 * downstream NXP values (thresh-low:1/2 and  tresh-high:3/4).
++	 */
++	writel(PANIC0_THRES_LOW(256) | PANIC0_THRES_HIGH(384),
++	       lcdif->base + LCDC_V8_PANIC0_THRES);
++
++	/*
++	 * Comment copied from NXP downstream kernel:
++	 * As designed, the panic won't trigger an irq, so it is unnecessary to
++	 * handle this as an irq and NoC + QoS modules will handle panic
++	 * automatically.
++	 */
++	writel(INT_ENABLE_D1_PLANE_PANIC_EN, lcdif->base + LCDC_V8_INT_ENABLE_D1);
++}
++
+ static int lcdif_load(struct drm_device *drm)
+ {
+ 	struct platform_device *pdev = to_platform_device(drm->dev);
+@@ -293,6 +313,8 @@ static int __maybe_unused lcdif_rpm_resume(struct device *dev)
+ 	/* These clock supply the DISPLAY CLOCK Domain */
+ 	clk_prepare_enable(lcdif->clk);
+ 
++	lcdif_set_underflow_panic(lcdif);
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/gpu/drm/mxsfb/lcdif_regs.h b/drivers/gpu/drm/mxsfb/lcdif_regs.h
+index 8e8bef175bf2..e8a8eee0e8e7 100644
+--- a/drivers/gpu/drm/mxsfb/lcdif_regs.h
++++ b/drivers/gpu/drm/mxsfb/lcdif_regs.h
+@@ -250,7 +250,9 @@
+ #define CSC0_COEF5_D2(n)		((n) & CSC0_COEF5_D2_MASK)
+ #define CSC0_COEF5_D2_MASK		GENMASK(8, 0)
+ 
++#define PANIC0_THRES_LOW(n)		(((n) << 16) & PANIC0_THRES_LOW_MASK)
+ #define PANIC0_THRES_LOW_MASK		GENMASK(24, 16)
++#define PANIC0_THRES_HIGH(n)		((n) & PANIC0_THRES_HIGH_MASK)
+ #define PANIC0_THRES_HIGH_MASK		GENMASK(8, 0)
+ 
+ #define LCDIF_MIN_XRES			120

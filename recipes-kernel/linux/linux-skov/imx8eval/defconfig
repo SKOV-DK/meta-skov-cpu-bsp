@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 6.0.0-rc7-20220927-1 Kernel Configuration
+# Linux/arm64 6.0.0-rc7-20220929-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="aarch64-pmc-linux-gcc (GCC) 9.3.0"
 CONFIG_CC_IS_GCC=y
@@ -4733,6 +4733,8 @@ CONFIG_DRM_I2C_ADV7511_CEC=y
 # CONFIG_DRM_IMX8QXP_PIXEL_COMBINER is not set
 # CONFIG_DRM_IMX8QXP_PIXEL_LINK is not set
 # CONFIG_DRM_IMX8QXP_PIXEL_LINK_TO_DPI is not set
+# CONFIG_DRM_IMX8MP_DW_HDMI_BRIDGE is not set
+# CONFIG_DRM_IMX8MP_HDMI_PVI is not set
 # end of Display Interface Bridges
 
 # CONFIG_DRM_IMX_DCSS is not set
@@ -6944,6 +6946,7 @@ CONFIG_PHY_FSL_IMX8MQ_USB=y
 # CONFIG_PHY_MIXEL_LVDS_PHY is not set
 CONFIG_PHY_MIXEL_MIPI_DPHY=m
 # CONFIG_PHY_FSL_IMX8M_PCIE is not set
+# CONFIG_PHY_FSL_SAMSUNG_HDMI_PHY is not set
 # CONFIG_PHY_PXA_28NM_HSIC is not set
 # CONFIG_PHY_PXA_28NM_USB2 is not set
 # CONFIG_PHY_LAN966X_SERDES is not set
