@@ -1,50 +1,44 @@
-# umpf-base: v2022.02.0
-# umpf-name: 2022.02.0/customers/skov/imx6
-# umpf-version: 2022.02.0/customers/skov/imx6/20220329-1
-# umpf-topic: v2022.02.0/topic/of-deep-probe
-# umpf-hashinfo: 92d6c3941d0deb49bf026b105e5b21166a192333
-# umpf-topic-range: 179eeaeb5ed73d2b49b1494b5e058009b5fb9a0d..4802ddad754b4f00a35d35263c5dcde2e133db0f
+# umpf-base: v2022.09.0
+# umpf-name: 2022.09.0/customers/skov/imx6
+# umpf-version: 2022.09.0/customers/skov/imx6/20221005-1
+# umpf-topic: v2022.09.0/topic/net-dsa-ksz8873
+# umpf-hashinfo: cfd6f5cf2dedace822a9006710c0360bb8c1e315
+# umpf-topic-range: a9a07aa1cd94b30335e0c82c8d36e9bc7d784e49..61dcb56b1e1b9814934028e67b44308f161cf593
 SRC_URI += "\
-  file://patches/0001-of-platform-return-early-when-deep-probe-is-not-supp.patch \
-  file://patches/0002-of-rename-of_find_node_by_name-to-of_find_node_by_na.patch \
-  file://patches/0003-of-Add-of_find_node_by_name-with-Linux-semantics.patch \
-  file://patches/0004-of-platform-Change-of_devices_ensure_probed_by_prope.patch \
-  file://patches/0005-of-platform-Ensure-timers-are-probed-early.patch \
+  file://patches/0001-net-port-support-for-microchip-SMI0-MDIO-bus.patch \
+  file://patches/0002-net-add-support-for-MDIO-devices.patch \
+  file://patches/0003-net-add-ksz8873-switch-support.patch \
+  file://patches/0004-mdio_bus-Configure-pinctrl-for-phy-devices.patch \
+  file://patches/0005-mdio_bus-do-reset-only-on-PHY-devices.patch \
+  file://patches/0006-driver-add-dev_is_probed-helper-function.patch \
+  file://patches/0007-net-ksz8873-add-device-validation-to-be-able-to-dete.patch \
+  file://patches/0008-ARM-boards-skov-imx6-free-used-gpio-devices-pins.patch \
+  file://patches/0009-ARM-boards-skov-imx6-rework-switch-detection.patch \
+  file://patches/0010-ARM-boards-Skov-i.MX6-select-KSZ8873-switch-driver.patch \
+  file://patches/0011-ARM-dts-Skov-i.MX6-start-using-mainlined-kernel-dts.patch \
+  file://patches/0012-net-dsa-do-not-wait-for-aneg-is-actually-done-on-the.patch \
   "
-# umpf-topic: v2022.02.0/topic/imx6-clk
-# umpf-hashinfo: 0597a7e962fc5a636f6b593e890a59ebd7383977
-# umpf-topic-range: 4802ddad754b4f00a35d35263c5dcde2e133db0f..5f8998e068a07bfaed6016ff73fc2fa8e16c2353
+# umpf-topic: v2022.09.0/customers/skov/imx6
+# umpf-hashinfo: b6c9fc33338c5a42c11f36f62d1446f7b52391fd
+# umpf-topic-range: 61dcb56b1e1b9814934028e67b44308f161cf593..def7a02048506aed3776eac96278aa90165b86a0
 SRC_URI += "\
-  file://patches/0101-clk-imx6-Add-hdmi_isfr-clk.patch \
-  file://patches/0102-clk-imx6-fix-axi_sels.patch \
-  file://patches/0103-clk-imx6-Fix-periph_clk2_sel-and-periph2_clk2_sel-cl.patch \
-  file://patches/0104-clk-imx6-emi_sel-clock-muxing.patch \
-  file://patches/0105-clk-imx6-fix-cko1_sels.patch \
-  file://patches/0106-clk-imx6-do-pfd-workaround-unconditionally.patch \
-  file://patches/0107-ARM-i.MX-Remove-duplicate-PFD-workaround.patch \
+  file://patches/0101-video-edid-increase-number-of-retries-to-request-EDI.patch \
+  file://patches/0102-ARM-skov-imx6-Add-new-calibration-values-for-i.MX6Q.patch \
+  file://patches/0103-ARM-skov-imx6-Add-new-calibration-values-for-i.MX6S.patch \
+  file://patches/0104-ARM-i.MX6-MMDC-Add-register-offset-comments-to-struc.patch \
+  file://patches/0105-ARM-skov-imx6-Remove-unused-board-variants.patch \
+  file://patches/0106-zstd-fix-assert-logic.patch \
+  file://patches/0107-Revert-lib-zstd-sync-with-Linux.patch \
   "
-# umpf-topic: v2022.02.0/customers/skov/imx6
-# umpf-hashinfo: 3d6dd53f7afff4f38ee7391e3564b3d5bcb287ab
-# umpf-topic-range: 5f8998e068a07bfaed6016ff73fc2fa8e16c2353..ea0d0d0a9069f4ab16f930dccd3704b14abc1e29
+# umpf-topic: v2022.09.0/customers/skov/imx8eval
+# umpf-hashinfo: 6b2cda46fadd18cefc141791b61a6a468d8cc218
+# umpf-topic-range: def7a02048506aed3776eac96278aa90165b86a0..e5178e4a6e1d7a17832475f6372f2e08004c92b1
 SRC_URI += "\
-  file://patches/0201-video-edid-increase-number-of-retries-to-request-EDI.patch \
-  file://patches/0202-Revert-ARM-boards-skov-imx6-start-using-deep-probe.patch \
+  file://patches/0201-ARM-imx-add-state-backend-for-i.MX8MP.patch \
   "
-# umpf-topic: v2022.02.0/customers/skov/imx8eval
-# umpf-hashinfo: 2c0e6d0b9b4adf11edbfe575289c7c022701e3df
-# umpf-topic-range: ea0d0d0a9069f4ab16f930dccd3704b14abc1e29..957524584f52ffea3241e1442fb9a09b7355693e
+# umpf-release: 2022.09.0/customers/skov/imx6/20221005-1
+# umpf-topic-range: e5178e4a6e1d7a17832475f6372f2e08004c92b1..bfd527c9f74923f97ebfd8762ac2f9943ffa3c79
 SRC_URI += "\
-  file://patches/0301-ARM-imx-add-state-backend-for-i.MX8MP.patch \
-  "
-# umpf-topic: v2022.02.0/topic/reboot-mode
-# umpf-hashinfo: 34c9c1c048cdb2c537713ea045d8169c09a276f0
-# umpf-topic-range: 957524584f52ffea3241e1442fb9a09b7355693e..3afed5262d453be9f35fd00fe72cf569b640d9c9
-SRC_URI += "\
-  file://patches/0401-power-reset-reboot-mode-Fix-resetting-to-normal-mode.patch \
-  "
-# umpf-release: 2022.02.0/customers/skov/imx6/20220329-1
-# umpf-topic-range: 3afed5262d453be9f35fd00fe72cf569b640d9c9..f9b4efc8346a21299212468baa368d332e8faf0e
-SRC_URI += "\
-  file://patches/0501-Release-2022.02.0-customers-skov-imx6-20220329-1.patch \
+  file://patches/0301-Release-2022.09.0-customers-skov-imx6-20221005-1.patch \
   "
 # umpf-end

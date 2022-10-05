@@ -1,0 +1,32 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 22 Sep 2022 15:55:17 +0200
+Subject: [PATCH] mdio_bus: do reset only on PHY devices
+
+Do not reset MDIO devices. Device drivers should handle it.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/phy/mdio_bus.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
+index f06ab68f50ee..a68b0e47c095 100644
+--- a/drivers/net/phy/mdio_bus.c
++++ b/drivers/net/phy/mdio_bus.c
+@@ -263,12 +263,13 @@ static int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
+ 		}
+ 
+ 		of_pinctrl_select_state_default(child);
+-		of_mdiobus_reset_phy(mdio, child);
+ 
+-		if (of_mdiobus_child_is_phy(child))
++		if (of_mdiobus_child_is_phy(child)) {
++			of_mdiobus_reset_phy(mdio, child);
+ 			of_mdiobus_register_phy(mdio, child, addr);
+-		else
++		} else {
+ 			of_mdiobus_register_device(mdio, child, addr);
++		}
+ 	}
+ 
+ 	return 0;

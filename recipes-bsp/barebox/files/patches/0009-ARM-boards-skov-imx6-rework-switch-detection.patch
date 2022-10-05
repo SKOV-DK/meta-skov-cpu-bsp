@@ -1,0 +1,76 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 22 Sep 2022 15:55:17 +0200
+Subject: [PATCH] ARM: boards: skov-imx6: rework switch detection
+
+The KSZ8873 switch supports two ways of communication over MDIO bus:
+1. Standard MDIO opcodes to talk with the switch PHYs only.
+2. Not standard MDIO opcodes to talk with complete switch management and
+   PHYs.
+
+Previous switch detection board code was using option 1. over FEC. Now,
+with the switch driver we are using option 2. with GPIO bitbang MDIO
+bus, since FEC do not support special opcodes.
+
+To avoid duplicating switch driver functionality, we will let do switch
+detection and validation to the switch driver and the board code should
+only test if switch driver was probed.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx6/board.c | 27 ++++++++++-----------------
+ 1 file changed, 10 insertions(+), 17 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx6/board.c b/arch/arm/boards/skov-imx6/board.c
+index 140689c87b07..3c51b7673501 100644
+--- a/arch/arm/boards/skov-imx6/board.c
++++ b/arch/arm/boards/skov-imx6/board.c
+@@ -133,9 +133,6 @@ copy_mac_from_eth0:
+ 	return eth_of_fixup_node_from_eth_device(root, node_path, ethname);
+ }
+ 
+-#define SKOV_GPIO_MDIO_BUS	0
+-#define SKOV_LAN1_PHY_ADDR	1
+-
+ #define MAX_V_GPIO 8
+ 
+ struct board_description {
+@@ -547,29 +544,25 @@ static void skov_init_board(const struct board_description *variant)
+ 
+ static int skov_switch_test(void)
+ {
+-	struct phy_device *phydev;
++	struct device_d *sw_dev;
+ 	struct device_d *eth0;
+-	struct mii_bus *mii;
+ 	int ret;
+ 
+ 	if (skov_board_no < 0)
+ 		return 0;
+ 
+-	/* On this boards, we have only one MDIO bus. So, it is enough to take
+-	 * the first one.
+-	 */
+-	mii = mdiobus_get_bus(SKOV_GPIO_MDIO_BUS);
+-	/* We can't read the switch ID, but we get get ID of the first PHY,
+-	 * which is enough to test if the switch is attached.
++	/* Driver should be able to detect if device do actually
++	 * exist. So, we need only to detect if driver is actually
++	 * probed.
+ 	 */
+-	phydev = get_phy_device(mii, SKOV_LAN1_PHY_ADDR);
+-	if (IS_ERR(phydev))
+-		goto no_switch;
+-
+-	if (phydev->phy_id != PHY_ID_KSZ886X)
++	sw_dev = of_find_device_by_node_path("/mdio/switch@0");
++	if (!sw_dev) {
++		pr_err("switch@0 device was not created!\n");
+ 		goto no_switch;
++	}
+ 
+-	return 0;
++	if (dev_is_probed(sw_dev))
++		return 0;
+ 
+ no_switch:
+ 	skov_have_switch = false;

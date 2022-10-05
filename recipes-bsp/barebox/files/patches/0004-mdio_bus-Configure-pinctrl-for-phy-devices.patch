@@ -1,0 +1,35 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Tue, 30 Aug 2022 15:38:26 +0200
+Subject: [PATCH] mdio_bus: Configure pinctrl for phy devices
+
+Some phys registered from devicetree have pinctrl settings attached to
+them. Configure the pinctrl state to make sure they can be accessed
+before trying to reset and detect the phy devices.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Link: https://lore.barebox.org/20220830133826.1395373-1-s.hauer@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/net/phy/mdio_bus.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/net/phy/mdio_bus.c b/drivers/net/phy/mdio_bus.c
+index 3f418e2001a6..f06ab68f50ee 100644
+--- a/drivers/net/phy/mdio_bus.c
++++ b/drivers/net/phy/mdio_bus.c
+@@ -23,6 +23,7 @@
+ #include <linux/phy.h>
+ #include <linux/err.h>
+ #include <of_device.h>
++#include <pinctrl.h>
+ 
+ #define DEFAULT_GPIO_RESET_ASSERT       1000      /* us */
+ #define DEFAULT_GPIO_RESET_DEASSERT     1000      /* us */
+@@ -261,6 +262,7 @@ static int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
+ 			continue;
+ 		}
+ 
++		of_pinctrl_select_state_default(child);
+ 		of_mdiobus_reset_phy(mdio, child);
+ 
+ 		if (of_mdiobus_child_is_phy(child))
