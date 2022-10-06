@@ -12,15 +12,15 @@ RDEPENDS_${PN} = "flex"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "6.0-rc7"
+LINUX_VERSION = "6.0"
 
 SRC_URI = " \
-    https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz \
+    https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz \
     file://defconfig \
 "
 
 require linux-skov/patches/series.inc
-SRC_URI[sha256sum] = "02a8c4ab25997be06d5aa21bd8661737b0deb9096b7ad3e72ec86f429261865d"
+SRC_URI[sha256sum] = "5c2443a5538de52688efb55c27ab0539c1f5eb58c0cfd16a2b9fbb08fd81788e"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
