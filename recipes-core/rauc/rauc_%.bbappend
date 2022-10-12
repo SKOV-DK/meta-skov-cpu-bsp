@@ -1,7 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://system.conf \
-	    file://dhcp.system.conf \
+SRC_URI += " \
+    file://dhcp.system.conf \
 "
 PACKAGES =+ "${PN}-dhcp"
 
