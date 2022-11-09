@@ -92,7 +92,6 @@ SRC_URI += "\
   file://patches/0605-arm64-dts-imx8mp-add-HDMI-display-pipeline.patch \
   file://patches/0606-arm64-dts-imx8mp-add-MIPI-DSI-display-output.patch \
   file://patches/0607-arm64-dts-imx8mp-Add-iMX8MP-PCIe-support.patch \
-  file://patches/0608-arm64-dts-imx8mp-describe-DMA-capable-memory.patch \
   "
 # umpf-topic: v6.0/topic/boards/imx8mp-evk
 # umpf-hashinfo: 9d1103061a1b820ab7390ef9c8896a722ca7ec3c
@@ -124,13 +123,12 @@ SRC_URI += "\
 # umpf-topic-range: 13ed186aa386c1d85d1d1de41ce0b9c181eaf002..da84ed833e39e095491ad642b07df67cba9f2183
 SRC_URI += "\
   file://patches/1001-drm-bridge-dw_hdmi-prefer-RGB-bus-formats-over-subsa.patch \
-  file://patches/1002-drm-bridge-dw_hdmi-only-trigger-hotplug-event-on-lin.patch \
   file://patches/1003-drm-bridge-dw_hdmi-detect-initial-connector-state.patch \
   file://patches/1004-drm-bridge-dw_hdmi-use-rx-sense-for-plug-detection-i.patch \
   "
 # umpf-release: 6.0/customers/skov/imx6/20221005-1
 # umpf-topic-range: da84ed833e39e095491ad642b07df67cba9f2183..5f470b1ec04c549c64317f0d4724cc9f26b4c3bf
 SRC_URI += "\
-  file://patches/1101-Release-6.0-customers-skov-imx6-20221005-1.patch \
+  file://patches/1101-Release-6.0-customers-skov-imx6-20221109-1.patch \
   "
 # umpf-end
