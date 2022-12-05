@@ -1,21 +1,21 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += " \
     file://dhcp.system.conf \
 "
 PACKAGES =+ "${PN}-dhcp"
 
-do_install_append() {
+do_install:append() {
 	install -d ${D}${sysconfdir}/rauc
 	install -m 0644 ${WORKDIR}/dhcp.system.conf ${D}${sysconfdir}/rauc/
 }
 
-FILES_${PN}-dhcp = "${sysconfdir}/rauc/dhcp.system.conf"
+FILES:${PN}-dhcp = "${sysconfdir}/rauc/dhcp.system.conf"
 
-pkg_postinst_${PN}-dhcp() {
+pkg_postinst:${PN}-dhcp() {
     mkdir -p $D/${sysconfdir}/rauc/
     mv $D/${sysconfdir}/rauc/dhcp.system.conf $D/${sysconfdir}/rauc/system.conf
 }
 
 #rauc-dhcp need to be installed after rauc, so the overwrite can happen
-RDEPENDS_${PN}-dhcp = "${PN}"
+RDEPENDS:${PN}-dhcp = "${PN}"

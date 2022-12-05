@@ -7,7 +7,7 @@ KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddef
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 DEPENDS += "nativesdk-flex"
-RDEPENDS_${PN} = "flex"
+RDEPENDS:${PN} = "flex"
 
 PR = "r0"
 PV = "${LINUX_VERSION}"
@@ -29,4 +29,4 @@ S = "${WORKDIR}/linux-${LINUX_VERSION}"
 COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu|imx8eval"
 
 # do not install kernel images to the rootfs
-RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
+RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
