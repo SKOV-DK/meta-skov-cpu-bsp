@@ -2,23 +2,23 @@ require barebox-skov.inc
 
 COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu|imx8eval"
 
-do_install_append () {
+do_install:append () {
 	install -d ${D}/boot/
 	install -m 0644 ${B}/images/${BAREBOX_IMAGE} ${D}/boot/
 }
 
-DEPENDS_append_imx8eval = "\
+DEPENDS:append:imx8eval = "\
 	firmware-imx-8m \
 	trusted-firmware-a \
 "
 
 BAREBOX_FIRMWARE_DEP = ""
-BAREBOX_FIRMWARE_DEP_imx8eval = "firmware-imx-8m:do_deploy"
+BAREBOX_FIRMWARE_DEP:imx8eval = "firmware-imx-8m:do_deploy"
 do_configure[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
-BAREBOX_FIRMWARE_DIR_imx8eval = "${S}/firmware"
+BAREBOX_FIRMWARE_DIR:imx8eval = "${S}/firmware"
 
-do_compile_prepend_imx8eval() {
+do_compile:prepend:imx8eval() {
 	mkdir -p ${BAREBOX_FIRMWARE_DIR}
 
 	# copy tf-a
@@ -30,4 +30,4 @@ do_compile_prepend_imx8eval() {
 	done
 }
 
-FILES_${PN} += "/boot/${BAREBOX_IMAGE}"
+FILES:${PN} += "/boot/${BAREBOX_IMAGE}"
