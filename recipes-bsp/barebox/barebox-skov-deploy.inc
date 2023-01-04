@@ -1,4 +1,4 @@
-PROVIDES_remove = "virtual/bootloader"
+PROVIDES:remove = "virtual/bootloader"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}

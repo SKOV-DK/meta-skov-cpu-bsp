@@ -1,0 +1,44 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 9 Jul 2018 12:14:57 +0200
+Subject: [PATCH] video/edid: increase number of retries to request EDID via
+ I2C
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The Chinese HDMI converter board (used to connect the 10-inch-display) is known
+to boot up too slowly, hence it needs longer than specified to get ready for
+answering barebox' I2C query for the EDID. To not come back with no valid modes
+(resulting in a failure to show the splash screen) implicitely allow barebox to
+wait longer by considerably increasing the number of retries. Let this increase
+depend on the "display.external" state variable's content to not catch a
+noticeable penalty in boot time for a controller with parallel panel.
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ drivers/video/edid.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/video/edid.c b/drivers/video/edid.c
+index 96489f2a372c..d2757185f666 100644
+--- a/drivers/video/edid.c
++++ b/drivers/video/edid.c
+@@ -29,6 +29,7 @@
+ #include <fb.h>
+ #include <malloc.h>
+ #include <i2c/i2c.h>
++#include <environment.h>
+ 
+ #include "edid.h"
+ 
+@@ -813,6 +814,10 @@ edid_do_read_i2c(struct i2c_adapter *adapter, unsigned char *buf,
+ 	unsigned char segment = block >> 1;
+ 	unsigned char xfers = segment ? 3 : 2;
+ 	int ret, retries = 5;
++	int external;
++
++	if (!getenv_bool("state.display.external", &external) && external)
++		retries = 500;
+ 
+ 	/* The core i2c driver will automatically retry the transfer if the
+ 	 * adapter reports EAGAIN. However, we find that bit-banging transfers
