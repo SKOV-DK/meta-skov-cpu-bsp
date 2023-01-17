@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# development support
-mkdir -p /mnt/tftp
-automount /mnt/tftp 'ifup -a && mount -t tftp $global.net.server /mnt/tftp'
-
-# regular SD card based boot procedure
-mkdir -p /mnt/sd
-automount -d /mnt/sd 'mmc2.probe=1 && mount -t ext4 /dev/mmc2.0 /mnt/sd'
