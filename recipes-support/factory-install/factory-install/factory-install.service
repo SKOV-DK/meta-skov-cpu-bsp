@@ -1,0 +1,10 @@
+[Unit]
+Description=Factory installation
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/factory-install.sh
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target
