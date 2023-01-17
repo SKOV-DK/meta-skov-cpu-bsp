@@ -19,3 +19,5 @@ pkg_postinst_${PN}-dhcp() {
 
 #rauc-dhcp need to be installed after rauc, so the overwrite can happen
 RDEPENDS_${PN}-dhcp = "${PN}"
+
+RDEPENDS:${PN}:append:imx8eval = " e2fsprogs-resize2fs"
