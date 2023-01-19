@@ -12,7 +12,7 @@ RDEPENDS_${PN} = "flex"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "6.1.3"
+LINUX_VERSION = "6.1.7"
 
 SRC_URI = " \
     https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz \
@@ -20,7 +20,7 @@ SRC_URI = " \
 "
 
 require linux-skov/patches/series.inc
-SRC_URI[sha256sum] = "6dc89ae7a7513e433c597c7346ed7ff4bfd115ea43a3b5e27a6bdb38c5580317"
+SRC_URI[sha256sum] = "4ab048bad2e7380d3b827f1fad5ad2d2fc4f2e80e1c604d85d1f8781debe600f"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
