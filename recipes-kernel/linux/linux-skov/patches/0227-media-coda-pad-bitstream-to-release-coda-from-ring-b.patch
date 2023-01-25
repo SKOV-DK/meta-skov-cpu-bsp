@@ -1,0 +1,41 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 19 Mar 2019 15:02:57 +0100
+Subject: [PATCH] media: coda: pad bitstream to release coda from ring buffer
+ empty condition
+
+If the h.264 or MPEG-2 decoder hangs waiting for more input because we
+estimated the prefetcher target incorrectly, write some dummy data into
+the bitstream and kick the decoder to continue.
+
+This works on h.264 by writing a filler NAL and on MPEG-2 by writing a
+user data sequence of sufficient size.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/chips-media/coda-bit.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-bit.c b/drivers/media/platform/chips-media/coda-bit.c
+index 1fa575722992..9fbb4c5fd81e 100644
+--- a/drivers/media/platform/chips-media/coda-bit.c
++++ b/drivers/media/platform/chips-media/coda-bit.c
+@@ -2818,5 +2818,19 @@ irqreturn_t coda_threaded_irq_handler(int irq, void *data)
+ 		 kfifo->out & kfifo->mask,
+ 		 kfifo->in & kfifo->mask);
+ 
++	if (ctx->codec->src_fourcc == V4L2_PIX_FMT_H264) {
++		mutex_lock(&ctx->bitstream_mutex);
++		/* Pad the bitstream */
++		coda_h264_bitstream_pad(ctx, 768);
++
++		pr_debug("coda: padded: rd = 0x%x, wr = 0x%x\n",
++			 kfifo->out & kfifo->mask,
++			 kfifo->in & kfifo->mask);
++
++		/* Sync read pointer to device */
++		coda_kfifo_sync_to_device_write(ctx);
++		mutex_unlock(&ctx->bitstream_mutex);
++	}
++
+ 	return IRQ_HANDLED;
+ }

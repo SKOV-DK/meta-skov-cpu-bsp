@@ -1,0 +1,81 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 13 Jun 2022 20:10:37 +0200
+Subject: [PATCH] arm64: dts: imx8mp: add MIPI DSI display output
+
+Add the DT nodes for the MIPI DSI display pipeline formed by a LCDIF
+and the MIPI DSI host.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp.dtsi | 58 +++++++++++++++++++++++++++++++
+ 1 file changed, 58 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+index 2f8eb9b887ca..039600f0d2dc 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+@@ -1053,6 +1053,64 @@ aips4: bus@32c00000 {
+ 			#size-cells = <1>;
+ 			ranges;
+ 
++			mipi_dsi: mipi_dsi@32e60000 {
++				compatible = "fsl,imx8mp-mipi-dsim";
++				reg = <0x32e60000 0x10000>;
++				clocks = <&clk IMX8MP_CLK_MEDIA_APB_ROOT>,
++					 <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF>;
++				clock-names = "bus_clk", "sclk_mipi";
++				assigned-clocks = <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF>;
++				assigned-clock-parents = <&clk IMX8MP_CLK_24M>;
++				assigned-clock-rates = <12000000>;
++				interrupts = <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
++				power-domains = <&media_blk_ctrl IMX8MP_MEDIABLK_PD_MIPI_DSI_1>;
++				samsung,esc-clock-frequency = <20000000>;
++				samsung,pll-clock-frequency = <12000000>;
++				status = "disabled";
++
++				ports {
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					port@0 {
++						reg = <0>;
++
++						dsim_from_lcdif: endpoint {
++							remote-endpoint = <&lcdif_to_dsim>;
++						};
++					};
++
++					port@1 {
++						reg = <1>;
++					};
++				};
++			};
++
++			lcdif1: lcd-controller@32e80000 {
++				compatible = "fsl,imx8mp-lcdif";
++				reg = <0x32e80000 0x10000>;
++				clocks = <&clk IMX8MP_CLK_MEDIA_DISP1_PIX>,
++					 <&clk IMX8MP_CLK_MEDIA_AXI>,
++					 <&clk IMX8MP_CLK_MEDIA_APB>;
++				clock-names = "pix", "axi", "disp_axi";
++				assigned-clocks = <&clk IMX8MP_CLK_MEDIA_DISP1_PIX>,
++						  <&clk IMX8MP_VIDEO_PLL1>;
++				assigned-clock-parents = <&clk IMX8MP_VIDEO_PLL1_OUT>;
++				assigned-clock-rates = <0>, <594000000>;
++				interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
++				power-domains = <&media_blk_ctrl IMX8MP_MEDIABLK_PD_LCDIF_1>;
++				status = "disabled";
++
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				lcdif1_disp: port {
++					lcdif_to_dsim: endpoint {
++						remote-endpoint = <&dsim_from_lcdif>;
++					};
++				};
++			};
++
+ 			media_blk_ctrl: blk-ctrl@32ec0000 {
+ 				compatible = "fsl,imx8mp-media-blk-ctrl",
+ 					     "syscon";

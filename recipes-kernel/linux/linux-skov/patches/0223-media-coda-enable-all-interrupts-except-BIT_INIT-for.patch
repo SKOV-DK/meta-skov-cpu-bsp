@@ -1,0 +1,189 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Fri, 29 Jun 2018 15:58:34 +0200
+Subject: [PATCH] media: coda: enable all interrupts except BIT_INIT for
+ debugging and thread all interrupts other than pic run done
+
+Enable all interrupts except BIT_INIT and log them to dmesg.
+
+BIT_INIT asserts during hardware initialization, which may cause
+the interrupt handler to be called after the clocks have already
+been disabled again.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/chips-media/coda-bit.c    | 78 +++++++++++++++++++-----
+ drivers/media/platform/chips-media/coda-common.c |  9 +--
+ drivers/media/platform/chips-media/coda.h        |  2 +
+ drivers/media/platform/chips-media/coda_regs.h   | 12 +++-
+ 4 files changed, 80 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/media/platform/chips-media/coda-bit.c b/drivers/media/platform/chips-media/coda-bit.c
+index a85732b792be..c3429ab1287b 100644
+--- a/drivers/media/platform/chips-media/coda-bit.c
++++ b/drivers/media/platform/chips-media/coda-bit.c
+@@ -2737,33 +2737,79 @@ irqreturn_t coda_irq_handler(int irq, void *data)
+ {
+ 	struct coda_dev *dev = data;
+ 	struct coda_ctx *ctx;
++	u32 status, reason;
+ 
+ 	/* read status register to attend the IRQ */
+-	coda_read(dev, CODA_REG_BIT_INT_STATUS);
++	status = coda_read(dev, CODA_REG_BIT_INT_STATUS);
++	reason = coda_read(dev, CODA_REG_BIT_INT_REASON);
+ 	coda_write(dev, 0, CODA_REG_BIT_INT_REASON);
+-	coda_write(dev, CODA_REG_BIT_INT_CLEAR_SET,
+-		      CODA_REG_BIT_INT_CLEAR);
++	coda_write(dev, CODA_REG_BIT_INT_CLEAR_SET, CODA_REG_BIT_INT_CLEAR);
+ 
+-	ctx = v4l2_m2m_get_curr_priv(dev->m2m_dev);
+-	if (ctx == NULL) {
+-		v4l2_err(&dev->v4l2_dev,
+-			 "Instance released before the end of transaction\n");
+-		return IRQ_HANDLED;
++	if (status != 1)
++		pr_debug("coda: interrupt status 0x%x\n", status);
++
++	if (reason & CODA_INT_BIT_PIC_RUN) {
++		ctx = v4l2_m2m_get_curr_priv(dev->m2m_dev);
++		if (ctx == NULL) {
++			v4l2_err(&dev->v4l2_dev,
++				 "Instance released before the end of transaction\n");
++			return IRQ_HANDLED;
++		}
++
++		trace_coda_bit_done(ctx);
++		coda_stats_done(dev->bit_stats);
++
++		if (ctx->aborting) {
++			coda_dbg(1, ctx, "task has been aborted\n");
++		}
++
++		if (coda_isbusy(ctx->dev)) {
++			coda_dbg(1, ctx, "coda is still busy!!!!\n");
++			return IRQ_NONE;
++		}
++
++		complete(&ctx->completion);
+ 	}
+ 
+-	trace_coda_bit_done(ctx);
+-	coda_stats_done(dev->bit_stats);
++	reason &= ~CODA_INT_BIT_PIC_RUN;
++	if (reason) {
++		dev->bit_int_reason = reason;
++		return IRQ_WAKE_THREAD;
++	}
+ 
+-	if (ctx->aborting) {
+-		coda_dbg(1, ctx, "task has been aborted\n");
++	return IRQ_HANDLED;
++}
++
++irqreturn_t coda_threaded_irq_handler(int irq, void *data)
++{
++	struct coda_dev *dev = data;
++	struct coda_ctx *ctx;
++	struct __kfifo *kfifo;
++
++	if (dev->bit_int_reason != CODA_INT_BIT_BUF_EMPTY) {
++		pr_debug("coda: interrupt reason 0x%x\n", dev->bit_int_reason);
++		return IRQ_HANDLED;
+ 	}
+ 
+-	if (coda_isbusy(ctx->dev)) {
+-		coda_dbg(1, ctx, "coda is still busy!!!!\n");
+-		return IRQ_NONE;
++	pr_debug("coda: interrupt reason 0x%x (buf empty)\n",
++		 dev->bit_int_reason);
++
++	ctx = v4l2_m2m_get_curr_priv(dev->m2m_dev);
++	if (ctx == NULL) {
++		v4l2_err(&dev->v4l2_dev,
++			 "Buffer underrun on released instance\n");
++		return IRQ_HANDLED;
+ 	}
+ 
+-	complete(&ctx->completion);
++	kfifo = &ctx->bitstream_fifo.kfifo;
++
++	pr_debug("coda: before: rd = 0x%x, wr = 0x%x\n",
++		 kfifo->out & kfifo->mask,
++		 kfifo->in & kfifo->mask);
++	coda_kfifo_sync_from_device(ctx);
++	pr_debug("coda: after: rd = 0x%x, wr = 0x%x\n",
++		 kfifo->out & kfifo->mask,
++		 kfifo->in & kfifo->mask);
+ 
+ 	return IRQ_HANDLED;
+ }
+diff --git a/drivers/media/platform/chips-media/coda-common.c b/drivers/media/platform/chips-media/coda-common.c
+index 504bf17405e8..799c5f9df8be 100644
+--- a/drivers/media/platform/chips-media/coda-common.c
++++ b/drivers/media/platform/chips-media/coda-common.c
+@@ -2945,8 +2945,8 @@ static int coda_hw_init(struct coda_dev *dev)
+ 	if (dev->devtype->product != CODA_DX6)
+ 		coda_write(dev, 0, CODA7_REG_BIT_AXI_SRAM_USE);
+ 
+-	coda_write(dev, CODA_INT_INTERRUPT_ENABLE,
+-		      CODA_REG_BIT_INT_ENABLE);
++	/* Enable all interrupts except BIT_INIT for debugging purposes */
++	coda_write(dev, ~CODA_INT_BIT_INIT, CODA_REG_BIT_INT_ENABLE);
+ 
+ 	/* Reset VPU and start processor */
+ 	data = coda_read(dev, CODA_REG_BIT_CODE_RESET);
+@@ -3282,8 +3282,9 @@ static int coda_probe(struct platform_device *pdev)
+ 	if (irq < 0)
+ 		return irq;
+ 
+-	ret = devm_request_irq(&pdev->dev, irq, coda_irq_handler, 0,
+-			       CODA_NAME "-video", dev);
++	ret = devm_request_threaded_irq(&pdev->dev, irq, coda_irq_handler,
++					coda_threaded_irq_handler, IRQF_ONESHOT,
++					CODA_NAME "-video", dev);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "failed to request irq: %d\n", ret);
+ 		return ret;
+diff --git a/drivers/media/platform/chips-media/coda.h b/drivers/media/platform/chips-media/coda.h
+index bce7598c96c4..eb48fd76a923 100644
+--- a/drivers/media/platform/chips-media/coda.h
++++ b/drivers/media/platform/chips-media/coda.h
+@@ -99,6 +99,7 @@ struct coda_dev {
+ 	struct mutex		coda_mutex;
+ 	struct workqueue_struct	*workqueue;
+ 	struct v4l2_m2m_dev	*m2m_dev;
++	u32			bit_int_reason;
+ 	struct ida		ida;
+ 	struct dentry		*debugfs_root;
+ 	struct ratelimit_state	mb_err_rs;
+@@ -406,6 +407,7 @@ extern const struct coda_context_ops coda9_jpeg_encode_ops;
+ extern const struct coda_context_ops coda9_jpeg_decode_ops;
+ 
+ irqreturn_t coda_irq_handler(int irq, void *data);
++irqreturn_t coda_threaded_irq_handler(int irq, void *data);
+ irqreturn_t coda9_jpeg_irq_handler(int irq, void *data);
+ 
+ static inline void coda_stats_run(struct v4l2_stats *stats)
+diff --git a/drivers/media/platform/chips-media/coda_regs.h b/drivers/media/platform/chips-media/coda_regs.h
+index db81a904cf3f..2433c97856e8 100644
+--- a/drivers/media/platform/chips-media/coda_regs.h
++++ b/drivers/media/platform/chips-media/coda_regs.h
+@@ -123,7 +123,17 @@
+ #define		CODA9_MODE_ENCODE_MJPG		13
+ #define		CODA_MODE_INVALID		0xffff
+ #define CODA_REG_BIT_INT_ENABLE		0x170
+-#define		CODA_INT_INTERRUPT_ENABLE	(1 << 3)
++#define		CODA_INT_BIT_INIT		(1 << 0)
++#define		CODA_INT_BIT_SEQ_INIT		(1 << 1)
++#define		CODA_INT_BIT_SEQ_END		(1 << 2)
++#define		CODA_INT_BIT_PIC_RUN		(1 << 3)
++#define		CODA_INT_BIT_SET_FRAME_BUF	(1 << 4)
++#define		CODA_INT_BIT_ENC_HEADER		(1 << 5)
++#define		CODA_INT_BIT_ENC_PARA_SET	(1 << 6)
++#define		CODA_INT_BIT_DEC_PARA_SET	(1 << 7)
++#define		CODA_INT_BIT_DEC_BUF_FLUSH	(1 << 8)
++#define		CODA_INT_BIT_BUF_EMPTY		(1 << 14)
++#define		CODA_INT_BIT_BUF_FULL		(1 << 15)
+ #define CODA_REG_BIT_INT_REASON			0x174
+ #define CODA7_REG_BIT_RUN_AUX_STD		0x178
+ #define		CODA_MP4_AUX_MPEG4		0

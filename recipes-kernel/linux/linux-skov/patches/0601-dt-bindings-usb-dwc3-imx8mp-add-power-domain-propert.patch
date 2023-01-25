@@ -1,0 +1,51 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 7 Feb 2022 20:36:20 +0100
+Subject: [PATCH] dt-bindings: usb: dwc3-imx8mp: add power domain property
+
+The USB controllers in the i.MX8MP are located inside the HSIO
+power domain. Add the power-domains property to the DT binding
+to be able to describe the hardware properly.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/usb/fsl,imx8mp-dwc3.yaml | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/usb/fsl,imx8mp-dwc3.yaml b/Documentation/devicetree/bindings/usb/fsl,imx8mp-dwc3.yaml
+index 01ab0f922ae8..3fb4feb6d3d9 100644
+--- a/Documentation/devicetree/bindings/usb/fsl,imx8mp-dwc3.yaml
++++ b/Documentation/devicetree/bindings/usb/fsl,imx8mp-dwc3.yaml
+@@ -71,6 +71,9 @@ properties:
+     description:
+       Power pad (PWR) polarity is active low.
+ 
++  power-domains:
++    maxItems: 1
++
+ # Required child node:
+ 
+ patternProperties:
+@@ -87,12 +90,14 @@ required:
+   - clocks
+   - clock-names
+   - interrupts
++  - power-domains
+ 
+ additionalProperties: false
+ 
+ examples:
+   - |
+     #include <dt-bindings/clock/imx8mp-clock.h>
++    #include <dt-bindings/power/imx8mp-power.h>
+     #include <dt-bindings/interrupt-controller/arm-gic.h>
+     usb3_0: usb@32f10100 {
+       compatible = "fsl,imx8mp-dwc3";
+@@ -102,6 +107,7 @@ examples:
+                <&clk IMX8MP_CLK_USB_ROOT>;
+       clock-names = "hsio", "suspend";
+       interrupts = <GIC_SPI 148 IRQ_TYPE_LEVEL_HIGH>;
++      power-domains = <&hsio_blk_ctrl IMX8MP_HSIOBLK_PD_USB>;
+       #address-cells = <1>;
+       #size-cells = <1>;
+       dma-ranges = <0x40000000 0x40000000 0xc0000000>;

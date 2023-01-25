@@ -1,0 +1,121 @@
+From: Christian Gmeiner <christian.gmeiner@gmail.com>
+Date: Fri, 3 Jun 2022 14:37:05 +0200
+Subject: [PATCH] drm/etnaviv: print offender task information on hangcheck
+ recovery
+
+Track the pid per submit, so we can print the name and cmdline of
+the task which submitted the batch that caused the gpu to hang.
+
+Signed-off-by: Christian Gmeiner <christian.gmeiner@gmail.com>
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gem.h        |  1 +
+ drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c |  6 ++++++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c        | 18 +++++++++++++++++-
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h        |  2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_sched.c      |  2 +-
+ 5 files changed, 26 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem.h b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+index 63688e6e4580..baa81cbf701a 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -96,6 +96,7 @@ struct etnaviv_gem_submit {
+ 	int out_fence_id;
+ 	struct list_head node; /* GPU active submit list */
+ 	struct etnaviv_cmdbuf cmdbuf;
++	struct pid *pid;       /* submitting process */
+ 	bool runtime_resumed;
+ 	u32 exec_state;
+ 	u32 flags;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+index 2337b24b05b0..a602c167b601 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem_submit.c
+@@ -399,6 +399,9 @@ static void submit_cleanup(struct kref *kref)
+ 		mutex_unlock(&submit->gpu->idr_lock);
+ 		dma_fence_put(submit->out_fence);
+ 	}
++
++	put_pid(submit->pid);
++
+ 	kfree(submit->pmrs);
+ 	kfree(submit);
+ }
+@@ -422,6 +425,7 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 	struct sync_file *sync_file = NULL;
+ 	struct ww_acquire_ctx ticket;
+ 	int out_fence_fd = -1;
++	struct pid *pid = get_pid(task_pid(current));
+ 	void *stream;
+ 	int ret;
+ 
+@@ -519,6 +523,8 @@ int etnaviv_ioctl_gem_submit(struct drm_device *dev, void *data,
+ 		goto err_submit_ww_acquire;
+ 	}
+ 
++	submit->pid = pid;
++
+ 	ret = etnaviv_cmdbuf_init(priv->cmdbuf_suballoc, &submit->cmdbuf,
+ 				  ALIGN(args->stream_size, 8) + 8);
+ 	if (ret)
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 669e17e096e7..cbd723c63863 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1045,12 +1045,28 @@ int etnaviv_gpu_debugfs(struct etnaviv_gpu *gpu, struct seq_file *m)
+ }
+ #endif
+ 
+-void etnaviv_gpu_recover_hang(struct etnaviv_gpu *gpu)
++void etnaviv_gpu_recover_hang(struct etnaviv_gem_submit *submit)
+ {
++	struct etnaviv_gpu *gpu = submit->gpu;
++	char *comm = NULL, *cmd = NULL;
++	struct task_struct *task;
+ 	unsigned int i;
+ 
+ 	dev_err(gpu->dev, "recover hung GPU!\n");
+ 
++	task = get_pid_task(submit->pid, PIDTYPE_PID);
++	if (task) {
++		comm = kstrdup(task->comm, GFP_KERNEL);
++		cmd = kstrdup_quotable_cmdline(task, GFP_KERNEL);
++		put_task_struct(task);
++	}
++
++	if (comm && cmd)
++		dev_err(gpu->dev, "offending task: %s (%s)\n", comm, cmd);
++
++	kfree(cmd);
++	kfree(comm);
++
+ 	if (pm_runtime_get_sync(gpu->dev) < 0)
+ 		goto pm_put;
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index c55a270e89b6..6c3ab7270fd1 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -168,7 +168,7 @@ bool etnaviv_fill_identity_from_hwdb(struct etnaviv_gpu *gpu);
+ int etnaviv_gpu_debugfs(struct etnaviv_gpu *gpu, struct seq_file *m);
+ #endif
+ 
+-void etnaviv_gpu_recover_hang(struct etnaviv_gpu *gpu);
++void etnaviv_gpu_recover_hang(struct etnaviv_gem_submit *submit);
+ void etnaviv_gpu_retire(struct etnaviv_gpu *gpu);
+ int etnaviv_gpu_wait_fence_interruptible(struct etnaviv_gpu *gpu,
+ 	u32 fence, struct drm_etnaviv_timespec *timeout);
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+index 866576175b68..feb840aa6bbb 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -67,7 +67,7 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
+ 
+ 	/* get the GPU back into the init state */
+ 	etnaviv_core_dump(submit);
+-	etnaviv_gpu_recover_hang(gpu);
++	etnaviv_gpu_recover_hang(submit);
+ 
+ 	drm_sched_resubmit_jobs(&gpu->sched);
+ 

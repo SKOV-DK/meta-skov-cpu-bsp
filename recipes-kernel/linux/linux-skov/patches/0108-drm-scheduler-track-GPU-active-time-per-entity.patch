@@ -1,0 +1,50 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Tue, 6 Sep 2022 10:52:55 +0200
+Subject: [PATCH] drm/scheduler: track GPU active time per entity
+
+Track the accumulated time that jobs from this entity were active
+on the GPU. This allows drivers using the scheduler to trivially
+implement the DRM fdinfo when the hardware doesn't provide more
+specific information than signalling job completion anyways.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/scheduler/sched_main.c | 6 ++++++
+ include/drm/gpu_scheduler.h            | 7 +++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
+index 68317d3a7a27..5dbe826d498d 100644
+--- a/drivers/gpu/drm/scheduler/sched_main.c
++++ b/drivers/gpu/drm/scheduler/sched_main.c
+@@ -852,6 +852,12 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+ 
+ 	spin_unlock(&sched->job_list_lock);
+ 
++	if (job) {
++		job->entity->elapsed_ns += ktime_to_ns(
++			ktime_sub(job->s_fence->finished.timestamp,
++				  job->s_fence->scheduled.timestamp));
++	}
++
+ 	return job;
+ }
+ 
+diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
+index addb135eeea6..573bef640664 100644
+--- a/include/drm/gpu_scheduler.h
++++ b/include/drm/gpu_scheduler.h
+@@ -196,6 +196,13 @@ struct drm_sched_entity {
+ 	 * drm_sched_entity_fini().
+ 	 */
+ 	struct completion		entity_idle;
++	/**
++	 * @elapsed_ns
++	 *
++	 * Records the amount of time where jobs from this entity were active
++	 * on the GPU.
++	 */
++	uint64_t elapsed_ns;
+ };
+ 
+ /**

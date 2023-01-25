@@ -1,0 +1,45 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Wed, 8 Oct 2014 17:49:08 +0200
+Subject: [PATCH] media: coda: jpeg: check for SOI/EOI again in prepare_decode
+
+Warn if the buffer queued into the bitstream buffer does not start with
+SOI and end with EOI. This can help debugging in case of CODA7541 JPEG
+decoder hangups.
+
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ drivers/media/platform/chips-media/coda-bit.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/media/platform/chips-media/coda-bit.c b/drivers/media/platform/chips-media/coda-bit.c
+index d74d9cc5455f..284aa44f451d 100644
+--- a/drivers/media/platform/chips-media/coda-bit.c
++++ b/drivers/media/platform/chips-media/coda-bit.c
+@@ -2270,6 +2270,9 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+ 					struct coda_buffer_meta, list);
+ 
+ 	if (meta && ctx->codec->src_fourcc == V4L2_PIX_FMT_JPEG) {
++		unsigned int start;
++		unsigned int end;
++		u16 soi, eoi;
+ 
+ 		/* If this is the last buffer in the bitstream, add padding */
+ 		if (meta->end == ctx->bitstream_fifo.kfifo.in) {
+@@ -2283,6 +2286,17 @@ static int coda_prepare_decode(struct coda_ctx *ctx)
+ 
+ 			kfifo_in(&ctx->bitstream_fifo, buf, pad);
+ 		}
++
++		start = meta->start & ctx->bitstream_fifo.kfifo.mask;
++		end = meta->end & ctx->bitstream_fifo.kfifo.mask;
++		soi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + start));
++		eoi = be16_to_cpup((__be16 *)(ctx->bitstream.vaddr + end - 2));
++
++		if (soi != 0xffd8 || eoi != 0xffd9) {
++			v4l2_warn(&ctx->dev->v4l2_dev,
++				  "Invalid markers: %04x..%04x (%x - %x)\n",
++				  soi, eoi, start, end);
++		}
+ 	}
+ 	spin_unlock(&ctx->buffer_meta_lock);
+ 

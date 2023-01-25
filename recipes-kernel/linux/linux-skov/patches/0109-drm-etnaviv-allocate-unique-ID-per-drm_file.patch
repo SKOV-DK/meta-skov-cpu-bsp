@@ -1,0 +1,46 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Tue, 6 Sep 2022 10:57:55 +0200
+Subject: [PATCH] drm/etnaviv: allocate unique ID per drm_file
+
+Allows to easily track if several fd are pointing to the same
+execution context due to being dup'ed.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_drv.c | 3 +++
+ drivers/gpu/drm/etnaviv/etnaviv_drv.h | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_drv.c b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+index 1d2b4fb4bcf8..b69edb40ae2a 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+@@ -49,6 +49,7 @@ static void load_gpu(struct drm_device *dev)
+ static int etnaviv_open(struct drm_device *dev, struct drm_file *file)
+ {
+ 	struct etnaviv_drm_private *priv = dev->dev_private;
++	static atomic_t ident = ATOMIC_INIT(0);
+ 	struct etnaviv_file_private *ctx;
+ 	int ret, i;
+ 
+@@ -56,6 +57,8 @@ static int etnaviv_open(struct drm_device *dev, struct drm_file *file)
+ 	if (!ctx)
+ 		return -ENOMEM;
+ 
++	ctx->id = atomic_inc_return(&ident);
++
+ 	ctx->mmu = etnaviv_iommu_context_init(priv->mmu_global,
+ 					      priv->cmdbuf_suballoc);
+ 	if (!ctx->mmu) {
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_drv.h b/drivers/gpu/drm/etnaviv/etnaviv_drv.h
+index f32f4771dada..851b4b4ef146 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.h
+@@ -27,6 +27,7 @@ struct etnaviv_iommu_global;
+ #define ETNAVIV_SOFTPIN_START_ADDRESS	SZ_4M /* must be >= SUBALLOC_SIZE */
+ 
+ struct etnaviv_file_private {
++	int id;
+ 	struct etnaviv_iommu_context	*mmu;
+ 	struct drm_sched_entity		sched_entity[ETNA_MAX_PIPES];
+ };
