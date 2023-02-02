@@ -2,7 +2,11 @@
 # or replacing files from the default environment
 
 SRC_URI += "\
+  file://env/nv/autoboot_timeout  \
+  file://env/nv/linux.bootargs.base \
   file://env/nv/boot.default \
+  file://env/nv/boot.watchdog_timeout \
+  file://env/nv/bootm.provide_machine_id \
   file://env/nv/bootchooser.disable_on_zero_attempts \
   file://env/nv/bootchooser.reset_attempts \
   file://env/nv/bootchooser.reset_priorities \
@@ -16,8 +20,8 @@ SRC_URI += "\
   file://env/nv/bootchooser.targets \
   file://env/nv/bootchooser.system0.boot \
   file://env/nv/bootchooser.system1.boot \
-  file://env/nv/boot.default \
   file://env/boot/system0 \
   file://env/boot/system1 \
+  file://env/init/bootargs \
   "
 

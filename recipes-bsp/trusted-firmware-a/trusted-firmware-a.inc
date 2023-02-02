@@ -1,14 +1,15 @@
 DESCRIPTION = "Trusted Firmware-A"
-LICENSE = "BSD-3-Clause"
-
-PROVIDES = "virtual/trusted-firmware-a"
+LICENSE = "BSD-3-Clause & MIT"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit deploy
 
 SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;name=tfa;branch=master"
+
 UPSTREAM_CHECK_GITTAGREGEX = "^v(?P<pver>\d+(\.\d+)+)$"
+
+SRCREV_FORMAT = "tfa"
 
 COMPATIBLE_MACHINE ?= "invalid"
 
@@ -57,7 +58,11 @@ SRCREV_FORMAT:append = "${@bb.utils.contains('TFA_MBEDTLS', '1', '_mbedtls', '',
 
 # U-boot support (set TFA_UBOOT to 1 to activate)
 # When U-Boot support is activated BL33 is activated with u-boot.bin file
-TFA_UBOOT ?= "0"
+TFA_UBOOT ??= "0"
+
+# UEFI support (set TFA_UEFI to 1 to activate)
+# When UEFI support is activated BL33 is activated with uefi.bin file
+TFA_UEFI ??= "0"
 
 # What to build
 # By default we only build bl1, do_deploy will copy
@@ -100,7 +105,8 @@ EXTRA_OEMAKE += "LD=${@remove_options_tail(d.getVar('LD'))}"
 
 EXTRA_OEMAKE += "CC=${@remove_options_tail(d.getVar('CC'))}"
 
-EXTRA_OEMAKE += "V=1"
+# Verbose builds, no -Werror
+EXTRA_OEMAKE += "V=1 E=0"
 
 # Add platform parameter
 EXTRA_OEMAKE += "BUILD_BASE=${B} PLAT=${TFA_PLATFORM}"
@@ -123,7 +129,15 @@ EXTRA_OEMAKE += "${@bb.utils.contains('TFA_MBEDTLS', '1', 'MBEDTLS_DIR=${TFA_MBE
 # Uboot support
 DEPENDS += " ${@bb.utils.contains('TFA_UBOOT', '1', 'u-boot', '', d)}"
 do_compile[depends] += " ${@bb.utils.contains('TFA_UBOOT', '1', 'u-boot:do_deploy', '', d)}"
-EXTRA_OEMAKE += "${@bb.utils.contains('TFA_UBOOT', '1', 'BL33=${DEPLOY_DIR_IMAGE}/u-boot.bin', '',d)}"
+EXTRA_OEMAKE += "${@bb.utils.contains('TFA_UBOOT', '1', 'BL33=${DEPLOY_DIR_IMAGE}/u-boot.bin', '', d)}"
+
+# UEFI support
+DEPENDS += " ${@bb.utils.contains('TFA_UEFI', '1', 'edk2-firmware', '', d)}"
+EXTRA_OEMAKE += "${@bb.utils.contains('TFA_UEFI', '1', 'BL33=${RECIPE_SYSROOT}/firmware/uefi.bin', '', d)}"
+
+# TFTF test support
+DEPENDS += " ${@bb.utils.contains('TFTF_TESTS', '1', 'tf-a-tests', '', d)}"
+EXTRA_OEMAKE += "${@bb.utils.contains('TFTF_TESTS', '1', 'BL33=${RECIPE_SYSROOT}/firmware/tftf.bin', '',d)}"
 
 # Hafnium support
 SEL2_SPMC = "${@'${TFA_SPMD_SPM_AT_SEL2}' if d.getVar('TFA_SPD', True) == 'spmd' else ''}"
@@ -139,30 +153,26 @@ EXTRA_OEMAKE += "${@bb.utils.contains('SEL2_SPMC', '1', 'ARM_SPMC_MANIFEST_DTS=$
 
 # Tell the tools where the native OpenSSL is located
 EXTRA_OEMAKE += "OPENSSL_DIR=${STAGING_DIR_NATIVE}/${prefix_native}"
+# Use the correct native compiler
+EXTRA_OEMAKE += "HOSTCC='${BUILD_CC}'"
 
 # Runtime variables
 EXTRA_OEMAKE += "RUNTIME_SYSROOT=${STAGING_DIR_HOST}"
-EXTRA_OEMAKE += "TARGET_FPU=${TARGET_FPU}"
 
 BUILD_DIR = "${B}/${TFA_PLATFORM}"
 BUILD_DIR .= "${@'/${TFA_BOARD}' if d.getVar('TFA_BOARD') else ''}"
 BUILD_DIR .= "/${@'debug' if d.getVar("TFA_DEBUG") == '1' else 'release'}"
 
-# The following hack is needed to fit properly in yocto build environment
-# TFA is forcing the host compiler and its flags in the Makefile using :=
-# assignment for GCC and CFLAGS.
 do_compile() {
-    cd ${S}
-
-    # These changes are needed to have the native tools compiling and executing properly
+    # This is still needed to have the native tools executing properly by
+    # setting the RPATH
     sed -i '/^LDLIBS/ s,$, \$\{BUILD_LDFLAGS},' ${S}/tools/fiptool/Makefile
     sed -i '/^INCLUDE_PATHS/ s,$, \$\{BUILD_CFLAGS},' ${S}/tools/fiptool/Makefile
-    # This can be removed when only TF-A 2.4 onwards is supported
-    sed -i 's^OPENSSL_DIR.*=.*$^OPENSSL_DIR = ${STAGING_DIR_NATIVE}/${prefix_native}^' ${S}/tools/*/Makefile
+    sed -i '/^LIB/ s,$, \$\{BUILD_LDFLAGS},' ${S}/tools/cert_create/Makefile
 
     # Currently there are races if you build all the targets at once in parallel
     for T in ${TFA_BUILD_TARGET}; do
-        oe_runmake $T
+        oe_runmake -C ${S} $T
     done
 }
 do_compile[cleandirs] = "${B}"
@@ -218,8 +228,13 @@ do_install() {
 
 FILES:${PN} = "/firmware"
 SYSROOT_DIRS += "/firmware"
+
+FILES:${PN}-dbg = "/firmware/*.elf"
 # Skip QA check for relocations in .text of elf binaries
-INSANE_SKIP:${PN} = "textrel"
+INSANE_SKIP:${PN}-dbg += "textrel"
+# Build paths are currently embedded
+INSANE_SKIP:${PN} += "buildpaths"
+INSANE_SKIP:${PN}-dbg += "buildpaths"
 
 do_deploy() {
     cp -rf ${D}/firmware/* ${DEPLOYDIR}/

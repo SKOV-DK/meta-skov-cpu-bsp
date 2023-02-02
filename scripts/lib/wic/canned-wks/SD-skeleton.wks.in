@@ -1,0 +1,17 @@
+# short-description: Create mostly empty bootable image to flash on an SD-card
+# long-description: Creates an MBR partitioned SD-card image with barebox as
+# bootloader between MBR and the first partition containing barebox'
+# environment. The second and third partitions contain the root-FS as well as
+# the filesystem for /home which are empty ext4-FSs here.
+
+# Remember to keep the location of barebox' environment synchronized with the
+# redundant information in barebox' devicetree file (imx8mp-evk.dts)!
+#
+# Dunfell's syntax does not allow for explicit units, the default is kiB for
+# offset and MiB for the (fixed) size.
+part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET} --no-table
+part --offset 1024                 --fixed-size 1
+part --label root-FS --fstype=ext4 --align 1024 --fixed-size 4096
+part --label home    --fstype=ext4 --align 1024 --fixed-size 2048
+
+bootloader --ptable msdos
