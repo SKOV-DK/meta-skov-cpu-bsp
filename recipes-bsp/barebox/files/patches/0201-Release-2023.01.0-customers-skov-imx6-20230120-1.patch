@@ -11,19 +11,11 @@ index 36bbbdf8fcb7..833343a94912 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
-<<<<<<< HEAD:recipes-bsp/barebox/files/patches/0301-Release-2022.12.0-customers-skov-imx6-20221216-1.patch
- VERSION = 2022
- PATCHLEVEL = 12
- SUBLEVEL = 0
--EXTRAVERSION =
-+EXTRAVERSION =-20221216-1
-=======
  VERSION = 2023
  PATCHLEVEL = 01
  SUBLEVEL = 0
 -EXTRAVERSION =
 +EXTRAVERSION =-20230120-1
->>>>>>> master:recipes-bsp/barebox/files/patches/0201-Release-2023.01.0-customers-skov-imx6-20230120-1.patch
  NAME = None
  
  # *DOCUMENTATION*
