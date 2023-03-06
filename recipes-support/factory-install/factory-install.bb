@@ -32,8 +32,7 @@ RDEPENDS:${PN} = " \
     pbzip2 \
     rauc \
     parted \
-    splash-factory-install-success \
-    splash-factory-install-failure \
+    splash-factory-install \
     skovsetup \
 "
 
