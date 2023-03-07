@@ -6,8 +6,8 @@ KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddef
 
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
-DEPENDS += "nativesdk-flex"
-RDEPENDS:${PN} = "flex"
+DEPENDS += "nativesdk-flex nativesdk-lzop lzop-native"
+RDEPENDS:${PN} = "flex lzop"
 
 PR = "r0"
 PV = "${LINUX_VERSION}"
