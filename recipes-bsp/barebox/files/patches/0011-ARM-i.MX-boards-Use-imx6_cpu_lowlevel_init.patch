@@ -1,0 +1,49 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Thu, 16 Mar 2023 10:41:46 +0100
+Subject: [PATCH] ARM: i.MX: boards: Use imx6_cpu_lowlevel_init()
+
+Some i.MX6 boards still call arm_cpu_lowlevel_init() instead of
+imx6_cpu_lowlevel_init(). The latter calls arm_cpu_lowlevel_init()
+and additionally enables ARM errata workarounds applicable for i.MX6.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/boards/cm-fx6/lowlevel.c    | 4 ++--
+ arch/arm/boards/skov-imx6/lowlevel.c | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boards/cm-fx6/lowlevel.c b/arch/arm/boards/cm-fx6/lowlevel.c
+index 27c15f5412e1..3b8014b238e2 100644
+--- a/arch/arm/boards/cm-fx6/lowlevel.c
++++ b/arch/arm/boards/cm-fx6/lowlevel.c
+@@ -334,7 +334,7 @@ static noinline void cm_fx6_start(void)
+ 
+ ENTRY_FUNCTION(start_imx6_cm_fx6, r0, r1, r2)
+ {
+-	arm_cpu_lowlevel_init();
++	imx6_cpu_lowlevel_init();
+ 
+ 	relocate_to_current_adr();
+ 	setup_c();
+@@ -361,7 +361,7 @@ static noinline void utilite_start(void)
+ 
+ ENTRY_FUNCTION(start_imx6_utilite, r0, r1, r2)
+ {
+-	arm_cpu_lowlevel_init();
++	imx6_cpu_lowlevel_init();
+ 
+ 	relocate_to_current_adr();
+ 	setup_c();
+diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
+index ade918e076c4..67923643269e 100644
+--- a/arch/arm/boards/skov-imx6/lowlevel.c
++++ b/arch/arm/boards/skov-imx6/lowlevel.c
+@@ -522,7 +522,7 @@ static noinline void skov_imx6_start(void)
+ 
+ ENTRY_FUNCTION(start_imx6_skov_imx6, r0, r1, r2)
+ {
+-	arm_cpu_lowlevel_init();
++	imx6_cpu_lowlevel_init();
+ 
+ 	relocate_to_current_adr();
+ 	setup_c();

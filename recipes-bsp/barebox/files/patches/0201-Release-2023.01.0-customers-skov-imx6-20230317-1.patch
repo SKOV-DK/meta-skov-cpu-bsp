@@ -1,13 +1,13 @@
-From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Fri, 20 Jan 2023 12:09:16 +0100
-Subject: [PATCH] Release 2023.01.0/customers/skov/imx6/20230120-1
+From: Enrico Jorns <ejo@pengutronix.de>
+Date: Fri, 17 Mar 2023 14:30:13 +0100
+Subject: [PATCH] Release 2023.01.0/customers/skov/imx6/20230317-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 36bbbdf8fcb7..833343a94912 100644
+index 36bbbdf8fcb7..c4cc0761fa88 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -15,7 +15,7 @@ index 36bbbdf8fcb7..833343a94912 100644
  PATCHLEVEL = 01
  SUBLEVEL = 0
 -EXTRAVERSION =
-+EXTRAVERSION =-20230120-1
++EXTRAVERSION =-20230317-1
  NAME = None
  
  # *DOCUMENTATION*
