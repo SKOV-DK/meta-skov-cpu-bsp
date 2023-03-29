@@ -1,1 +1,1 @@
-COMPATIBLE_MACHINE_imx8eval = "imx8eval"
+COMPATIBLE_MACHINE:imx8eval = "imx8eval"
