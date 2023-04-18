@@ -1,0 +1,113 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Wed, 22 Mar 2023 21:32:54 +0100
+Subject: [PATCH] arm64: dts: imx8mp-evk: add dual-role usb port1 support
+
+The i.MX8MP-EVK has a dual-role usb-type-c port marked as PORT1. By this
+commit the dual-role support is added which allows the user-space to
+assign usb-gadget functions to it via the configFS.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-evk.dts | 59 ++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
+index ed3970e90b20..0541ba61bc0f 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
+@@ -5,7 +5,9 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/interrupt-controller/irq.h>
+ #include <dt-bindings/phy/phy-imx8-pcie.h>
++#include <dt-bindings/usb/pd.h>
+ #include "imx8mp.dtsi"
+ 
+ / {
+@@ -389,6 +391,34 @@ &i2c2 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_i2c2>;
+ 	status = "okay";
++
++	tcpc@50 {
++		compatible = "nxp,ptn5110";
++		reg = <0x50>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_tcpc>;
++		interrupt-parent = <&gpio4>;
++		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
++
++		connector {
++			compatible = "usb-c-connector";
++			label = "USB-C";
++			power-role = "dual";
++			data-role = "dual";
++			try-power-role = "sink";
++			source-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)>;
++			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM)
++				     PDO_VAR(5000, 20000, 3000)>;
++			op-sink-microwatt = <15000000>;
++			self-powered;
++		};
++
++		port {
++			usb_con_ss: endpoint {
++				remote-endpoint = <&usb_dwc3_0_drd>;
++			};
++		};
++	};
+ };
+ 
+ &i2c3 {
+@@ -521,14 +551,37 @@ &uart2 {
+ 	status = "okay";
+ };
+ 
++&usb3_phy0 {
++	status = "okay";
++};
++
+ &usb3_phy1 {
+ 	status = "okay";
+ };
+ 
++&usb3_0 {
++	status = "okay";
++};
++
+ &usb3_1 {
+ 	status = "okay";
+ };
+ 
++&usb_dwc3_0 {
++	dr_mode = "otg";
++	hnp-disable;
++	srp-disable;
++	adp-disable;
++	usb-role-switch;
++	status = "okay";
++
++	port {
++		usb_dwc3_0_drd: endpoint {
++			remote-endpoint = <&usb_con_ss>;
++		};
++	};
++};
++
+ &usb_dwc3_1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_usb1_vbus>;
+@@ -759,6 +812,12 @@ MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29               0xd6
+ 		>;
+ 	};
+ 
++	pinctrl_tcpc: tcpcgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19	0x159
++		>;
++	};
++
+ 	pinctrl_uart1: uart1grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX	0x140
