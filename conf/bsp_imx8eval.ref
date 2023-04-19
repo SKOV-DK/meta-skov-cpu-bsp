@@ -17,6 +17,15 @@ skov_kernel_namespaces:
     kconfig.KernelConfig()['PID_NS']
   value: False
 
+skov_imx8_multitouch:
+  description: |
+    Skov's i.MX8MP based design is equipped with a multitouch capable panel that
+    needs "Generic support for HID multitouch panels" enabled.
+  type: bool
+  analyzer: |
+    kconfig.KernelConfig()['HID_MULTITOUCH']
+  value: True
+
 # vim: syntax=yaml
 # Local Variables:
 # mode: yaml
