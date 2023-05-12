@@ -11,10 +11,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 83 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-index a0a2adf14bd2..4376fe2dcaa7 100644
+index b843c08cd1c9..165c8e13e2ce 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-@@ -1216,6 +1216,89 @@ irqsteer_hdmi: interrupt-controller@32fc2000 {
+@@ -1465,6 +1465,89 @@ irqsteer_hdmi: interrupt-controller@32fc2000 {
  				clock-names = "ipg";
  				power-domains = <&hdmi_blk_ctrl IMX8MP_HDMIBLK_PD_IRQSTEER>;
  			};

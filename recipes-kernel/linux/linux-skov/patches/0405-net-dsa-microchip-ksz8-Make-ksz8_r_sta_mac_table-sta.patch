@@ -25,7 +25,7 @@ index ad2c3a72a576..d87f8ebc6323 100644
  			  struct alu_struct *alu);
  void ksz8_r_mib_cnt(struct ksz_device *dev, int port, u16 addr, u64 *cnt);
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index ee68e166fc44..fc079d6eee80 100644
+index d31901284e8f..965193e2302a 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -457,8 +457,8 @@ int ksz8_r_dyn_mac_table(struct ksz_device *dev, u16 addr, u8 *mac_addr,

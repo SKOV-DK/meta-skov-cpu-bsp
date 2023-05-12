@@ -6,13 +6,42 @@ The i.MX8MP-EVK has a dual-role usb-type-c port marked as PORT1. By this
 commit the dual-role support is added which allows the user-space to
 assign usb-gadget functions to it via the configFS.
 
+Below is the test results of a basic usbgadget-ethernet test using by
+iperf3.
+
+Accepted connection from 192.168.60.1, port 48172
+[  5] local 192.168.60.2 port 5201 connected to 192.168.60.1 port 48176
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec   101 MBytes   850 Mbits/sec
+[  5]   1.00-2.00   sec   105 MBytes   883 Mbits/sec
+[  5]   2.00-3.00   sec   105 MBytes   885 Mbits/sec
+
+...
+
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-100.04 sec  10.3 GBytes   882 Mbits/sec                  receiver
+
+Accepted connection from 192.168.60.1, port 42104
+[  5] local 192.168.60.2 port 5201 connected to 192.168.60.1 port 42110
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec   110 MBytes   925 Mbits/sec    0    540 KBytes
+[  5]   1.00-2.00   sec   112 MBytes   938 Mbits/sec    0    566 KBytes
+[  5]   2.00-3.00   sec   115 MBytes   969 Mbits/sec    0    566 KBytes
+
+...
+
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-37.00  sec  4.27 GBytes   990 Mbits/sec    0             sender
+
 Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
 ---
- arch/arm64/boot/dts/freescale/imx8mp-evk.dts | 59 ++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+ arch/arm64/boot/dts/freescale/imx8mp-evk.dts | 87 ++++++++++++++++++++++++++++
+ 1 file changed, 87 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
-index ed3970e90b20..0541ba61bc0f 100644
+index c28abf047214..fb343381006a 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
 @@ -5,7 +5,9 @@
@@ -25,7 +54,30 @@ index ed3970e90b20..0541ba61bc0f 100644
  #include "imx8mp.dtsi"
  
  / {
-@@ -389,6 +391,34 @@ &i2c2 {
+@@ -123,7 +125,22 @@ cpudai: simple-audio-card,cpu {
+ 		simple-audio-card,codec {
+ 			sound-dai = <&wm8960>;
+ 		};
++	};
++
++	usb-ss-mux {
++		compatible = "gpio-ss-mux";
++		enable-gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
++		select-gpios = <&gpio4 20 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usb_ss_mux>;
+ 
++		orientation-switch;
++
++		port {
++			usb_ss_mux: endpoint {
++				remote-endpoint = <&usb_con_ss_mux>;
++			};
++		};
+ 	};
+ };
+ 
+@@ -392,6 +409,40 @@ &i2c2 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_i2c2>;
  	status = "okay";
@@ -49,6 +101,12 @@ index ed3970e90b20..0541ba61bc0f 100644
 +				     PDO_VAR(5000, 20000, 3000)>;
 +			op-sink-microwatt = <15000000>;
 +			self-powered;
++
++			port {
++				usb_con_ss_mux: endpoint {
++					remote-endpoint = <&usb_ss_mux>;
++				};
++			};
 +		};
 +
 +		port {
@@ -60,7 +118,7 @@ index ed3970e90b20..0541ba61bc0f 100644
  };
  
  &i2c3 {
-@@ -521,14 +551,37 @@ &uart2 {
+@@ -524,14 +575,37 @@ &uart2 {
  	status = "okay";
  };
  
@@ -98,16 +156,30 @@ index ed3970e90b20..0541ba61bc0f 100644
  &usb_dwc3_1 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_usb1_vbus>;
-@@ -759,6 +812,12 @@ MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29               0xd6
+@@ -756,6 +830,12 @@ MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x40
  		>;
  	};
  
 +	pinctrl_tcpc: tcpcgrp {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19	0x159
++			MX8MP_IOMUXC_SAI1_TXD7__GPIO4_IO19	0x1e0
 +		>;
 +	};
 +
  	pinctrl_uart1: uart1grp {
  		fsl,pins = <
  			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX	0x140
+@@ -797,6 +877,13 @@ MX8MP_IOMUXC_ECSPI1_MISO__UART3_DCE_CTS		0x140
+ 		>;
+ 	};
+ 
++	pinctrl_usb_ss_mux: usbssmuxgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SD2_WP__GPIO2_IO20		0x104
++			MX8MP_IOMUXC_SAI1_MCLK__GPIO4_IO20	0x144
++		>;
++	};
++
+ 	pinctrl_usdhc2: usdhc2grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SD2_CLK__USDHC2_CLK	0x190

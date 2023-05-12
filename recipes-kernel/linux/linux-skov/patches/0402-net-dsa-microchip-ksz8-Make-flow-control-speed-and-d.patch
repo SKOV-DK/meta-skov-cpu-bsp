@@ -31,7 +31,7 @@ index ea05abfbd51d..9bb19764fa33 100644
  
  #endif
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index d0e3f6e2db1d..8917f22f90d2 100644
+index e37f4c7d6e80..f3be047d5299 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -1321,12 +1321,52 @@ void ksz8_config_cpu_port(struct dsa_switch *ds)
@@ -103,10 +103,10 @@ index d0e3f6e2db1d..8917f22f90d2 100644
  	ksz_cfg(dev, S_LINK_AGING_CTRL, SW_LINK_AUTO_AGING, true);
  
 diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
-index 8601a9e4e4d2..aae71ba94b55 100644
+index 74c56d05ab0b..0a88d9786392 100644
 --- a/drivers/net/dsa/microchip/ksz_common.c
 +++ b/drivers/net/dsa/microchip/ksz_common.c
-@@ -205,6 +205,7 @@ static const struct ksz_dev_ops ksz8_dev_ops = {
+@@ -212,6 +212,7 @@ static const struct ksz_dev_ops ksz8_dev_ops = {
  	.mirror_add = ksz8_port_mirror_add,
  	.mirror_del = ksz8_port_mirror_del,
  	.get_caps = ksz8_get_caps,

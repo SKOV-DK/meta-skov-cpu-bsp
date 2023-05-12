@@ -20,7 +20,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  2 files changed, 1 insertion(+), 20 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 3cab285ddb90..0dcb27b484cb 100644
+index 8c6d37ed7b1e..52d35cc74d10 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -954,7 +954,6 @@ void ksz8_flush_dyn_mac_table(struct ksz_device *dev, int port)
@@ -79,10 +79,10 @@ index 3cab285ddb90..0dcb27b484cb 100644
  			ksz_pread8(dev, i, regs[P_REMOTE_STATUS], &remote);
  			if (remote & KSZ8_PORT_FIBER_MODE)
 diff --git a/drivers/net/dsa/microchip/ksz_common.h b/drivers/net/dsa/microchip/ksz_common.h
-index 055d61ff3fb8..504ad07842a0 100644
+index d2d5761d58e9..52b252bbd721 100644
 --- a/drivers/net/dsa/microchip/ksz_common.h
 +++ b/drivers/net/dsa/microchip/ksz_common.h
-@@ -87,7 +87,6 @@ struct ksz_port {
+@@ -100,7 +100,6 @@ struct ksz_port {
  	int stp_state;
  	struct phy_device phydev;
  

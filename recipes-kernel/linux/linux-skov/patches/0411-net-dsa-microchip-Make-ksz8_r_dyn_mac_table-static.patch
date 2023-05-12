@@ -25,7 +25,7 @@ index a6ef33d2c74b..77439d9c5fc2 100644
  void ksz8_r_mib_pkt(struct ksz_device *dev, int port, u16 addr,
  		    u64 *dropped, u64 *cnt);
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index a04e5ee52a5a..6615273ddbc0 100644
+index 8c98933ada56..79d53deb2678 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -408,8 +408,8 @@ static int ksz8_valid_dyn_entry(struct ksz_device *dev, u8 *data)
