@@ -24,7 +24,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 18 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/soc/imx/gpcv2.c b/drivers/soc/imx/gpcv2.c
-index 7a47d14fde44..f5a97729f27b 100644
+index 4b3300b090a8..5493d5df8bcc 100644
 --- a/drivers/soc/imx/gpcv2.c
 +++ b/drivers/soc/imx/gpcv2.c
 @@ -1452,7 +1452,7 @@ static int imx_gpcv2_probe(struct platform_device *pdev)

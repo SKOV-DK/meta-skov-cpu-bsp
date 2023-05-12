@@ -15,7 +15,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 20 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/soc/imx/gpcv2.c b/drivers/soc/imx/gpcv2.c
-index f5a97729f27b..af94a7f2a5a5 100644
+index 5493d5df8bcc..e1927d23407b 100644
 --- a/drivers/soc/imx/gpcv2.c
 +++ b/drivers/soc/imx/gpcv2.c
 @@ -293,7 +293,7 @@ struct imx_pgc_domain {

@@ -9,13 +9,13 @@ to replace other occurrences of the same value.
 Suggested-by: Lucas Stach <l.stach@pengutronix.de>
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
- drivers/gpu/drm/imx/ipuv3-plane.c | 11 +++++------
+ drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c | 11 +++++------
  1 file changed, 5 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/gpu/drm/imx/ipuv3-plane.c b/drivers/gpu/drm/imx/ipuv3-plane.c
+diff --git a/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c b/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
 index 09d81813e156..c17282d2bf46 100644
---- a/drivers/gpu/drm/imx/ipuv3-plane.c
-+++ b/drivers/gpu/drm/imx/ipuv3-plane.c
+--- a/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
++++ b/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
 @@ -655,6 +655,7 @@ static void ipu_plane_atomic_update(struct drm_plane *plane,
  		width = ipu_src_rect_width(new_state);
  	else

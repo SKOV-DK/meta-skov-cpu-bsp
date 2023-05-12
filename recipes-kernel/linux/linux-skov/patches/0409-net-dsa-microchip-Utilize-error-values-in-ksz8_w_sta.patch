@@ -13,7 +13,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 18 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
-index 81ce1e3fdf56..fe17ce27e5e2 100644
+index 4a41e0ab7bb2..ace1d615380f 100644
 --- a/drivers/net/dsa/microchip/ksz8795.c
 +++ b/drivers/net/dsa/microchip/ksz8795.c
 @@ -358,19 +358,26 @@ static int ksz8_r_table(struct ksz_device *dev, int table, u16 addr, u64 *data)
