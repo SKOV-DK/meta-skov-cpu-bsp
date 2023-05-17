@@ -4,6 +4,7 @@
 SRC_URI += "\
   file://env/nv/autoboot_timeout  \
   file://env/nv/linux.bootargs.base \
+  file://env/nv/linux.bootargs.platsch \
   file://env/nv/boot.default \
   file://env/nv/boot.watchdog_timeout \
   file://env/nv/bootm.provide_machine_id \
