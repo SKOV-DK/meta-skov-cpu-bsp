@@ -21,3 +21,5 @@ pkg_postinst_${PN}-dhcp() {
 RDEPENDS_${PN}-dhcp = "${PN}"
 
 RDEPENDS:${PN}:append:imx8eval = " e2fsprogs-resize2fs"
+
+RDEPENDS:${PN}:append:imx8-cpu = " e2fsprogs-resize2fs"
