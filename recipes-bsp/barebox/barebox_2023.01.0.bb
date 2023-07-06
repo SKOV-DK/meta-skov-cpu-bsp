@@ -24,6 +24,7 @@ BAREBOX_FIRMWARE_DEP:imx8-cpu = "firmware-imx-8m:do_deploy"
 do_configure[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
 BAREBOX_FIRMWARE_DIR:imx8eval = "${S}/firmware"
+BAREBOX_FIRMWARE_DIR:imx8-cpu = "${S}/firmware"
 
 do_compile:prepend:imx8eval() {
 	mkdir -p ${BAREBOX_FIRMWARE_DIR}
