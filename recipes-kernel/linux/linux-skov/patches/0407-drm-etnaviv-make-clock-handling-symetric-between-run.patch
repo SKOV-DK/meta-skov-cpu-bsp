@@ -1,0 +1,56 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Sun, 28 May 2023 16:36:34 +0200
+Subject: [PATCH] drm/etnaviv: make clock handling symetric between runtime
+ resume and suspend
+
+Currently the clock is enabled in the runtime resume function, but are
+disabled a level further down in the callstack in the suspend function.
+Move the clock disable into the suspend function to make handling
+symmetrical between resume and suspend.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 54a1249c5bca..57cf77ed2fcf 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1632,7 +1632,7 @@ int etnaviv_gpu_wait_idle(struct etnaviv_gpu *gpu, unsigned int timeout_ms)
+ 	} while (1);
+ }
+ 
+-static int etnaviv_gpu_hw_suspend(struct etnaviv_gpu *gpu)
++static void etnaviv_gpu_hw_suspend(struct etnaviv_gpu *gpu)
+ {
+ 	if (gpu->initialized && gpu->fe_running) {
+ 		/* Replace the last WAIT with END */
+@@ -1651,8 +1651,6 @@ static int etnaviv_gpu_hw_suspend(struct etnaviv_gpu *gpu)
+ 	}
+ 
+ 	gpu->exec_state = -1;
+-
+-	return etnaviv_gpu_clk_disable(gpu);
+ }
+ 
+ static int etnaviv_gpu_hw_resume(struct etnaviv_gpu *gpu)
+@@ -1789,6 +1787,7 @@ static void etnaviv_gpu_unbind(struct device *dev, struct device *master,
+ 		pm_runtime_put_sync_suspend(gpu->dev);
+ 	} else {
+ 		etnaviv_gpu_hw_suspend(gpu);
++		etnaviv_gpu_clk_disable(gpu);
+ 	}
+ 
+ 	if (gpu->mmu_context)
+@@ -1922,7 +1921,9 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+ 		return -EBUSY;
+ 	}
+ 
+-	return etnaviv_gpu_hw_suspend(gpu);
++	etnaviv_gpu_hw_suspend(gpu);
++
++	return etnaviv_gpu_clk_disable(gpu);
+ }
+ 
+ static int etnaviv_gpu_rpm_resume(struct device *dev)
