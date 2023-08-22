@@ -1,0 +1,21 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 21 Aug 2023 14:04:14 +0200
+Subject: [PATCH] Release 2023.07.1/customers/skov/imx6/20230821-1
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 92b5c6779a52..a8a8adacc53f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ VERSION = 2023
+ PATCHLEVEL = 07
+ SUBLEVEL = 1
+-EXTRAVERSION =
++EXTRAVERSION =-20230821-1
+ NAME = None
+ 
+ # *DOCUMENTATION*

@@ -352,10 +352,10 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 27 insertions(+), 27 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
-index 54e20c86ac05..6b89ea953878 100644
+index 842e3af6db77..c9a695ced4d7 100644
 --- a/arch/arm/boards/skov-imx6/lowlevel.c
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
-@@ -295,25 +295,25 @@ static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_2x128Mb_800MHz = {
+@@ -296,25 +296,25 @@ static const struct mx6_ddr_sysinfo skov_imx6_sysinfo_2x128Mb_800MHz = {
  	.dsize = 1, /* 32 bit wide = 2 devices, 16 bit each */
  	.cs_density = 4, /* two 2 GBit devices connected */
  	.ncs = 1, /* one CS line for all devices */
@@ -395,7 +395,7 @@ index 54e20c86ac05..6b89ea953878 100644
  };
  
  /* ------------------------------------------------------------------------ */
-@@ -327,21 +327,21 @@ static const struct mx6sdl_iomux_ddr_regs ddr_iomux_s = {
+@@ -328,21 +328,21 @@ static const struct mx6sdl_iomux_ddr_regs ddr_iomux_s = {
  	.dram_sdqs5 = 0x00000030,
  	.dram_sdqs6 = 0x00000030,
  	.dram_sdqs7 = 0x00000030,

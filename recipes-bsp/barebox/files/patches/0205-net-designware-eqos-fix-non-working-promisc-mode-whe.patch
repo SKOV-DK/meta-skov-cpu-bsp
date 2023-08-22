@@ -1,0 +1,70 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 10 Aug 2023 07:57:56 +0200
+Subject: [PATCH] net: designware: eqos: fix non-working promisc mode when set
+ before interface start
+
+Promisc mode is not working if set before starting interface. This seen
+more with DSA switch driver when having many interfaces and different
+MACs.
+
+Make promisc mode work by saving configs before soft reset, then use
+them after reset.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/designware_eqos.c | 12 +++++++++++-
+ drivers/net/designware_eqos.h |  3 +++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/designware_eqos.c b/drivers/net/designware_eqos.c
+index 845f9f51efa7..6caf3a436f8f 100644
+--- a/drivers/net/designware_eqos.c
++++ b/drivers/net/designware_eqos.c
+@@ -351,6 +351,9 @@ int eqos_set_ethaddr(struct eth_device *edev, const unsigned char *mac)
+ 
+ 	memcpy(eqos->macaddr, mac, ETH_ALEN);
+ 
++	if (!eqos->is_started)
++		return 0;
++
+ 	/* mac_hi is only partially overwritten by the following code. Part of
+ 	 * this variable is DCS (DMA Channel Select). If this variable is not
+ 	 * zeroed, we may get some random DMA RX channel.
+@@ -371,6 +374,11 @@ static int eqos_set_promisc(struct eth_device *edev, bool enable)
+ 	struct eqos *eqos = edev->priv;
+ 	u32 mask;
+ 
++	eqos->promisc_enabled = enable;
++
++	if (!eqos->is_started)
++		return 0;
++
+ 	mask = EQOS_MAC_PACKET_FILTER_PR | EQOS_MAC_PACKET_FILTER_PCF;
+ 
+ 	if (enable)
+@@ -429,8 +437,10 @@ static int eqos_start(struct eth_device *edev)
+ 		return ret;
+ 	}
+ 
+-	/* Reset above clears MAC address */
++	/* Reset above clears any previously made configuration */
++	eqos->is_started = true;
+ 	eqos_set_ethaddr(edev, eqos->macaddr);
++	eqos_set_promisc(edev, eqos->promisc_enabled);
+ 
+ 	/* Required for accurate time keeping with EEE counters */
+ 	rate = eqos->ops->get_csr_clk_rate(eqos);
+diff --git a/drivers/net/designware_eqos.h b/drivers/net/designware_eqos.h
+index 31d0dc863229..58ba912cd01f 100644
+--- a/drivers/net/designware_eqos.h
++++ b/drivers/net/designware_eqos.h
+@@ -60,6 +60,9 @@ struct eqos {
+ 
+ 	const struct eqos_ops *ops;
+ 	void *priv;
++
++	bool is_started;
++	bool promisc_enabled;
+ };
+ 
+ struct device;

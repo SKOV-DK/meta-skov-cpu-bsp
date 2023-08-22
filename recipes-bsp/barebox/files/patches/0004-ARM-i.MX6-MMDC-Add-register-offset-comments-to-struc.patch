@@ -10,14 +10,14 @@ comments with the register offsets as a debugging aid.
 
 Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 ---
- arch/arm/mach-imx/include/mach/imx6-mmdc.h | 100 ++++++++++++++---------------
+ include/mach/imx/imx6-mmdc.h | 100 +++++++++++++++++++++----------------------
  1 file changed, 50 insertions(+), 50 deletions(-)
 
-diff --git a/arch/arm/mach-imx/include/mach/imx6-mmdc.h b/arch/arm/mach-imx/include/mach/imx6-mmdc.h
-index bda20aba1741..6a246588d1ac 100644
---- a/arch/arm/mach-imx/include/mach/imx6-mmdc.h
-+++ b/arch/arm/mach-imx/include/mach/imx6-mmdc.h
-@@ -144,60 +144,60 @@ struct mx6sx_iomux_grp_regs {
+diff --git a/include/mach/imx/imx6-mmdc.h b/include/mach/imx/imx6-mmdc.h
+index bf8d41fe5881..1df87bf6bd30 100644
+--- a/include/mach/imx/imx6-mmdc.h
++++ b/include/mach/imx/imx6-mmdc.h
+@@ -145,60 +145,60 @@ struct mx6sx_iomux_grp_regs {
   */
  #define MX6DQ_IOM_DDR_BASE      0x020e0500
  struct mx6dq_iomux_ddr_regs {

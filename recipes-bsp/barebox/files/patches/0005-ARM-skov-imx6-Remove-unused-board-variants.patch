@@ -10,10 +10,10 @@ Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
  1 file changed, 136 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx6/lowlevel.c b/arch/arm/boards/skov-imx6/lowlevel.c
-index 6b89ea953878..ade918e076c4 100644
+index c9a695ced4d7..16809dd4a61d 100644
 --- a/arch/arm/boards/skov-imx6/lowlevel.c
 +++ b/arch/arm/boards/skov-imx6/lowlevel.c
-@@ -27,122 +27,6 @@ static void __udelay(int us)
+@@ -28,122 +28,6 @@ static void __udelay(int us)
  
  /* ------------------------------------------------------------------------ */
  
@@ -136,7 +136,7 @@ index 6b89ea953878..ade918e076c4 100644
  /*
   * Micron MT41K128M16JT-125 IT:K ->  2 GBit = 16 Meg x 16 x 8 banks
   *
-@@ -529,26 +413,6 @@ static void skov_imx6_init(int cpu_type, unsigned board_variant)
+@@ -530,26 +414,6 @@ static void skov_imx6_init(int cpu_type, unsigned board_variant)
  	int instance;
  
  	switch (board_variant) {
