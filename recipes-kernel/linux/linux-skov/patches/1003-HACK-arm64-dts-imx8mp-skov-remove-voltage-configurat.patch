@@ -1,0 +1,59 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 22 Aug 2023 11:29:21 +0200
+Subject: [PATCH] HACK: arm64: dts: imx8mp: skov: remove voltage configurations
+ for the SD2 controller
+
+Currently SD2 controller is not working. So, make it work at least with
+some hi speed SD cards. This issue should be properly investigated.
+
+So far I tested with two different cards:
+ATP SDHC U1, class 10 - not working
+Transcend SDHC class 10 - working
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts | 17 -----------------
+ 1 file changed, 17 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
+index a5b8731557dd..688c6b2cfac5 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
+@@ -111,19 +111,6 @@ reg_can2_stby: regulator-can2-stby {
+ 		regulator-max-microvolt = <3300000>;
+ 		gpio = <&gpio4 22 GPIO_ACTIVE_LOW>;
+ 	};
+-
+-	reg_sd2_vsel: regulator-sd2-vsel {
+-		compatible = "regulator-gpio";
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&pinctrl_reg_sd2_vsel>;
+-		regulator-name = "SD2_VSEL";
+-		regulator-type = "voltage";
+-		vin-supply = <&buck4>;
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <3300000>;
+-		gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+-		states = <3300000 0x1 1800000 0x0>;
+-	};
+ };
+ 
+ &A53_0 {
+@@ -440,9 +427,6 @@ &usdhc2 {
+ 	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
+ 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
+ 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
+-	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
+-	wp-gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
+-	vmmc-supply = <&reg_sd2_vsel>;
+ 	bus-width = <4>;
+ 	status = "okay";
+ };
+@@ -651,7 +635,6 @@ pinctrl_usdhc2_gpio: usdhc2gpiogrp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SD2_CD_B__GPIO2_IO12			0x1c4
+ 			MX8MP_IOMUXC_SD2_WP__GPIO2_IO20				0x1c4
+-			MX8MP_IOMUXC_SD2_RESET_B__USDHC2_RESET_B		0x1c4
+ 		>;
+ 	};
+ 

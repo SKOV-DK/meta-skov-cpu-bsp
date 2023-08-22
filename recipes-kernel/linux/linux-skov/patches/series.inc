@@ -1,6 +1,6 @@
 # umpf-base: v6.5-rc7
 # umpf-name: 6.5/customers/skov/imx6
-# umpf-version: 6.5/customers/skov/imx6/20230821-1
+# umpf-version: 6.5/customers/skov/imx6/20230822-1
 # umpf-topic: v6.5/topic/boards/imx8mp-evk
 # umpf-hashinfo: 2eaf7e480113fb2e2edc695d6f2c992b9bcaa7c0
 # umpf-topic-range: 706a741595047797872e669b3101429ab8d378ef..2e247b6df3f1b7e3aa65aae26dde4bff216013ab
@@ -95,15 +95,16 @@ SRC_URI += "\
   file://patches/0906-phy-freescale-add-Samsung-HDMI-PHY.patch \
   "
 # umpf-topic: v6.5/topic/imx8mp-skov-dts
-# umpf-hashinfo: 38f248571a6a3170471b3ba033fe7b635a0bd910
-# umpf-topic-range: c629447a362a442aa957b8d9ff8a743af94bb9e9..3893020a23dadad0c387d1622f2cc2ecb399e991
+# umpf-hashinfo: f6d3ccd2b2e74797fe1c7211a8e8edfbb100037c
+# umpf-topic-range: c629447a362a442aa957b8d9ff8a743af94bb9e9..1b4d022bf245390e1d6b002913f4e61a916874bb
 SRC_URI += "\
   file://patches/1001-dt-bindings-arm-Add-compatible-for-SKOV-i.MX8MP-RevA.patch \
   file://patches/1002-arm64-dts-freescale-Add-SKOV-IMX8MP-CPU-revA-board.patch \
+  file://patches/1003-HACK-arm64-dts-imx8mp-skov-remove-voltage-configurat.patch \
   "
-# umpf-release: 6.5/customers/skov/imx6/20230821-1
-# umpf-topic-range: 3893020a23dadad0c387d1622f2cc2ecb399e991..be115ca8ba13f65abf2b0b98c43808ea7886b40b
+# umpf-release: 6.5/customers/skov/imx6/20230822-1
+# umpf-topic-range: 1b4d022bf245390e1d6b002913f4e61a916874bb..c6b2cbeb6d13fbd7093d69d9b15759f1efb25592
 SRC_URI += "\
-  file://patches/1101-Release-6.5-customers-skov-imx6-20230821-1.patch \
+  file://patches/1101-Release-6.5-customers-skov-imx6-20230822-1.patch \
   "
 # umpf-end
