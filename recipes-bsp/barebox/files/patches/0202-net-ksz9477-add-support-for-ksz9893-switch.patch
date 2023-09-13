@@ -1,0 +1,24 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 8 Aug 2023 11:28:05 +0200
+Subject: [PATCH] net: ksz9477: add support for ksz9893 switch
+
+Add support for Microchip KSZ9893 switch. No additional changes seems to
+be needed.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/ksz9477.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/ksz9477.c b/drivers/net/ksz9477.c
+index 61142aa97b1a..a6a8144479f7 100644
+--- a/drivers/net/ksz9477.c
++++ b/drivers/net/ksz9477.c
+@@ -476,6 +476,7 @@ static const struct of_device_id microchip_switch_dt_ids[] = {
+ 	{ .compatible = "microchip,ksz8563" },
+ 	{ .compatible = "microchip,ksz9477" },
+ 	{ .compatible = "microchip,ksz9563" },
++	{ .compatible = "microchip,ksz9893" },
+ 	{ }
+ };
+ MODULE_DEVICE_TABLE(of, microchip_switch_dt_ids);

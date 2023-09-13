@@ -12,21 +12,21 @@ RDEPENDS:${PN} = "flex lzop"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "6.3.2"
+LINUX_VERSION = "6.5-rc7"
 
 SRC_URI = " \
-    https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz \
+    https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz \
     file://defconfig \
 "
 
 require linux-skov/patches/series.inc
-SRC_URI[sha256sum] = "b612ecf282ca3f7989ff6d9f39082833b7dc2d522cb969a05334d3614e9c5328"
+SRC_URI[sha256sum] = "b3d55abc507f8e971afd9a3dd6408ed5a8d13e5f30284716150a06b9bd455a96"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
 # file. Leaving it empty here ensures an early explicit build failure.
-COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu|imx8eval"
+COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu|imx8eval|imx8-cpu"
 
 # do not install kernel images to the rootfs
 RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""

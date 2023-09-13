@@ -1,0 +1,57 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Sun, 28 May 2023 18:35:40 +0200
+Subject: [PATCH] drm/etnaviv: expedited MMU fault handling
+
+The GPU is halted when it hits a MMU exception, so there is no point in
+waiting for the job timeout to expire or try to work out if the GPU is
+still making progress in the timeout handler, as we know that the GPU
+won't make any more progress.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c   | 2 ++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h   | 1 +
+ drivers/gpu/drm/etnaviv/etnaviv_sched.c | 5 +++--
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index e62761032afe..74fdcaf52fc5 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1531,6 +1531,8 @@ static irqreturn_t irq_handler(int irq, void *data)
+ 
+ 		if (intr & VIVS_HI_INTR_ACKNOWLEDGE_MMU_EXCEPTION) {
+ 			dump_mmu_fault(gpu);
++			gpu->state = ETNA_GPU_STATE_FAULT;
++			drm_sched_fault(&gpu->sched);
+ 			intr &= ~VIVS_HI_INTR_ACKNOWLEDGE_MMU_EXCEPTION;
+ 		}
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index a4a9253f0d52..d4b9a97f2c72 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -101,6 +101,7 @@ enum etnaviv_gpu_state {
+ 	ETNA_GPU_STATE_RESET,
+ 	ETNA_GPU_STATE_INITIALIZED,
+ 	ETNA_GPU_STATE_RUNNING,
++	ETNA_GPU_STATE_FAULT,
+ };
+ 
+ struct etnaviv_gpu {
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+index 35d7c2ef7a57..d5d255ab089f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -52,8 +52,9 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
+ 	 */
+ 	dma_addr = gpu_read(gpu, VIVS_FE_DMA_ADDRESS);
+ 	change = dma_addr - gpu->hangcheck_dma_addr;
+-	if (gpu->completed_fence != gpu->hangcheck_fence ||
+-	    change < 0 || change > 16) {
++	if (gpu->state == ETNA_GPU_STATE_RUNNING &&
++	    (gpu->completed_fence != gpu->hangcheck_fence ||
++	     change < 0 || change > 16)) {
+ 		gpu->hangcheck_dma_addr = dma_addr;
+ 		gpu->hangcheck_fence = gpu->completed_fence;
+ 		return DRM_GPU_SCHED_STAT_NOMINAL;

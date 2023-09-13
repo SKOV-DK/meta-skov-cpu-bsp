@@ -4,15 +4,19 @@
 # root-FSs and a partition for /home. The first two are empty and the remaining
 # partitions contain an empty ext4-filesystem each.
 
+# You can find the list of partition type GUIDs at https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs.
+
 # Remember to keep the location of barebox' environment & state synchronized
 # with the redundant information in barebox' devicetree file (imx8mp-evk.dts)!
 #
 # Dunfell's syntax does not allow for explicit units, the default is kiB for
 # offset and MiB for the (fixed) size.
-part --part-name barebox-environment --part-type 8DA63339-0007-60C0-C436-083AC8230908 --offset 1024 --fixed-size 1
-part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --offset 2048 --fixed-size 1
-part --part-name system0 --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label root-FS --fstype=ext4 --align 1024 --fixed-size 4096
-part --part-name system1 --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label root-FS --fstype=ext4 --align 1024 --fixed-size 4096
-part --part-name home    --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label home    --fstype=ext4 --align 1024 --fixed-size 8192
+part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET} --no-table
+part --part-name barebox-environment --part-type 8DA63339-0007-60C0-C436-083AC8230908 --offset 1024       --fixed-size 1
+part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --offset 2048       --fixed-size 1
+part --part-name system0             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  root-FS    --fstype=ext4 --align 1024 --fixed-size 2048
+part --part-name system1             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  root-FS    --fstype=ext4 --align 1024 --fixed-size 2048 
+part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label  home       --fstype=ext4 --align 1024 --fixed-size 2560
+part --part-name recovery            --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  recoveryfs --fstype=ext4 --align 1024 --fixed-size 512
 
 bootloader --ptable gpt

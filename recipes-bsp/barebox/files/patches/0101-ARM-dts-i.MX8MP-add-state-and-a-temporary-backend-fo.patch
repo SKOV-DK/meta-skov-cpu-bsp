@@ -25,7 +25,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 96 insertions(+), 20 deletions(-)
 
 diff --git a/arch/arm/dts/imx8mp-evk.dts b/arch/arm/dts/imx8mp-evk.dts
-index d992b14882a3..3a54b7e87e50 100644
+index 037674306817..df5ea7fbe407 100644
 --- a/arch/arm/dts/imx8mp-evk.dts
 +++ b/arch/arm/dts/imx8mp-evk.dts
 @@ -10,15 +10,19 @@
@@ -50,7 +50,7 @@ index d992b14882a3..3a54b7e87e50 100644
  			status = "disabled";
  		};
  	};
-@@ -28,6 +32,70 @@
+@@ -28,6 +32,70 @@ status {
  			barebox,default-trigger = "heartbeat";
  		};
  	};
@@ -120,8 +120,8 @@ index d992b14882a3..3a54b7e87e50 100644
 +	};
  };
  
- &ethphy1 {
-@@ -40,32 +108,40 @@
+ /delete-node/ &{/memory@40000000};
+@@ -78,31 +146,39 @@ &usb_dwc3_0 {
  };
  
  &usdhc2 {
@@ -179,4 +179,3 @@ index d992b14882a3..3a54b7e87e50 100644
 +		};
  	};
  };
- 

@@ -7,4 +7,4 @@ require files/${MACHINE}/env/env.inc
 
 DEPENDS += "coreutils-native"
 
-SRC_URI[sha256sum] = "20532daff1720fbefa0e02dba0294e6817d29c155f49b9b549db9577435fc7b6"
+SRC_URI[sha256sum] = "3f2f1e3b28dd35d49c2b08cd194df3910c1e322a8372574273c073ca6ddafe7e"

@@ -1,0 +1,77 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 26 Aug 2022 19:36:10 +0200
+Subject: [PATCH] soc: imx: gpcv2: split PGC domain probe in two passes
+
+Since 5a46079a9645 ("PM: domains: Delete usage of driver_deferred_probe_check_state()")
+power domain consumers attached by the driver core do not support probe
+deferral anymore, as it is assumed that they are only probed after the
+provider is present, as a devlink should have been established between
+the two.
+
+With the GPCv2 and its slightly unusual mix between platform devices and DT
+description for the PGC domains, devlink fails to add the neccessary probe
+dependency. Now that probe deferral is not an option anymore, the domain
+drivers for nested GPC domains simply fail to probe, leaving parts of the
+SoC unusable. Rather than trying to teach devlink about our one-off usage
+of DT and platform devices, just split the registration of the nested
+power domains into a second pass, so that we never need any dependency
+handling.
+
+Fixes: 5a46079a9645 ("PM: domains: Delete usage of driver_deferred_probe_check_state()")
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/soc/imx/gpcv2.c | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/soc/imx/gpcv2.c b/drivers/soc/imx/gpcv2.c
+index 4b3300b090a8..5493d5df8bcc 100644
+--- a/drivers/soc/imx/gpcv2.c
++++ b/drivers/soc/imx/gpcv2.c
+@@ -1452,7 +1452,7 @@ static int imx_gpcv2_probe(struct platform_device *pdev)
+ 	struct device_node *pgc_np, *np;
+ 	struct regmap *regmap;
+ 	void __iomem *base;
+-	int ret;
++	int ret, pass = 0;
+ 
+ 	pgc_np = of_get_child_by_name(dev->of_node, "pgc");
+ 	if (!pgc_np) {
+@@ -1471,7 +1471,16 @@ static int imx_gpcv2_probe(struct platform_device *pdev)
+ 		return ret;
+ 	}
+ 
++	/*
++	 * Run two passes for the registration of the PGC domain platform
++	 * devices: first all devices that are not part of a power-domain
++	 * themselves, then all the others. This avoids -EPROBE_DEFER being
++	 * returned for nested domains, that need their parent PGC domains
++	 * to be present on probe.
++	 */
++again:
+ 	for_each_child_of_node(pgc_np, np) {
++		bool child_domain = of_property_read_bool(np, "power-domains");
+ 		struct platform_device *pd_pdev;
+ 		struct imx_pgc_domain *domain;
+ 		u32 domain_index;
+@@ -1479,6 +1488,9 @@ static int imx_gpcv2_probe(struct platform_device *pdev)
+ 		if (!of_device_is_available(np))
+ 			continue;
+ 
++		if ((pass == 0 && child_domain) || (pass == 1 && !child_domain))
++			continue;
++
+ 		ret = of_property_read_u32(np, "reg", &domain_index);
+ 		if (ret) {
+ 			dev_err(dev, "Failed to read 'reg' property\n");
+@@ -1528,6 +1540,11 @@ static int imx_gpcv2_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
++	if (pass == 0) {
++		pass++;
++		goto again;
++	}
++
+ 	return 0;
+ }
+ 
