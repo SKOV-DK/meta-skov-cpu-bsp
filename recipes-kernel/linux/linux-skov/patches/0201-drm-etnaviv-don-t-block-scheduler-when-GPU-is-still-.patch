@@ -23,7 +23,7 @@ the behavior of other drivers and avoids the issue.
  1 file changed, 5 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-index 1ae87dfd19c4..35d7c2ef7a57 100644
+index 345fec6cb1a4..d5d255ab089f 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 @@ -38,15 +38,12 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
@@ -43,8 +43,8 @@ index 1ae87dfd19c4..35d7c2ef7a57 100644
  
  	/*
  	 * If the GPU is still making forward progress on the front-end (which
-@@ -59,9 +56,12 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
- 	    change < 0 || change > 16) {
+@@ -60,9 +57,12 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
+ 	     change < 0 || change > 16)) {
  		gpu->hangcheck_dma_addr = dma_addr;
  		gpu->hangcheck_fence = gpu->completed_fence;
 -		goto out_no_timeout;
@@ -57,7 +57,7 @@ index 1ae87dfd19c4..35d7c2ef7a57 100644
  	if(sched_job)
  		drm_sched_increase_karma(sched_job);
  
-@@ -73,11 +73,6 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
+@@ -74,11 +74,6 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job
  
  	drm_sched_start(&gpu->sched, true);
  	return DRM_GPU_SCHED_STAT_NOMINAL;

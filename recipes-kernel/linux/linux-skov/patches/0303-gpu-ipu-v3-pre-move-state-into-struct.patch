@@ -11,7 +11,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 15 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/gpu/ipu-v3/ipu-pre.c b/drivers/gpu/ipu-v3/ipu-pre.c
-index ad82c9e0252f..befffc85a146 100644
+index aef984a43190..0d4e882fe8f1 100644
 --- a/drivers/gpu/ipu-v3/ipu-pre.c
 +++ b/drivers/gpu/ipu-v3/ipu-pre.c
 @@ -96,9 +96,12 @@ struct ipu_pre {

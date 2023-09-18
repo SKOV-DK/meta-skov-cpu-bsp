@@ -11,13 +11,13 @@ the bus clocks needed that should be keyed off this property.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
- drivers/soc/imx/gpcv2.c | 40 ++++++++++++++++++++--------------------
+ drivers/pmdomain/imx/gpcv2.c | 40 ++++++++++++++++++++--------------------
  1 file changed, 20 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/soc/imx/gpcv2.c b/drivers/soc/imx/gpcv2.c
-index 5493d5df8bcc..e1927d23407b 100644
---- a/drivers/soc/imx/gpcv2.c
-+++ b/drivers/soc/imx/gpcv2.c
+diff --git a/drivers/pmdomain/imx/gpcv2.c b/drivers/pmdomain/imx/gpcv2.c
+index 752b1344a84d..bb7439908f2d 100644
+--- a/drivers/pmdomain/imx/gpcv2.c
++++ b/drivers/pmdomain/imx/gpcv2.c
 @@ -293,7 +293,7 @@ struct imx_pgc_domain {
  	} bits;
  

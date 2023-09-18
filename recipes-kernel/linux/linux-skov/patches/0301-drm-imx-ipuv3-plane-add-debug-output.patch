@@ -10,7 +10,7 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 49 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c b/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
-index 80142d9a4a55..09d81813e156 100644
+index dade8b59feae..c17282d2bf46 100644
 --- a/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
 +++ b/drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c
 @@ -371,7 +371,8 @@ static int ipu_plane_atomic_check(struct drm_plane *plane,

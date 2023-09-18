@@ -20,7 +20,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  3 files changed, 50 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/gpu/ipu-v3/ipu-pre.c b/drivers/gpu/ipu-v3/ipu-pre.c
-index befffc85a146..e8d9792827dd 100644
+index 0d4e882fe8f1..82b91fd117b1 100644
 --- a/drivers/gpu/ipu-v3/ipu-pre.c
 +++ b/drivers/gpu/ipu-v3/ipu-pre.c
 @@ -99,8 +99,12 @@ struct ipu_pre {
@@ -135,7 +135,7 @@ index befffc85a146..e8d9792827dd 100644
  
  bool ipu_pre_update_pending(struct ipu_pre *pre)
 diff --git a/drivers/gpu/ipu-v3/ipu-prg.c b/drivers/gpu/ipu-v3/ipu-prg.c
-index 196797c1b4b3..eb8cfcd9f5b4 100644
+index 729605709955..661dedf6617a 100644
 --- a/drivers/gpu/ipu-v3/ipu-prg.c
 +++ b/drivers/gpu/ipu-v3/ipu-prg.c
 @@ -287,7 +287,7 @@ int ipu_prg_channel_configure(struct ipuv3_channel *ipu_chan,

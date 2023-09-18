@@ -12,10 +12,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 13 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-index d74f4db304ae..1a14587fc6e8 100644
+index eaabb953cda0..3549057992bd 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-@@ -1864,6 +1864,19 @@ hdmi_blk_ctrl: blk-ctrl@32fc0000 {
+@@ -1860,6 +1860,19 @@ hdmi_blk_ctrl: blk-ctrl@32fc0000 {
  						     "hdmi-tx", "hdmi-tx-phy";
  				#power-domain-cells = <1>;
  			};

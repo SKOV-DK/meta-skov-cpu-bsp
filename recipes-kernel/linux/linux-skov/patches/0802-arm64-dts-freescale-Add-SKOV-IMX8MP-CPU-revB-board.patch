@@ -1,52 +1,60 @@
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Thu, 17 Aug 2023 14:41:21 +0200
-Subject: [PATCH] arm64: dts: freescale: Add SKOV IMX8MP CPU revA board
+Subject: [PATCH] arm64: dts: freescale: Add SKOV IMX8MP CPU revB board
 
 Add Skov i.MX8MP based climate controller.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
- arch/arm64/boot/dts/freescale/Makefile             |   1 +
- arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts | 711 +++++++++++++++++++++
- 2 files changed, 712 insertions(+)
- create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
+ arch/arm64/boot/dts/freescale/Makefile             |   3 +
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 621 +++++++++++++++++++++
+ .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   |  38 ++
+ .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 159 ++++++
+ .../freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts  |  89 +++
+ 5 files changed, 910 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
 
 diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index a750be13ace8..529f6f2e92b3 100644
+index c6872b7e9471..6af424268ebc 100644
 --- a/arch/arm64/boot/dts/freescale/Makefile
 +++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -99,6 +99,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb
+@@ -101,6 +101,9 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
-+dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-reva.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-hdmi.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-lt6.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-mi1010ait-1cp1.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw74xx.dtb
- dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw7905-2x.dtb
-diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw71xx-2x.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw72xx-2x.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 new file mode 100644
-index 000000000000..a5b8731557dd
+index 000000000000..7faa99bc885e
 --- /dev/null
-+++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dts
-@@ -0,0 +1,711 @@
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -0,0 +1,621 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-+
-+/dts-v1/;
 +
 +#include "imx8mp.dtsi"
 +
 +#include <dt-bindings/leds/common.h>
 +
 +/ {
-+	model = "SKOV IMX8MP CPU revA - MI1010AIT-1CP1";
-+	compatible = "skov,imx8mp-skov-reva-mi1010ait-1cp1", "fsl,imx8mp";
-+
 +	aliases {
++		/* some of this aliases like backlight0, ethernetX and switch0
++		 * are needed for the bootloader.
++		 */
++		backlight0 = &backlight;
 +		ethernet0 = &eqos;
 +		ethernet1 = &lan1;
 +		ethernet2 = &lan2;
 +		rtc0 = &i2c_rtc;
 +		rtc1 = &snvs_rtc;
++		switch0 = &switch;
 +	};
 +
 +	backlight: backlight {
@@ -54,22 +62,11 @@ index 000000000000..a5b8731557dd
 +		pinctrl-0 = <&pinctrl_backlight>;
 +		pwms = <&pwm1 0 20000 0>;
 +		power-supply = <&reg_24v0>;
-+		enable-gpios = <&gpio4 24 GPIO_ACTIVE_LOW>;
++		enable-gpios = <&gpio4 24 GPIO_ACTIVE_HIGH>;
 +		brightness-levels = <0 255>;
 +		num-interpolated-steps = <17>;
 +		default-brightness-level = <8>;
-+	};
-+
-+	display {
-+		compatible = "multi-inno,mi1010ait-1cp";
-+		backlight = <&backlight>;
-+		power-supply = <&buck4>;
-+
-+		port {
-+			panel_in_lvds0: endpoint {
-+				remote-endpoint = <&ldb_lvds_ch0>;
-+			};
-+		};
++		status = "disabled";
 +	};
 +
 +	leds {
@@ -141,19 +138,6 @@ index 000000000000..a5b8731557dd
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
 +		gpio = <&gpio4 22 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	reg_sd2_vsel: regulator-sd2-vsel {
-+		compatible = "regulator-gpio";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_reg_sd2_vsel>;
-+		regulator-name = "SD2_VSEL";
-+		regulator-type = "voltage";
-+		vin-supply = <&buck4>;
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <3300000>;
-+		gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
-+		states = <3300000 0x1 1800000 0x0>;
 +	};
 +};
 +
@@ -299,27 +283,6 @@ index 000000000000..a5b8731557dd
 +	};
 +};
 +
-+&i2c2 {
-+	clock-frequency = <400000>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_i2c2>;
-+	status = "okay";
-+
-+	touchscreen@38 {
-+		compatible = "edt,edt-ft5406";
-+		reg = <0x38>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_touchscreen>;
-+		interrupts-extended = <&gpio4 28 IRQ_TYPE_EDGE_FALLING>;
-+		reset-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
-+		touchscreen-size-x = <1280>;
-+		touchscreen-size-y = <800>;
-+		vcc-supply = <&buck4>;
-+		iovcc-supply = <&buck4>;
-+		wakeup-source;
-+	};
-+};
-+
 +&i2c3 {
 +	clock-frequency = <400000>;
 +	pinctrl-names = "default";
@@ -348,7 +311,7 @@ index 000000000000..a5b8731557dd
 +	pinctrl-0 = <&pinctrl_i2c4>;
 +	status = "okay";
 +
-+	switch@5f {
++	switch: switch@5f {
 +		compatible = "microchip,ksz9893";
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_switch>;
@@ -391,43 +354,9 @@ index 000000000000..a5b8731557dd
 +	};
 +};
 +
-+&lcdif2 {
-+ 	status = "okay";
-+};
-+
-+&lvds_bridge {
-+	/* IMX8MP_CLK_MEDIA_LDB = IMX8MP_CLK_MEDIA_DISP2_PIX * 7 */
-+	assigned-clock-rates = <482300000>;
-+	status = "okay";
-+
-+	ports {
-+		port@1 {
-+			ldb_lvds_ch0: endpoint {
-+				remote-endpoint = <&panel_in_lvds0>;
-+			};
-+		};
-+	};
-+};
-+
-+&media_blk_ctrl {
-+	/* currently it is not possible to let display clocks confugure
-+	 * automatically, so we need to set them manually
-+	 */
-+	assigned-clock-rates = <500000000>, <200000000>, <0>,
-+		/* IMX8MP_CLK_MEDIA_DISP2_PIX = pixelclk of lvds panel */
-+		<68900000>,
-+		/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_LDB * 2 */
-+		<964600000>;
-+};
-+
 +&pwm1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_pwm1>;
-+	status = "okay";
-+};
-+
-+&snvs_pwrkey {
-+	status = "okay";
 +};
 +
 +&uart2 {
@@ -471,9 +400,6 @@ index 000000000000..a5b8731557dd
 +	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
-+	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
-+	vmmc-supply = <&reg_sd2_vsel>;
 +	bus-width = <4>;
 +	status = "okay";
 +};
@@ -576,13 +502,6 @@ index 000000000000..a5b8731557dd
 +		>;
 +	};
 +
-+	pinctrl_i2c2: i2c2grp {
-+		fsl,pins = <
-+			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL				0x400001c2
-+			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA				0x400001c2
-+		>;
-+	};
-+
 +	pinctrl_i2c3: i2c3grp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL				0x400001c2
@@ -682,7 +601,6 @@ index 000000000000..a5b8731557dd
 +		fsl,pins = <
 +			MX8MP_IOMUXC_SD2_CD_B__GPIO2_IO12			0x1c4
 +			MX8MP_IOMUXC_SD2_WP__GPIO2_IO20				0x1c4
-+			MX8MP_IOMUXC_SD2_RESET_B__USDHC2_RESET_B		0x1c4
 +		>;
 +	};
 +
@@ -737,6 +655,310 @@ index 000000000000..a5b8731557dd
 +	pinctrl_wdog: wdoggrp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B			0xc6
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+new file mode 100644
+index 000000000000..01c7420966ba
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+@@ -0,0 +1,38 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++
++/dts-v1/;
++
++#include "imx8mp-skov-reva.dtsi"
++
++/ {
++	model = "SKOV IMX8MP CPU revB - HDMI";
++	compatible = "skov,imx8mp-skov-revb-hdmi", "fsl,imx8mp";
++};
++
++&hdmi_pvi {
++	status = "okay";
++};
++
++&hdmi_tx {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hdmi>;
++	status = "okay";
++};
++
++&hdmi_tx_phy {
++	status = "okay";
++};
++
++&lcdif3 {
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_hdmi: hdmigrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL		0x1c3
++			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA		0x1c3
++			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD			0x19
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
+new file mode 100644
+index 000000000000..1065e8880449
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
+@@ -0,0 +1,159 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++
++/dts-v1/;
++
++#include "imx8mp-skov-reva.dtsi"
++
++/ {
++	model = "SKOV IMX8MP CPU revB - LT6";
++	compatible = "skov,imx8mp-skov-revb-lt6", "fsl,imx8mp";
++
++	lvds-decoder {
++		compatible = "ti,sn65lvds822", "lvds-decoder";
++		power-supply = <&buck4>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++
++				in_lvds1: endpoint {
++					data-mapping = "vesa-24";
++					remote-endpoint = <&ldb_lvds_ch1>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++
++				lvds_decoder_out: endpoint {
++					remote-endpoint = <&panel_in>;
++				};
++			};
++		};
++	};
++
++	panel {
++		compatible = "logictechno,lttd800480070-l6wh-rt";
++		backlight = <&backlight>;
++		power-supply = <&buck4>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&lvds_decoder_out>;
++			};
++		};
++	};
++
++	touchscreen {
++		compatible = "resistive-adc-touch";
++		io-channels = <&adc_ts 1>, <&adc_ts 3>, <&adc_ts 4>, <&adc_ts 5>;
++		io-channel-names = "y", "z1", "z2", "x";
++		touchscreen-min-pressure = <65000>;
++		touchscreen-inverted-y;
++		touchscreen-swapped-x-y;
++		touchscreen-x-plate-ohms = <300>;
++		touchscreen-y-plate-ohms = <800>;
++	};
++};
++
++&backlight {
++	status = "okay";
++};
++
++&ecspi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_ecspi1>;
++	cs-gpios = <&gpio5 9 GPIO_ACTIVE_LOW>;
++	status = "okay";
++
++	adc_ts: adc@0 {
++		compatible = "ti,tsc2046e-adc";
++		reg = <0>;
++		pinctrl-0 = <&pinctrl_touch>;
++		pinctrl-names ="default";
++		spi-max-frequency = <1000000>;
++		interrupts-extended = <&gpio4 25 IRQ_TYPE_LEVEL_LOW>;
++		#io-channel-cells = <1>;
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		channel@1 {
++			reg = <1>;
++			settling-time-us = <700>;
++			oversampling-ratio = <5>;
++		};
++
++		channel@3 {
++			reg = <3>;
++			settling-time-us = <700>;
++			oversampling-ratio = <5>;
++		};
++
++		channel@4 {
++			reg = <4>;
++			settling-time-us = <700>;
++			oversampling-ratio = <5>;
++		};
++
++		channel@5 {
++			reg = <5>;
++			settling-time-us = <700>;
++			oversampling-ratio = <5>;
++		};
++	};
++};
++
++&lcdif2 {
++	status = "okay";
++};
++
++&lvds_bridge {
++	/* IMX8MP_CLK_MEDIA_LDB = IMX8MP_CLK_MEDIA_DISP2_PIX * 7 */
++	assigned-clock-rates = <231000000>;
++	status = "okay";
++
++	ports {
++		port@2 {
++			ldb_lvds_ch1: endpoint {
++				remote-endpoint = <&in_lvds1>;
++			};
++		};
++	};
++};
++
++&media_blk_ctrl {
++	/* currently it is not possible to let display clocks confugure
++	 * automatically, so we need to set them manually
++	 */
++	assigned-clock-rates = <500000000>, <200000000>, <0>,
++		/* IMX8MP_CLK_MEDIA_DISP2_PIX = pixelclk of lvds panel */
++		<33000000>,
++		/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_LDB * 2 */
++		<462000000>;
++};
++
++&pwm1 {
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_ecspi1: ecspi1grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_ECSPI1_SCLK__ECSPI1_SCLK			0x44
++			MX8MP_IOMUXC_ECSPI1_MOSI__ECSPI1_MOSI			0x44
++			MX8MP_IOMUXC_ECSPI1_MISO__ECSPI1_MISO			0x44
++			MX8MP_IOMUXC_ECSPI1_SS0__GPIO5_IO09			0x40
++		>;
++	};
++
++	pinctrl_touch: touchgrp {
++		fsl,pins = <
++			/* external pull up */
++			MX8MP_IOMUXC_SAI2_TXC__GPIO4_IO25			0x40
++		>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+new file mode 100644
+index 000000000000..9b94b413cc45
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+@@ -0,0 +1,89 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++
++/dts-v1/;
++
++#include "imx8mp-skov-reva.dtsi"
++
++/ {
++	model = "SKOV IMX8MP CPU revB - MI1010AIT-1CP1";
++	compatible = "skov,imx8mp-skov-revb-mi1010ait-1cp1", "fsl,imx8mp";
++
++	panel {
++		compatible = "multi-inno,mi1010ait-1cp";
++		backlight = <&backlight>;
++		power-supply = <&buck4>;
++
++		port {
++			in_lvds0: endpoint {
++				remote-endpoint = <&ldb_lvds_ch0>;
++			};
++		};
++	};
++};
++
++&backlight {
++	status = "okay";
++};
++
++&i2c2 {
++	clock-frequency = <400000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++	status = "okay";
++
++	touchscreen@38 {
++		compatible = "edt,edt-ft5406";
++		reg = <0x38>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_touchscreen>;
++		interrupts-extended = <&gpio4 28 IRQ_TYPE_EDGE_FALLING>;
++		reset-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
++		touchscreen-size-x = <1280>;
++		touchscreen-size-y = <800>;
++		vcc-supply = <&buck4>;
++		iovcc-supply = <&buck4>;
++		wakeup-source;
++	};
++};
++
++&lcdif2 {
++	status = "okay";
++};
++
++&lvds_bridge {
++	/* IMX8MP_CLK_MEDIA_LDB = IMX8MP_CLK_MEDIA_DISP2_PIX * 7 */
++	assigned-clock-rates = <482300000>;
++	status = "okay";
++
++	ports {
++		port@1 {
++			ldb_lvds_ch0: endpoint {
++				remote-endpoint = <&in_lvds0>;
++			};
++		};
++	};
++};
++
++&media_blk_ctrl {
++	/* currently it is not possible to let display clocks confugure
++	 * automatically, so we need to set them manually
++	 */
++	assigned-clock-rates = <500000000>, <200000000>, <0>,
++		/* IMX8MP_CLK_MEDIA_DISP2_PIX = pixelclk of lvds panel */
++		<68900000>,
++		/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_LDB * 2 */
++		<964600000>;
++};
++
++&pwm1 {
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl_i2c2: i2c2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL				0x400001c2
++			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA				0x400001c2
 +		>;
 +	};
 +};

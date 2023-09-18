@@ -12,10 +12,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index 74fdcaf52fc5..8e809899b9d9 100644
+index 9276756e1397..1dcfa23db3be 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -505,8 +505,19 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+@@ -513,8 +513,19 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
  	timeout = jiffies + msecs_to_jiffies(1000);
  
  	while (time_is_after_jiffies(timeout)) {
