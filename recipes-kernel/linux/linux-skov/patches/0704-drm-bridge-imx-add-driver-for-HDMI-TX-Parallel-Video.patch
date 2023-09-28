@@ -14,41 +14,44 @@ Tested-by: Marek Vasut <marex@denx.de>
 ---
  drivers/gpu/drm/bridge/imx/Kconfig           |   7 +
  drivers/gpu/drm/bridge/imx/Makefile          |   1 +
- drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c | 202 +++++++++++++++++++++++++++
- 3 files changed, 210 insertions(+)
+ drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c | 206 +++++++++++++++++++++++++++
+ 3 files changed, 214 insertions(+)
  create mode 100644 drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c
 
 diff --git a/drivers/gpu/drm/bridge/imx/Kconfig b/drivers/gpu/drm/bridge/imx/Kconfig
-index 00b69a920c8b..b1f4d962b2af 100644
+index 00b69a920c8b..52df854c25be 100644
 --- a/drivers/gpu/drm/bridge/imx/Kconfig
 +++ b/drivers/gpu/drm/bridge/imx/Kconfig
-@@ -58,4 +58,11 @@ config DRM_IMX8MP_DW_HDMI_BRIDGE
- 	  Choose this to enable support for the internal HDMI encoder found
- 	  on the i.MX8MP SoC.
+@@ -3,6 +3,13 @@ if ARCH_MXC || COMPILE_TEST
+ config DRM_IMX_LDB_HELPER
+ 	tristate
  
 +config DRM_IMX8MP_HDMI_PVI
-+	tristate "i.MX8MP HDMI PVI bridge support"
++	tristate "Freescale i.MX8MP HDMI PVI bridge support"
 +	depends on OF
 +	help
 +	  Choose this to enable support for the internal HDMI TX Parallel
-+	  Video Interface found on the i.MX8MP SoC.
++	  Video Interface found on the Freescale i.MX8MP SoC.
 +
- endif # ARCH_MXC || COMPILE_TEST
+ config DRM_IMX8QM_LDB
+ 	tristate "Freescale i.MX8QM LVDS display bridge"
+ 	depends on OF
 diff --git a/drivers/gpu/drm/bridge/imx/Makefile b/drivers/gpu/drm/bridge/imx/Makefile
-index 5ca5e3309524..373beb358df3 100644
+index 5ca5e3309524..3ab7c1499698 100644
 --- a/drivers/gpu/drm/bridge/imx/Makefile
 +++ b/drivers/gpu/drm/bridge/imx/Makefile
-@@ -6,3 +6,4 @@ obj-$(CONFIG_DRM_IMX8QXP_PIXEL_LINK) += imx8qxp-pixel-link.o
- obj-$(CONFIG_DRM_IMX8QXP_PIXEL_LINK_TO_DPI) += imx8qxp-pxl2dpi.o
- 
- obj-$(CONFIG_DRM_IMX8MP_DW_HDMI_BRIDGE) += imx8mp-hdmi.o
+@@ -1,4 +1,5 @@
+ obj-$(CONFIG_DRM_IMX_LDB_HELPER) += imx-ldb-helper.o
 +obj-$(CONFIG_DRM_IMX8MP_HDMI_PVI) += imx8mp-hdmi-pvi.o
+ obj-$(CONFIG_DRM_IMX8QM_LDB) += imx8qm-ldb.o
+ obj-$(CONFIG_DRM_IMX8QXP_LDB) += imx8qxp-ldb.o
+ obj-$(CONFIG_DRM_IMX8QXP_PIXEL_COMBINER) += imx8qxp-pixel-combiner.o
 diff --git a/drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c b/drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c
 new file mode 100644
-index 000000000000..30d40c21dabb
+index 000000000000..5ccd70c98187
 --- /dev/null
 +++ b/drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,206 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +
 +/*
@@ -58,20 +61,23 @@ index 000000000000..30d40c21dabb
 +#include <drm/drm_atomic_helper.h>
 +#include <drm/drm_bridge.h>
 +#include <drm/drm_crtc.h>
++#include <linux/bitfield.h>
++#include <linux/io.h>
 +#include <linux/module.h>
 +#include <linux/of_device.h>
 +#include <linux/of_graph.h>
 +#include <linux/pm_runtime.h>
 +
-+#define HTX_PVI_CTL	0x0
-+#define  PVI_CTL_OP_VSYNC_POL	BIT(18)
-+#define  PVI_CTL_OP_HSYNC_POL	BIT(17)
-+#define  PVI_CTL_OP_DE_POL	BIT(16)
-+#define  PVI_CTL_INP_VSYNC_POL	BIT(14)
-+#define  PVI_CTL_INP_HSYNC_POL	BIT(13)
-+#define  PVI_CTL_INP_DE_POL	BIT(12)
-+#define  PVI_CTL_INPUT_LCDIF	BIT(2)
-+#define  PVI_CTL_EN		BIT(0)
++#define HTX_PVI_CTRL			0x0
++#define  PVI_CTRL_OP_VSYNC_POL		BIT(18)
++#define  PVI_CTRL_OP_HSYNC_POL		BIT(17)
++#define  PVI_CTRL_OP_DE_POL		BIT(16)
++#define  PVI_CTRL_INP_VSYNC_POL		BIT(14)
++#define  PVI_CTRL_INP_HSYNC_POL		BIT(13)
++#define  PVI_CTRL_INP_DE_POL		BIT(12)
++#define  PVI_CTRL_MODE_MASK		GENMASK(2, 1)
++#define  PVI_CTRL_MODE_LCDIF		2
++#define  PVI_CTRL_EN			BIT(0)
 +
 +struct imx8mp_hdmi_pvi {
 +	struct drm_bridge	bridge;
@@ -115,13 +121,13 @@ index 000000000000..30d40c21dabb
 +
 +	mode = &crtc_state->adjusted_mode;
 +
-+	val = PVI_CTL_INPUT_LCDIF;
++	val = FIELD_PREP(PVI_CTRL_MODE_MASK, PVI_CTRL_MODE_LCDIF) | PVI_CTRL_EN;
 +
 +	if (mode->flags & DRM_MODE_FLAG_PVSYNC)
-+		val |= PVI_CTL_OP_VSYNC_POL | PVI_CTL_INP_VSYNC_POL;
++		val |= PVI_CTRL_OP_VSYNC_POL | PVI_CTRL_INP_VSYNC_POL;
 +
 +	if (mode->flags & DRM_MODE_FLAG_PHSYNC)
-+		val |= PVI_CTL_OP_HSYNC_POL | PVI_CTL_INP_HSYNC_POL;
++		val |= PVI_CTRL_OP_HSYNC_POL | PVI_CTRL_INP_HSYNC_POL;
 +
 +	if (pvi->next_bridge->timings)
 +		bus_flags = pvi->next_bridge->timings->input_bus_flags;
@@ -129,11 +135,9 @@ index 000000000000..30d40c21dabb
 +		bus_flags = bridge_state->input_bus_cfg.flags;
 +
 +	if (bus_flags & DRM_BUS_FLAG_DE_HIGH)
-+		val |= PVI_CTL_OP_DE_POL | PVI_CTL_INP_DE_POL;
++		val |= PVI_CTRL_OP_DE_POL | PVI_CTRL_INP_DE_POL;
 +
-+	writel(val, pvi->regs + HTX_PVI_CTL);
-+	val |= PVI_CTL_EN;
-+	writel(val, pvi->regs + HTX_PVI_CTL);
++	writel(val, pvi->regs + HTX_PVI_CTRL);
 +}
 +
 +static void imx8mp_hdmi_pvi_bridge_disable(struct drm_bridge *bridge,
@@ -141,17 +145,18 @@ index 000000000000..30d40c21dabb
 +{
 +	struct imx8mp_hdmi_pvi *pvi = to_imx8mp_hdmi_pvi(bridge);
 +
-+	writel(0x0, pvi->regs + HTX_PVI_CTL);
++	writel(0x0, pvi->regs + HTX_PVI_CTRL);
 +
 +	pm_runtime_put(pvi->dev);
 +}
 +
-+static u32 *imx8mp_hdmi_pvi_bridge_get_input_bus_fmts(struct drm_bridge *bridge,
-+					struct drm_bridge_state *bridge_state,
-+					struct drm_crtc_state *crtc_state,
-+					struct drm_connector_state *conn_state,
-+					u32 output_fmt,
-+					unsigned int *num_input_fmts)
++static u32 *
++imx8mp_hdmi_pvi_bridge_get_input_bus_fmts(struct drm_bridge *bridge,
++					  struct drm_bridge_state *bridge_state,
++					  struct drm_crtc_state *crtc_state,
++					  struct drm_connector_state *conn_state,
++					  u32 output_fmt,
++					  unsigned int *num_input_fmts)
 +{
 +	struct imx8mp_hdmi_pvi *pvi = to_imx8mp_hdmi_pvi(bridge);
 +	struct drm_bridge *next_bridge = pvi->next_bridge;
@@ -225,6 +230,8 @@ index 000000000000..30d40c21dabb
 +{
 +	struct imx8mp_hdmi_pvi *pvi = platform_get_drvdata(pdev);
 +
++	pm_runtime_disable(&pdev->dev);
++
 +	drm_bridge_remove(&pvi->bridge);
 +
 +	return 0;
@@ -235,7 +242,7 @@ index 000000000000..30d40c21dabb
 +		.compatible = "fsl,imx8mp-hdmi-pvi",
 +	}, {
 +		/* sentinel */
-+	},
++	}
 +};
 +MODULE_DEVICE_TABLE(of, imx8mp_hdmi_pvi_match);
 +

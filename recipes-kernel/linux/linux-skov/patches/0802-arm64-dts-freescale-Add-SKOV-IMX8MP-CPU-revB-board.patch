@@ -7,11 +7,11 @@ Add Skov i.MX8MP based climate controller.
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
  arch/arm64/boot/dts/freescale/Makefile             |   3 +
- .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 621 +++++++++++++++++++++
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 706 +++++++++++++++++++++
  .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   |  38 ++
- .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 159 ++++++
- .../freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts  |  89 +++
- 5 files changed, 910 insertions(+)
+ .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 170 +++++
+ .../freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts  | 100 +++
+ 5 files changed, 1017 insertions(+)
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
@@ -33,10 +33,10 @@ index c6872b7e9471..6af424268ebc 100644
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw72xx-2x.dtb
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 new file mode 100644
-index 000000000000..7faa99bc885e
+index 000000000000..66aeb4c910f5
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -0,0 +1,621 @@
+@@ -0,0 +1,706 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +#include "imx8mp.dtsi"
@@ -61,7 +61,7 @@ index 000000000000..7faa99bc885e
 +		compatible = "pwm-backlight";
 +		pinctrl-0 = <&pinctrl_backlight>;
 +		pwms = <&pwm1 0 20000 0>;
-+		power-supply = <&reg_24v0>;
++		power-supply = <&reg_24v>;
 +		enable-gpios = <&gpio4 24 GPIO_ACTIVE_HIGH>;
 +		brightness-levels = <0 255>;
 +		num-interpolated-steps = <17>;
@@ -98,63 +98,125 @@ index 000000000000..7faa99bc885e
 +		};
 +	};
 +
++	reg_1v2: regulator-1v2 {
++		compatible = "regulator-fixed";
++		vin-supply = <&reg_5v_p>;
++		regulator-name = "1V2";
++		regulator-min-microvolt = <1200000>;
++		regulator-max-microvolt = <1200000>;
++	};
++
 +	reg_2v5: regulator-2v5 {
 +		compatible = "regulator-fixed";
-+		vin-supply = <&reg_5v0>;
-+		regulator-name = "2v5";
++		vin-supply = <&reg_5v_s>;
++		regulator-name = "2V5";
 +		regulator-min-microvolt = <2500000>;
 +		regulator-max-microvolt = <2500000>;
 +	};
 +
-+	reg_5v0: regulator-5v0 {
++	reg_3v3: regulator-3v3 {
 +		compatible = "regulator-fixed";
-+		regulator-name = "5v0";
++		vin-supply = <&reg_5v_s>;
++		regulator-name = "3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	/* not controllable */
++	reg_5v_p: regulator-5v-p {
++		compatible = "regulator-fixed";
++		regulator-name = "5V_P";
++		vin-supply = <&reg_24v>;
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
 +	};
 +
-+	reg_24v0: regulator-24v0 {
++	/* controllable by mains fail detect */
++	reg_5v_s: regulator-5v-s {
 +		compatible = "regulator-fixed";
-+		regulator-name = "24v0";
++		regulator-name = "5V_S";
++		vin-supply = <&reg_24v>;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++	};
++
++	reg_24v: regulator-24v {
++		compatible = "regulator-fixed";
++		regulator-name = "24V";
 +		regulator-min-microvolt = <24000000>;
 +		regulator-max-microvolt = <24000000>;
 +	};
 +
-+	reg_can1_stby: regulator-can1-stby {
++	reg_canrs: regulator-canrs {
 +		compatible = "regulator-fixed";
-+		regulator-name = "can1-3v3";
++		regulator-name = "CANRS";
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_flexcan1_reg>;
++		pinctrl-0 = <&pinctrl_canrs>;
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
 +		gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
 +	};
 +
-+	reg_can2_stby: regulator-can2-stby {
++	reg_can2rs: regulator-can2rs {
 +		compatible = "regulator-fixed";
-+		regulator-name = "can2-3v3";
++		regulator-name = "CAN2RS";
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_flexcan2_reg>;
++		pinctrl-0 = <&pinctrl_can2rs>;
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
 +		gpio = <&gpio4 22 GPIO_ACTIVE_LOW>;
 +	};
++
++	/* TODO: actually this regulator is part of nxp,pca9450c, implementig
++	 * it separately */
++	reg_vsd_3v3: regulator-vsd-3v3 {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_vsd_3v3>;
++		vin-supply = <&reg_vdd_3v3>;
++		compatible = "regulator-fixed";
++		regulator-name = "VSD_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++	};
++
++	/* TODO: LCD bias Power Supply with integrated VCOM Buffer TPS65150
++	 * is not implemented yet. IN pin should be controlled by PWM4.
++	 * Different boards have different "bootstrapped" output voltages.
++	 * VGH pin: 10" - 22V, 7" - 16V
++	 * AVDD pin: 10" - 8,2V, 7" - 10,4V
++	 * The VCOM buffer in the TPS65150 device is essentially a
++	 * transconductance amplifier. It's designed to drive capacitive loads,
++	 * like the common plane voltage (VCOM) for an LCD display.
++	 */
++	reg_tft_vcom: regulator-tft-vcom {
++		compatible = "pwm-regulator";
++		pwms = <&pwm4 0 20000 0>;
++		regulator-name = "VCOM";
++		vin-supply = <&reg_5v_s>;
++		regulator-min-microvolt = <3600000>;
++		regulator-max-microvolt = <3600000>;
++		regulator-always-on;
++		voltage-table = <3600000 26>;
++		status = "disabled";
++	};
 +};
 +
 +&A53_0 {
-+	cpu-supply = <&buck2>;
++	cpu-supply = <&reg_vdd_arm>;
 +};
 +
 +&A53_1 {
-+	cpu-supply = <&buck2>;
++	cpu-supply = <&reg_vdd_arm>;
 +};
 +
 +&A53_2 {
-+	cpu-supply = <&buck2>;
++	cpu-supply = <&reg_vdd_arm>;
 +};
 +
 +&A53_3 {
-+	cpu-supply = <&buck2>;
++	cpu-supply = <&reg_vdd_arm>;
 +};
 +
 +&ecspi2 {
@@ -166,7 +228,7 @@ index 000000000000..7faa99bc885e
 +	adc: adc@0 {
 +		compatible = "microchip,mcp3002";
 +		reg = <0>;
-+		vref-supply = <&buck4>;
++		vref-supply = <&reg_vdd_3v3>;
 +		spi-max-frequency = <1000000>;
 +		#io-channel-cells = <1>;
 +	};
@@ -187,14 +249,14 @@ index 000000000000..7faa99bc885e
 +&flexcan1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_flexcan1>;
-+	xceiver-supply = <&reg_can1_stby>;
++	xceiver-supply = <&reg_canrs>;
 +	status = "okay";
 +};
 +
 +&flexcan2 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_flexcan2>;
-+	xceiver-supply = <&reg_can2_stby>;
++	xceiver-supply = <&reg_can2rs>;
 +	status = "okay";
 +};
 +
@@ -210,21 +272,24 @@ index 000000000000..7faa99bc885e
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_pmic>;
 +		interrupts-extended = <&gpio1 3 IRQ_TYPE_EDGE_RISING>;
++		sd-vsel-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
 +
 +		regulators {
-+			buck1: BUCK1 {
-+				regulator-name = "BUCK1";
++			reg_vdd_soc: BUCK1 {
++				regulator-name = "VDD_SOC";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <2187500>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +				regulator-ramp-delay = <3125>;
 +			};
 +
-+			buck2: BUCK2 {
-+				regulator-name = "BUCK2";
++			reg_vdd_arm: BUCK2 {
++				regulator-name = "VDD_ARM";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <2187500>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +				regulator-ramp-delay = <3125>;
@@ -232,50 +297,56 @@ index 000000000000..7faa99bc885e
 +				nxp,dvs-standby-voltage = <850000>;
 +			};
 +
-+			buck4: BUCK4 {	/* VDD_3V3 */
-+				regulator-name = "BUCK4";
++			reg_vdd_3v3: BUCK4 {
++				regulator-name = "VDD_3V3";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <3400000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
 +
-+			buck5: BUCK5 {	/* VDD_1V8 */
-+				regulator-name = "BUCK5";
++			reg_vdd_1v8: BUCK5 { 
++				regulator-name = "VDD_1V8";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <3400000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
 +
-+			buck6: BUCK6 {	/* NVCC_DRAM_1V1 */
-+				regulator-name = "BUCK6";
++			reg_nvcc_dram_1v1: BUCK6 {
++				regulator-name = "NVCC_DRAM_1V1";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <3400000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
 +
-+			ldo1: LDO1 {	/* NVCC_SNVS_1V8 */
-+				regulator-name = "LDO1";
++			reg_nvcc_snvs_1v8: LDO1 {
++				regulator-name = "NVCC_SNVS_1V8";
 +				regulator-min-microvolt = <1600000>;
 +				regulator-max-microvolt = <3300000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
 +
-+			ldo3: LDO3 {	/* VDDA_1V8 */
-+				regulator-name = "LDO3";
++			reg_vdda_1v8: LDO3 {
++				regulator-name = "VDDA_1V8";
 +				regulator-min-microvolt = <800000>;
 +				regulator-max-microvolt = <3300000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
 +
-+			ldo5: LDO5 {	/* NVCC_SD2 */
-+				regulator-name = "LDO5";
++			reg_nvcc_sd2: LDO5 {
++				regulator-name = "NVCC_SD2";
 +				regulator-min-microvolt = <1800000>;
 +				regulator-max-microvolt = <3300000>;
++				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
 +			};
@@ -359,6 +430,11 @@ index 000000000000..7faa99bc885e
 +	pinctrl-0 = <&pinctrl_pwm1>;
 +};
 +
++&pwm4 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm4>;
++};
++
 +&uart2 {
 +	/* console */
 +	pinctrl-names = "default";
@@ -375,23 +451,21 @@ index 000000000000..7faa99bc885e
 +};
 +
 +&usb3_phy0 {
-+	vbus-supply = <&buck4>;
++	vbus-supply = <&reg_3v3>;
 +	status = "okay";
 +};
 +
 +&usb3_phy1 {
-+	vbus-supply = <&buck4>;
++	vbus-supply = <&reg_3v3>;
 +	status = "okay";
 +};
 +
 +&usb_dwc3_0 {
 +	dr_mode = "host";
-+	status = "okay";
 +};
 +
 +&usb_dwc3_1 {
 +	dr_mode = "host";
-+	status = "okay";
 +};
 +
 +/* SD Card */
@@ -400,6 +474,10 @@ index 000000000000..7faa99bc885e
 +	pinctrl-0 = <&pinctrl_usdhc2>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-1 = <&pinctrl_usdhc2_100mhz>, <&pinctrl_usdhc2_gpio>;
 +	pinctrl-2 = <&pinctrl_usdhc2_200mhz>, <&pinctrl_usdhc2_gpio>;
++	vmmc-supply = <&reg_vsd_3v3>;
++	vqmmc-supply = <&reg_nvcc_sd2>;
++	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio2 20 GPIO_ACTIVE_HIGH>;
 +	bus-width = <4>;
 +	status = "okay";
 +};
@@ -412,8 +490,8 @@ index 000000000000..7faa99bc885e
 +	pinctrl-0 = <&pinctrl_usdhc3>;
 +	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
 +	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
-+	vmmc-supply = <&buck4>;
-+	vqmmc-supply = <&buck5>;
++	vmmc-supply = <&reg_vdd_3v3>;
++	vqmmc-supply = <&reg_vdd_1v8>;
 +	bus-width = <8>;
 +	no-sd;
 +	no-sdio;
@@ -468,7 +546,7 @@ index 000000000000..7faa99bc885e
 +		>;
 +	};
 +
-+	pinctrl_flexcan1_reg: flexcan1reggrp {
++	pinctrl_canrs: canrsgrp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21			0x154
 +		>;
@@ -481,7 +559,7 @@ index 000000000000..7faa99bc885e
 +		>;
 +	};
 +
-+	pinctrl_flexcan2_reg: flexcan2reggrp {
++	pinctrl_can2rs: can2rsgrp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22			0x154
 +		>;
@@ -519,6 +597,7 @@ index 000000000000..7faa99bc885e
 +	pinctrl_pmic: pmicirqgrp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03			0x41
++			MX8MP_IOMUXC_GPIO1_IO04__GPIO1_IO04			0x41
 +		>;
 +	};
 +
@@ -528,9 +607,9 @@ index 000000000000..7faa99bc885e
 +		>;
 +	};
 +
-+	pinctrl_reg_sd2_vsel: regsd2vselgrp {
++	pinctrl_pwm4: pwm4grp {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_GPIO1_IO04__GPIO1_IO04			0x41
++			MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT			0x116
 +		>;
 +	};
 +
@@ -657,6 +736,12 @@ index 000000000000..7faa99bc885e
 +			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B			0xc6
 +		>;
 +	};
++
++	pinctrl_reg_vsd_3v3: regvsd3v3grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x40
++		>;
++	};
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
 new file mode 100644
@@ -704,10 +789,10 @@ index 000000000000..01c7420966ba
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
 new file mode 100644
-index 000000000000..1065e8880449
+index 000000000000..297320007bc6
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
-@@ -0,0 +1,159 @@
+@@ -0,0 +1,170 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +/dts-v1/;
@@ -720,7 +805,7 @@ index 000000000000..1065e8880449
 +
 +	lvds-decoder {
 +		compatible = "ti,sn65lvds822", "lvds-decoder";
-+		power-supply = <&buck4>;
++		power-supply = <&reg_3v3>;
 +
 +		ports {
 +			#address-cells = <1>;
@@ -748,7 +833,7 @@ index 000000000000..1065e8880449
 +	panel {
 +		compatible = "logictechno,lttd800480070-l6wh-rt";
 +		backlight = <&backlight>;
-+		power-supply = <&buck4>;
++		power-supply = <&reg_tft_vcom>;
 +
 +		port {
 +			panel_in: endpoint {
@@ -767,6 +852,17 @@ index 000000000000..1065e8880449
 +		touchscreen-x-plate-ohms = <300>;
 +		touchscreen-y-plate-ohms = <800>;
 +	};
++};
++
++&reg_tft_vcom {
++	regulator-min-microvolt = <3600000>;
++	regulator-max-microvolt = <3600000>;
++	voltage-table = <3600000 26>;
++	status = "okay";
++};
++
++&pwm4 {
++	status = "okay";
 +};
 +
 +&backlight {
@@ -869,10 +965,10 @@ index 000000000000..1065e8880449
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
 new file mode 100644
-index 000000000000..9b94b413cc45
+index 000000000000..880d771d971d
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,100 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +/dts-v1/;
@@ -886,7 +982,7 @@ index 000000000000..9b94b413cc45
 +	panel {
 +		compatible = "multi-inno,mi1010ait-1cp";
 +		backlight = <&backlight>;
-+		power-supply = <&buck4>;
++		power-supply = <&reg_tft_vcom>;
 +
 +		port {
 +			in_lvds0: endpoint {
@@ -894,6 +990,17 @@ index 000000000000..9b94b413cc45
 +			};
 +		};
 +	};
++};
++
++&reg_tft_vcom {
++	regulator-min-microvolt = <3160000>;
++	regulator-max-microvolt = <3160000>;
++	voltage-table = <3160000 73>;
++	status = "okay";
++};
++
++&pwm4 {
++	status = "okay";
 +};
 +
 +&backlight {
@@ -915,8 +1022,8 @@ index 000000000000..9b94b413cc45
 +		reset-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
 +		touchscreen-size-x = <1280>;
 +		touchscreen-size-y = <800>;
-+		vcc-supply = <&buck4>;
-+		iovcc-supply = <&buck4>;
++		vcc-supply = <&reg_vdd_3v3>;
++		iovcc-supply = <&reg_vdd_3v3>;
 +		wakeup-source;
 +	};
 +};

@@ -1,21 +1,21 @@
 From: Oleksij Rempel <o.rempel@pengutronix.de>
-Date: Tue, 19 Sep 2023 12:38:06 +0200
-Subject: [PATCH] Release 6.6/customers/skov/imx6/20230919-1
+Date: Thu, 28 Sep 2023 10:26:52 +0200
+Subject: [PATCH] Release 6.6/customers/skov/imx6/20230928-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 57698d048e2c..5ccc00a1722d 100644
+index 3de08c780c74..6f5b9bb512d9 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 6
  SUBLEVEL = 0
--EXTRAVERSION = -rc2
-+EXTRAVERSION = -rc2-20230919-1
+-EXTRAVERSION = -rc3
++EXTRAVERSION = -rc3-20230928-1
  NAME = Hurr durr I'ma ninja sloth
  
  # *DOCUMENTATION*

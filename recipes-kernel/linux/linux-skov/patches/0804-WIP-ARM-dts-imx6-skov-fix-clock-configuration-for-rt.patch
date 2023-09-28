@@ -1,0 +1,29 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 28 Sep 2023 09:43:51 +0200
+Subject: [PATCH] WIP: ARM: dts: imx6: skov: fix clock configuration for rtc@51
+ node
+
+Not sure why do we need it. CLKOUT is not attached to anything.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boot/dts/nxp/imx/imx6qdl-skov-cpu.dtsi | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boot/dts/nxp/imx/imx6qdl-skov-cpu.dtsi b/arch/arm/boot/dts/nxp/imx/imx6qdl-skov-cpu.dtsi
+index d59d5d0e1d19..76e91bef87ac 100644
+--- a/arch/arm/boot/dts/nxp/imx/imx6qdl-skov-cpu.dtsi
++++ b/arch/arm/boot/dts/nxp/imx/imx6qdl-skov-cpu.dtsi
+@@ -276,6 +276,12 @@ i2c_rtc: rtc@51 {
+ 		compatible = "nxp,pcf85063";
+ 		reg = <0x51>;
+ 		quartz-load-femtofarads = <12500>;
++
++		clock {
++			compatible = "fixed-clock";
++			#clock-cells = <0>;
++			clock-frequency = <32768>;
++		};
+ 	};
+ };
+ 

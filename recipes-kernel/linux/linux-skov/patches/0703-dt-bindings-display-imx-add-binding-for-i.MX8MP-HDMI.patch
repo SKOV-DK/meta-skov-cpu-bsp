@@ -7,16 +7,16 @@ Add binding for the i.MX8MP HDMI parallel video interface block.
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 Tested-by: Marek Vasut <marex@denx.de>
 ---
- .../bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml  | 79 ++++++++++++++++++++++
- 1 file changed, 79 insertions(+)
+ .../bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml  | 83 ++++++++++++++++++++++
+ 1 file changed, 83 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml
 
 diff --git a/Documentation/devicetree/bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml b/Documentation/devicetree/bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml
 new file mode 100644
-index 000000000000..aa369721ac99
+index 000000000000..df29006b4090
 --- /dev/null
 +++ b/Documentation/devicetree/bindings/display/imx/fsl,imx8mp-hdmi-pvi.yaml
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,83 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +%YAML 1.2
 +---
@@ -34,10 +34,12 @@ index 000000000000..aa369721ac99
 +
 +properties:
 +  compatible:
-+    enum:
-+      - fsl,imx8mp-hdmi-pvi
++    const: fsl,imx8mp-hdmi-pvi
 +
 +  reg:
++    maxItems: 1
++
++  interrupts:
 +    maxItems: 1
 +
 +  power-domains:
@@ -53,7 +55,7 @@ index 000000000000..aa369721ac99
 +
 +      port@1:
 +        $ref: /schemas/graph.yaml#/properties/port
-+        description: Output to the HDMI TX controller
++        description: Output to the HDMI TX controller.
 +
 +    required:
 +      - port@0
@@ -62,6 +64,7 @@ index 000000000000..aa369721ac99
 +required:
 +  - compatible
 +  - reg
++  - interrupts
 +  - power-domains
 +  - ports
 +
@@ -69,12 +72,13 @@ index 000000000000..aa369721ac99
 +
 +examples:
 +  - |
-+    #include <dt-bindings/clock/imx8mp-clock.h>
++    #include <dt-bindings/interrupt-controller/irq.h>
 +    #include <dt-bindings/power/imx8mp-power.h>
 +
 +    display-bridge@32fc4000 {
 +        compatible = "fsl,imx8mp-hdmi-pvi";
 +        reg = <0x32fc4000 0x40>;
++        interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
 +        power-domains = <&hdmi_blk_ctrl IMX8MP_HDMIBLK_PD_PVI>;
 +
 +        ports {
