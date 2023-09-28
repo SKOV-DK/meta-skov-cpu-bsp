@@ -68,8 +68,8 @@ SRC_URI += "\
   file://patches/0706-phy-freescale-add-Samsung-HDMI-PHY.patch \
   "
 # umpf-topic: v6.6/topic/imx8mp-skov-dts
-# umpf-hashinfo: cf36c5f580e24da857392799eee4271b6ea48a0c
-# umpf-topic-range: a0e85580b9c998f13f5c2107cddc8a18d32b491e..b696c5b4c953df8896a81791aa538f2309d6ee8d
+# umpf-hashinfo: 690e2457d0698b1aec839d66fe588a42d112d575
+# umpf-topic-range: a0e85580b9c998f13f5c2107cddc8a18d32b491e..8a1284d4851624135ddd83e6abb3c8fda33cad1c
 SRC_URI += "\
   file://patches/0801-dt-bindings-arm-Add-compatible-for-SKOV-i.MX8MP-RevB.patch \
   file://patches/0802-arm64-dts-freescale-Add-SKOV-IMX8MP-CPU-revB-board.patch \
@@ -78,12 +78,12 @@ SRC_URI += "\
   "
 # umpf-topic: v6.6/topic/drm-fsl-ldb
 # umpf-hashinfo: 65650998c53b4520ec48f31fd30c65f31cd8c8e0
-# umpf-topic-range: b696c5b4c953df8896a81791aa538f2309d6ee8d..e3279080a3f129ecd52d27376d743f501639d801
+# umpf-topic-range: 8a1284d4851624135ddd83e6abb3c8fda33cad1c..4a5557f34a3c4b658d8f224273d7a59f0d5e79e5
 SRC_URI += "\
   file://patches/0901-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-release: 6.6/customers/skov/imx6/20230928-1
-# umpf-topic-range: e3279080a3f129ecd52d27376d743f501639d801..f0927b57d753242c49caff9bffd9f75fad6f3765
+# umpf-topic-range: 4a5557f34a3c4b658d8f224273d7a59f0d5e79e5..416395a3a180eb93dff14e500f5891477e59f553
 SRC_URI += "\
   file://patches/1001-Release-6.6-customers-skov-imx6-20230928-1.patch \
   "

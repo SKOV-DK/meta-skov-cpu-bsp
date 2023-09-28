@@ -7,11 +7,11 @@ Add Skov i.MX8MP based climate controller.
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
  arch/arm64/boot/dts/freescale/Makefile             |   3 +
- .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 706 +++++++++++++++++++++
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 720 +++++++++++++++++++++
  .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   |  38 ++
  .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 170 +++++
  .../freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts  | 100 +++
- 5 files changed, 1017 insertions(+)
+ 5 files changed, 1031 insertions(+)
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
@@ -33,10 +33,10 @@ index c6872b7e9471..6af424268ebc 100644
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw72xx-2x.dtb
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 new file mode 100644
-index 000000000000..66aeb4c910f5
+index 000000000000..d03d0a478bf1
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -0,0 +1,706 @@
+@@ -0,0 +1,720 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +#include "imx8mp.dtsi"
@@ -435,6 +435,12 @@ index 000000000000..66aeb4c910f5
 +	pinctrl-0 = <&pinctrl_pwm4>;
 +};
 +
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
 +&uart2 {
 +	/* console */
 +	pinctrl-names = "default";
@@ -633,6 +639,14 @@ index 000000000000..66aeb4c910f5
 +			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28			0x41
 +			/* CTP_RST */
 +			MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29			0x41
++		>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX			0x140
++			MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX			0x140
++			MX8MP_IOMUXC_UART3_RXD__UART1_DTE_RTS			0x140
 +		>;
 +	};
 +
