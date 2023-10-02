@@ -1,6 +1,0 @@
-#!/bin/sh
-
-# explicitely remove the OCOTP's node's property "read-only" by introducing a
-# devicetree fixture to re-enable burning fuses in the factory
-
-of_property -d -f /soc/aips-bus@2100000/ocotp@21bc000 read-only
