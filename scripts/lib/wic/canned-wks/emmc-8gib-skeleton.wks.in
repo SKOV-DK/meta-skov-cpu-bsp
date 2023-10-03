@@ -1,0 +1,21 @@
+# short-description: Create A/B image to flash on an eMMC
+# long-description: Creates a GPT partitioned eMMC image with barebox-
+# environment and barebox-state partitions (each 1 MiB), two partitions for the
+# root-FSs and a partition for /home. The first two, as well as the fourth, are
+# empty and the remaining partitions are filled with the contents of the root-FS
+# this WKS file is applied to.
+
+# Remember to keep the location of barebox' environment & state synchronized
+# with the redundant information in barebox' devicetree file (imx8mp-evk.dts)!
+#
+# Dunfell's syntax does not allow for explicit units, the default is kiB for
+# offset and MiB for the (fixed) size.
+part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET} --no-table
+part --part-name barebox-environment --part-type 8DA63339-0007-60C0-C436-083AC8230908 --offset 1024       --fixed-size 1
+part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --offset 2048       --fixed-size 1
+part --part-name system0             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  rootfs0    --fstype=ext4 --align 1024 --fixed-size 2048 --source rootfs --exclude-path home/
+part --part-name system1             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  rootfs1    --fstype=ext4 --align 1024 --fixed-size 2048
+part --part-name recovery            --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  recoveryfs --fstype=ext4 --align 1024 --fixed-size 512
+part /home --part-name home          --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label  home       --fstype=ext4 --align 1024 --fixed-size 2844 --source rootfs --change-directory home/ --ondisk mmcblk2 --fsoptions "defaults,rw"
+
+bootloader --ptable gpt
