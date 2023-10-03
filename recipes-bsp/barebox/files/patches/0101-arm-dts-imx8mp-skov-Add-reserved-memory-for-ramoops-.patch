@@ -1,0 +1,34 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 27 Sep 2023 12:37:19 +0200
+Subject: [PATCH] arm: dts: imx8mp-skov: Add reserved-memory for ramoops pstore
+
+Add a reserved-memory node for 'ramoops' in imx8mp-skov device tree to enable
+persistent storage of logs.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/dts/imx8mp-skov.dts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm/dts/imx8mp-skov.dts b/arch/arm/dts/imx8mp-skov.dts
+index b7f6fed4b7d6..4c83bb6bc22a 100644
+--- a/arch/arm/dts/imx8mp-skov.dts
++++ b/arch/arm/dts/imx8mp-skov.dts
+@@ -62,6 +62,17 @@ led-2 {
+ 		};
+ 	};
+ 
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		/* Address will be determined by the bootloader */
++		ramoops {
++			compatible = "ramoops";
++		};
++	};
++
+ 	reg_usdhc2_vmmc: regulator-usdhc2 {
+ 		compatible = "regulator-fixed";
+ 		pinctrl-names = "default";
