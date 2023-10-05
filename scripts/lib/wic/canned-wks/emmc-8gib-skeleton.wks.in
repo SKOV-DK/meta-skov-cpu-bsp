@@ -16,6 +16,6 @@ part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC
 part --part-name system0             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  rootfs0    --fstype=ext4 --align 1024 --fixed-size 2048 --source rootfs --exclude-path home/
 part --part-name system1             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  rootfs1    --fstype=ext4 --align 1024 --fixed-size 2048
 part --part-name recovery            --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  recoveryfs --fstype=ext4 --align 1024 --fixed-size 512
-part /home --part-name home          --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label  home       --fstype=ext4 --align 1024 --fixed-size 2844 --source rootfs --change-directory home/ --ondisk mmcblk2 --fsoptions "defaults,rw"
+part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label  home       --fstype=ext4 --align 1024 --fixed-size 2844 --source rootfs --change-directory home/
 
 bootloader --ptable gpt
