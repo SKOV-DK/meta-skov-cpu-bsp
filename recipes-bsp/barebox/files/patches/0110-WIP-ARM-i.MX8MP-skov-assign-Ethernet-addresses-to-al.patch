@@ -1,0 +1,139 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 2 Oct 2023 11:19:15 +0200
+Subject: [PATCH] WIP: ARM: i.MX8MP: skov: assign Ethernet addresses to all
+ ports
+
+Serial based address generation should be replaced by afa's
+implementation.
+
+Assign Ethernet address to all ports based on the master address stored
+in the NVMEM. In case nothing nvmem is clean, generate address based on
+vendor OUI with part of i.MX8MP unique ID.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 97 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 97 insertions(+)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 3b6eb7b08057..6de9ab47abee 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -12,13 +12,18 @@
+ #include <io.h>
+ #include <mach/imx/bbu.h>
+ #include <mach/imx/generic.h>
++#include <mach/imx/imx8mq.h>
+ #include <mach/imx/iomux-mx8mp.h>
++#include <net.h>
++#include <of_net.h>
+ 
+ struct skov_imx8mp_priv {
+ 	struct device *dev;
+ 	int variant_id;
+ };
+ 
++#define SKOV_OUI  {0x00, 0x0e, 0xcd}
++
+ static struct skov_imx8mp_priv *skov_imx8mp_priv;
+ 
+ #define GPIO_HW_VARIANT  {\
+@@ -85,6 +90,98 @@ static const struct board_description imx8mp_variants[] = {
+ 	},
+ };
+ 
++static struct eth_device *
++skov_imx8mp_init_master_edev(struct skov_imx8mp_priv *priv,
++			     struct device_node *np)
++{
++	u8 oui_mac[ETH_ALEN] = SKOV_OUI;
++	struct eth_device *edev;
++
++	edev = of_find_eth_device_by_node(np);
++	if (!edev) {
++		dev_err(priv->dev, "Failed to find master eth device\n");
++		return NULL;
++	}
++
++	if (is_valid_ether_addr(edev->ethaddr))
++		return edev;
++
++	if (!edev->parent || of_get_mac_addr_nvmem(edev->parent->of_node,
++						   oui_mac)) {
++		char str[sizeof("xx:xx:xx:xx:xx:xx")];
++		u64 unique_id;
++
++		unique_id = imx8m_uid();
++		if (!unique_id)
++			dev_err(priv->dev, "Failed to get i.MX8MP unique ID\n");
++
++		/* Generate MAC address based on i.MX8MP unique ID */
++		oui_mac[3] = (unique_id >> 56) & 0xff;
++		oui_mac[4] = (unique_id >> 48) & 0xff;
++		oui_mac[5] = (unique_id >> 40) & 0xff;
++		ethaddr_to_string(oui_mac, str);
++		dev_warn(priv->dev, "Failed to get master eth addr. Generating based on i.MX8MP unique ID: %s\n",
++			 str);
++	}
++
++	of_eth_register_ethaddr(np, oui_mac);
++
++	return edev;
++}
++
++static void skov_imx8mp_register_ethaddr(struct skov_imx8mp_priv *priv,
++					 struct device_node *root)
++{
++	struct eth_device *master_edev;
++	struct eth_node_info {
++		const char *alias;
++		struct device_node *np;
++		u32 inc;
++	} eth_nodes[] = {
++		{ "ethernet0", NULL, 0 },
++		/* Addresses are assigned in the reverse order
++		 * LAN2 addr < LAN1 addr
++		 */
++		{ "ethernet1", NULL, 1 },
++		{ "ethernet2", NULL, 0 },
++	};
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(eth_nodes); i++) {
++		eth_nodes[i].np = of_find_node_by_alias(root,
++							eth_nodes[i].alias);
++		if (!eth_nodes[i].np) {
++			dev_err(priv->dev, "Failed to find %s alias\n",
++				eth_nodes[i].alias);
++			return;
++		}
++	}
++
++	master_edev = skov_imx8mp_init_master_edev(priv, eth_nodes[0].np);
++	if (!master_edev) {
++		dev_err(priv->dev, "Failed to init master edev\n");
++		return;
++	}
++
++	/* Set ETH addresses for all but master edev */
++	for (i = 1; i < ARRAY_SIZE(eth_nodes); i++) {
++		u8 ethaddr[ETH_ALEN];
++
++		ether_addr_inc(ethaddr, master_edev->ethaddr, eth_nodes[i].inc);
++		of_eth_register_ethaddr(eth_nodes[i].np, ethaddr);
++	}
++}
++
++static int skov_imx8mp_populate_ethaddr(void)
++{
++	struct skov_imx8mp_priv *priv = skov_imx8mp_priv;
++
++	skov_imx8mp_register_ethaddr(priv, NULL);
++
++	return 0;
++}
++postenvironment_initcall(skov_imx8mp_populate_ethaddr);
++
+ static int skov_imx8mp_fixup(struct device_node *root, void *data)
+ {
+ 	struct device_node *chosen = of_create_node(root, "/chosen");

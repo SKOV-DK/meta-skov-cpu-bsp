@@ -13,7 +13,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 105 insertions(+)
 
 diff --git a/arch/arm/dts/imx8mp-skov.dts b/arch/arm/dts/imx8mp-skov.dts
-index b94b9dd51d6d..7d6514f04b94 100644
+index accaed44ab13..885ffe6a2416 100644
 --- a/arch/arm/dts/imx8mp-skov.dts
 +++ b/arch/arm/dts/imx8mp-skov.dts
 @@ -31,6 +31,7 @@ aliases {
@@ -134,4 +134,4 @@ index b94b9dd51d6d..7d6514f04b94 100644
 +	};
  };
  
- &usdhc2 {
+ &A53_0 {

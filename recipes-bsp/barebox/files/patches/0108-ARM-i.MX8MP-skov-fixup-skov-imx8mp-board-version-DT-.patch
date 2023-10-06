@@ -1,0 +1,97 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 2 Oct 2023 06:49:38 +0200
+Subject: [PATCH] ARM: i.MX8MP: skov: fixup skov,imx8mp-board-version DT
+ property for the kernel
+
+Fixup Skov specific skov,imx8mp-board-version property for the kernel DT,
+to keep it compatible with the imx6 version.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 41 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 3a1cd83bbd43..3b6eb7b08057 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -14,6 +14,13 @@
+ #include <mach/imx/generic.h>
+ #include <mach/imx/iomux-mx8mp.h>
+ 
++struct skov_imx8mp_priv {
++	struct device *dev;
++	int variant_id;
++};
++
++static struct skov_imx8mp_priv *skov_imx8mp_priv;
++
+ #define GPIO_HW_VARIANT  {\
+ 	{IMX_GPIO_NR(1, 8), GPIOF_DIR_IN | GPIOF_ACTIVE_HIGH, "var0"}, \
+ 	{IMX_GPIO_NR(1, 9), GPIOF_DIR_IN | GPIOF_ACTIVE_HIGH, "var1"}, \
+@@ -78,6 +85,22 @@ static const struct board_description imx8mp_variants[] = {
+ 	},
+ };
+ 
++static int skov_imx8mp_fixup(struct device_node *root, void *data)
++{
++	struct device_node *chosen = of_create_node(root, "/chosen");
++	const char *of_board = "skov,imx8mp-board-version";
++	struct skov_imx8mp_priv *priv = data;
++	struct device *dev = priv->dev;
++	int ret;
++
++	ret = of_property_write_u32(chosen, of_board, priv->variant_id);
++	if (ret)
++		dev_err(dev,  "Failed to fixup %s: %pe\n", of_board,
++			ERR_PTR(ret));
++
++	return 0;
++}
++
+ static int skov_imx8mp_get_variant_id(uint *id)
+ {
+ 	struct gpio gpios_rev[] = GPIO_HW_VARIANT;
+@@ -133,9 +156,10 @@ static int skov_imx8mp_get_hdmi(struct device *dev)
+ 	return val;
+ }
+ 
+-static int skov_imx8mp_init_variant(struct device *dev)
++static int skov_imx8mp_init_variant(struct skov_imx8mp_priv *priv)
+ {
+ 	const struct board_description *variant;
++	struct device *dev = priv->dev;
+ 	const char *compatible;
+ 	unsigned int v = 0;
+ 	int ret;
+@@ -144,6 +168,8 @@ static int skov_imx8mp_init_variant(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
++	priv->variant_id = v;
++
+ 	if (v >= ARRAY_SIZE(imx8mp_variants)) {
+ 		dev_err(dev, "Invalid variant %u\n", v);
+ 		return -EINVAL;
+@@ -234,9 +260,20 @@ static void skov_imx8mp_init_storage(struct device *dev)
+ 
+ static int skov_imx8mp_probe(struct device *dev)
+ {
++	struct skov_imx8mp_priv *priv;
++	int ret;
++
++	priv = xzalloc(sizeof(*priv));
++	priv->dev = dev;
++	skov_imx8mp_priv = priv;
++
+ 	skov_imx8mp_init_storage(dev);
+ 
+-	skov_imx8mp_init_variant(dev);
++	skov_imx8mp_init_variant(priv);
++
++	ret = of_register_fixup(skov_imx8mp_fixup, priv);
++	if (ret)
++		dev_err(dev, "Failed to register fixup: %pe\n", ERR_PTR(ret));
+ 
+ 	return 0;
+ }
