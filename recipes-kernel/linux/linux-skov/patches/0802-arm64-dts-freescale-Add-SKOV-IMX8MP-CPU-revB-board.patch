@@ -36,7 +36,7 @@ new file mode 100644
 index 000000000000..ac0043db340b
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -0,0 +1,714 @@
+@@ -0,0 +1,716 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +#include "imx8mp.dtsi"
@@ -433,6 +433,7 @@ index 000000000000..ac0043db340b
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_uart1>;
 +	status = "okay";
++	uart-has-rtscts;
 +};
 +
 +&uart2 {
@@ -641,6 +642,7 @@ index 000000000000..ac0043db340b
 +			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX			0x140
 +			MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX			0x140
 +			MX8MP_IOMUXC_UART3_RXD__UART1_DTE_RTS			0x140
++			MX8MP_IOMUXC_UART3_TXD__UART1_DTE_CTS			0x140
 +		>;
 +	};
 +
