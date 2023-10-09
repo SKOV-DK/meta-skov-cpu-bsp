@@ -261,7 +261,7 @@ index 000000000000..ac0043db340b
 +};
 +
 +&i2c1 {
-+	clock-frequency = <400000>;
++	clock-frequency = <100000>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_i2c1>;
 +	status = "okay";
@@ -355,7 +355,7 @@ index 000000000000..ac0043db340b
 +};
 +
 +&i2c3 {
-+	clock-frequency = <400000>;
++	clock-frequency = <100000>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_i2c3>;
 +	status = "okay";
@@ -1018,7 +1018,7 @@ index 000000000000..880d771d971d
 +};
 +
 +&i2c2 {
-+	clock-frequency = <400000>;
++	clock-frequency = <100000>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_i2c2>;
 +	status = "okay";
