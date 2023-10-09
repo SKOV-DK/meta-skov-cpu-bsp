@@ -371,7 +371,7 @@ index 000000000000..ac0043db340b
 +};
 +
 +&i2c4 {
-+	clock-frequency = <400000>;
++	clock-frequency = <380000>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_i2c4>;
 +	status = "okay";
