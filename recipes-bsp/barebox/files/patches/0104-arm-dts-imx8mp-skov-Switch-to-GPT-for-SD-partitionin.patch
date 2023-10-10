@@ -1,0 +1,50 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 27 Sep 2023 13:46:08 +0200
+Subject: [PATCH] arm: dts: imx8mp-skov: Switch to GPT for SD partitioning
+
+Same as for eMMC, use GPT based partitioning. In case of SD cards, they
+can be used just for storing data without having boot partitions.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/dts/imx8mp-skov.dts | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
+
+diff --git a/arch/arm/dts/imx8mp-skov.dts b/arch/arm/dts/imx8mp-skov.dts
+index 1d4738dbd7b1..accaed44ab13 100644
+--- a/arch/arm/dts/imx8mp-skov.dts
++++ b/arch/arm/dts/imx8mp-skov.dts
+@@ -16,7 +16,7 @@ chosen {
+ 
+ 		environment-sd {
+ 			compatible = "barebox,environment";
+-			device-path = &env_sd;
++			device-path = &usdhc2, "partname:barebox-environment";
+ 			status = "disabled";
+ 		};
+ 
+@@ -85,24 +85,6 @@ reg_usdhc2_vmmc: regulator-usdhc2 {
+ 	};
+ };
+ 
+-&usdhc2 {
+-	partitions {
+-		compatible = "fixed-partitions";
+-		#address-cells = <2>;
+-		#size-cells = <2>;
+-
+-		partition@0 {
+-			label = "barebox";
+-			reg = <0x0 0x0 0x0 0x100000>;
+-		};
+-
+-		env_sd: partition@e0000 {
+-			label = "barebox-environment";
+-			reg = <0x0 0x100000 0x0 0x100000>;
+-		};
+-	};
+-};
+-
+ &A53_0 {
+ 	cpu-supply = <&buck2>;
+ };

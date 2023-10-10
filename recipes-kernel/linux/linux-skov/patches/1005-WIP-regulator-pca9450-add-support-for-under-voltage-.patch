@@ -1,0 +1,115 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 5 Oct 2023 12:48:25 +0200
+Subject: [PATCH] WIP: regulator: pca9450: add support for under-voltage event
+ forwarding
+
+Add support for under-voltage event forwarding.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/regulator/pca9450-regulator.c | 64 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
+
+diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
+index 34117eb4877c..509519e38f25 100644
+--- a/drivers/regulator/pca9450-regulator.c
++++ b/drivers/regulator/pca9450-regulator.c
+@@ -29,6 +29,11 @@ struct pca9450_regulator_desc {
+ 	const struct pc9450_dvs_config dvs;
+ };
+ 
++struct pca9450_rdev {
++	struct regulator_dev *rdev;
++	struct notifier_block nb;
++};
++
+ struct pca9450 {
+ 	struct device *dev;
+ 	struct regmap *regmap;
+@@ -36,6 +41,7 @@ struct pca9450 {
+ 	enum pca9450_chip_type type;
+ 	unsigned int rcnt;
+ 	int irq;
++	struct pca9450_rdev *rdevs;
+ };
+ 
+ static const struct regmap_range pca9450_status_range = {
+@@ -672,6 +678,51 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 	},
+ };
+ 
++static int pca9450_regulator_notifier(struct notifier_block *nb,
++				      unsigned long event, void *data)
++{
++	struct pca9450_rdev *pca9450_rdev = container_of(nb, struct pca9450_rdev, nb);
++	struct regulator_dev *rdev = pca9450_rdev->rdev;
++	int ret;
++
++	if (event != REGULATOR_EVENT_UNDER_VOLTAGE_WARN &&
++	    event != REGULATOR_EVENT_UNDER_VOLTAGE)
++		return NOTIFY_OK;
++
++	ret = regulator_notifier_call_chain(rdev, event,
++					    NULL);
++	if (ret == NOTIFY_BAD)
++		dev_err(rdev_get_dev(rdev),
++			"Failed to notify under voltage event\n");
++
++	return NOTIFY_OK;
++}
++
++static int pca9450_register_regulator_notifier(struct pca9450 *pca9450,
++					       struct regulator_dev *rdev,
++					       int idx)
++{
++	struct pca9450_rdev *pca9450_rdev = &pca9450->rdevs[idx];
++	struct notifier_block *nb = &pca9450_rdev->nb;
++	int ret;
++
++	pca9450_rdev->rdev = rdev;
++
++	if (!rdev->supply) {
++		dev_err(&rdev->dev, "no supply\n");
++		return 0;
++	}
++
++	nb->notifier_call = pca9450_regulator_notifier;
++	ret = devm_regulator_register_notifier(rdev->supply, nb);
++	if (ret) {
++		dev_err(&rdev->dev, "failed to register regulator notifier\n");
++		return ret;
++	}
++
++	return 0;
++}
++
+ static irqreturn_t pca9450_irq_handler(int irq, void *data)
+ {
+ 	struct pca9450 *pca9450 = data;
+@@ -771,6 +822,11 @@ static int pca9450_i2c_probe(struct i2c_client *i2c)
+ 		return -EINVAL;
+ 	}
+ 
++	pca9450->rdevs = devm_kzalloc(&i2c->dev, sizeof(*pca9450->rdevs) * pca9450->rcnt,
++				    GFP_KERNEL);
++	if (!pca9450->rdevs)
++		return -ENOMEM;
++
+ 	for (i = 0; i < pca9450->rcnt; i++) {
+ 		const struct regulator_desc *desc;
+ 		struct regulator_dev *rdev;
+@@ -790,6 +846,14 @@ static int pca9450_i2c_probe(struct i2c_client *i2c)
+ 				desc->name, ret);
+ 			return ret;
+ 		}
++
++		ret = pca9450_register_regulator_notifier(pca9450, rdev, i);
++		if (ret) {
++			dev_err(pca9450->dev,
++				"Failed to register notifier for regulator(%s): %d\n",
++				desc->name, ret);
++			return ret;
++		}
+ 	}
+ 
+ 	ret = devm_request_threaded_irq(pca9450->dev, pca9450->irq, NULL,

@@ -1,0 +1,65 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 2 Oct 2023 07:15:27 +0200
+Subject: [PATCH] WIP: net: lib: add ether_addr_inc() helper
+
+This patch should be replaced by kernel version if this function. See
+afa's patch
+
+Add helper function to calculate Ethernet address by incriminating it.
+This helper can be used for multiport devices like switches to generate
+address for each port based on one stored address.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ include/net.h |  1 +
+ net/lib.c     | 25 +++++++++++++++++++++++++
+ 2 files changed, 26 insertions(+)
+
+diff --git a/include/net.h b/include/net.h
+index 5e029c71f29e..f9a728587852 100644
+--- a/include/net.h
++++ b/include/net.h
+@@ -360,6 +360,7 @@ int setenv_ip(const char *name, IPaddr_t ip);
+ 
+ int string_to_ethaddr(const char *str, u8 enetaddr[6]);
+ void ethaddr_to_string(const u8 enetaddr[6], char *str);
++void ether_addr_inc(u8 *dst_addr, const u8 *src_addr, u32 increment);
+ 
+ #ifdef CONFIG_NET_RESOLV
+ int resolv(const char *host, IPaddr_t *ip);
+diff --git a/net/lib.c b/net/lib.c
+index d4536441bd71..dc7d83bc6d1e 100644
+--- a/net/lib.c
++++ b/net/lib.c
+@@ -44,6 +44,31 @@ void ethaddr_to_string(const u8 enetaddr[ETH_ALEN], char *str)
+ 		 enetaddr[4], enetaddr[5]);
+ }
+ 
++/**
++ * ether_addr_inc - Increment an Ethernet address.
++ * @dst_addr: Destination address to store the incremented address.
++ * @src_addr: Source address to be incremented.
++ * @increment: Value by which to increment the source address.
++ *
++ * This function increments the given source Ethernet address by
++ * the specified increment value, storing the result in the
++ * destination address.
++ */
++void ether_addr_inc(u8 *dst_addr, const u8 *src_addr, u32 increment)
++{
++	u32 value;
++	int i;
++
++	for(i = 0; i < 6; ++i)
++		dst_addr[i] = src_addr[i];
++
++	for(i = 5; i >= 0 && increment; --i) {
++		value = dst_addr[i] + increment;
++		dst_addr[i] = value & 0xFF;
++		increment = value >> 8;
++	}
++}
++
+ int string_to_ip(const char *s, IPaddr_t *ip)
+ {
+ 	IPaddr_t addr = 0;

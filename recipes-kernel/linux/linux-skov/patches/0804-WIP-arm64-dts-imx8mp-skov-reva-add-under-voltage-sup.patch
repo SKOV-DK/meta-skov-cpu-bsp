@@ -1,0 +1,39 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 2 Oct 2023 12:44:43 +0200
+Subject: [PATCH] WIP: arm64: dts: imx8mp-skov-reva: add under-voltage support
+
+Before mainline this part driver changes should go mainline first
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index ac0043db340b..311da49dcc2a 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -106,6 +106,10 @@ reg_24v: regulator-24v {
+ 		regulator-name = "24V";
+ 		regulator-min-microvolt = <24000000>;
+ 		regulator-max-microvolt = <24000000>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg24v>;
++		interrupt-names = "under-voltage";
++		interrupts-extended = <&gpio4 23 IRQ_TYPE_EDGE_FALLING>;
+ 	};
+ 
+ 	reg_canrs: regulator-canrs {
+@@ -574,6 +578,12 @@ MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT			0x116
+ 		>;
+ 	};
+ 
++	pinctrl_reg24v: reg24vgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI2_RXD0__GPIO4_IO23			0x154
++		>;
++	};
++
+ 	pinctrl_rtc: rtcgrp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SAI3_TXFS__GPIO4_IO31			0x41
