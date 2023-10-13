@@ -3,15 +3,11 @@
 # bootloader between MBR and the first partition containing barebox'
 # environment. The second and third partitions contain the root-FS as well as
 # the filesystem for /home which are empty ext4-FSs here.
-
-# Remember to keep the location of barebox' environment synchronized with the
-# redundant information in barebox' devicetree file (imx8mp-evk.dts)!
 #
-# Dunfell's syntax does not allow for explicit units, the default is kiB for
-# offset and MiB for the (fixed) size.
+# https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
+
 part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET} --no-table
-part --offset 1024                 --fixed-size 1
-part --label root-FS --fstype=ext4 --align 1024 --fixed-size 4096
-part --label home    --fstype=ext4 --align 1024 --fixed-size 2048
+part --offset 1024 --fixed-size 1
+part --label system --fstype=ext4 --align 1024 --fixed-size 3813 --source rootfs
 
 bootloader --ptable msdos
