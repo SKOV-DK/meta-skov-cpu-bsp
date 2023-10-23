@@ -555,7 +555,7 @@ index 000000000000..ac0043db340b
 +
 +	pinctrl_flexcan2: flexcan2grp {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_SAI5_MCLK__CAN2_RX				0x154
++			MX8MP_IOMUXC_SAI2_MCLK__CAN2_RX				0x154
 +			MX8MP_IOMUXC_SAI2_TXD0__CAN2_TX				0x154
 +		>;
 +	};
