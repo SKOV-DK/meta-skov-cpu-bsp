@@ -14,10 +14,10 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
-index 2ab365d2749f..34117eb4877c 100644
+index dcf2cbda7b23..4427e61279fe 100644
 --- a/drivers/regulator/pca9450-regulator.c
 +++ b/drivers/regulator/pca9450-regulator.c
-@@ -479,6 +479,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -480,6 +480,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.n_ramp_values = ARRAY_SIZE(pca9450_dvs_buck_ramp_table),
  			.owner = THIS_MODULE,
  			.of_parse_cb = pca9450_set_dvs_levels,
@@ -25,7 +25,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  		.dvs = {
  			.run_reg = PCA9450_REG_BUCK1OUT_DVS0,
-@@ -508,6 +509,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -509,6 +510,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.n_ramp_values = ARRAY_SIZE(pca9450_dvs_buck_ramp_table),
  			.owner = THIS_MODULE,
  			.of_parse_cb = pca9450_set_dvs_levels,
@@ -33,7 +33,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  		.dvs = {
  			.run_reg = PCA9450_REG_BUCK2OUT_DVS0,
-@@ -532,6 +534,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -533,6 +535,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_BUCK4CTRL,
  			.enable_mask = BUCK4_ENMODE_MASK,
  			.owner = THIS_MODULE,
@@ -41,7 +41,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -550,6 +553,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -551,6 +554,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_BUCK5CTRL,
  			.enable_mask = BUCK5_ENMODE_MASK,
  			.owner = THIS_MODULE,
@@ -49,7 +49,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -568,6 +572,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -569,6 +573,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_BUCK6CTRL,
  			.enable_mask = BUCK6_ENMODE_MASK,
  			.owner = THIS_MODULE,
@@ -57,7 +57,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -586,6 +591,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -587,6 +592,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_LDO1CTRL,
  			.enable_mask = LDO1_EN_MASK,
  			.owner = THIS_MODULE,
@@ -65,7 +65,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -604,6 +610,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -605,6 +611,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_LDO2CTRL,
  			.enable_mask = LDO2_EN_MASK,
  			.owner = THIS_MODULE,
@@ -73,7 +73,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -622,6 +629,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -623,6 +630,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_LDO3CTRL,
  			.enable_mask = LDO3_EN_MASK,
  			.owner = THIS_MODULE,
@@ -81,7 +81,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -640,6 +648,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -641,6 +649,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_LDO4CTRL,
  			.enable_mask = LDO4_EN_MASK,
  			.owner = THIS_MODULE,
@@ -89,7 +89,7 @@ index 2ab365d2749f..34117eb4877c 100644
  		},
  	},
  	{
-@@ -658,6 +667,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+@@ -659,6 +668,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
  			.enable_reg = PCA9450_REG_LDO5CTRL_H,
  			.enable_mask = LDO5H_EN_MASK,
  			.owner = THIS_MODULE,

@@ -1,0 +1,30 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 25 Oct 2023 09:15:18 +0200
+Subject: [PATCH] regulator: dt-bindings: Allow system-critical marking for
+ fixed-regulator
+
+In certain projects, the main system regulator, composed of simple
+components including an under-voltage detector and capacitors, can be
+aptly described as a fixed regulator in the device tree. To cater to
+such use cases, this patch extends the fixed regulator binding to
+support the 'system-critical-regulator' property. This property
+signifies that the fixed-regulator is vital for system stability.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ Documentation/devicetree/bindings/regulator/fixed-regulator.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml b/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
+index ce7751b9129c..9ff9abf2691a 100644
+--- a/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
++++ b/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
+@@ -105,6 +105,8 @@ properties:
+     description:
+       Interrupt signaling a critical under-voltage event.
+ 
++  system-critical-regulator: true
++
+ required:
+   - compatible
+   - regulator-name

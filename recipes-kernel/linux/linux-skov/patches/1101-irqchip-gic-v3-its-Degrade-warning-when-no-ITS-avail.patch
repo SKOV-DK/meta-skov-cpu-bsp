@@ -1,0 +1,26 @@
+From: Holger Assmann <h.assmann@pengutronix.de>
+Date: Mon, 17 Oct 2022 11:54:44 +0200
+Subject: [PATCH] irqchip/gic-v3-its: Degrade warning when no ITS available
+
+There are use cases where neither interrupts over PCI nor for
+virtualisation are used. With such scenarios, throwing a warning for
+missing ITS nodes seems exaggerated.
+
+Signed-off-by: Holger Assmann <h.assmann@pengutronix.de>
+---
+ drivers/irqchip/irq-gic-v3-its.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/irqchip/irq-gic-v3-its.c b/drivers/irqchip/irq-gic-v3-its.c
+index a8c89df1a997..aee04c4c3e84 100644
+--- a/drivers/irqchip/irq-gic-v3-its.c
++++ b/drivers/irqchip/irq-gic-v3-its.c
+@@ -5662,7 +5662,7 @@ int __init its_init(struct fwnode_handle *handle, struct rdists *rdists,
+ 		its_acpi_probe();
+ 
+ 	if (list_empty(&its_nodes)) {
+-		pr_warn("ITS: No ITS available, not enabling LPIs\n");
++		pr_notice("ITS: No ITS available, not enabling LPIs\n");
+ 		return -ENXIO;
+ 	}
+ 

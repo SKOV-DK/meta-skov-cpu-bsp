@@ -84,7 +84,7 @@ index 06cedfe4b486..203f89dadbda 100644
  MODULE_DESCRIPTION("DRM GPU scheduler");
  MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 506371c42745..f03d747b764b 100644
+index 5a3a622fc672..99c9578aac83 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -64,6 +64,8 @@
@@ -348,7 +348,7 @@ index 000000000000..e3e3e73bf279
 +
 +#endif
 diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
-index f9544d9b670d..c1c09434e2e3 100644
+index ac65f0626cfc..8c9d3c9b47c5 100644
 --- a/include/drm/gpu_scheduler.h
 +++ b/include/drm/gpu_scheduler.h
 @@ -27,6 +27,7 @@
@@ -359,7 +359,7 @@ index f9544d9b670d..c1c09434e2e3 100644
  #include <linux/xarray.h>
  #include <linux/workqueue.h>
  
-@@ -465,6 +466,16 @@ struct drm_sched_backend_ops {
+@@ -464,6 +465,16 @@ struct drm_sched_backend_ops {
  	void (*free_job)(struct drm_sched_job *sched_job);
  };
  
@@ -376,7 +376,7 @@ index f9544d9b670d..c1c09434e2e3 100644
  /**
   * struct drm_gpu_scheduler - scheduler instance-specific data
   *
-@@ -517,6 +528,7 @@ struct drm_gpu_scheduler {
+@@ -516,6 +527,7 @@ struct drm_gpu_scheduler {
  	bool				ready;
  	bool				free_guilty;
  	struct device			*dev;

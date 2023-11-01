@@ -1,0 +1,30 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 10 Oct 2023 09:36:53 +0200
+Subject: [PATCH] regulator: dt-bindings: fixed-regulator: Add under-voltage
+ interrupt support
+
+Add under-voltage interrupt support. This can be used with simple
+regulators having no other way to communicate an under-voltage event
+except as by toggling some GPIO line.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ Documentation/devicetree/bindings/regulator/fixed-regulator.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml b/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
+index ac0281b1cceb..ce7751b9129c 100644
+--- a/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
++++ b/Documentation/devicetree/bindings/regulator/fixed-regulator.yaml
+@@ -100,6 +100,11 @@ properties:
+   vin-supply:
+     description: Input supply phandle.
+ 
++  interrupts:
++    maxItems: 1
++    description:
++      Interrupt signaling a critical under-voltage event.
++
+ required:
+   - compatible
+   - regulator-name
