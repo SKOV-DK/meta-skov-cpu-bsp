@@ -11,14 +11,22 @@ store it later on device shutdown call.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
- drivers/rtc/rtc-pcf85063.c | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ drivers/rtc/rtc-pcf85063.c | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
 
 diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
-index fdbc07f14036..1a41808111ef 100644
+index fdbc07f14036..68321d721428 100644
 --- a/drivers/rtc/rtc-pcf85063.c
 +++ b/drivers/rtc/rtc-pcf85063.c
-@@ -70,6 +70,7 @@ struct pcf85063 {
+@@ -17,6 +17,7 @@
+ #include <linux/of.h>
+ #include <linux/pm_wakeirq.h>
+ #include <linux/regmap.h>
++#include <linux/reboot.h>
+ 
+ /*
+  * Information for this driver was pulled from the following datasheets.
+@@ -70,6 +71,7 @@ struct pcf85063 {
  #ifdef CONFIG_COMMON_CLK
  	struct clk_hw		clkout_hw;
  #endif
@@ -26,7 +34,7 @@ index fdbc07f14036..1a41808111ef 100644
  };
  
  static int pcf85063_rtc_read_time(struct device *dev, struct rtc_time *tm)
-@@ -549,6 +550,35 @@ static const struct pcf85063_config config_rv8263 = {
+@@ -549,6 +551,35 @@ static const struct pcf85063_config config_rv8263 = {
  	.force_cap_7000 = 1,
  };
  
@@ -62,7 +70,7 @@ index fdbc07f14036..1a41808111ef 100644
  static int pcf85063_probe(struct i2c_client *client)
  {
  	struct pcf85063 *pcf85063;
-@@ -629,6 +659,9 @@ static int pcf85063_probe(struct i2c_client *client)
+@@ -629,6 +660,9 @@ static int pcf85063_probe(struct i2c_client *client)
  	nvmem_cfg.priv = pcf85063->regmap;
  	devm_rtc_nvmem_register(pcf85063->rtc, &nvmem_cfg);
  

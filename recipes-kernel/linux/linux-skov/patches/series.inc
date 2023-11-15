@@ -1,6 +1,6 @@
 # umpf-base: v6.6
 # umpf-name: 6.6/customers/skov/imx6
-# umpf-version: 6.6/customers/skov/imx6/20231115-1
+# umpf-version: 6.6/customers/skov/imx6/20231115-2
 # umpf-topic: v6.6/topic/drm-sched-accounting
 # umpf-hashinfo: f38bb0440877afd76984c287c6628b76480dfa6a
 # umpf-topic-range: ffc253263a1375a65fa6c9f62a893e9767fbebfa..5d101b01f708613a97550649dd83bab2aa261965
@@ -85,8 +85,8 @@ SRC_URI += "\
   file://patches/0901-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.6/topic/regulator-mmc-under-voltage
-# umpf-hashinfo: eea809e4acad936d6c0e78242499dc15154f78cd
-# umpf-topic-range: 09dad42d636caee197f5c4c8c1f12a946c0ecf92..6a8597747cbfc3901eae2d1b43f624593b5f73e8
+# umpf-hashinfo: c6a610fb1dbcaf075810e7c34c82efa910195b53
+# umpf-topic-range: 09dad42d636caee197f5c4c8c1f12a946c0ecf92..e860c0f0d91e1fd0972f593bd32ce9f8deb146d9
 SRC_URI += "\
   file://patches/1001-regulator-dt-bindings-Add-system-critical-regulator-.patch \
   file://patches/1002-regulator-Introduce-handling-for-system-critical-und.patch \
@@ -103,27 +103,27 @@ SRC_URI += "\
   "
 # umpf-topic: v6.6/topic/gic-v3-its
 # umpf-hashinfo: 4a30eb3a5a229b8426400cb138b0f442bda0bda8
-# umpf-topic-range: 6a8597747cbfc3901eae2d1b43f624593b5f73e8..f0dff7a7682ec4c80c98e50d45583427f4c5b4d6
+# umpf-topic-range: e860c0f0d91e1fd0972f593bd32ce9f8deb146d9..fa9e8357af4332a60c604ba551fb902ca57bb076
 SRC_URI += "\
   file://patches/1101-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.6/topic/pca9450
 # umpf-hashinfo: e9532a1a7d3550efaa04a15d19e9b2ab37275e68
-# umpf-topic-range: f0dff7a7682ec4c80c98e50d45583427f4c5b4d6..f6472864531487c748ae0b76d8c856c11563caab
+# umpf-topic-range: fa9e8357af4332a60c604ba551fb902ca57bb076..04c72ee1215c9633534a2afdce8cd30ee6352cf6
 SRC_URI += "\
   file://patches/1201-WIP-regulator-pca9450-add-support-for-software-trigg.patch \
   file://patches/1202-WIP-regulator-pca9450-add-vin-supply-DT-support.patch \
   "
 # umpf-topic: v6.6/topic/imx6q-dt
 # umpf-hashinfo: 2edb44276ad1ccd527d3fa863e974ea7e028cfaa
-# umpf-topic-range: f6472864531487c748ae0b76d8c856c11563caab..836b9dbc407b76521a4949930ac8660ab6e3f9c0
+# umpf-topic-range: 04c72ee1215c9633534a2afdce8cd30ee6352cf6..398289b5f8628265816f397523dba5cf4db98dbb
 SRC_URI += "\
   file://patches/1301-ARM-dts-imx6q-skov-fix-ethernet-clock-regression.patch \
   file://patches/1302-ARM-dts-imx6-skov-add-aliases-for-all-ethernet-nodes.patch \
   "
-# umpf-release: 6.6/customers/skov/imx6/20231115-1
-# umpf-topic-range: 836b9dbc407b76521a4949930ac8660ab6e3f9c0..cf26f2e3f973026080cf7a478195deb1be1a3b0d
+# umpf-release: 6.6/customers/skov/imx6/20231115-2
+# umpf-topic-range: 398289b5f8628265816f397523dba5cf4db98dbb..4fdc8a9dba3b5a67765660f504fdebe22d875f26
 SRC_URI += "\
-  file://patches/1401-Release-6.6-customers-skov-imx6-20231115-1.patch \
+  file://patches/1401-Release-6.6-customers-skov-imx6-20231115-2.patch \
   "
 # umpf-end
