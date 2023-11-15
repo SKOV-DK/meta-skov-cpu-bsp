@@ -6,12 +6,15 @@ Add Skov i.MX8MP based climate controller.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
+changes v3:
+- set rgmii-txid on the MAC side and rgmii mode on the switch side
+---
  arch/arm64/boot/dts/freescale/Makefile             |   3 +
- .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 729 +++++++++++++++++++++
- .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   |  38 ++
- .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 170 +++++
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 711 +++++++++++++++++++++
+ .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   |  20 +
+ .../boot/dts/freescale/imx8mp-skov-revb-lt6.dts    | 101 +++
  .../freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts  | 100 +++
- 5 files changed, 1040 insertions(+)
+ 5 files changed, 935 insertions(+)
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
@@ -33,10 +36,10 @@ index 89aee6c92576..0e1eed08c805 100644
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw72xx-2x.dtb
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 new file mode 100644
-index 000000000000..c8e3ef230845
+index 000000000000..59813ef8e2bb
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -0,0 +1,729 @@
+@@ -0,0 +1,711 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +#include "imx8mp.dtsi"
@@ -57,6 +60,10 @@ index 000000000000..c8e3ef230845
 +		switch0 = &switch;
 +	};
 +
++	/*
++	 * Backlight is present only on some of boards, so it is disabled by
++	 * default.
++	 */
 +	backlight: backlight {
 +		compatible = "pwm-backlight";
 +		pinctrl-0 = <&pinctrl_backlight>;
@@ -122,7 +129,10 @@ index 000000000000..c8e3ef230845
 +		regulator-max-microvolt = <3300000>;
 +	};
 +
-+	/* not controllable */
++	/*
++	 * This regulator will provide power as long as possible even if
++	 * undervoltage is detected.
++	 */
 +	reg_5v_p: regulator-5v-p {
 +		compatible = "regulator-fixed";
 +		regulator-name = "5V_P";
@@ -131,7 +141,10 @@ index 000000000000..c8e3ef230845
 +		regulator-max-microvolt = <5000000>;
 +	};
 +
-+	/* controllable by mains fail detect */
++	/*
++	 * This regulator will be automatically shutdown if undervoltage is
++	 * detected.
++	 */
 +	reg_5v_s: regulator-5v-s {
 +		compatible = "regulator-fixed";
 +		regulator-name = "5V_S";
@@ -145,21 +158,6 @@ index 000000000000..c8e3ef230845
 +		regulator-name = "24V";
 +		regulator-min-microvolt = <24000000>;
 +		regulator-max-microvolt = <24000000>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_reg24v>;
-+		interrupts-extended = <&gpio4 23 IRQ_TYPE_EDGE_FALLING>;
-+		system-critical-regulator;
-+		regulator-uv-less-critical-window-ms = <50>;
-+	};
-+
-+	reg_canrs: regulator-canrs {
-+		compatible = "regulator-fixed";
-+		regulator-name = "CANRS";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_canrs>;
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
 +	};
 +
 +	reg_can2rs: regulator-can2rs {
@@ -172,29 +170,16 @@ index 000000000000..c8e3ef230845
 +		gpio = <&gpio4 22 GPIO_ACTIVE_LOW>;
 +	};
 +
-+	/* TODO: actually this regulator is part of nxp,pca9450c, implementig
-+	 * it separately */
-+	reg_vsd_3v3: regulator-vsd-3v3 {
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_reg_vsd_3v3>;
-+		vin-supply = <&reg_vdd_3v3>;
++	reg_canrs: regulator-canrs {
 +		compatible = "regulator-fixed";
-+		regulator-name = "VSD_3V3";
++		regulator-name = "CANRS";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_canrs>;
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
-+		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
-+		enable-active-high;
++		gpio = <&gpio4 21 GPIO_ACTIVE_LOW>;
 +	};
 +
-+	/* TODO: LCD bias Power Supply with integrated VCOM Buffer TPS65150
-+	 * is not implemented yet. IN pin should be controlled by PWM4.
-+	 * Different boards have different "bootstrapped" output voltages.
-+	 * VGH pin: 10" - 22V, 7" - 16V
-+	 * AVDD pin: 10" - 8,2V, 7" - 10,4V
-+	 * The VCOM buffer in the TPS65150 device is essentially a
-+	 * transconductance amplifier. It's designed to drive capacitive loads,
-+	 * like the common plane voltage (VCOM) for an LCD display.
-+	 */
 +	reg_tft_vcom: regulator-tft-vcom {
 +		compatible = "pwm-regulator";
 +		pwms = <&pwm4 0 20000 0>;
@@ -205,6 +190,18 @@ index 000000000000..c8e3ef230845
 +		regulator-always-on;
 +		voltage-table = <3600000 26>;
 +		status = "disabled";
++	};
++
++	reg_vsd_3v3: regulator-vsd-3v3 {
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg_vsd_3v3>;
++		vin-supply = <&reg_vdd_3v3>;
++		compatible = "regulator-fixed";
++		regulator-name = "VSD_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
 +	};
 +};
 +
@@ -242,7 +239,7 @@ index 000000000000..c8e3ef230845
 +&eqos {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_eqos>;
-+	phy-mode = "rgmii";
++	phy-mode = "rgmii-txid";
 +	status = "okay";
 +
 +	fixed-link {
@@ -311,7 +308,7 @@ index 000000000000..c8e3ef230845
 +				regulator-always-on;
 +			};
 +
-+			reg_vdd_1v8: BUCK5 { 
++			reg_vdd_1v8: BUCK5 {
 +				regulator-name = "VDD_1V8";
 +				regulator-min-microvolt = <600000>;
 +				regulator-max-microvolt = <3400000>;
@@ -408,10 +405,8 @@ index 000000000000..c8e3ef230845
 +				reg = <2>;
 +				label = "cpu";
 +				ethernet = <&eqos>;
-+				/* 2ns rgmii-rxid is implemented on PCB.
-+				 * Switch should add only rgmii-txid.
-+				 */
-+				phy-mode = "rgmii-txid";
++				phy-mode = "rgmii";
++				/* 2ns RX delay is implemented on PCB */
 +				tx-internal-delay-ps = <2000>;
 +				rx-internal-delay-ps = <0>;
 +
@@ -438,8 +433,6 @@ index 000000000000..c8e3ef230845
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_uart1>;
 +	status = "okay";
-+	/* CTS is not connected, but curretly needed as workaround */
-+	uart-has-rtscts;
 +};
 +
 +&uart2 {
@@ -520,6 +513,18 @@ index 000000000000..c8e3ef230845
 +		>;
 +	};
 +
++	pinctrl_can2rs: can2rsgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22			0x154
++		>;
++	};
++
++	pinctrl_canrs: canrsgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21			0x154
++		>;
++	};
++
 +	pinctrl_ecspi2: ecspi2grp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_ECSPI2_SCLK__ECSPI2_SCLK			0x44
@@ -553,22 +558,10 @@ index 000000000000..c8e3ef230845
 +		>;
 +	};
 +
-+	pinctrl_canrs: canrsgrp {
-+		fsl,pins = <
-+			MX8MP_IOMUXC_SAI2_RXFS__GPIO4_IO21			0x154
-+		>;
-+	};
-+
 +	pinctrl_flexcan2: flexcan2grp {
 +		fsl,pins = <
 +			MX8MP_IOMUXC_SAI2_MCLK__CAN2_RX				0x154
 +			MX8MP_IOMUXC_SAI2_TXD0__CAN2_TX				0x154
-+		>;
-+	};
-+
-+	pinctrl_can2rs: can2rsgrp {
-+		fsl,pins = <
-+			MX8MP_IOMUXC_SAI2_RXC__GPIO4_IO22			0x154
 +		>;
 +	};
 +
@@ -620,9 +613,9 @@ index 000000000000..c8e3ef230845
 +		>;
 +	};
 +
-+	pinctrl_reg24v: reg24vgrp {
++	pinctrl_reg_vsd_3v3: regvsd3v3grp {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_SAI2_RXD0__GPIO4_IO23			0x154
++			MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x40
 +		>;
 +	};
 +
@@ -654,8 +647,6 @@ index 000000000000..c8e3ef230845
 +			MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX			0x140
 +			MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX			0x140
 +			MX8MP_IOMUXC_UART3_RXD__UART1_DTE_RTS			0x140
-+			/* CTS pin is not connected, but currently needed as workaround */
-+			MX8MP_IOMUXC_UART3_TXD__UART1_DTE_CTS			0x140
 +		>;
 +	};
 +
@@ -759,19 +750,13 @@ index 000000000000..c8e3ef230845
 +			MX8MP_IOMUXC_GPIO1_IO02__WDOG1_WDOG_B			0xc6
 +		>;
 +	};
-+
-+	pinctrl_reg_vsd_3v3: regvsd3v3grp {
-+		fsl,pins = <
-+			MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x40
-+		>;
-+	};
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
 new file mode 100644
-index 000000000000..01c7420966ba
+index 000000000000..c1ca69da3cb8
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,20 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +/dts-v1/;
@@ -781,24 +766,6 @@ index 000000000000..01c7420966ba
 +/ {
 +	model = "SKOV IMX8MP CPU revB - HDMI";
 +	compatible = "skov,imx8mp-skov-revb-hdmi", "fsl,imx8mp";
-+};
-+
-+&hdmi_pvi {
-+	status = "okay";
-+};
-+
-+&hdmi_tx {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_hdmi>;
-+	status = "okay";
-+};
-+
-+&hdmi_tx_phy {
-+	status = "okay";
-+};
-+
-+&lcdif3 {
-+	status = "okay";
 +};
 +
 +&iomuxc {
@@ -812,10 +779,10 @@ index 000000000000..01c7420966ba
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
 new file mode 100644
-index 000000000000..297320007bc6
+index 000000000000..ccbd3abedd69
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-lt6.dts
-@@ -0,0 +1,170 @@
+@@ -0,0 +1,101 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +
 +/dts-v1/;
@@ -826,45 +793,6 @@ index 000000000000..297320007bc6
 +	model = "SKOV IMX8MP CPU revB - LT6";
 +	compatible = "skov,imx8mp-skov-revb-lt6", "fsl,imx8mp";
 +
-+	lvds-decoder {
-+		compatible = "ti,sn65lvds822", "lvds-decoder";
-+		power-supply = <&reg_3v3>;
-+
-+		ports {
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+
-+			port@0 {
-+				reg = <0>;
-+
-+				in_lvds1: endpoint {
-+					data-mapping = "vesa-24";
-+					remote-endpoint = <&ldb_lvds_ch1>;
-+				};
-+			};
-+
-+			port@1 {
-+				reg = <1>;
-+
-+				lvds_decoder_out: endpoint {
-+					remote-endpoint = <&panel_in>;
-+				};
-+			};
-+		};
-+	};
-+
-+	panel {
-+		compatible = "logictechno,lttd800480070-l6wh-rt";
-+		backlight = <&backlight>;
-+		power-supply = <&reg_tft_vcom>;
-+
-+		port {
-+			panel_in: endpoint {
-+				remote-endpoint = <&lvds_decoder_out>;
-+			};
-+		};
-+	};
-+
 +	touchscreen {
 +		compatible = "resistive-adc-touch";
 +		io-channels = <&adc_ts 1>, <&adc_ts 3>, <&adc_ts 4>, <&adc_ts 5>;
@@ -873,7 +801,6 @@ index 000000000000..297320007bc6
 +		touchscreen-inverted-y;
 +		touchscreen-swapped-x-y;
 +		touchscreen-x-plate-ohms = <300>;
-+		touchscreen-y-plate-ohms = <800>;
 +	};
 +};
 +
@@ -936,35 +863,6 @@ index 000000000000..297320007bc6
 +	};
 +};
 +
-+&lcdif2 {
-+	status = "okay";
-+};
-+
-+&lvds_bridge {
-+	/* IMX8MP_CLK_MEDIA_LDB = IMX8MP_CLK_MEDIA_DISP2_PIX * 7 */
-+	assigned-clock-rates = <231000000>;
-+	status = "okay";
-+
-+	ports {
-+		port@2 {
-+			ldb_lvds_ch1: endpoint {
-+				remote-endpoint = <&in_lvds1>;
-+			};
-+		};
-+	};
-+};
-+
-+&media_blk_ctrl {
-+	/* currently it is not possible to let display clocks confugure
-+	 * automatically, so we need to set them manually
-+	 */
-+	assigned-clock-rates = <500000000>, <200000000>, <0>,
-+		/* IMX8MP_CLK_MEDIA_DISP2_PIX = pixelclk of lvds panel */
-+		<33000000>,
-+		/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_LDB * 2 */
-+		<462000000>;
-+};
-+
 +&pwm1 {
 +	status = "okay";
 +};
@@ -988,7 +886,7 @@ index 000000000000..297320007bc6
 +};
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
 new file mode 100644
-index 000000000000..f59fa8f69633
+index 000000000000..3c2efdc59bfa
 --- /dev/null
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
 @@ -0,0 +1,100 @@
@@ -1013,17 +911,6 @@ index 000000000000..f59fa8f69633
 +			};
 +		};
 +	};
-+};
-+
-+&reg_tft_vcom {
-+	regulator-min-microvolt = <3160000>;
-+	regulator-max-microvolt = <3160000>;
-+	voltage-table = <3160000 73>;
-+	status = "okay";
-+};
-+
-+&pwm4 {
-+	status = "okay";
 +};
 +
 +&backlight {
@@ -1080,7 +967,18 @@ index 000000000000..f59fa8f69633
 +		<964600000>;
 +};
 +
++&pwm4 {
++	status = "okay";
++};
++
 +&pwm1 {
++	status = "okay";
++};
++
++&reg_tft_vcom {
++	regulator-min-microvolt = <3160000>;
++	regulator-max-microvolt = <3160000>;
++	voltage-table = <3160000 73>;
 +	status = "okay";
 +};
 +

@@ -1,0 +1,21 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 15 Nov 2023 09:34:19 +0100
+Subject: [PATCH] WIP: regulator: store reset reason on under voltage
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/regulator/core.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index a6cb84af989e..27aa208146b4 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -5093,6 +5093,7 @@ static void regulator_handle_critical(struct regulator_dev *rdev,
+ 	if (!reason)
+ 		return;
+ 
++	reset_reason_set(RESET_REASON_UNDERVOLTAGE);
+ 	hw_protection_shutdown(reason,
+ 			       rdev->constraints->uv_less_critical_window_ms);
+ }

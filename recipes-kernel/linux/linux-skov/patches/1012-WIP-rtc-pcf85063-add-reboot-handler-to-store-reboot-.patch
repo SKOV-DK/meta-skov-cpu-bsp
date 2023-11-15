@@ -1,0 +1,74 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 13 Nov 2023 14:53:31 +0100
+Subject: [PATCH] WIP: rtc: pcf85063: add reboot handler to store reboot reason
+
+WIP note: probably we need to use NVMEM interface and have common
+implementation for this use case.
+
+Introduce a reboot handle to stare to store reset reason as early as
+possible. Otherwise in undervoltage case we wont have enough power to
+store it later on device shutdown call.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/rtc/rtc-pcf85063.c | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
+index fdbc07f14036..1a41808111ef 100644
+--- a/drivers/rtc/rtc-pcf85063.c
++++ b/drivers/rtc/rtc-pcf85063.c
+@@ -70,6 +70,7 @@ struct pcf85063 {
+ #ifdef CONFIG_COMMON_CLK
+ 	struct clk_hw		clkout_hw;
+ #endif
++	struct notifier_block	reboot_notifier;
+ };
+ 
+ static int pcf85063_rtc_read_time(struct device *dev, struct rtc_time *tm)
+@@ -549,6 +550,35 @@ static const struct pcf85063_config config_rv8263 = {
+ 	.force_cap_7000 = 1,
+ };
+ 
++static int pcf85063_power_off_prepare(struct notifier_block *nb,
++				      unsigned long action, void *data)
++{
++	struct pcf85063 *pcf85063 =
++			container_of(nb, struct pcf85063, reboot_notifier);
++	u8 buf = reset_reason_get();
++
++	pr_emerg("storing reboot reason to the RTC RAM %x\n", buf);
++	regmap_write(pcf85063->regmap, PCF85063_REG_RAM, buf);
++
++	return NOTIFY_DONE;
++}
++
++static int pcf85063_power_off_prepare_init(struct pcf85063 *pcf85063)
++{
++	struct device *dev = &pcf85063->rtc->dev;
++	int err;
++
++	pcf85063->reboot_notifier.notifier_call = pcf85063_power_off_prepare;
++	err = devm_register_reboot_notifier(dev, &pcf85063->reboot_notifier);
++	if (err) {
++		dev_err(dev, "failed to register sys-off handler: %d\n",
++			err);
++		return err;
++	}
++
++	return 0;
++}
++
+ static int pcf85063_probe(struct i2c_client *client)
+ {
+ 	struct pcf85063 *pcf85063;
+@@ -629,6 +659,9 @@ static int pcf85063_probe(struct i2c_client *client)
+ 	nvmem_cfg.priv = pcf85063->regmap;
+ 	devm_rtc_nvmem_register(pcf85063->rtc, &nvmem_cfg);
+ 
++	pcf85063_power_off_prepare_init(pcf85063);
++	regmap_read(pcf85063->regmap, PCF85063_REG_RAM, &tmp);
++
+ #ifdef CONFIG_COMMON_CLK
+ 	/* register clk in common clk framework */
+ 	pcf85063_clkout_register_clk(pcf85063);

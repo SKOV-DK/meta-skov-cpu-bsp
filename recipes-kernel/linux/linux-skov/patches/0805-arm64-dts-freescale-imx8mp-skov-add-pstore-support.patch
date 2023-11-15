@@ -1,0 +1,52 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 1 Nov 2023 14:08:41 +0100
+Subject: [PATCH] arm64: dts: freescale: imx8mp-skov: add pstore support
+
+Current version of barebox seems to have some issues with latest kernel.
+In this case, we need to have pstore node in the kernel devicetree
+instead of letting to create it by barebox.
+
+Except of this, we need to have warm reset on watchdog instead of cold
+reset to make pstore survive. The problem with warm reset is that it may
+have not enough impact to recover the system.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 9a423090a386..c1a2dee4e9a3 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -177,6 +177,21 @@ reg_vsd_3v3: regulator-vsd-3v3 {
+ 		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+ 		enable-active-high;
+ 	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		ramoops: ramoops@bfdd0000 {
++			compatible = "ramoops";
++			reg = <0x00 0xbfdd0000 0x00 0x0100000>;
++			record-size = <0x8000>;
++			console-size = <0x8000>;
++			ftrace-size = <0x00>;
++			pmsg-size = <0x8000>;
++		};
++	};
+ };
+ 
+ &A53_0 {
+@@ -249,6 +264,8 @@ pmic@25 {
+ 		pinctrl-0 = <&pinctrl_pmic>;
+ 		interrupts-extended = <&gpio1 3 IRQ_TYPE_EDGE_RISING>;
+ 		sd-vsel-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
++		/* use warm reset to make pstore survive */
++		nxp,wdog_b-warm-reset;
+ 
+ 		regulators {
+ 			reg_vdd_soc: BUCK1 {

@@ -5,6 +5,10 @@ Subject: [PATCH] dt-bindings: arm: Add compatible for SKOV i.MX8MP RevB board
 Add DT compatible string for a SKOV i.MX8MP RevB climate controller board.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+changes v3:
+- add Acked-by
 ---
  Documentation/devicetree/bindings/arm/fsl.yaml | 3 +++
  1 file changed, 3 insertions(+)

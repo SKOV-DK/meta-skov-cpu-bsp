@@ -1,0 +1,63 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 14 Nov 2023 14:05:36 +0100
+Subject: [PATCH] WIP: kernel/reboot: introduce a reset reason storage
+
+Add a reset reason storage, which can be used by other components like
+RTC clock to restore the reset reason to the RTC ram.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ include/linux/reboot.h | 10 ++++++++++
+ kernel/reboot.c        | 13 +++++++++++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/include/linux/reboot.h b/include/linux/reboot.h
+index 2b6bb593be5b..fc8bf853f235 100644
+--- a/include/linux/reboot.h
++++ b/include/linux/reboot.h
+@@ -183,4 +183,14 @@ void hw_protection_shutdown(const char *reason, int ms_until_forced);
+ extern void emergency_restart(void);
+ #include <asm/emergency-restart.h>
+ 
++/* Keep it stable, this values can be shared with bootloaders */
++enum reset_reason {
++	RESET_REASON_UNKNOWN = 0,
++	RESET_REASON_UNDERVOLTAGE = 1,
++	RESET_REASON_OVERTEMPERATURE = 2,
++};
++
++void reset_reason_set(enum reset_reason reason);
++unsigned int reset_reason_get(void);
++
+ #endif /* _LINUX_REBOOT_H */
+diff --git a/kernel/reboot.c b/kernel/reboot.c
+index 3bba88c7ffc6..3785a4178e88 100644
+--- a/kernel/reboot.c
++++ b/kernel/reboot.c
+@@ -47,6 +47,7 @@ int reboot_default = 1;
+ int reboot_cpu;
+ enum reboot_type reboot_type = BOOT_ACPI;
+ int reboot_force;
++unsigned int reset_reason = RESET_REASON_UNKNOWN;
+ 
+ struct sys_off_handler {
+ 	struct notifier_block nb;
+@@ -63,6 +64,18 @@ struct sys_off_handler {
+  */
+ void __weak (*pm_power_off)(void);
+ 
++void reset_reason_set(enum reset_reason reason)
++{
++	reset_reason = reason;
++}
++EXPORT_SYMBOL_GPL(reset_reason_set);
++
++unsigned int reset_reason_get(void)
++{
++	return reset_reason;
++}
++EXPORT_SYMBOL_GPL(reset_reason_get);
++
+ /**
+  *	emergency_restart - reboot the system
+  *
