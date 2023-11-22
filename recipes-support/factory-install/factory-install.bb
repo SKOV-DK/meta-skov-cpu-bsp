@@ -1,4 +1,4 @@
-LICENSE = "BSD-0-Clause"
+LICENSE = "0BSD"
 LIC_FILES_CHKSUM = "file://factory-install.sh;beginline=3;endline=15;md5=3175507a15319e01b19e37279acea659"
 
 SRC_URI = " \
