@@ -16,7 +16,7 @@ MEDIUM = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "SD-card", "eMMC", d)}"
 TGT_DEV = "/dev/${@bb.utils.contains("TARGET_MEDIUM", "SD", "mmcblk1", "mmcblk2", d)}"
 SKELETON = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "sd-skeleton-image", "emmc-skeleton-image", d)}"
 WIC = "${SKELETON}-${MACHINE}.wic"
-PART_NO = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "3", "5", d)}"
+PART_NO = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "3", "6", d)}"
 BUNDLE = "${FACTORY_INSTALL_BUNDLE}-${MACHINE}.raucb"
 
 # Ensure that all needed artifacts are available for inclusion
