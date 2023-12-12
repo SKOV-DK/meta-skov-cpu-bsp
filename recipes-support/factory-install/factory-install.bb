@@ -35,7 +35,6 @@ RDEPENDS:${PN} = " \
     mmc-utils \
     bmap-tools \
     util-linux-blkdiscard \
-    procps \
     zstd \
     parted \
     e2fsprogs-resize2fs \

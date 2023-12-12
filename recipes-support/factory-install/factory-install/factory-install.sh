@@ -28,21 +28,17 @@ PART_NO=@PART_NO@
 
 
 show_splash () {
-    local BASENAME="splash-factory-install-${1}"
+    local BASENAME
+
+    if [ $# -eq "0" ]; then
+        BASENAME="splash"
+    else
+        BASENAME="splash-factory-install-${1}"
+    fi
 
     systemd-run --quiet --unit="${BASENAME}" \
         /usr/sbin/platsch --directory /usr/share/platsch \
                           --basename "${BASENAME}"
-
-    # Now the initial instance of platsch is not needed anymore
-    if [ -n "${PLATSCH_PID}" ]; then
-        while ! systemctl --quiet is-active "${BASENAME}"; do
-            sleep 1
-        done
-
-        sleep 1
-        kill "${PLATSCH_PID}"
-    fi
 }
 
 success () {
@@ -69,8 +65,8 @@ echo timer > /sys/class/leds/D2/trigger
 echo 50 > /sys/class/leds/D2/delay_on
 echo 50 > /sys/class/leds/D2/delay_off
 
-# Find the PID of the initial platsch's forked instance
-PLATSCH_PID=$(pgrep platsch)
+# Display initial factory-install splashscreen
+show_splash
 
 echo "Discarding the whole ${MEDIUM} initially using blkdiscard."
 if ! blkdiscard -f -v "${TGT_DEV}"; then
