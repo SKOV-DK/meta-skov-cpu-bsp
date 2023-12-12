@@ -47,16 +47,27 @@ show_splash () {
 
 success () {
     echo "Installation succeeded."
+    echo none > /sys/class/leds/D1/trigger
+    echo none > /sys/class/leds/D2/trigger
+    echo heartbeat > /sys/class/leds/D1/trigger
+    echo heartbeat > /sys/class/leds/D2/trigger
     show_splash success
     exit 0;
 }
 
 failure () {
     echo "Installation failed: ${1}"
+    echo timer > /sys/class/leds/D2/trigger
+    echo 1000 > /sys/class/leds/D2/delay_on
+    echo 1000 > /sys/class/leds/D2/delay_off
     show_splash failure
     exit 1;
 }
 
+
+echo timer > /sys/class/leds/D2/trigger
+echo 50 > /sys/class/leds/D2/delay_on
+echo 50 > /sys/class/leds/D2/delay_off
 
 # Find the PID of the initial platsch's forked instance
 PLATSCH_PID=$(pgrep platsch)
