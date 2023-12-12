@@ -16,12 +16,15 @@
 #
 
 MEDIUM=@MEDIUM@
-TGT_DEV=@TGT_DEV@
+TGT_DEV=/dev/@TGT_MMC@
+TGT_DEV_BOOT0=/dev/@TGT_MMC@boot0
+TGT_DEV_BOOT1=/dev/@TGT_MMC@boot1
+BOOT0_FORCE_RO=/sys/class/block/@TGT_MMC@boot0/force_ro
+BOOT1_FORCE_RO=/sys/class/block/@TGT_MMC@boot1/force_ro
 WIC=@WIC@
+BAREBOX_RENAME=@BAREBOX_RENAME@
 DATADIR=@DATADIR@
 PART_NO=@PART_NO@
-BUNDLE=@BUNDLE@
-BAREBOX="${DATADIR}"@BAREBOX_IMAGE@
 
 
 show_splash () {
@@ -58,13 +61,13 @@ failure () {
 # Find the PID of the initial platsch's forked instance
 PLATSCH_PID=$(pgrep platsch)
 
-echo "Discard the whole ${MEDIUM} initially using blkdiscard."
-if ! blkdiscard -v "${TGT_DEV}"; then
+echo "Discarding the whole ${MEDIUM} initially using blkdiscard."
+if ! blkdiscard -f -v "${TGT_DEV}"; then
     failure "Failed to discard the whole ${MEDIUM} initially using blkdiscard."
 fi
 
 echo "Flashing ${WIC} into ${MEDIUM} using bmaptool."
-if ! bmaptool copy --bmap "${DATADIR}${WIC}.bmap" "${DATADIR}${WIC}.bz2" "${TGT_DEV}"; then
+if ! bmaptool copy --bmap "${DATADIR}${WIC}.bmap" "${DATADIR}${WIC}.zst" "${TGT_DEV}"; then
     failure "Failed to flash ${WIC} into ${MEDIUM} using bmaptool."
 fi
 
@@ -78,22 +81,49 @@ if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" -64s; then
     failure "Failed to expand ${PART_NO}th partition of ${MEDIUM} to the end of the device."
 fi
 
-echo "Resizing filesystem on ${PART_NO}th partition of ${MEDIUM}."
-if ! resize2fs "${TGT_DEV}"p"${PART_NO}"; then
-    failure "Failed to resize filesystem on ${PART_NO}th partition of ${MEDIUM}."
+echo "Resizing ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
+if ! resize2fs -p "${TGT_DEV}"p"${PART_NO}"; then
+    failure "Failed to resize ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
 fi
 
-echo "Prepare fake-overlay-FS for /home/etc to let rauc create its data-directory."
-if ! mkdir -p /tmp/fake_home/etc/rauc; then
-    failure "Failed to \"mkdir /tmp/fake_home/etc/rauc\"."
-fi
-if ! mount --bind /tmp/fake_home /home; then
-    failure "Failed to \"mount --bind /tmp/fake_home /home\"."
+echo "Disabling the ${MEDIUM}'s first boot partition's read-only mode."
+if ! echo 0 > "${BOOT0_FORCE_RO}"; then
+    failure "Failed to disable the ${MEDIUM}'s first boot partition's read-only mode."
 fi
 
-echo "Ask RAUC to install ${BUNDLE}."
-if ! rauc install ${DATADIR}${BUNDLE}; then
-    failure "Failed to \"rauc install ${DATADIR}${BUNDLE}\"."
+echo "Discarding the ${MEDIUM}'s first boot partition initially using blkdiscard."
+if ! blkdiscard -v "${TGT_DEV_BOOT0}"; then
+    failure "Failed to discard the ${MEDIUM}'s first boot partition initially using blkdiscard."
+fi
+
+echo "Flashing ${BAREBOX_RENAME} into the ${MEDIUM}'s first boot partition using dd."
+if ! dd if="${DATADIR}${BAREBOX_RENAME}" of="${TGT_DEV_BOOT0}" bs=1M; then
+    failure "Failed to flash ${BAREBOX_RENAME} into the ${MEDIUM}'s first boot partition using dd."
+fi
+
+echo "Enabling the ${MEDIUM}'s first boot partition's read-only mode."
+if ! echo 1 > "${BOOT0_FORCE_RO}"; then
+    failure "Failed to enable the ${MEDIUM}'s first boot partition's read-only mode."
+fi
+
+echo "Disabling the ${MEDIUM}'s second boot partition's read-only mode."
+if ! echo 0 > "${BOOT1_FORCE_RO}"; then
+    failure "Failed to disable the ${MEDIUM}'s second boot partition's read-only mode."
+fi
+
+echo "Discarding the ${MEDIUM}'s second boot partition initially using blkdiscard."
+if ! blkdiscard -v "${TGT_DEV_BOOT1}"; then
+    failure "Failed to discard the ${MEDIUM}'s second boot partition initially using blkdiscard."
+fi
+
+echo "Enabling the ${MEDIUM}'s second boot partition's read-only mode."
+if ! echo 1 > "${BOOT1_FORCE_RO}"; then
+    failure "Failed to enable the ${MEDIUM}'s second boot partition's read-only mode."
+fi
+
+echo "Enabling the ${MEDIUM}'s first boot partition."
+if ! mmc bootpart enable 1 0 "${TGT_DEV}"; then
+    failure "Failed to enable the ${MEDIUM}'s first boot partition."
 fi
 
 success

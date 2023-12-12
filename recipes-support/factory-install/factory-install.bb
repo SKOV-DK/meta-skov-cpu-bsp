@@ -12,47 +12,58 @@ S = "${WORKDIR}"
 
 SYSTEMD_SERVICE:${PN} = "factory-install.service"
 
-MEDIUM = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "SD-card", "eMMC", d)}"
-TGT_DEV = "/dev/${@bb.utils.contains("TARGET_MEDIUM", "SD", "mmcblk1", "mmcblk2", d)}"
-SKELETON = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "sd-skeleton-image", "emmc-skeleton-image", d)}"
-WIC = "${SKELETON}-${MACHINE}.wic"
-PART_NO = "${@bb.utils.contains("TARGET_MEDIUM", "SD", "3", "6", d)}"
-BUNDLE = "${FACTORY_INSTALL_BUNDLE}-${MACHINE}.raucb"
+MEDIUM = "eMMC"
+TGT_MMC = "mmcblk2"
+PART_NO = "6"
+WIC = "${FACTORY_INSTALL_IMAGE}-${MACHINE}.wic"
+BAREBOX_OFFSET ?= "0"
+BAREBOX_OFFSET:imx8eval = "${BAREBOX_PADDING_OFFSET}K"
+BAREBOX_OFFSET:imx8-cpu = "${BAREBOX_PADDING_OFFSET}K"
+BAREBOX_RENAME ?= "${BAREBOX_IMAGE}"
+BAREBOX_RENAME:imx8eval = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
+BAREBOX_RENAME:imx8-cpu = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
 
 # Ensure that all needed artifacts are available for inclusion
-do_install[depends] += "${SKELETON}:do_image_complete"
-do_install[depends] += "${FACTORY_INSTALL_BUNDLE}:do_deploy"
-do_install[depends] += "virtual/bootloader:do_deploy"
+do_compile[depends] += "${FACTORY_INSTALL_IMAGE}:do_image_complete"
+do_compile[depends] += "virtual/bootloader:do_deploy"
 
+DEPENDS = " \
+    zstd \
+"
 RDEPENDS:${PN} = " \
     bash \
+    mmc-utils \
     bmap-tools \
     util-linux-blkdiscard \
     procps \
-    pbzip2 \
-    rauc \
+    zstd \
     parted \
+    e2fsprogs-resize2fs \
     splash-factory-install \
-    skovsetup \
 "
+
+do_compile() {
+    zstd -f -k -T0 -c ${ZSTD_COMPRESSION_LEVEL} ${DEPLOY_DIR_IMAGE}/${WIC} > ${B}/${WIC}.zst
+
+    dd if=${DEPLOY_DIR_IMAGE}/${BAREBOX_IMAGE} of=${B}/${BAREBOX_RENAME} \
+       iflag=skip_bytes skip=${BAREBOX_OFFSET}
+}
 
 do_install() {
     install -d ${D}${bindir}
     install -m 0755 ${S}/factory-install.sh ${D}${bindir}
     sed --expression=s,@MEDIUM@,${MEDIUM}, \
-        --expression=s,@TGT_DEV@,${TGT_DEV}, \
+        --expression=s,@TGT_MMC@,${TGT_MMC}, \
         --expression=s,@WIC@,${WIC}, \
+        --expression=s,@BAREBOX_RENAME@,${BAREBOX_RENAME}, \
         --expression=s,@DATADIR@,${datadir}/factory-install/, \
         --expression=s,@PART_NO@,${PART_NO}, \
-        --expression=s,@BUNDLE@,${BUNDLE}, \
-        --expression=s,@BAREBOX_IMAGE@,${BAREBOX_IMAGE}, \
         --in-place ${D}${bindir}/factory-install.sh
 
     install -d ${D}${datadir}/factory-install
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${BAREBOX_IMAGE}    ${D}${datadir}/factory-install
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${WIC}.bz2          ${D}${datadir}/factory-install
+    install -m 0644 ${B}/${WIC}.zst                         ${D}${datadir}/factory-install
     install -m 0644 ${DEPLOY_DIR_IMAGE}/${WIC}.bmap         ${D}${datadir}/factory-install
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/${BUNDLE}           ${D}${datadir}/factory-install
+    install -m 0644 ${B}/${BAREBOX_RENAME}                  ${D}${datadir}/factory-install
 
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/factory-install.service ${D}${systemd_unitdir}/system
