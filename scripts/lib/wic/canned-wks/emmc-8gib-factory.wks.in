@@ -7,11 +7,11 @@
 #
 # https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
 
-part --part-name barebox-environment --part-type 6C3737F2-07F8-45D1-AD45-15D260AAB24D                                   --align 1024 --fixed-size 1M    --source empty
-part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1                                   --align 1024 --fixed-size 1M    --source empty
-part --part-name system0             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE                                   --align 1024 --fixed-size 2048M --source empty
-part --part-name system1             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE                                   --align 1024 --fixed-size 2048M --source empty
-part --part-name recovery            --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --label  recoveryfs --fstype=ext4 --align 1024 --fixed-size 512M  --source rootfs --exclude-path home/
-part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --label  home       --fstype=ext4 --align 1024 --fixed-size 2844M --source rootfs --change-directory home/
+part --part-name barebox-environment --part-type 6C3737F2-07F8-45D1-AD45-15D260AAB24D --align 1024 --fixed-size 1M    --source empty
+part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --align 1024 --fixed-size 1M    --source empty
+part --part-name system0             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 2048M --source empty
+part --part-name system1             --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 2048M --source empty
+part --part-name recovery            --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 512M  --source rootfs --exclude-path     home/ --fstype=ext4 --label recoveryfs
+part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --align 1024 --fixed-size 2844M --source rootfs --change-directory home/ --fstype=ext4 --label home
 
 bootloader --ptable gpt

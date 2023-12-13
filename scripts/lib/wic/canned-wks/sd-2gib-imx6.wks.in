@@ -7,8 +7,8 @@
 # https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
 
 part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET}k --no-table
-part                                     --align 1024 --fixed-size 1M    --source empty
-part        --label system --fstype=ext4 --align 1024 --fixed-size 1749M --source rootfs --exclude-path home/
-part /home  --label home   --fstype=ext4 --align 1024 --fixed-size 64M   --source rootfs --change-directory home/ --ondisk mmcblk2 --fsoptions "defaults,rw"
+part       --align 1024 --fixed-size 1M    --source empty
+part       --align 1024 --fixed-size 1749M --source rootfs --exclude-path     home/ --fstype=ext4 --label system
+part /home --align 1024 --fixed-size 64M   --source rootfs --change-directory home/ --fstype=ext4 --label home   --ondisk mmcblk2 --fsoptions "defaults,rw"
 
 bootloader --ptable msdos
