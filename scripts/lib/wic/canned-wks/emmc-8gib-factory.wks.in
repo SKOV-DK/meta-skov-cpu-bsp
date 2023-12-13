@@ -1,15 +1,12 @@
 # short-description: Create A/B image to flash on an eMMC
 # long-description: Creates a GPT partitioned eMMC image with barebox-
-# environment and barebox-state partitions (each 1 MiB), two partitions for the
-# root-FSs and a partition for /home. The first two, as well as the fourth, are
+# environment and barebox-state partitions, two partitions for the root-FSs, a
+# partition for a recovery system and a partition for /home. The first four are
 # empty and the remaining partitions are filled with the contents of the root-FS
 # this WKS file is applied to.
-
-# Remember to keep the location of barebox' environment & state synchronized
-# with the redundant information in barebox' devicetree file (imx8mp-evk.dts)!
 #
-# Dunfell's syntax does not allow for explicit units, the default is kiB for
-# offset and MiB for the (fixed) size.
+# https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
+
 part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET} --no-table
 part --part-name barebox-environment --part-type 6C3737F2-07F8-45D1-AD45-15D260AAB24D --offset 1024       --fixed-size 1
 part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --offset 2048       --fixed-size 1
