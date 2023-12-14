@@ -1,5 +1,5 @@
 # short-description: Create mostly empty bootable image to flash on an SD-card
-# long-description: Creates an MBR partitioned SD-card image with barebox as
+# long-description: Creates a GPT partitioned SD-card image with barebox as
 # bootloader between MBR and the first partition containing barebox'
 # environment. The second partition is filled with the contents of the root-FS
 # this WKS file is applied to.
@@ -7,7 +7,7 @@
 # https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
 
 part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET}k --no-table
-part --align 1024 --fixed-size 1M    --source empty
-part --align 1024 --fixed-size 1813M --source rootfs --fstype=ext4 --label system
+part --part-name barebox-environment --part-type 6C3737F2-07F8-45D1-AD45-15D260AAB24D --align 1024 --fixed-size 1M    --source empty
+part --part-name system              --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 1813M --source rootfs --fstype=ext4 --label system
 
-bootloader --ptable msdos
+bootloader --ptable gpt
