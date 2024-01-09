@@ -31,3 +31,7 @@ SRC_URI += "\
   file://patches/0201-Release-2023.09.0-customers-skov-imx6-20231006-1.patch \
   "
 # umpf-end
+# SAN patch for alternative SAMSUNG ram "
+SRC_URI += "\
+  file://patches/0302-imx8-cpu-samsung-ram-timings.patch \
+"
