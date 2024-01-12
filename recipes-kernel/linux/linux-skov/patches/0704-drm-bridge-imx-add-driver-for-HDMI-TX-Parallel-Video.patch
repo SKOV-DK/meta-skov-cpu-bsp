@@ -19,7 +19,7 @@ Tested-by: Marek Vasut <marex@denx.de>
  create mode 100644 drivers/gpu/drm/bridge/imx/imx8mp-hdmi-pvi.c
 
 diff --git a/drivers/gpu/drm/bridge/imx/Kconfig b/drivers/gpu/drm/bridge/imx/Kconfig
-index 00b69a920c8b..52df854c25be 100644
+index 0ee2e377c632..0e4cf0569957 100644
 --- a/drivers/gpu/drm/bridge/imx/Kconfig
 +++ b/drivers/gpu/drm/bridge/imx/Kconfig
 @@ -3,6 +3,13 @@ if ARCH_MXC || COMPILE_TEST
@@ -37,7 +37,7 @@ index 00b69a920c8b..52df854c25be 100644
  	tristate "Freescale i.MX8QM LVDS display bridge"
  	depends on OF
 diff --git a/drivers/gpu/drm/bridge/imx/Makefile b/drivers/gpu/drm/bridge/imx/Makefile
-index 5ca5e3309524..3ab7c1499698 100644
+index bd8706de6ae5..2dc9575d9d25 100644
 --- a/drivers/gpu/drm/bridge/imx/Makefile
 +++ b/drivers/gpu/drm/bridge/imx/Makefile
 @@ -1,4 +1,5 @@

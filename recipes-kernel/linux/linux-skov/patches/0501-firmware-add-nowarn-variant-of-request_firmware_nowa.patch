@@ -23,10 +23,10 @@ v3:
  2 files changed, 76 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index b58c42f1b1ce..596c67267476 100644
+index ea28102d421e..8320ded4b48b 100644
 --- a/drivers/base/firmware_loader/main.c
 +++ b/drivers/base/firmware_loader/main.c
-@@ -1167,34 +1167,11 @@ static void request_firmware_work_func(struct work_struct *work)
+@@ -1168,34 +1168,11 @@ static void request_firmware_work_func(struct work_struct *work)
  	kfree(fw_work);
  }
  
@@ -64,7 +64,7 @@ index b58c42f1b1ce..596c67267476 100644
  {
  	struct firmware_work *fw_work;
  
-@@ -1212,7 +1189,8 @@ request_firmware_nowait(
+@@ -1213,7 +1190,8 @@ request_firmware_nowait(
  	fw_work->context = context;
  	fw_work->cont = cont;
  	fw_work->opt_flags = FW_OPT_NOWAIT |
@@ -74,7 +74,7 @@ index b58c42f1b1ce..596c67267476 100644
  
  	if (!uevent && fw_cache_is_setup(device, name)) {
  		kfree_const(fw_work->name);
-@@ -1231,8 +1209,66 @@ request_firmware_nowait(
+@@ -1232,8 +1210,66 @@ request_firmware_nowait(
  	schedule_work(&fw_work->work);
  	return 0;
  }

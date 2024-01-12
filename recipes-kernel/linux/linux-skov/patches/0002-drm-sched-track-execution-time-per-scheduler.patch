@@ -14,7 +14,7 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 17 insertions(+)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 99c9578aac83..086fb81a8dad 100644
+index 563d997a30e5..149539b1de6a 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -379,6 +379,11 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)
@@ -29,7 +29,7 @@ index 99c9578aac83..086fb81a8dad 100644
  	spin_unlock(&sched->job_list_lock);
  }
  
-@@ -912,6 +917,7 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
+@@ -918,6 +923,7 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
  static struct drm_sched_job *
  drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  {
@@ -37,7 +37,7 @@ index 99c9578aac83..086fb81a8dad 100644
  	struct drm_sched_job *job, *next;
  
  	spin_lock(&sched->job_list_lock);
-@@ -941,6 +947,17 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
+@@ -947,6 +953,17 @@ drm_sched_get_cleanup_job(struct drm_gpu_scheduler *sched)
  
  	spin_unlock(&sched->job_list_lock);
  

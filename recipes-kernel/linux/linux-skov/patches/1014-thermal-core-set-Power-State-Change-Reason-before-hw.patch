@@ -1,0 +1,32 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 16 Jan 2024 13:05:57 +0100
+Subject: [PATCH] thermal: core: set Power State Change Reason before
+ hw_protection_shutdown()
+
+Store the state change reason to some black box for later investigation.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/thermal/thermal_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/thermal/thermal_core.c b/drivers/thermal/thermal_core.c
+index 9c17d35ccbbd..5ee3a59d7a0e 100644
+--- a/drivers/thermal/thermal_core.c
++++ b/drivers/thermal/thermal_core.c
+@@ -16,6 +16,7 @@
+ #include <linux/kdev_t.h>
+ #include <linux/idr.h>
+ #include <linux/thermal.h>
++#include <linux/pscr.h>
+ #include <linux/reboot.h>
+ #include <linux/string.h>
+ #include <linux/of.h>
+@@ -325,6 +326,7 @@ void thermal_zone_device_critical(struct thermal_zone_device *tz)
+ 	dev_emerg(&tz->device, "%s: critical temperature reached, "
+ 		  "shutting down\n", tz->type);
+ 
++	set_power_state_change_reason(PSCR_OVERTEMPERATURE);
+ 	hw_protection_shutdown("Temperature too high", poweroff_delay_ms);
+ }
+ EXPORT_SYMBOL(thermal_zone_device_critical);

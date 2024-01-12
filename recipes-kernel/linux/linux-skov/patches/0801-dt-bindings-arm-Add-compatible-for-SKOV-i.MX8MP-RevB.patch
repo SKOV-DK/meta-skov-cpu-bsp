@@ -14,10 +14,10 @@ changes v3:
  1 file changed, 3 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/arm/fsl.yaml b/Documentation/devicetree/bindings/arm/fsl.yaml
-index 9450b2c8a678..f457ad8e2ca1 100644
+index 32b195852a75..ce72c7340353 100644
 --- a/Documentation/devicetree/bindings/arm/fsl.yaml
 +++ b/Documentation/devicetree/bindings/arm/fsl.yaml
-@@ -1037,6 +1037,9 @@ properties:
+@@ -1048,6 +1048,9 @@ properties:
                - gateworks,imx8mp-gw73xx-2x # i.MX8MP Gateworks Board
                - gateworks,imx8mp-gw74xx   # i.MX8MP Gateworks Board
                - gateworks,imx8mp-gw7905-2x # i.MX8MP Gateworks Board

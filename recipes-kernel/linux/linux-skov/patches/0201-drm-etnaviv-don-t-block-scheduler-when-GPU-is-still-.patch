@@ -23,7 +23,7 @@ the behavior of other drivers and avoids the issue.
  1 file changed, 5 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
-index 345fec6cb1a4..d5d255ab089f 100644
+index 9b79f218e21a..e8338ce5bd3f 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
 @@ -38,15 +38,12 @@ static enum drm_gpu_sched_stat etnaviv_sched_timedout_job(struct drm_sched_job

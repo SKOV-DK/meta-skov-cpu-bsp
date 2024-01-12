@@ -21,10 +21,10 @@ changes v3:
  create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
 
 diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
-index 89aee6c92576..0e1eed08c805 100644
+index 300049037eb0..45bfaf5a8b66 100644
 --- a/arch/arm64/boot/dts/freescale/Makefile
 +++ b/arch/arm64/boot/dts/freescale/Makefile
-@@ -102,6 +102,9 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb
+@@ -115,6 +115,9 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-evk.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-icore-mx8mp-edimm2.2.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-msc-sm2s-ep1.dtb
  dtb-$(CONFIG_ARCH_MXC) += imx8mp-phyboard-pollux-rdk.dtb
@@ -357,7 +357,7 @@ index 000000000000..59813ef8e2bb
 +};
 +
 +&i2c3 {
-+	clock-frequency = <400000>;
++	clock-frequency = <100000>;
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pinctrl_i2c3>;
 +	status = "okay";

@@ -88,10 +88,10 @@ index 0af96548e7da..e2448500630d 100644
  
  static void mmc_bus_remove(struct device *dev)
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4a4bab9aa726..60df44f9343e 100644
+index 705942edacc6..505eaa9bc9d7 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -2008,6 +2008,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+@@ -2013,6 +2013,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
  	unsigned int timeout = card->ext_csd.generic_cmd6_time;
  	int err;
  
@@ -99,7 +99,7 @@ index 4a4bab9aa726..60df44f9343e 100644
  	/* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
  	if (notify_type == EXT_CSD_POWER_OFF_LONG)
  		timeout = card->ext_csd.power_off_longtime;
-@@ -2019,6 +2020,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+@@ -2024,6 +2025,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
  		pr_err("%s: Power Off Notification timed out, %u\n",
  		       mmc_hostname(card->host), timeout);
  
@@ -120,10 +120,10 @@ index c3e554344c99..85d2cb845057 100644
  	 * Set the Power Off Notification bit in the power management settings
  	 * register at 2 bytes offset.
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index daa2f40d9ce6..9e14cd8559aa 100644
+index 7b12eebc5586..4fa5dba32d22 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -339,6 +339,7 @@ struct mmc_card {
+@@ -341,6 +341,7 @@ struct mmc_card {
  	unsigned int    nr_parts;
  
  	struct workqueue_struct *complete_wq;	/* Private workqueue */

@@ -1,11 +1,14 @@
 From: Lucas Stach <l.stach@pengutronix.de>
-Date: Tue, 24 Jan 2023 18:08:07 +0100
+Date: Thu, 26 Jan 2023 19:47:43 +0100
 Subject: [PATCH] gpu: ipu-v3: pre: move state into struct
 
 Move the variables tracking the current dynamic state into a struct
 to separate it a bit better from the static device properties.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+Reviewed-by: Philipp Zabel <p.zabel@pengutronix.de>
+Link: https://lore.kernel.org/r/20230126184744.921758-1-l.stach@pengutronix.de
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/ipu-v3/ipu-pre.c | 27 +++++++++++++++------------
  1 file changed, 15 insertions(+), 12 deletions(-)

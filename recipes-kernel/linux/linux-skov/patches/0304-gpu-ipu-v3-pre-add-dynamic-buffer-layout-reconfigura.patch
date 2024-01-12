@@ -1,5 +1,5 @@
 From: Lucas Stach <l.stach@pengutronix.de>
-Date: Tue, 24 Jan 2023 17:28:36 +0100
+Date: Thu, 26 Jan 2023 19:47:44 +0100
 Subject: [PATCH] gpu: ipu-v3: pre: add dynamic buffer layout reconfiguration
 
 imx-drm doesn't mandate a modeset when the framebuffer modifier changes,
@@ -13,6 +13,8 @@ prefetch needs to touch the CTRL register make sure to do the
 reconfiguration inside the safe window.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+Link: https://lore.kernel.org/r/20230126184744.921758-2-l.stach@pengutronix.de
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/ipu-v3/ipu-pre.c | 59 +++++++++++++++++++++++++++++++++++---------
  drivers/gpu/ipu-v3/ipu-prg.c |  2 +-

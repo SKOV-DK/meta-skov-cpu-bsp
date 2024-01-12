@@ -1,0 +1,26 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 9 Jan 2024 14:41:19 +0100
+Subject: [PATCH] arm64: dts: freescale: imx8mp-skov: increase I2C clock
+ frequency for RTC
+
+We need to store reset/poweroff reason to the RTC storage ASAP. So,
+increase the i2c bus frequency.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 8ca2365847e4..95a08216d060 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -348,7 +348,7 @@ reg_nvcc_sd2: LDO5 {
+ };
+ 
+ &i2c3 {
+-	clock-frequency = <100000>;
++	clock-frequency = <400000>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_i2c3>;
+ 	status = "okay";

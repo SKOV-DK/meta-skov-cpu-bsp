@@ -1,0 +1,24 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 10 Jan 2024 09:56:33 +0100
+Subject: [PATCH] WIP: regulator: pca9450: fix build with kernel v6.7
+
+With latest kernel and kernel config build will fail. Probably
+needed dependencies was taken indirectly.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/regulator/pca9450-regulator.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
+index 4427e61279fe..fcbc93bb5f88 100644
+--- a/drivers/regulator/pca9450-regulator.c
++++ b/drivers/regulator/pca9450-regulator.c
+@@ -12,6 +12,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/reboot.h>
+ #include <linux/regulator/driver.h>
+ #include <linux/regulator/machine.h>
+ #include <linux/regulator/of_regulator.h>

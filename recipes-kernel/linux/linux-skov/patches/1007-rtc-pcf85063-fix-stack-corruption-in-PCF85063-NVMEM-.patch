@@ -1,0 +1,52 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 17 Jan 2024 07:04:40 +0100
+Subject: [PATCH] rtc: pcf85063: fix stack corruption in PCF85063 NVMEM
+ read/write due to buffer size mismatch
+
+Fix a stack corruption issue in the PCF85063 NVMEM read and write
+functions caused by a buffer size mismatch. The nvmem interface supports
+variable buffer sizes, while the regmap interface operates with
+fixed-size storage. If an nvmem client uses a buffer size less than 4 bytes
+located on the stack, regmap_read overwrites part of the stack due to expecting
+an unsigned int pointer. This patch addresses this by ensuring proper handling
+of the data size.
+
+Fixes: fadfd092ee91 ("rtc: pcf85063: add nvram support")
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/rtc/rtc-pcf85063.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
+index fdbc07f14036..cb4a4e01dc08 100644
+--- a/drivers/rtc/rtc-pcf85063.c
++++ b/drivers/rtc/rtc-pcf85063.c
+@@ -322,12 +322,27 @@ static const struct rtc_class_ops pcf85063_rtc_ops = {
+ static int pcf85063_nvmem_read(void *priv, unsigned int offset,
+ 			       void *val, size_t bytes)
+ {
+-	return regmap_read(priv, PCF85063_REG_RAM, val);
++	unsigned int tmp;
++	int ret;
++
++	if (offset != 0 || bytes != 1)
++		return -EINVAL;
++
++	ret = regmap_read(priv, PCF85063_REG_RAM, &tmp);
++	if (ret < 0)
++		return ret;
++
++	*(u8 *)val = tmp;
++
++	return 0;
+ }
+ 
+ static int pcf85063_nvmem_write(void *priv, unsigned int offset,
+ 				void *val, size_t bytes)
+ {
++	if (offset != 0 || bytes != 1)
++		return -EINVAL;
++
+ 	return regmap_write(priv, PCF85063_REG_RAM, *(u8 *)val);
+ }
+ 

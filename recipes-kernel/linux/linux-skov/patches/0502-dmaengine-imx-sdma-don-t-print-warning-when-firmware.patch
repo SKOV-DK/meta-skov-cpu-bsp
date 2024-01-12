@@ -21,7 +21,7 @@ v3:
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/dma/imx-sdma.c b/drivers/dma/imx-sdma.c
-index 51012bd39900..1585321839bd 100644
+index f81ecf5863e8..b2129a361e23 100644
 --- a/drivers/dma/imx-sdma.c
 +++ b/drivers/dma/imx-sdma.c
 @@ -2061,9 +2061,8 @@ static int sdma_get_firmware(struct sdma_engine *sdma,

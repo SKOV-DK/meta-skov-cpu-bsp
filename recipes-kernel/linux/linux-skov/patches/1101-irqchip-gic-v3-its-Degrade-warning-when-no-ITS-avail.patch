@@ -12,10 +12,10 @@ Signed-off-by: Holger Assmann <h.assmann@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/irqchip/irq-gic-v3-its.c b/drivers/irqchip/irq-gic-v3-its.c
-index a8c89df1a997..aee04c4c3e84 100644
+index 9a7a74239eab..ec619a3ac3e7 100644
 --- a/drivers/irqchip/irq-gic-v3-its.c
 +++ b/drivers/irqchip/irq-gic-v3-its.c
-@@ -5662,7 +5662,7 @@ int __init its_init(struct fwnode_handle *handle, struct rdists *rdists,
+@@ -5666,7 +5666,7 @@ int __init its_init(struct fwnode_handle *handle, struct rdists *rdists,
  		its_acpi_probe();
  
  	if (list_empty(&its_nodes)) {
