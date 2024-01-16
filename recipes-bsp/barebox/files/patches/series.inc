@@ -35,3 +35,7 @@ SRC_URI += "\
 SRC_URI += "\
   file://patches/0302-imx8-cpu-samsung-ram-timings.patch \
 "
+# San patch for boot sd card without enviroment
+SRC_URI += "\
+  file://patches/0303-imx8-cpu-sd-boot-lvds.patch \
+"
