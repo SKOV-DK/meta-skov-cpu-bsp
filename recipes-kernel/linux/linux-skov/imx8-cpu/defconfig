@@ -1554,152 +1554,7 @@ CONFIG_ARM_SMCCC_SOC_ID=y
 # end of Firmware Drivers
 
 # CONFIG_GNSS is not set
-CONFIG_MTD=y
-# CONFIG_MTD_TESTS is not set
-
-#
-# Partition parsers
-#
-# CONFIG_MTD_CMDLINE_PARTS is not set
-CONFIG_MTD_OF_PARTS=y
-# CONFIG_MTD_AFS_PARTS is not set
-# CONFIG_MTD_REDBOOT_PARTS is not set
-# end of Partition parsers
-
-#
-# User Modules And Translation Layers
-#
-CONFIG_MTD_BLKDEVS=y
-CONFIG_MTD_BLOCK=y
-
-#
-# Note that in some cases UBI block is preferred. See MTD_UBI_BLOCK.
-#
-# CONFIG_FTL is not set
-# CONFIG_NFTL is not set
-# CONFIG_INFTL is not set
-# CONFIG_RFD_FTL is not set
-# CONFIG_SSFDC is not set
-# CONFIG_SM_FTL is not set
-# CONFIG_MTD_OOPS is not set
-# CONFIG_MTD_SWAP is not set
-# CONFIG_MTD_PARTITIONED_MASTER is not set
-
-#
-# RAM/ROM/Flash chip drivers
-#
-CONFIG_MTD_CFI=y
-# CONFIG_MTD_JEDECPROBE is not set
-CONFIG_MTD_GEN_PROBE=y
-CONFIG_MTD_CFI_ADV_OPTIONS=y
-CONFIG_MTD_CFI_NOSWAP=y
-# CONFIG_MTD_CFI_BE_BYTE_SWAP is not set
-# CONFIG_MTD_CFI_LE_BYTE_SWAP is not set
-# CONFIG_MTD_CFI_GEOMETRY is not set
-CONFIG_MTD_MAP_BANK_WIDTH_1=y
-CONFIG_MTD_MAP_BANK_WIDTH_2=y
-CONFIG_MTD_MAP_BANK_WIDTH_4=y
-CONFIG_MTD_CFI_I1=y
-CONFIG_MTD_CFI_I2=y
-# CONFIG_MTD_OTP is not set
-CONFIG_MTD_CFI_INTELEXT=y
-CONFIG_MTD_CFI_AMDSTD=y
-CONFIG_MTD_CFI_STAA=y
-CONFIG_MTD_CFI_UTIL=y
-# CONFIG_MTD_RAM is not set
-# CONFIG_MTD_ROM is not set
-# CONFIG_MTD_ABSENT is not set
-# end of RAM/ROM/Flash chip drivers
-
-#
-# Mapping drivers for chip access
-#
-# CONFIG_MTD_COMPLEX_MAPPINGS is not set
-CONFIG_MTD_PHYSMAP=y
-# CONFIG_MTD_PHYSMAP_COMPAT is not set
-CONFIG_MTD_PHYSMAP_OF=y
-# CONFIG_MTD_PHYSMAP_VERSATILE is not set
-# CONFIG_MTD_PHYSMAP_GEMINI is not set
-# CONFIG_MTD_INTEL_VR_NOR is not set
-# CONFIG_MTD_PLATRAM is not set
-# end of Mapping drivers for chip access
-
-#
-# Self-contained MTD device drivers
-#
-# CONFIG_MTD_PMC551 is not set
-CONFIG_MTD_DATAFLASH=y
-# CONFIG_MTD_DATAFLASH_WRITE_VERIFY is not set
-# CONFIG_MTD_DATAFLASH_OTP is not set
-# CONFIG_MTD_MCHP23K256 is not set
-# CONFIG_MTD_MCHP48L640 is not set
-CONFIG_MTD_SST25L=y
-# CONFIG_MTD_SLRAM is not set
-# CONFIG_MTD_PHRAM is not set
-# CONFIG_MTD_MTDRAM is not set
-# CONFIG_MTD_BLOCK2MTD is not set
-
-#
-# Disk-On-Chip Device Drivers
-#
-# CONFIG_MTD_DOCG3 is not set
-# end of Self-contained MTD device drivers
-
-#
-# NAND
-#
-CONFIG_MTD_NAND_CORE=y
-# CONFIG_MTD_ONENAND is not set
-CONFIG_MTD_RAW_NAND=y
-
-#
-# Raw/parallel NAND flash controllers
-#
-CONFIG_MTD_NAND_DENALI=y
-# CONFIG_MTD_NAND_DENALI_PCI is not set
-CONFIG_MTD_NAND_DENALI_DT=y
-# CONFIG_MTD_NAND_CAFE is not set
-# CONFIG_MTD_NAND_BRCMNAND is not set
-# CONFIG_MTD_NAND_MXC is not set
-# CONFIG_MTD_NAND_MXIC is not set
-# CONFIG_MTD_NAND_GPIO is not set
-# CONFIG_MTD_NAND_PLATFORM is not set
-# CONFIG_MTD_NAND_CADENCE is not set
-# CONFIG_MTD_NAND_ARASAN is not set
-# CONFIG_MTD_NAND_INTEL_LGM is not set
-
-#
-# Misc
-#
-# CONFIG_MTD_NAND_NANDSIM is not set
-# CONFIG_MTD_NAND_RICOH is not set
-# CONFIG_MTD_NAND_DISKONCHIP is not set
-# CONFIG_MTD_SPI_NAND is not set
-
-#
-# ECC engine support
-#
-CONFIG_MTD_NAND_ECC=y
-CONFIG_MTD_NAND_ECC_SW_HAMMING=y
-# CONFIG_MTD_NAND_ECC_SW_HAMMING_SMC is not set
-# CONFIG_MTD_NAND_ECC_SW_BCH is not set
-# CONFIG_MTD_NAND_ECC_MXIC is not set
-# end of ECC engine support
-# end of NAND
-
-#
-# LPDDR & LPDDR2 PCM memory drivers
-#
-# CONFIG_MTD_LPDDR is not set
-# end of LPDDR & LPDDR2 PCM memory drivers
-
-CONFIG_MTD_SPI_NOR=y
-# CONFIG_MTD_SPI_NOR_USE_4K_SECTORS is not set
-# CONFIG_MTD_SPI_NOR_SWP_DISABLE is not set
-CONFIG_MTD_SPI_NOR_SWP_DISABLE_ON_VOLATILE=y
-# CONFIG_MTD_SPI_NOR_SWP_KEEP is not set
-# CONFIG_MTD_UBI is not set
-# CONFIG_MTD_HYPERBUS is not set
+# CONFIG_MTD is not set
 CONFIG_DTC=y
 CONFIG_OF=y
 # CONFIG_OF_UNITTEST is not set
@@ -1777,8 +1632,8 @@ CONFIG_PCI_ENDPOINT_TEST=m
 #
 # EEPROM support
 #
-CONFIG_EEPROM_AT24=m
-CONFIG_EEPROM_AT25=m
+# CONFIG_EEPROM_AT24 is not set
+# CONFIG_EEPROM_AT25 is not set
 # CONFIG_EEPROM_MAX6875 is not set
 # CONFIG_EEPROM_93CX6 is not set
 # CONFIG_EEPROM_93XX46 is not set
@@ -4084,7 +3939,6 @@ CONFIG_LEDS_SYSCON=y
 CONFIG_LEDS_TRIGGERS=y
 CONFIG_LEDS_TRIGGER_TIMER=y
 # CONFIG_LEDS_TRIGGER_ONESHOT is not set
-# CONFIG_LEDS_TRIGGER_MTD is not set
 CONFIG_LEDS_TRIGGER_HEARTBEAT=y
 # CONFIG_LEDS_TRIGGER_BACKLIGHT is not set
 CONFIG_LEDS_TRIGGER_CPU=y
@@ -5213,7 +5067,6 @@ CONFIG_NVMEM_IMX_OCOTP_SCU=y
 # CONFIG_NVMEM_RMEM is not set
 # CONFIG_NVMEM_SNVS_LPGPR is not set
 # CONFIG_NVMEM_SPMI_SDAM is not set
-# CONFIG_NVMEM_U_BOOT_ENV is not set
 
 #
 # HW tracing support
@@ -5381,7 +5234,6 @@ CONFIG_MISC_FILESYSTEMS=y
 # CONFIG_BEFS_FS is not set
 # CONFIG_BFS_FS is not set
 # CONFIG_EFS_FS is not set
-# CONFIG_JFFS2_FS is not set
 # CONFIG_CRAMFS is not set
 CONFIG_SQUASHFS=y
 CONFIG_SQUASHFS_FILE_CACHE=y
