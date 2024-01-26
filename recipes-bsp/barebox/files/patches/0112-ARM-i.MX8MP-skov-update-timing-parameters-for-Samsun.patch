@@ -1,13 +1,23 @@
+From: Soren Andersen <san@skov.com>
+Date: Mon, 6 Nov 2023 14:08:22 +0100
+Subject: [PATCH] ARM: i.MX8MP: skov: update timing parameters for Samsung RAM
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Is is operated in slower speed, hence the timings have to be adjusted.
+
+Signed-off-by: Soren Andersen <san@skov.com>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/lpddr4-timing.c | 46 ++++++++++++++---------------
+ 1 file changed, 23 insertions(+), 23 deletions(-)
+
 diff --git a/arch/arm/boards/skov-imx8mp/lpddr4-timing.c b/arch/arm/boards/skov-imx8mp/lpddr4-timing.c
-index 6a896bc677..6de8efac9b 100644
+index 6a896bc6775f..2cbae11f14a9 100644
 --- a/arch/arm/boards/skov-imx8mp/lpddr4-timing.c
 +++ b/arch/arm/boards/skov-imx8mp/lpddr4-timing.c
-@@ -1,4 +1,3 @@
--// SPDX-License-Identifier: GPL-2.0-or-later
- /*
-  * Copyright 2019 NXP
-  *
-@@ -15,29 +14,29 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
+@@ -15,29 +15,29 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
  	{ 0x3d400030, 0x1 },
  	{ 0x3d400000, 0xa1080020 },
  	{ 0x3d400020, 0x1223 },
@@ -49,7 +59,7 @@ index 6a896bc677..6de8efac9b 100644
  	{ 0x3d400188, 0x0 },
  	{ 0x3d400190, 0x497820a },
  	{ 0x3d400194, 0x80303 },
-@@ -270,7 +269,7 @@ static struct dram_cfg_param ddr_ddrphy_cfg[] = {
+@@ -270,7 +270,7 @@ static struct dram_cfg_param ddr_ddrphy_cfg[] = {
  	{ 0x20018, 0x3 },
  	{ 0x20075, 0x4 },
  	{ 0x20050, 0x0 },
@@ -58,7 +68,7 @@ index 6a896bc677..6de8efac9b 100644
  	{ 0x120008, 0x64 },
  	{ 0x220008, 0x19 },
  	{ 0x20088, 0x9 },
-@@ -1057,7 +1056,7 @@ static struct dram_cfg_param ddr_ddrphy_trained_csr[] = {
+@@ -1057,7 +1057,7 @@ static struct dram_cfg_param ddr_ddrphy_trained_csr[] = {
  /* P0 message block paremeter for training firmware */
  static struct dram_cfg_param ddr_fsp0_cfg[] = {
  	{ 0xd0000, 0x0 },
@@ -67,7 +77,7 @@ index 6a896bc677..6de8efac9b 100644
  	{ 0x54004, 0x2 },
  	{ 0x54005, 0x2228 },
  	{ 0x54006, 0x14 },
-@@ -1179,7 +1178,7 @@ static struct dram_cfg_param ddr_fsp2_cfg[] = {
+@@ -1179,7 +1179,7 @@ static struct dram_cfg_param ddr_fsp2_cfg[] = {
  /* P0 2D message block paremeter for training firmware */
  static struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
  	{ 0xd0000, 0x0 },
@@ -76,7 +86,7 @@ index 6a896bc677..6de8efac9b 100644
  	{ 0x54004, 0x2 },
  	{ 0x54005, 0x2228 },
  	{ 0x54006, 0x14 },
-@@ -1698,9 +1697,9 @@ static struct dram_cfg_param ddr_phy_pie[] = {
+@@ -1698,9 +1698,9 @@ static struct dram_cfg_param ddr_phy_pie[] = {
  	{ 0x400d7, 0x20b },
  	{ 0x2003a, 0x2 },
  	{ 0x200be, 0x3 },
@@ -89,7 +99,7 @@ index 6a896bc677..6de8efac9b 100644
  	{ 0x2000e, 0x2c },
  	{ 0x12000b, 0x70 },
  	{ 0x12000c, 0x19 },
-@@ -1803,8 +1802,8 @@ static struct dram_cfg_param ddr_phy_pie[] = {
+@@ -1803,8 +1803,8 @@ static struct dram_cfg_param ddr_phy_pie[] = {
  
  static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
  	{
@@ -100,7 +110,7 @@ index 6a896bc677..6de8efac9b 100644
  		.fw_type = FW_1D_IMAGE,
  		.fsp_cfg = ddr_fsp0_cfg,
  		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_cfg),
-@@ -1824,8 +1823,8 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
+@@ -1824,8 +1824,8 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
  		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp2_cfg),
  	},
  	{
@@ -111,7 +121,7 @@ index 6a896bc677..6de8efac9b 100644
  		.fw_type = FW_2D_IMAGE,
  		.fsp_cfg = ddr_fsp0_2d_cfg,
  		.fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_2d_cfg),
-@@ -1844,6 +1843,6 @@ struct dram_timing_info imx8mp_skov_dram_timing = {
+@@ -1844,6 +1844,6 @@ struct dram_timing_info imx8mp_skov_dram_timing = {
  	.ddrphy_trained_csr_num = ARRAY_SIZE(ddr_ddrphy_trained_csr),
  	.ddrphy_pie = ddr_phy_pie,
  	.ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
