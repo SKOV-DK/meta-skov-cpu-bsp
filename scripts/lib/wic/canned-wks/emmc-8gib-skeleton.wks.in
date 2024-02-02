@@ -6,6 +6,29 @@
 # filled with the contents of the root-FS this WKS file is applied to.
 #
 # https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
+#
+# See: https://github.com/intel/luv-yocto/blob/master/scripts/lib/wic/canned-wks/directdisk-multi-rootfs.wks
+#
+# short-description: Create multi rootfs image using rootfs plugin
+# long-description: Creates a partitioned disk image with two rootfs partitions
+# using rootfs plugin.
+#
+# Partitions can use either
+#   - indirect rootfs references to image recipe(s):
+#     wic create directdisk-multi-indirect-recipes -e core-image-minimal \
+#         --rootfs-dir rootfs1=core-image-minimal
+#         --rootfs-dir rootfs2=core-image-minimal-dev
+#
+#   - or paths to rootfs directories:
+#     wic create directdisk-multi-rootfs \
+#         --rootfs-dir rootfs1=tmp/work/qemux86_64-poky-linux/core-image-minimal/1.0-r0/rootfs/
+#         --rootfs-dir rootfs2=tmp/work/qemux86_64-poky-linux/core-image-minimal-dev/1.0-r0/rootfs/
+#
+#   - or any combinations of -r and --rootfs command line options
+#
+# To configure these rootfs, specify them as WIC_CREATE_EXTRA_ARGS in your image recipe, e.g.:
+#
+# recipes-core/images/tc-ci.bbappend:WIC_CREATE_EXTRA_ARGS = "--rootfs-dir rootfs1=tc-ci --rootfs-dir rootfs2=pmc-failsafe"
 
 part --part-name barebox-environment --part-type 6C3737F2-07F8-45D1-AD45-15D260AAB24D --align 1024 --fixed-size 1M    --source empty
 part --part-name barebox-state       --part-type 4778ED65-BF42-45FA-9C5B-287A1DC4AAB1 --align 1024 --fixed-size 1M    --source empty
