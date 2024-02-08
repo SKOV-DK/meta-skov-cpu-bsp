@@ -34,3 +34,7 @@ SRC_URI += "\
   file://patches/0201-Release-2023.09.0-customers-skov-imx6-20240126-1.patch \
   "
 # umpf-end
+# SAN EVIL HACK!!!!!!!!!!
+SRC_URI += "\
+  file://patches/0301-run-buck2-with-850mv.patch \
+  "
