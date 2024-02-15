@@ -1,0 +1,46 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 15 Feb 2024 10:47:16 +0100
+Subject: [PATCH] ARM: dts: AT91: skov-arm9cpu: remove barebox environment on
+ NOR
+
+The NOR-Flash for ARM9CPUs in the field has U-Boot, so it's not a good
+idea to overwrite its environment with barebox'. We'll add a SD-Card
+environment for barebox in recovery case in a later commit, but for now
+remove the NOR flash environment footgun.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/dts/at91-skov-arm9cpu.dts | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm/dts/at91-skov-arm9cpu.dts b/arch/arm/dts/at91-skov-arm9cpu.dts
+index 5e2541f2fa76..ac1d5c0c2e6e 100644
+--- a/arch/arm/dts/at91-skov-arm9cpu.dts
++++ b/arch/arm/dts/at91-skov-arm9cpu.dts
+@@ -16,11 +16,6 @@ / {
+ 
+ 	chosen {
+ 		stdout-path = "serial0:115200n8";
+-
+-		environment {
+-			compatible = "barebox,environment";
+-			device-path = &environment_nor;
+-		};
+ 	};
+ 
+ 	flash: nor_flash@10000000 {
+@@ -36,12 +31,12 @@ partitions {
+ 			#address-cells = <1>;
+ 			#size-cells = <1>;
+ 
+-			barebox@0 {
++			u-boot@0 {
+ 				label = "bootloader";
+ 				reg = <0x00000 0x80000>;
+ 			};
+ 
+-			environment_nor: env@80000 {
++			env@80000 {
+ 				label = "environment";
+ 				reg = <0x80000 0x20000>;
+ 			};

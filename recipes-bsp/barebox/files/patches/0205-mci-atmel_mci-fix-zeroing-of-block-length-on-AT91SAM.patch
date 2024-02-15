@@ -1,0 +1,43 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 14 Feb 2024 14:20:46 +0100
+Subject: [PATCH] mci: atmel_mci: fix zeroing of block length on AT91SAM9263
+
+We don't read back ATMCI_MR, but instead set up the value once and keep
+writing it on every reset. On the SAM9263, but not on the later SAM9x5,
+the ATMCI_MR register also includes a field for the block length. Not
+taking that into account means that we zero the block length on every
+reset.
+
+While the effect of this zeroing is likely limited, because we set the
+block length on every transfer via ATMCI_BLKR, it would be less surprising
+and more robust against future change to not intermittently zero the block
+length via the MR register.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/atmel_mci_common.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mci/atmel_mci_common.c b/drivers/mci/atmel_mci_common.c
+index ec710f1cfc38..139570fe4717 100644
+--- a/drivers/mci/atmel_mci_common.c
++++ b/drivers/mci/atmel_mci_common.c
+@@ -68,7 +68,17 @@ static void atmci_set_clk_rate(struct atmel_mci *host,
+ 				 clock_min, host->bus_hz / (2 * 256));
+ 			clkdiv = 255;
+ 		}
+-		host->mode_reg = ATMCI_MR_CLKDIV(clkdiv);
++
++		/*
++		 * Older Atmels without CLKODD have the block length
++		 * in the upper 16 bits of both MCI_MR and MCI_BLKR
++		 *
++		 * To avoid intermittent zeroing of the block length,
++		 * just hardcode 512 here and have atmci_setup_data()
++		 * change it as necessary.
++		 */
++
++		host->mode_reg = ATMCI_MR_CLKDIV(clkdiv) | ATMCI_BLKLEN(512);
+ 	}
+ 
+ 	dev_dbg(host->hw_dev, "atmel_set_clk_rate: clkIn=%ld clkIos=%d divider=%d\n",

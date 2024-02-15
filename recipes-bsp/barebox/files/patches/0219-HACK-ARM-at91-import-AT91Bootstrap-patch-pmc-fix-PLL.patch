@@ -1,0 +1,50 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 15 Feb 2024 11:41:02 +0100
+Subject: [PATCH] HACK: ARM: at91: import AT91Bootstrap patch "pmc: fix PLL
+ setup for ARM9-CPU"
+
+This is a barebox port of following AT91Bootstrap commit:
+
+| Author:     Sam Ravnborg <srn@skov.dk>
+| AuthorDate: Sun Jan 15 17:43:15 2017 +0100
+|
+|     pmc: fix PLL setup for ARM9-CPU
+|
+|     Fix setup of PLL to adjust to the 100 MHz frequency.
+|     Uses hardcoded numbers as leftovers from the original
+|     patch.
+
+It's unknown what it hopes to achieve and why the existing AT91Bootstrap code that
+was ported to barebox doesn't suffice. Booting Linux with or without this patch
+didn't show apparent differences, but given that this is only meant for recovery,
+we'll play it safe and apply the patch, but this is not upstreaming material.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-at91/at91_pmc_ll.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/mach-at91/at91_pmc_ll.c b/arch/arm/mach-at91/at91_pmc_ll.c
+index 0101623c8e39..a277e6cbbb77 100644
+--- a/arch/arm/mach-at91/at91_pmc_ll.c
++++ b/arch/arm/mach-at91/at91_pmc_ll.c
+@@ -126,11 +126,19 @@ void at91_pmc_init(void __iomem *pmc_base, unsigned int flags)
+ 			;
+ 	}
+ 
++#if 1
++	if ((at91_pmc_read(AT91_PMC_MCKR) & AT91_PMC_CSS) != AT91_PMC_CSS_PLLA) {
++		tmp = at91_pmc_read(AT91_PMC_MCKR);
++		tmp &= (~(0x1 << 13));
++		tmp &= ~AT91_PMC_CSS;
++
++#else
+ 	/* After stablization, switch to Main Clock */
+ 	if ((at91_pmc_read(AT91_PMC_MCKR) & AT91_PMC_ALT_PCKR_CSS) == AT91_PMC_CSS_SLOW) {
+ 		tmp = at91_pmc_read(AT91_PMC_MCKR);
+ 		tmp &= ~(0x1 << 13);
+ 		tmp &= ~AT91_PMC_ALT_PCKR_CSS;
++#endif
+ 		tmp |= AT91_PMC_CSS_MAIN;
+ 		at91_pmc_write(AT91_PMC_MCKR, tmp);
+ 

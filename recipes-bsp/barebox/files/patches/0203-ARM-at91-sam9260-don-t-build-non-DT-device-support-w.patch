@@ -1,0 +1,34 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 26 Sep 2023 20:38:34 +0200
+Subject: [PATCH] ARM: at91: sam9260: don't build non-DT device support when
+ unneeded
+
+The _device.c files create helper functions for creating devices for
+legacy boards that do not support CONFIG_AT91_MULTI_BOARDS.
+
+We are adding DT support for 9260, so guard the file behind a
+!CONFIG_AT91_MULTI_BOARDS check.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Link: https://lore.barebox.org/20230926183835.2617909-5-a.fatoum@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/mach-at91/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-at91/Makefile b/arch/arm/mach-at91/Makefile
+index 777dc6d1aa3c..c4532959556e 100644
+--- a/arch/arm/mach-at91/Makefile
++++ b/arch/arm/mach-at91/Makefile
+@@ -25,10 +25,10 @@ obj-$(CONFIG_HAVE_AT91SAM9_RST) += at91sam9_rst.o
+ 
+ # CPU-specific support
+ obj-$(CONFIG_SOC_AT91RM9200)	+= at91rm9200.o at91rm9200_time.o at91rm9200_devices.o
+-obj-$(CONFIG_SOC_AT91SAM9260) += at91sam9260.o at91sam9260_devices.o
+ obj-$(CONFIG_SOC_AT91SAM9261) += at91sam9261.o at91sam9261_devices.o
+ obj-$(CONFIG_SOC_AT91SAM9G10) += at91sam9261.o at91sam9261_devices.o
+ ifeq ($(CONFIG_AT91_MULTI_BOARDS),)
++obj-$(CONFIG_SOC_AT91SAM9260) += at91sam9260.o at91sam9260_devices.o
+ obj-$(CONFIG_SOC_AT91SAM9263) += at91sam9263.o at91sam9263_devices.o
+ obj-$(CONFIG_SOC_SAMA5D3)	+= sama5d3.o sama5d3_devices.o
+ obj-$(CONFIG_SOC_SAMA5D4)	+= sama5d4.o sama5d4_devices.o

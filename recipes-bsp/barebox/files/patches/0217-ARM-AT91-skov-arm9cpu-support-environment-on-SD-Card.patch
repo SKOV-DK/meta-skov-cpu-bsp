@@ -1,0 +1,56 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 15 Feb 2024 10:50:10 +0100
+Subject: [PATCH] ARM: AT91: skov-arm9cpu: support environment on SD-Card
+
+barebox is meant to boot from SD-Card on this platform, so support a
+barebox environment in this case for easier handling.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/boards/skov-arm9cpu/board.c | 8 ++++++++
+ arch/arm/dts/at91-skov-arm9cpu.dts   | 6 ++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/arch/arm/boards/skov-arm9cpu/board.c b/arch/arm/boards/skov-arm9cpu/board.c
+index db6813c0e726..20507922cb24 100644
+--- a/arch/arm/boards/skov-arm9cpu/board.c
++++ b/arch/arm/boards/skov-arm9cpu/board.c
+@@ -7,6 +7,7 @@
+ #include <envfs.h>
+ #include <init.h>
+ #include <gpio.h>
++#include <bootsource.h>
+ 
+ #include <linux/sizes.h>
+ 
+@@ -70,6 +71,13 @@ static int skov_arm9_probe(struct device *dev)
+ 	mem = mem / SZ_1M;
+ 	globalvar_add_simple_int("board.mem", &mem, "%u");
+ 
++	/*
++	 * NOR first stage bootloader is at91bootstrap, so if we find traces
++	 * of barebox in on-chip SRAM, it must mean we have booted from SD
++	 */
++	if (is_barebox_arm_head((void *)AT91SAM9263_SRAM0_BASE))
++		bootsource_set_raw(BOOTSOURCE_MMC, BOOTSOURCE_INSTANCE_UNKNOWN);
++
+ 	return 0;
+ }
+ 
+diff --git a/arch/arm/dts/at91-skov-arm9cpu.dts b/arch/arm/dts/at91-skov-arm9cpu.dts
+index ac1d5c0c2e6e..d04d031f4053 100644
+--- a/arch/arm/dts/at91-skov-arm9cpu.dts
++++ b/arch/arm/dts/at91-skov-arm9cpu.dts
+@@ -16,6 +16,12 @@ / {
+ 
+ 	chosen {
+ 		stdout-path = "serial0:115200n8";
++
++		environment-sd {
++			compatible = "barebox,environment";
++			device-path = &mmc1;
++			file-path = "barebox.env";
++		};
+ 	};
+ 
+ 	flash: nor_flash@10000000 {

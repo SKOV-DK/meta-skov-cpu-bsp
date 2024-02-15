@@ -1,0 +1,123 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 14 Feb 2024 17:36:06 +0100
+Subject: [PATCH] ARM: at91: sam9263_ll: support configuration of PLLB
+
+PLLB may be used as input to derive the USB's 48 MHz clock.
+PLLA is already being setup by currently unused sam9263_lowlevel_init(),
+so add an extra parameter for PLLB as well.
+
+While at it, we change the API of sam9263_lowlevel_init(): AT91Bootstrap
+code has PLLA_SETTINGS and PLLB_SETTINGS as hex values in the headers,
+so it makes porting easier by just allowing low-level barebox code to
+use the values as is without having to split them up to stuff into a
+struct, only to have them ORed into a single value again.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-at91/at91_pmc_ll.c | 11 +++++++++++
+ arch/arm/mach-at91/sam9263_ll.c  | 15 +++++++--------
+ include/mach/at91/at91_pmc_ll.h  |  1 +
+ include/mach/at91/sam92_ll.h     |  7 +------
+ 4 files changed, 20 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm/mach-at91/at91_pmc_ll.c b/arch/arm/mach-at91/at91_pmc_ll.c
+index 0d377b4ca720..0101623c8e39 100644
+--- a/arch/arm/mach-at91/at91_pmc_ll.c
++++ b/arch/arm/mach-at91/at91_pmc_ll.c
+@@ -157,6 +157,17 @@ void at91_pmc_cfg_plla(void __iomem *pmc_base, u32 pmc_pllar,
+ 		;
+ }
+ 
++void at91_pmc_cfg_pllb(void __iomem *pmc_base, u32 pmc_pllbr,
++		       unsigned int __always_unused flags)
++{
++	/* Always disable PLL before configuring it */
++	at91_pmc_write(AT91_CKGR_PLLBR, 0);
++	at91_pmc_write(AT91_CKGR_PLLBR, pmc_pllbr);
++
++	while (!(at91_pmc_read(AT91_PMC_SR) & AT91_PMC_LOCKB))
++		;
++}
++
+ void at91_pmc_cfg_mck(void __iomem *pmc_base, u32 pmc_mckr, unsigned int flags)
+ {
+ 	u32 tmp;
+diff --git a/arch/arm/mach-at91/sam9263_ll.c b/arch/arm/mach-at91/sam9263_ll.c
+index dd4ea7c938f7..a60d3c7a25be 100644
+--- a/arch/arm/mach-at91/sam9263_ll.c
++++ b/arch/arm/mach-at91/sam9263_ll.c
+@@ -7,7 +7,7 @@
+ #include <mach/at91/at91_wdt.h>
+ #include <mach/at91/sam92_ll.h>
+ 
+-static void sam9263_pmc_init(const struct sam92_pmc_config *config)
++static void sam9263_pmc_init(u32 plla, u32 pllb)
+ {
+ 	unsigned flags = AT91_PMC_LL_AT91SAM9263;
+ 	u32 mckr_settings;
+@@ -15,11 +15,7 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ 	at91_pmc_init(IOMEM(AT91SAM926X_BASE_PMC), flags);
+ 
+ 	/* Setting PLL A and divider A */
+-	at91_pmc_cfg_plla(IOMEM(AT91SAM926X_BASE_PMC),
+-			  AT91_PMC_MUL_(config->mula) |
+-			  AT91_PMC_OUT_2 |		// 190 to 240 MHz
+-			  config->diva,			// Divider
+-			  flags);
++	at91_pmc_cfg_plla(IOMEM(AT91SAM926X_BASE_PMC), plla, flags);
+ 
+ 	/* Selection of Master Clock and Processor Clock */
+ 	mckr_settings = AT91_PMC_PRES_1 | AT91SAM9_PMC_MDIV_2 | AT91_PMC_PDIV_1;
+@@ -31,6 +27,9 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ 	/* Switch MCK on PLLA output */
+ 	at91_pmc_cfg_mck(IOMEM(AT91SAM926X_BASE_PMC),
+ 			 AT91_PMC_CSS_PLLA | mckr_settings, flags);
++
++	if (pllb)
++		at91_pmc_cfg_pllb(IOMEM(AT91SAM926X_BASE_PMC), pllb, flags);
+ }
+ 
+ static inline void matrix_wr(unsigned int offset, const unsigned int value)
+@@ -199,10 +198,10 @@ static void sam9263_rstc_init(void)
+ 	writel(AT91_RSTC_KEY | AT91_RSTC_URSTEN, IOMEM(AT91SAM926X_BASE_RSTC + AT91_RSTC_MR));
+ }
+ 
+-void sam9263_lowlevel_init(const struct sam92_pmc_config *config)
++void sam9263_lowlevel_init(u32 plla, u32 pllb)
+ {
+ 	at91_wdt_disable(IOMEM(AT91SAM9263_BASE_WDT));
+-	sam9263_pmc_init(config);
++	sam9263_pmc_init(plla, pllb);
+ 	sam9263_matrix_init();
+ 	sam9263_rstc_init();
+ }
+diff --git a/include/mach/at91/at91_pmc_ll.h b/include/mach/at91/at91_pmc_ll.h
+index 9832712fe5ca..ceb7510144d8 100644
+--- a/include/mach/at91/at91_pmc_ll.h
++++ b/include/mach/at91/at91_pmc_ll.h
+@@ -45,6 +45,7 @@
+ void at91_pmc_init(void __iomem *pmc_base, unsigned int flags);
+ void at91_pmc_cfg_mck(void __iomem *pmc_base, u32 pmc_mckr, unsigned int flags);
+ void at91_pmc_cfg_plla(void __iomem *pmc_base, u32 pmc_pllar, unsigned int flags);
++void at91_pmc_cfg_pllb(void __iomem *pmc_base, u32 pmc_pllbr, unsigned int flags);
+ 
+ int at91_pmc_enable_generic_clock(void __iomem *pmc_base, void __iomem *sfr_base,
+ 				  unsigned int periph_id,
+diff --git a/include/mach/at91/sam92_ll.h b/include/mach/at91/sam92_ll.h
+index 8cfccd640220..25c572bfb4f3 100644
+--- a/include/mach/at91/sam92_ll.h
++++ b/include/mach/at91/sam92_ll.h
+@@ -15,12 +15,7 @@
+ #include <mach/at91/early_udelay.h>
+ #include <mach/at91/iomux.h>
+ 
+-struct sam92_pmc_config {
+-	unsigned int diva;
+-	unsigned int mula;
+-};
+-
+-void sam9263_lowlevel_init(const struct sam92_pmc_config *config);
++void sam9263_lowlevel_init(u32 plla, u32 pllb);
+ 
+ static inline void sam92_pmc_enable_periph_clock(int clk)
+ {

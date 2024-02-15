@@ -1,0 +1,43 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 14 Feb 2024 16:48:51 +0100
+Subject: [PATCH] ARM: at91: sam9263_ll: drop PLL charge pump initialization
+
+The datasheet[1] described the PLL Charge Pump Current Register in 27.9.17
+very sparingly by mandating that 0x10001 is to be written into it.
+
+In the 28-Jan-16 revision of the datasheet the access mode for the
+register was changed from Write-only to Read/Write. Indeed reading the
+register is possible, but it seems to always return 0, even directly
+after write.
+
+Given that code for initializing the PLL charge pumps was added to
+AT91Bootsrap only for SAMA5 support and that apparently no adverse effect
+was observed on SAM9263 for not doing this for all these years, it follows
+that the PLL charge pump has to be already initialized on POR or by BootROM
+and we are better off playing it safe and not introducing code in the PMC
+setup that didn't exist in Atmel's own AT91Bootstrap.
+
+Therefore drop that line again. There are no upstream boards calling
+this function yet anyway, so this should have very limited effect.
+
+[1]: Atmel-6249N-ATARM-SAM9263-Datasheet_14-Mar-16
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-at91/sam9263_ll.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/arch/arm/mach-at91/sam9263_ll.c b/arch/arm/mach-at91/sam9263_ll.c
+index 8855a679fdf2..7600391629af 100644
+--- a/arch/arm/mach-at91/sam9263_ll.c
++++ b/arch/arm/mach-at91/sam9263_ll.c
+@@ -11,9 +11,6 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ {
+ 	at91_pmc_init(IOMEM(AT91SAM926X_BASE_PMC), 0);
+ 
+-	/* Initialize PLL charge pump, must be done before PLLAR/PLLBR */
+-	at91_pmc_init_pll(IOMEM(AT91SAM926X_BASE_PMC), AT91SAM9_PMC_ICPPLLA | AT91SAM9_PMC_ICPPLLB);
+-
+ 	/* Setting PLL A and divider A */
+ 	at91_pmc_cfg_plla(IOMEM(AT91SAM926X_BASE_PMC),
+ 			  AT91_PMC_MUL_(config->mula) |

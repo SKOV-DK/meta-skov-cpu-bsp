@@ -1,0 +1,25 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 15 Feb 2024 10:33:09 +0100
+Subject: [PATCH] ARM: at91: skov-arm9cpu: configure more appropriate hostname
+
+The default logic would set the hostname to arm9-cpu, which isn't very
+descriptive. Set our own hostname that contains the vendor name.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/boards/skov-arm9cpu/board.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/boards/skov-arm9cpu/board.c b/arch/arm/boards/skov-arm9cpu/board.c
+index 1d0ecb247d8e..db6813c0e726 100644
+--- a/arch/arm/boards/skov-arm9cpu/board.c
++++ b/arch/arm/boards/skov-arm9cpu/board.c
+@@ -56,6 +56,8 @@ static int mem;
+  */
+ static int skov_arm9_probe(struct device *dev)
+ {
++	barebox_set_hostname("skov-arm9cpu");
++
+ 	add_generic_device("at91sam9-smc", 0, NULL, AT91SAM9263_BASE_SMC0, 0x200,
+ 			   IORESOURCE_MEM, NULL);
+ 	add_generic_device("at91sam9-smc", 1, NULL, AT91SAM9263_BASE_SMC1, 0x200,

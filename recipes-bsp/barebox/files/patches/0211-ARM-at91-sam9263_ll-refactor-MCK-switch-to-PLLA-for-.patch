@@ -1,0 +1,52 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 14 Feb 2024 17:06:59 +0100
+Subject: [PATCH] ARM: at91: sam9263_ll: refactor MCK switch to PLLA for
+ clarity
+
+Duplicating the bits being written to configure the MCK harms
+readability, so factor that out into a new variable to make clear the
+bits that change between the two calls to at91_pmc_cfg_mck().
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-at91/sam9263_ll.c | 14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/mach-at91/sam9263_ll.c b/arch/arm/mach-at91/sam9263_ll.c
+index ed56ad21cd89..dd4ea7c938f7 100644
+--- a/arch/arm/mach-at91/sam9263_ll.c
++++ b/arch/arm/mach-at91/sam9263_ll.c
+@@ -10,6 +10,7 @@
+ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ {
+ 	unsigned flags = AT91_PMC_LL_AT91SAM9263;
++	u32 mckr_settings;
+ 
+ 	at91_pmc_init(IOMEM(AT91SAM926X_BASE_PMC), flags);
+ 
+@@ -21,22 +22,15 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ 			  flags);
+ 
+ 	/* Selection of Master Clock and Processor Clock */
++	mckr_settings = AT91_PMC_PRES_1 | AT91SAM9_PMC_MDIV_2 | AT91_PMC_PDIV_1;
+ 
+ 	/* PCK = PLLA = 2 * MCK */
+ 	at91_pmc_cfg_mck(IOMEM(AT91SAM926X_BASE_PMC),
+-			 AT91_PMC_CSS_SLOW
+-			 | AT91_PMC_PRES_1
+-			 | AT91SAM9_PMC_MDIV_2
+-			 | AT91_PMC_PDIV_1,
+-			 flags);
++			 AT91_PMC_CSS_SLOW | mckr_settings, flags);
+ 
+ 	/* Switch MCK on PLLA output */
+ 	at91_pmc_cfg_mck(IOMEM(AT91SAM926X_BASE_PMC),
+-			 AT91_PMC_CSS_PLLA
+-			 | AT91_PMC_PRES_1
+-			 | AT91SAM9_PMC_MDIV_2
+-			 | AT91_PMC_PDIV_1,
+-			 flags);
++			 AT91_PMC_CSS_PLLA | mckr_settings, flags);
+ }
+ 
+ static inline void matrix_wr(unsigned int offset, const unsigned int value)

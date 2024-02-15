@@ -1,0 +1,59 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 14 Feb 2024 17:04:36 +0100
+Subject: [PATCH] ARM: at91: sam9263_ll: pass AT91_PMC_LL_AT91SAM9263 to PMC
+ functions
+
+The low level PMC driver does things differently according to its flags
+parameter that encodes what SoC is being used. The default case of flags
+== 0 is appropriate for the AT91SAM9263, but we have a AT91_PMC_LL_AT91SAM9263
+macro that expands to 0, which makes apparent that we take the necessary
+precautions, so use that instead for documentation purposes.
+
+No functional change.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-at91/sam9263_ll.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-at91/sam9263_ll.c b/arch/arm/mach-at91/sam9263_ll.c
+index 7600391629af..ed56ad21cd89 100644
+--- a/arch/arm/mach-at91/sam9263_ll.c
++++ b/arch/arm/mach-at91/sam9263_ll.c
+@@ -9,14 +9,16 @@
+ 
+ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ {
+-	at91_pmc_init(IOMEM(AT91SAM926X_BASE_PMC), 0);
++	unsigned flags = AT91_PMC_LL_AT91SAM9263;
++
++	at91_pmc_init(IOMEM(AT91SAM926X_BASE_PMC), flags);
+ 
+ 	/* Setting PLL A and divider A */
+ 	at91_pmc_cfg_plla(IOMEM(AT91SAM926X_BASE_PMC),
+ 			  AT91_PMC_MUL_(config->mula) |
+ 			  AT91_PMC_OUT_2 |		// 190 to 240 MHz
+ 			  config->diva,			// Divider
+-			  0);
++			  flags);
+ 
+ 	/* Selection of Master Clock and Processor Clock */
+ 
+@@ -26,7 +28,7 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ 			 | AT91_PMC_PRES_1
+ 			 | AT91SAM9_PMC_MDIV_2
+ 			 | AT91_PMC_PDIV_1,
+-			 0);
++			 flags);
+ 
+ 	/* Switch MCK on PLLA output */
+ 	at91_pmc_cfg_mck(IOMEM(AT91SAM926X_BASE_PMC),
+@@ -34,7 +36,7 @@ static void sam9263_pmc_init(const struct sam92_pmc_config *config)
+ 			 | AT91_PMC_PRES_1
+ 			 | AT91SAM9_PMC_MDIV_2
+ 			 | AT91_PMC_PDIV_1,
+-			 0);
++			 flags);
+ }
+ 
+ static inline void matrix_wr(unsigned int offset, const unsigned int value)

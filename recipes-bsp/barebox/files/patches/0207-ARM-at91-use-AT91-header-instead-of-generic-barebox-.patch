@@ -1,0 +1,93 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 12 Feb 2024 12:37:08 +0100
+Subject: [PATCH] ARM: at91: use AT91 header instead of generic barebox ARM's
+
+Prior to the multi-arch (really multi-platform) rework, ENTRY_FUNCTION
+used to be overrideable according to selected machine/SoC family. Now
+that there is no single selected family, board code needs to be explicit
+in choosing the SoC-appropriate ENTRY_FUNCTION. This was done for nearly
+all AT91 boards in-tree, but three were missed, which is what's fixed
+here.
+
+This breakage likewise affects all out-of-tree boards, which will
+misbehave after an update to a newer barebox when used as first stage.
+Fixing that might be more effort though, so let's just fix what we got
+in-tree.
+
+Fixes: 4331e488f363 ("ARM: at91: Use ENTRY_FUNCTION_HEAD")
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/boards/at91sam9263ek/lowlevel_init.c | 5 ++---
+ arch/arm/boards/at91sam9x5ek/lowlevel.c       | 5 ++---
+ arch/arm/boards/skov-arm9cpu/lowlevel.c       | 4 ++--
+ 3 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/boards/at91sam9263ek/lowlevel_init.c b/arch/arm/boards/at91sam9263ek/lowlevel_init.c
+index 3e1f471d8e5f..aea772c7431c 100644
+--- a/arch/arm/boards/at91sam9263ek/lowlevel_init.c
++++ b/arch/arm/boards/at91sam9263ek/lowlevel_init.c
+@@ -6,8 +6,7 @@
+ 
+ #include <linux/sizes.h>
+ 
+-#include <asm/barebox-arm.h>
+-
++#include <mach/at91/barebox-arm.h>
+ #include <mach/at91/at91sam926x_board_init.h>
+ #include <mach/at91/at91sam9263_matrix.h>
+ 
+@@ -117,7 +116,7 @@ static void __bare_init at91sam9263ek_init(void *fdt)
+ 
+ extern char __dtb_z_at91sam9263ek_start[];
+ 
+-ENTRY_FUNCTION(start_at91sam9263ek, r0, r1, r2)
++AT91_ENTRY_FUNCTION(start_at91sam9263ek, r0, r1, r2)
+ {
+ 	void *fdt;
+ 
+diff --git a/arch/arm/boards/at91sam9x5ek/lowlevel.c b/arch/arm/boards/at91sam9x5ek/lowlevel.c
+index 350c99100ee7..5dbac307acfd 100644
+--- a/arch/arm/boards/at91sam9x5ek/lowlevel.c
++++ b/arch/arm/boards/at91sam9x5ek/lowlevel.c
+@@ -3,14 +3,13 @@
+ #include <common.h>
+ #include <linux/sizes.h>
+ #include <mach/at91/at91_ddrsdrc.h>
+-#include <asm/barebox-arm-head.h>
+-#include <asm/barebox-arm.h>
++#include <mach/at91/barebox-arm.h>
+ #include <io.h>
+ #include <debug_ll.h>
+ 
+ extern char __dtb_z_at91sam9x5ek_start[];
+ 
+-ENTRY_FUNCTION(start_at91sam9x5ek, r0, r1, r2)
++AT91_ENTRY_FUNCTION(start_at91sam9x5ek, r0, r1, r2)
+ {
+ 	void *fdt;
+ 
+diff --git a/arch/arm/boards/skov-arm9cpu/lowlevel.c b/arch/arm/boards/skov-arm9cpu/lowlevel.c
+index bde5b80e6c1c..82abfb4021a9 100644
+--- a/arch/arm/boards/skov-arm9cpu/lowlevel.c
++++ b/arch/arm/boards/skov-arm9cpu/lowlevel.c
+@@ -3,10 +3,10 @@
+ 
+ #include <linux/sizes.h>
+ 
+-#include <asm/barebox-arm.h>
+ 
+ #include <mach/at91/at91sam926x_board_init.h>
+ #include <mach/at91/at91sam9263_matrix.h>
++#include <mach/at91/barebox-arm.h>
+ 
+ #define MASTER_PLL_MUL		171
+ #define MASTER_PLL_DIV		14
+@@ -114,7 +114,7 @@ static void __bare_init skov_arm9cpu_init(void *fdt)
+ 
+ extern char __dtb_at91_skov_arm9cpu_start[];
+ 
+-ENTRY_FUNCTION(start_skov_arm9cpu, r0, r1, r2)
++AT91_ENTRY_FUNCTION(start_skov_arm9cpu, r0, r1, r2)
+ {
+ 	void *fdt;
+ 
