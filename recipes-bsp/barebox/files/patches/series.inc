@@ -58,3 +58,7 @@ SRC_URI += "\
   file://patches/0301-Release-2023.09.0-customers-skov-imx6-20240215-4.patch \
   "
 # umpf-end
+# SAN MAC address hack
+SRC_URI += "\
+  file://patches/0302-switch-macaddr-lan1-lan2.patch \
+  "
