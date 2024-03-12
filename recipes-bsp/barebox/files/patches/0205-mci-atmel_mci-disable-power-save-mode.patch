@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 14:10:26 +0100
+Date: Thu, 15 Feb 2024 17:29:55 +0100
 Subject: [PATCH] mci: atmel_mci: disable power save mode
 
 Power saving mode will clock down the MCI clock according to the value
@@ -17,6 +17,7 @@ an ext4 fsck in Linux would hang and barebox PBL chainloading of barebox
 proper would hang when CONFIG_DEBUG_PBL is disabled.
 
 Fixes: 6cf02124b10d ("mci: add Atmel AT91 MCI driver")
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  drivers/mci/atmel_mci.c     | 1 +

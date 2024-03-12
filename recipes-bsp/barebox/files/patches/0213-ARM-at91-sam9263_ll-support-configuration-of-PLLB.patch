@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 17:36:06 +0100
+Date: Thu, 15 Feb 2024 17:30:03 +0100
 Subject: [PATCH] ARM: at91: sam9263_ll: support configuration of PLLB
 
 PLLB may be used as input to derive the USB's 48 MHz clock.
@@ -12,6 +12,7 @@ so it makes porting easier by just allowing low-level barebox code to
 use the values as is without having to split them up to stuff into a
 struct, only to have them ORed into a single value again.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/mach-at91/at91_pmc_ll.c | 11 +++++++++++

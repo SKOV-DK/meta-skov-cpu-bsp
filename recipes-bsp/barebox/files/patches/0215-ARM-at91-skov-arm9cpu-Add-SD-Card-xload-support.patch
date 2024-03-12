@@ -1,5 +1,5 @@
 From: Sam Ravnborg <sam@ravnborg.org>
-Date: Tue, 28 Jun 2022 22:38:48 +0200
+Date: Thu, 15 Feb 2024 17:30:05 +0100
 Subject: [PATCH] ARM: at91: skov-arm9cpu: Add SD-Card xload support
 
 This updates skov-arm9cpu with xload support, and we can now
@@ -8,34 +8,39 @@ use barebox as a replacement for at91bootstrap
 Only boot via SD card is supported.
 
 Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
+v3 -> v4:
+  - use macro definitions for PLLA_SETTINGS/PLLB_SETTINGS (Sam)
+  - add Sam's r-b
 v2 -> v3:
   - rename skov-arm9cpu-xload.img to skov-arm9cpu-xload-mmc.img
   - move code after relocation into separate noinline function
   - fix PLLA configuration and add PLLB configuration
   - add support for 64M SDRAM variant
   - remove erroneous pull-up setting from DRAM lines
-  - read AT91SAM9263_MATRIX_EBI0CSA, so we only set the relevant bits
+  - read AT91SAM9263_MATRIX_EBI0CSA, so we only set the
+  relevant bits
 
 v1 -> v2:
   - Use ENTRY_FUNCTION_WITHSTACK
   - Reshuffeled order in early init
   - SD card in not highcapacity
-  - Drop irrelevant max image size in images/Makefile.at91
-
-Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+  - Drop irrelevant max image size in
+  images/Makefile.at91
 ---
- arch/arm/boards/skov-arm9cpu/lowlevel.c | 199 ++++++++++++++++----------------
+ arch/arm/boards/skov-arm9cpu/lowlevel.c | 210 ++++++++++++++++----------------
  arch/arm/mach-at91/Kconfig              |   4 +-
  images/Makefile.at91                    |   6 +-
- 3 files changed, 104 insertions(+), 105 deletions(-)
+ include/mach/at91/at91_pmc.h            |   2 +
+ 4 files changed, 116 insertions(+), 106 deletions(-)
 
 diff --git a/arch/arm/boards/skov-arm9cpu/lowlevel.c b/arch/arm/boards/skov-arm9cpu/lowlevel.c
-index 82abfb4021a9..d83215bf9336 100644
+index 82abfb4021a9..baf0b7bfc990 100644
 --- a/arch/arm/boards/skov-arm9cpu/lowlevel.c
 +++ b/arch/arm/boards/skov-arm9cpu/lowlevel.c
-@@ -1,115 +1,110 @@
+@@ -1,115 +1,119 @@
  // SPDX-License-Identifier: GPL-2.0
 -// PDX-FileCopyrightText: 2018 Sam Ravnborg <sam@ravnborg.org>
 -
@@ -48,12 +53,19 @@ index 82abfb4021a9..d83215bf9336 100644
 +#include <mach/at91/sam92_ll.h>
 +#include <mach/at91/xload.h>
  #include <mach/at91/barebox-arm.h>
- 
--#define MASTER_PLL_MUL		171
--#define MASTER_PLL_DIV		14
++#include <linux/build_bug.h>
++
 +/* MCK = 20 MHz */
 +#define MAIN_CLOCK	200000000
 +#define MASTER_CLOCK	(MAIN_CLOCK / 2)	/* PMC_MCKR divides by 2 */
++
++#define PLLA_SETTINGS	(AT91_PMC_PLLA_WR_ERRATA | AT91_PMC_MUL_(49) | AT91_PMC_OUT_2 | \
++			 AT91_PMC_PLLCOUNT_(48) | AT91_PMC_DIV_(4))
++static_assert(PLLA_SETTINGS == 0x2031B004);
++
++#define PLLB_SETTINGS	(AT91_PMC_USBDIV_2 | AT91_PMC_MUL_(5) | AT91_PMC_OUT_0 | \
++			 AT91_PMC_PLLCOUNT_(48) | AT91_PMC_DIV_BYPASS)
++static_assert(PLLB_SETTINGS == 0x10053001);
 +
 +/*
 + * Check if target is 64 or 128 MB and adjust AT91_SDRAMC_CR
@@ -89,6 +101,9 @@ index 82abfb4021a9..d83215bf9336 100644
 +	return true;
 +}
  
+-#define MASTER_PLL_MUL		171
+-#define MASTER_PLL_DIV		14
+-
 -static void __bare_init skovarm9cpu_board_config(struct at91sam926x_board_cfg *cfg)
 +static void sam9263_sdramc_init(void)
  {
@@ -217,7 +232,7 @@ index 82abfb4021a9..d83215bf9336 100644
 +static noinline void continue_skov_arm9cpu_xload_mmc(void)
  {
 -	struct at91sam926x_board_cfg cfg;
-+	sam9263_lowlevel_init(0x2031B004, 0x10053001);
++	sam9263_lowlevel_init(PLLA_SETTINGS, PLLB_SETTINGS);
 +	sam92_dbgu_setup_ll(MASTER_CLOCK);
  
 -	cfg.pio = IOMEM(AT91SAM9263_BASE_PIOD);
@@ -244,7 +259,7 @@ index 82abfb4021a9..d83215bf9336 100644
  }
  
  extern char __dtb_at91_skov_arm9cpu_start[];
-@@ -118,10 +113,12 @@ AT91_ENTRY_FUNCTION(start_skov_arm9cpu, r0, r1, r2)
+@@ -118,10 +122,12 @@ AT91_ENTRY_FUNCTION(start_skov_arm9cpu, r0, r1, r2)
  {
  	void *fdt;
  
@@ -294,3 +309,18 @@ index 36f725940639..2a3c4c6d3b7e 100644
  image-$(CONFIG_MACH_SKOV_ARM9CPU) += barebox-skov-arm9cpu.img
  
  pblb-$(CONFIG_MACH_SAMA5D4_WIFX) += start_sama5d4_wifx_l1
+diff --git a/include/mach/at91/at91_pmc.h b/include/mach/at91/at91_pmc.h
+index c5ce0f82a1de..46ca0d746dfb 100644
+--- a/include/mach/at91/at91_pmc.h
++++ b/include/mach/at91/at91_pmc.h
+@@ -63,8 +63,10 @@
+ #define	AT91_CKGR_PLLAR		0x28			/* PLL A Register */
+ #define	AT91_CKGR_PLLBR		0x2c			/* PLL B Register */
+ #define		AT91_PMC_DIV		(0xff  <<  0)		/* Divider */
++#define			AT91_PMC_DIV_(n)	(((n) << 0) & AT91_PMC_DIV)
+ #define			AT91_PMC_DIV_BYPASS	(1 << 0)		/* Divider bypass */
+ #define		AT91_PMC_PLLCOUNT	(0x3f  <<  8)		/* PLL Counter */
++#define			AT91_PMC_PLLCOUNT_(n)	(((n) << 8) & AT91_PMC_PLLCOUNT)
+ #define		AT91_PMC_OUT		(3     << 14)		/* PLL Clock Frequency Range */
+ #define			AT91_PMC_OUT_0		(0 << 14)
+ #define			AT91_PMC_OUT_1		(1 << 14)

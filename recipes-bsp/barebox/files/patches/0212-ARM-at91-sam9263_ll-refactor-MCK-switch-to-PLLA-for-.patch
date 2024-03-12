@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 17:06:59 +0100
+Date: Thu, 15 Feb 2024 17:30:02 +0100
 Subject: [PATCH] ARM: at91: sam9263_ll: refactor MCK switch to PLLA for
  clarity
 
@@ -7,6 +7,7 @@ Duplicating the bits being written to configure the MCK harms
 readability, so factor that out into a new variable to make clear the
 bits that change between the two calls to at91_pmc_cfg_mck().
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/mach-at91/sam9263_ll.c | 14 ++++----------

@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 16:48:51 +0100
+Date: Thu, 15 Feb 2024 17:30:00 +0100
 Subject: [PATCH] ARM: at91: sam9263_ll: drop PLL charge pump initialization
 
 The datasheet[1] described the PLL Charge Pump Current Register in 27.9.17
@@ -22,6 +22,7 @@ this function yet anyway, so this should have very limited effect.
 
 [1]: Atmel-6249N-ATARM-SAM9263-Datasheet_14-Mar-16
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/mach-at91/sam9263_ll.c | 3 ---

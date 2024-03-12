@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 23:28:30 +0100
+Date: Thu, 15 Feb 2024 17:30:09 +0100
 Subject: [PATCH] usb: ohci-at91: fix possible hang chainloading barebox
 
 barebox, like Linux, will consider disabling parents when disabling a
@@ -20,6 +20,7 @@ The proper solution would be to support propagation of clock rate change
 requests, but till we have that, patch the driver, so only the immediate
 clock is disabled and not its parents.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  drivers/clk/clk.c            | 10 ++++++++--

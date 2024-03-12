@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Mon, 12 Feb 2024 20:11:04 +0100
+Date: Thu, 15 Feb 2024 17:29:57 +0100
 Subject: [PATCH] ARM: replace ENTRY_FUNCTION_HEAD with
  ENTRY_FUNCTION_WITHSTACK_HEAD
 
@@ -14,6 +14,7 @@ like we did on arm64 and then we could use the same implementation for
 both platforms (and support clang on arm32!), but till then, this seems
 the least ugly way to go about it.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/include/asm/barebox-arm.h    | 20 ++++++++++++++------
