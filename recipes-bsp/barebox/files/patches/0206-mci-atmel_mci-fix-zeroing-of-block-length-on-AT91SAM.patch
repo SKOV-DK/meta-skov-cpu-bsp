@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 14 Feb 2024 14:20:46 +0100
+Date: Thu, 15 Feb 2024 17:29:56 +0100
 Subject: [PATCH] mci: atmel_mci: fix zeroing of block length on AT91SAM9263
 
 We don't read back ATMCI_MR, but instead set up the value once and keep
@@ -13,6 +13,7 @@ block length on every transfer via ATMCI_BLKR, it would be less surprising
 and more robust against future change to not intermittently zero the block
 length via the MR register.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  drivers/mci/atmel_mci_common.c | 12 +++++++++++-

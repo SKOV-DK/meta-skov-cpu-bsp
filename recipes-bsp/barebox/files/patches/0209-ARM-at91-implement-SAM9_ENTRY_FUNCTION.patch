@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Mon, 12 Feb 2024 20:15:11 +0100
+Date: Thu, 15 Feb 2024 17:29:59 +0100
 Subject: [PATCH] ARM: at91: implement SAM9_ENTRY_FUNCTION
 
 An On-chip SRAM is available at address 0x00300000 on all SAM9x
@@ -7,6 +7,7 @@ variants, so let's define a macro that sets up the stack to grow
 down from its end. This will be useful for first stage barebox running
 without previously setup stack.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  include/mach/at91/barebox-arm.h | 5 +++++

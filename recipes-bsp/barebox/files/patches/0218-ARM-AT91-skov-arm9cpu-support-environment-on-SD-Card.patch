@@ -1,10 +1,11 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Thu, 15 Feb 2024 10:50:10 +0100
+Date: Thu, 15 Feb 2024 17:30:08 +0100
 Subject: [PATCH] ARM: AT91: skov-arm9cpu: support environment on SD-Card
 
 barebox is meant to boot from SD-Card on this platform, so support a
 barebox environment in this case for easier handling.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-arm9cpu/board.c | 8 ++++++++

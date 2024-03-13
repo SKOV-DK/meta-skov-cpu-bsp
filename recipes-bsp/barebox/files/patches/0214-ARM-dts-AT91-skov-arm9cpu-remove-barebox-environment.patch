@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Thu, 15 Feb 2024 10:47:16 +0100
+Date: Thu, 15 Feb 2024 17:30:04 +0100
 Subject: [PATCH] ARM: dts: AT91: skov-arm9cpu: remove barebox environment on
  NOR
 
@@ -8,6 +8,7 @@ idea to overwrite its environment with barebox'. We'll add a SD-Card
 environment for barebox in recovery case in a later commit, but for now
 remove the NOR flash environment footgun.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/dts/at91-skov-arm9cpu.dts | 9 ++-------

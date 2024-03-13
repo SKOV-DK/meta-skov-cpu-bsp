@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Mon, 12 Feb 2024 23:57:42 +0100
+Date: Thu, 15 Feb 2024 17:30:06 +0100
 Subject: [PATCH] ARM: at91: skov-arm9cpu: configure SMC for NOR flash use
 
 Deployed ARM9CPU's boots from NOR, not NAND. Replace the EBI NAND configuration
@@ -8,6 +8,7 @@ taken from the EK with one appropriate for the NOR chip we have.
 As this needs to happen earlier than the cfi-flash driver probe, we also
 move the board code to coredevice initlevel.
 
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-arm9cpu/board.c | 45 +++++++++++++++++++-----------------

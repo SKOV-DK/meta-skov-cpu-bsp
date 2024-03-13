@@ -1,5 +1,5 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Mon, 12 Feb 2024 12:37:08 +0100
+Date: Thu, 15 Feb 2024 17:29:58 +0100
 Subject: [PATCH] ARM: at91: use AT91 header instead of generic barebox ARM's
 
 Prior to the multi-arch (really multi-platform) rework, ENTRY_FUNCTION
@@ -15,6 +15,7 @@ Fixing that might be more effort though, so let's just fix what we got
 in-tree.
 
 Fixes: 4331e488f363 ("ARM: at91: Use ENTRY_FUNCTION_HEAD")
+Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/at91sam9263ek/lowlevel_init.c | 5 ++---
