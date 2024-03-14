@@ -1,6 +1,6 @@
 # umpf-base: v2023.09.0
 # umpf-name: 2023.09.0/customers/skov/imx6
-# umpf-version: 2023.09.0/customers/skov/imx6/20240313-1
+# umpf-version: 2023.09.0/customers/skov/imx6/20240314-1
 # umpf-topic: v2023.09.0/customers/skov/imx6
 # umpf-hashinfo: d8e4faeec3b9abcebe8fe9dfada65e7d0faf6c8b
 # umpf-topic-range: ce40a01f804a50433ace02c43cbc6c24dfe4d458..29194a09ba2694a64209b23273df395610b48bfb
@@ -12,8 +12,8 @@ SRC_URI += "\
   file://patches/0005-ARM-dts-skov-imx6-switch-barebox-environment-from-MB.patch \
   "
 # umpf-topic: v2023.09.0/topic/skov-imx8mp
-# umpf-hashinfo: 11a44a251521372a3d2c844aaa86898591da3614
-# umpf-topic-range: 29194a09ba2694a64209b23273df395610b48bfb..09b96f2614c4d7e58eb5d68c32434adfc6c718ba
+# umpf-hashinfo: e27bfd4de51e371734b10d9070ce1901d1008f42
+# umpf-topic-range: 29194a09ba2694a64209b23273df395610b48bfb..321336ea0900ec370f0647a0048280a075cbf4ea
 SRC_URI += "\
   file://patches/0101-arm-dts-imx8mp-skov-Add-reserved-memory-for-ramoops-.patch \
   file://patches/0102-arm-dts-imx8mp-skov-Add-pins-for-hardware-variant-de.patch \
@@ -26,10 +26,12 @@ SRC_URI += "\
   file://patches/0109-ARM-i.MX8MP-skov-fix-variant-detection-on-boards-wit.patch \
   file://patches/0110-ARM-i.MX8MP-skov-update-timing-parameters-for-Samsun.patch \
   file://patches/0111-ARM-i.MX8MP-skov-add-MAC-address-assignment-support.patch \
+  file://patches/0112-ARM-i.MX8MP-skov-add-fallback-for-unsupported-HW.patch \
+  file://patches/0113-ARM-i.MX8MP-skov-add-new-bd500-variant-support.patch \
   "
 # umpf-topic: v2023.09.0/customers/skov/arm9cpu
 # umpf-hashinfo: f792e18786446c0eaf2384e83c367f4f4acc2ec6
-# umpf-topic-range: 09b96f2614c4d7e58eb5d68c32434adfc6c718ba..bd1dd7babef94f37bfd048fc6816755e3e6de3cd
+# umpf-topic-range: 321336ea0900ec370f0647a0048280a075cbf4ea..4d00fa00e1f842a305eee1b5ca1749fa5c867280
 SRC_URI += "\
   file://patches/0201-ARM-at91-add-SDRAMC-driver-for-memory-detection.patch \
   file://patches/0202-ARM-at91-at91sam9_rst-add-DT-support-for-at91sam9260.patch \
@@ -51,9 +53,9 @@ SRC_URI += "\
   file://patches/0218-ARM-AT91-skov-arm9cpu-support-environment-on-SD-Card.patch \
   file://patches/0219-HACK-ARM-at91-import-AT91Bootstrap-patch-pmc-fix-PLL.patch \
   "
-# umpf-release: 2023.09.0/customers/skov/imx6/20240313-1
-# umpf-topic-range: bd1dd7babef94f37bfd048fc6816755e3e6de3cd..b4407c198941114ece6722023fdf56406a9da45f
+# umpf-release: 2023.09.0/customers/skov/imx6/20240314-1
+# umpf-topic-range: 4d00fa00e1f842a305eee1b5ca1749fa5c867280..1e9f097ec427e38ea78d8bdef167e4c68afa1d3f
 SRC_URI += "\
-  file://patches/0301-Release-2023.09.0-customers-skov-imx6-20240313-1.patch \
+  file://patches/0301-Release-2023.09.0-customers-skov-imx6-20240314-1.patch \
   "
 # umpf-end

@@ -1,0 +1,25 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 14 Mar 2024 10:11:24 +0100
+Subject: [PATCH] ARM: i.MX8MP: skov: add new bd500 variant support
+
+Add bd500 board variant.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index a45fe8517f59..b4dd83a8cf24 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -83,6 +83,9 @@ static const struct board_description imx8mp_variants[] = {
+ 		.dts_compatible_hdmi = "skov,imx8mp-skov-revb-hdmi",
+ 		.flags = SKOV_IMX8MP_HAS_HDMI,
+ 	},
++	[2] = {
++		.dts_compatible = "skov,imx8mp-skov-revc-bd500",
++	},
+ 	/* Keep this entry always on the last place. It will be used
+ 	 * as fallback variant if not supported variant is detected.
+ 	 */
