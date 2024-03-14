@@ -7,19 +7,20 @@ Store the state change reason to some black box, for later
 investigation.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Reviewed-by: Mark Brown <broonie@kernel.org>
 ---
  drivers/regulator/core.c | 6 ++++++
  1 file changed, 6 insertions(+)
 
 diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-index a6cb84af989e..d8a45c89f14a 100644
+index a6cb84af989e..ed84f86a0bd7 100644
 --- a/drivers/regulator/core.c
 +++ b/drivers/regulator/core.c
 @@ -19,6 +19,7 @@
  #include <linux/delay.h>
  #include <linux/gpio/consumer.h>
  #include <linux/of.h>
-+#include <linux/pscr.h>
++#include <linux/pscrr.h>
  #include <linux/reboot.h>
  #include <linux/regmap.h>
  #include <linux/regulator/of_regulator.h>
@@ -27,7 +28,7 @@ index a6cb84af989e..d8a45c89f14a 100644
  static void regulator_handle_critical(struct regulator_dev *rdev,
  				      unsigned long event)
  {
-+	enum power_state_change_reason pscr;
++	enum pscr pscr;
  	const char *reason = NULL;
  
  	if (!rdev->constraints->system_critical)

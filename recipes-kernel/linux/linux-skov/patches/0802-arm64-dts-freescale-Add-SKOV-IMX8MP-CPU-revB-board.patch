@@ -280,7 +280,7 @@ index 000000000000..59813ef8e2bb
 +			reg_vdd_soc: BUCK1 {
 +				regulator-name = "VDD_SOC";
 +				regulator-min-microvolt = <600000>;
-+				regulator-max-microvolt = <850000>;
++				regulator-max-microvolt = <2187500>;
 +				vin-supply = <&reg_5v_p>;
 +				regulator-boot-on;
 +				regulator-always-on;
@@ -295,7 +295,7 @@ index 000000000000..59813ef8e2bb
 +				regulator-boot-on;
 +				regulator-always-on;
 +				regulator-ramp-delay = <3125>;
-+				nxp,dvs-run-voltage = <850000>;
++				nxp,dvs-run-voltage = <950000>;
 +				nxp,dvs-standby-voltage = <850000>;
 +			};
 +

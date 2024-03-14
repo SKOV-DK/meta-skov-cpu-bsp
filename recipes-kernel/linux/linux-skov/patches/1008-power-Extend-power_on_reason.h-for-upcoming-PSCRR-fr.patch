@@ -1,0 +1,29 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 22 Jan 2024 14:03:25 +0100
+Subject: [PATCH] power: Extend power_on_reason.h for upcoming PSCRR framework
+
+Prepare for the introduction of the Power State Change Reason Recorder
+(PSCRR)  framework by expanding the power_on_reason.h header. This
+extension includes new power-on reasons:
+- POWER_ON_REASON_OVER_CURRENT for over-current conditions.
+- POWER_ON_REASON_REGULATOR_FAILURE for regulator failures.
+- POWER_ON_REASON_OVERTEMPERATURE for over temperature situations.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ include/linux/power/power_on_reason.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/linux/power/power_on_reason.h b/include/linux/power/power_on_reason.h
+index 95a1ec0c403c..f2446cece277 100644
+--- a/include/linux/power/power_on_reason.h
++++ b/include/linux/power/power_on_reason.h
+@@ -15,5 +15,8 @@
+ #define POWER_ON_REASON_XTAL_FAIL "crystal oscillator failure"
+ #define POWER_ON_REASON_BROWN_OUT "brown-out reset"
+ #define POWER_ON_REASON_UNKNOWN "unknown reason"
++#define POWER_ON_REASON_OVER_CURRENT "over current"
++#define POWER_ON_REASON_REGULATOR_FAILURE "regulator failure"
++#define POWER_ON_REASON_OVERTEMPERATURE "overtemperature"
+ 
+ #endif /* POWER_ON_REASON_H */
