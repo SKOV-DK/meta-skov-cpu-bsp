@@ -1,6 +1,6 @@
 # umpf-base: v6.7
 # umpf-name: 6.7/customers/skov/imx6
-# umpf-version: 6.7/customers/skov/imx6/20240314-1
+# umpf-version: 6.7/customers/skov/imx6/20240411-2
 # umpf-topic: v6.7/topic/drm-sched-accounting
 # umpf-hashinfo: 8d5b9eede881aab0bc6c265060ee44e9a0aa2bdb
 # umpf-topic-range: 0dd3ee31125508cd67f7e7172247f05b7fd1753a..fa41452d6309dc71769adf51b49e82a4361024c0
@@ -70,8 +70,8 @@ SRC_URI += "\
   file://patches/0706-phy-freescale-add-Samsung-HDMI-PHY.patch \
   "
 # umpf-topic: v6.7/topic/imx8mp-skov-dts
-# umpf-hashinfo: bdb7d522db35edec15c83864d267431f3a01a10b
-# umpf-topic-range: d6c4451179139322d0284ab0e4f2e620f9bba68e..628f11ea68acfadf66a05a35f222a06e37bcda79
+# umpf-hashinfo: c61a78037198794cffd6084797a7abf62ee27c85
+# umpf-topic-range: d6c4451179139322d0284ab0e4f2e620f9bba68e..bcc42ab0f8b3fc2e844a634b7affd40c34f125d7
 SRC_URI += "\
   file://patches/0801-dt-bindings-arm-Add-compatible-for-SKOV-i.MX8MP-RevB.patch \
   file://patches/0802-arm64-dts-freescale-Add-SKOV-IMX8MP-CPU-revB-board.patch \
@@ -83,16 +83,17 @@ SRC_URI += "\
   file://patches/0808-arm64-dts-freescale-remove-pstore.patch \
   file://patches/0809-arm64-dts-freescale-imx8mp-skov-add-PSCR-node.patch \
   file://patches/0810-arm64-dts-freescale-imx8mp-skov-add-basic-and-revC-B.patch \
+  file://patches/0811-arm64-dts-freescale-imx8mp-skov-reva-correct-PMIC-bo.patch \
   "
 # umpf-topic: v6.7/topic/drm-fsl-ldb
 # umpf-hashinfo: a3b0b0bc12a90fdc308e5d5d4418e995153f06b3
-# umpf-topic-range: 628f11ea68acfadf66a05a35f222a06e37bcda79..3f330d39cafd723a802009d16ca265a5b574f225
+# umpf-topic-range: bcc42ab0f8b3fc2e844a634b7affd40c34f125d7..02a5d59be67a141358a179dc3d791ae1d4e46c1f
 SRC_URI += "\
   file://patches/0901-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.7/topic/regulator-mmc-under-voltage
 # umpf-hashinfo: 440804ae54758a911d0c0a23a1979baab69ab136
-# umpf-topic-range: 3f330d39cafd723a802009d16ca265a5b574f225..bf860776a1d34b81e4e4fce477b6145992754863
+# umpf-topic-range: 02a5d59be67a141358a179dc3d791ae1d4e46c1f..81990119320ef4ebc8be1215e526dc4b59faae7b
 SRC_URI += "\
   file://patches/1001-regulator-dt-bindings-Add-system-critical-regulator-.patch \
   file://patches/1002-regulator-Introduce-handling-for-system-critical-und.patch \
@@ -112,13 +113,13 @@ SRC_URI += "\
   "
 # umpf-topic: v6.7/topic/gic-v3-its
 # umpf-hashinfo: dbdc0d11fb7c93b5ec85e7c0ef8635c4fd1d1c86
-# umpf-topic-range: bf860776a1d34b81e4e4fce477b6145992754863..25e202e9b13a328d3d4cfc08e4deb04c9fd59995
+# umpf-topic-range: 81990119320ef4ebc8be1215e526dc4b59faae7b..29e649e6a63a1face0ecb4b2e1d9e4d771b0980e
 SRC_URI += "\
   file://patches/1101-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.7/topic/pca9450
 # umpf-hashinfo: 18bb45fd4a680cae0c376407b0f957dddece060c
-# umpf-topic-range: 25e202e9b13a328d3d4cfc08e4deb04c9fd59995..80d9aba540676da1085a81e5523a1a7aed6f44af
+# umpf-topic-range: 29e649e6a63a1face0ecb4b2e1d9e4d771b0980e..b924e3753233a95f4ca185bfe21cde541611404f
 SRC_URI += "\
   file://patches/1201-WIP-regulator-pca9450-add-support-for-software-trigg.patch \
   file://patches/1202-WIP-regulator-pca9450-add-vin-supply-DT-support.patch \
@@ -126,13 +127,13 @@ SRC_URI += "\
   "
 # umpf-topic: v6.7/topic/imx6q-dt
 # umpf-hashinfo: ea7f9ce9ae8ea7754f69ea6c2abd05074dbd1424
-# umpf-topic-range: 80d9aba540676da1085a81e5523a1a7aed6f44af..a52cd02a27c97c2fa66c462cd8951ec234c1b5ed
+# umpf-topic-range: b924e3753233a95f4ca185bfe21cde541611404f..c1b19184409a205acd1988ad04e530ef910446ad
 SRC_URI += "\
   file://patches/1301-ARM-dts-imx6-skov-add-aliases-for-all-ethernet-nodes.patch \
   "
 # umpf-topic: v6.7/topic/net-ksz8-switch
 # umpf-hashinfo: ef8b7e816eb19edb3659ca3a0e1bf324c4959c02
-# umpf-topic-range: a52cd02a27c97c2fa66c462cd8951ec234c1b5ed..3ab68b7c8d3212948e89013c62c0e505dc166a99
+# umpf-topic-range: c1b19184409a205acd1988ad04e530ef910446ad..43618c864663cd6ec5538af0a6e32e20fa60294d
 SRC_URI += "\
   file://patches/1401-net-dsa-microchip-ksz8-move-BMCR-specific-code-to-se.patch \
   file://patches/1402-net-dsa-microchip-Remove-redundant-optimization-in-k.patch \
@@ -149,9 +150,13 @@ SRC_URI += "\
   file://patches/1413-net-dsa-microchip-ksz8-Add-function-to-configure-por.patch \
   file://patches/1414-net-dsa-microchip-make-phylink_mac_link_up-not-optio.patch \
   "
-# umpf-release: 6.7/customers/skov/imx6/20240314-1
-# umpf-topic-range: 3ab68b7c8d3212948e89013c62c0e505dc166a99..6df78fe3619e64b0dbcf96e336ddceb83a773d4b
+# umpf-release: 6.7/customers/skov/imx6/20240411-2
+# umpf-topic-range: 43618c864663cd6ec5538af0a6e32e20fa60294d..381e4331642f39406069eaaf002264ee8f2143d3
 SRC_URI += "\
-  file://patches/1501-Release-6.7-customers-skov-imx6-20240314-1.patch \
+  file://patches/1501-Release-6.7-customers-skov-imx6-20240411-2.patch \
   "
+UMPF_BASE = "6.7"
+UMPF_VERSION = "20240411-2"
+PV = "${UMPF_BASE}-${UMPF_VERSION}"
+LINUX_VERSION = "${UMPF_BASE}"
 # umpf-end
