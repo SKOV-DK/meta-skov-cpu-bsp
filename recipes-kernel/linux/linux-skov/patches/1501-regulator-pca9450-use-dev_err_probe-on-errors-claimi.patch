@@ -1,0 +1,75 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 10 Apr 2024 17:13:39 +0200
+Subject: [PATCH] regulator: pca9450: use dev_err_probe on errors claiming
+ resources
+
+Functions claiming resources may return -EPROBE_DEFER to the driver core
+to instruct it to retry probe at a later time. This is not unusual and
+printing it unconditionally presents is just confusing to users:
+
+  nxp-pca9450 0-0025: Failed to register regulator(buck1): -517
+
+Using dev_err_probe remedies this:
+The error message will only be shown if it's not -EPROBE_DEFER and in
+the -EPROBE_DEFER, the deferral reason is saved for display at a later
+time.
+
+Fixes: 0935ff5f1f0a ("regulator: pca9450: add pca9450 pmic driver")
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/regulator/pca9450-regulator.c | 29 +++++++++++++----------------
+ 1 file changed, 13 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
+index 2ab365d2749f..124f9227bcc2 100644
+--- a/drivers/regulator/pca9450-regulator.c
++++ b/drivers/regulator/pca9450-regulator.c
+@@ -773,24 +773,21 @@ static int pca9450_i2c_probe(struct i2c_client *i2c)
+ 		config.dev = pca9450->dev;
+ 
+ 		rdev = devm_regulator_register(pca9450->dev, desc, &config);
+-		if (IS_ERR(rdev)) {
+-			ret = PTR_ERR(rdev);
+-			dev_err(pca9450->dev,
+-				"Failed to register regulator(%s): %d\n",
+-				desc->name, ret);
+-			return ret;
+-		}
++		if (IS_ERR(rdev))
++			return dev_err_probe(pca9450->dev, ERR_PTR(rdev),
++				"Failed to register regulatokr(%s)\n",
++				desc->name);
+ 	}
+ 
+ 	ret = devm_request_threaded_irq(pca9450->dev, pca9450->irq, NULL,
+ 					pca9450_irq_handler,
+ 					(IRQF_TRIGGER_FALLING | IRQF_ONESHOT),
+ 					"pca9450-irq", pca9450);
+-	if (ret != 0) {
+-		dev_err(pca9450->dev, "Failed to request IRQ: %d\n",
+-			pca9450->irq);
+-		return ret;
+-	}
++	if (ret != 0)
++		return dev_err_probe(pca9450->dev, ret,
++				     "Failed to request IRQ: %d\n",
++				     pca9450->irq);
++
+ 	/* Unmask all interrupt except PWRON/WDOG/RSVD */
+ 	ret = regmap_update_bits(pca9450->regmap, PCA9450_REG_INT1_MSK,
+ 				IRQ_VR_FLT1 | IRQ_VR_FLT2 | IRQ_LOWVSYS |
+@@ -840,10 +837,10 @@ static int pca9450_i2c_probe(struct i2c_client *i2c)
+ 	 */
+ 	pca9450->sd_vsel_gpio = gpiod_get_optional(pca9450->dev, "sd-vsel", GPIOD_OUT_HIGH);
+ 
+-	if (IS_ERR(pca9450->sd_vsel_gpio)) {
+-		dev_err(&i2c->dev, "Failed to get SD_VSEL GPIO\n");
+-		return PTR_ERR(pca9450->sd_vsel_gpio);
+-	}
++	if (IS_ERR(pca9450->sd_vsel_gpio))
++		return dev_err_probe(&i2c->dev,
++				     PTR_ERR(pca9450->sd_vsel_gpio),
++				     "Failed to get SD_VSEL GPIO\n");
+ 
+ 	dev_info(&i2c->dev, "%s probed.\n",
+ 		type == PCA9450_TYPE_PCA9450A ? "pca9450a" : "pca9450bc");

@@ -1,0 +1,26 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Fri, 22 Jul 2022 10:13:08 +0200
+Subject: [PATCH] arm64: dts: imx8mp: add interconnect for lcdif-hdmi
+
+Add the interconnect property for the lcdif-hdmi.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+index 67a3ef81fd9f..64e5d535fe2e 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+@@ -1925,6 +1925,10 @@ hdmi_blk_ctrl: blk-ctrl@32fc0000 {
+ 						     "pai", "pvi", "trng",
+ 						     "hdmi-tx", "hdmi-tx-phy",
+ 						     "hdcp", "hrv";
++				interconnects = <&noc IMX8MP_ICM_LCDIF_HDMI &noc IMX8MP_ICN_HDMI>,
++						<&noc IMX8MP_ICM_HRV &noc IMX8MP_ICN_HDMI>,
++						<&noc IMX8MP_ICM_HDCP &noc IMX8MP_ICN_HDMI>;
++				interconnect-names = "lcdif-hdmi", "hrv", "hdcp";
+ 				#power-domain-cells = <1>;
+ 			};
+ 

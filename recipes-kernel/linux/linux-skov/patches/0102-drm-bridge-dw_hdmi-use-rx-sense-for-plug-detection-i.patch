@@ -14,10 +14,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 14 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-index 132bd984ea73..c935dacf2692 100644
+index 1c0cc8903455..c7b6da7a113b 100644
 --- a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 +++ b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-@@ -141,6 +141,7 @@ struct dw_hdmi {
+@@ -142,6 +142,7 @@ struct dw_hdmi {
  	struct clk *iahb_clk;
  	struct clk *cec_clk;
  	struct dw_hdmi_i2c *i2c;
@@ -48,7 +48,7 @@ index 132bd984ea73..c935dacf2692 100644
  		hdmi->phy_mask |= HDMI_PHY_RX_SENSE;
  	else
  		hdmi->phy_mask &= ~HDMI_PHY_RX_SENSE;
-@@ -3055,7 +3061,7 @@ void dw_hdmi_setup_rx_sense(struct dw_hdmi *hdmi, bool hpd, bool rx_sense)
+@@ -3062,7 +3068,7 @@ void dw_hdmi_setup_rx_sense(struct dw_hdmi *hdmi, bool hpd, bool rx_sense)
  		 * If the RX sense status indicates we're disconnected,
  		 * clear the software rxsense status.
  		 */
@@ -57,7 +57,7 @@ index 132bd984ea73..c935dacf2692 100644
  			hdmi->rxsense = false;
  
  		/*
-@@ -3118,7 +3124,9 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
+@@ -3125,7 +3131,9 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
  			mutex_unlock(&hdmi->cec_notifier_mutex);
  		}
  
@@ -68,7 +68,7 @@ index 132bd984ea73..c935dacf2692 100644
  			status = connector_status_connected;
  
  		if (!(phy_stat & (HDMI_PHY_HPD | HDMI_PHY_RX_SENSE)))
-@@ -3499,6 +3507,8 @@ struct dw_hdmi *dw_hdmi_probe(struct platform_device *pdev,
+@@ -3506,6 +3514,8 @@ struct dw_hdmi *dw_hdmi_probe(struct platform_device *pdev,
  		goto err_iahb;
  	}
  

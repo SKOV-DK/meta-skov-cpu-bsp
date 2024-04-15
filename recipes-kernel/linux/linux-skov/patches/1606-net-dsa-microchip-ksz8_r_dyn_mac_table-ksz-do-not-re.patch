@@ -1,0 +1,48 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 2 Apr 2024 15:13:37 +0200
+Subject: [PATCH] net: dsa: microchip: ksz8_r_dyn_mac_table(): ksz: do not
+ return EAGAIN on timeout
+
+EAGAIN was not used by previous code and not used by  current code. So,
+remove it and use proper error value.
+
+Reviewed-by: Vladimir Oltean <olteanv@gmail.com>
+Acked-by: Arun Ramadoss <arun.ramadoss@microchip.com>
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/dsa/microchip/ksz8795.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
+index 5765d23bc6ed..eeb32df0939d 100644
+--- a/drivers/net/dsa/microchip/ksz8795.c
++++ b/drivers/net/dsa/microchip/ksz8795.c
+@@ -396,7 +396,7 @@ static int ksz8_valid_dyn_entry(struct ksz_device *dev, u8 *data)
+ 
+ 	/* Entry is not ready for accessing. */
+ 	if (*data & masks[DYNAMIC_MAC_TABLE_NOT_READY]) {
+-		return -EAGAIN;
++		return -ETIMEDOUT;
+ 	/* Entry is ready for accessing. */
+ 	} else {
+ 		ksz_read8(dev, regs[REG_IND_DATA_8], data);
+@@ -431,15 +431,14 @@ static int ksz8_r_dyn_mac_table(struct ksz_device *dev, u16 addr, u8 *mac_addr,
+ 	ksz_write16(dev, regs[REG_IND_CTRL_0], ctrl_addr);
+ 
+ 	ret = ksz8_valid_dyn_entry(dev, &data);
+-	if (ret == -EAGAIN) {
+-		if (addr == 0)
+-			*entries = 0;
+-		goto unlock_alu;
+-	} else if (ret == -ENXIO) {
++	if (ret == -ENXIO) {
+ 		*entries = 0;
+ 		goto unlock_alu;
+ 	}
+ 
++	if (ret)
++		goto unlock_alu;
++
+ 	ksz_read64(dev, regs[REG_IND_DATA_HI], &buf);
+ 	data_hi = (u32)(buf >> 32);
+ 	data_lo = (u32)buf;

@@ -1,0 +1,34 @@
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Tue, 24 Oct 2023 15:37:20 +0200
+Subject: [PATCH] HACK: arm64: dts: imx8mp: Hook up MLMIX reset to power domain
+
+This seems to make NPU register reads work reliably.
+
+Before:
+
+  etnaviv-gpu 38500000.npu: model: GC0, revision: 0
+  etnaviv-gpu 38500000.npu: Unknown GPU model
+
+After:
+
+  etnaviv-gpu 38500000.npu: model: GC8000, revision: 8002
+  etnaviv-gpu 38500000.npu: etnaviv has been instantiated on a NPU, for which the UAPI is still experimental
+
+Suggested-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+index a0982a6123a7..1aa8317f1692 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+@@ -916,6 +916,7 @@ pgc_mlmix: power-domain@24 {
+ 						assigned-clock-rates = <800000000>,
+ 								       <800000000>,
+ 								       <300000000>;
++						resets = <&src IMX8MP_RESET_MLMIX_RESET>;
+ 					};
+ 				};
+ 			};

@@ -1,0 +1,54 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 16 Jan 2024 06:31:34 +0100
+Subject: [PATCH] arm64: dts: freescale: imx8mp-skov: add PSCR node
+
+Add node to store reboot/power-off reason information.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 25 ++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index ee099a3a832c..ff6e2f82582b 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -63,6 +63,15 @@ led-2 {
+ 		};
+ 	};
+ 
++	/* Power Status Change Reason Recorder */
++	pscrr {
++		compatible = "pscr-nvmem";
++		nvmem-cells = <&pscr_cell>;
++		nvmem-cell-names = "pscr";
++		pscr-under-voltage = <1>;
++		pscr-over-temperature = <2>;
++	};
++
+ 	reg_1v2: regulator-1v2 {
+ 		compatible = "regulator-fixed";
+ 		vin-supply = <&reg_5v_p>;
+@@ -345,6 +354,22 @@ i2c_rtc: rtc@51 {
+ 		pinctrl-0 = <&pinctrl_rtc>;
+ 		interrupts-extended = <&gpio4 31 IRQ_TYPE_EDGE_FALLING>;
+ 		quartz-load-femtofarads = <12500>;
++
++		nvmem-layout {
++			compatible = "fixed-layout";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			pscr_cell: pscr@0,0 {
++				reg = <0x0 0x1>;
++				bits = <0 4>;
++			};
++
++			reboot_mode@0,4 {
++				reg = <0x0 0x1>;
++				bits = <4 4>;
++			};
++		};
+ 	};
+ };
+ 

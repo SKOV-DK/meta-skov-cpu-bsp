@@ -1,0 +1,67 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 2 Apr 2024 15:13:32 +0200
+Subject: [PATCH] net: dsa: microchip: Remove unused FDB timestamp support in
+ ksz8_r_dyn_mac_table()
+
+The FDB timestamps are not being utilized. This commit removes the
+unused timestamp support from ksz8_r_dyn_mac_table() function.
+
+Reviewed-by: Vladimir Oltean <olteanv@gmail.com>
+Acked-by: Arun Ramadoss <arun.ramadoss@microchip.com>
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/net/dsa/microchip/ksz8.h    | 2 +-
+ drivers/net/dsa/microchip/ksz8795.c | 7 ++-----
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz8.h b/drivers/net/dsa/microchip/ksz8.h
+index 1a5225264e6a..5b38cbb7b058 100644
+--- a/drivers/net/dsa/microchip/ksz8.h
++++ b/drivers/net/dsa/microchip/ksz8.h
+@@ -20,7 +20,7 @@ void ksz8_port_setup(struct ksz_device *dev, int port, bool cpu_port);
+ int ksz8_r_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 *val);
+ int ksz8_w_phy(struct ksz_device *dev, u16 phy, u16 reg, u16 val);
+ int ksz8_r_dyn_mac_table(struct ksz_device *dev, u16 addr, u8 *mac_addr,
+-			 u8 *fid, u8 *src_port, u8 *timestamp, u16 *entries);
++			 u8 *fid, u8 *src_port, u16 *entries);
+ void ksz8_r_mib_cnt(struct ksz_device *dev, int port, u16 addr, u64 *cnt);
+ void ksz8_r_mib_pkt(struct ksz_device *dev, int port, u16 addr,
+ 		    u64 *dropped, u64 *cnt);
+diff --git a/drivers/net/dsa/microchip/ksz8795.c b/drivers/net/dsa/microchip/ksz8795.c
+index 14923535ca7e..f59a03e6981d 100644
+--- a/drivers/net/dsa/microchip/ksz8795.c
++++ b/drivers/net/dsa/microchip/ksz8795.c
+@@ -409,7 +409,7 @@ static int ksz8_valid_dyn_entry(struct ksz_device *dev, u8 *data)
+ }
+ 
+ int ksz8_r_dyn_mac_table(struct ksz_device *dev, u16 addr, u8 *mac_addr,
+-			 u8 *fid, u8 *src_port, u8 *timestamp, u16 *entries)
++			 u8 *fid, u8 *src_port, u16 *entries)
+ {
+ 	u32 data_hi, data_lo;
+ 	const u8 *shifts;
+@@ -454,8 +454,6 @@ int ksz8_r_dyn_mac_table(struct ksz_device *dev, u16 addr, u8 *mac_addr,
+ 			shifts[DYNAMIC_MAC_FID];
+ 		*src_port = (data_hi & masks[DYNAMIC_MAC_TABLE_SRC_PORT]) >>
+ 			shifts[DYNAMIC_MAC_SRC_PORT];
+-		*timestamp = (data_hi & masks[DYNAMIC_MAC_TABLE_TIMESTAMP]) >>
+-			shifts[DYNAMIC_MAC_TIMESTAMP];
+ 
+ 		mac_addr[5] = (u8)data_lo;
+ 		mac_addr[4] = (u8)(data_lo >> 8);
+@@ -1196,14 +1194,13 @@ int ksz8_fdb_dump(struct ksz_device *dev, int port,
+ 	int ret = 0;
+ 	u16 i = 0;
+ 	u16 entries = 0;
+-	u8 timestamp = 0;
+ 	u8 fid;
+ 	u8 src_port;
+ 	u8 mac[ETH_ALEN];
+ 
+ 	do {
+ 		ret = ksz8_r_dyn_mac_table(dev, i, mac, &fid, &src_port,
+-					   &timestamp, &entries);
++					   &entries);
+ 		if (!ret && port == src_port) {
+ 			ret = cb(mac, fid, false, data);
+ 			if (ret)

@@ -11,10 +11,10 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-index 52d91a0df85e..132bd984ea73 100644
+index cceb5aab6c83..1c0cc8903455 100644
 --- a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 +++ b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-@@ -2592,6 +2592,7 @@ static int dw_hdmi_connector_create(struct dw_hdmi *hdmi)
+@@ -2599,6 +2599,7 @@ static int dw_hdmi_connector_create(struct dw_hdmi *hdmi)
  	if (hdmi->version >= 0x200a && hdmi->plat_data->use_drm_infoframe)
  		drm_connector_attach_hdr_output_metadata_property(connector);
  

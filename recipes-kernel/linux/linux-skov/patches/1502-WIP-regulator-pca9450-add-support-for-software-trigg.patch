@@ -1,0 +1,83 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Wed, 1 Nov 2023 06:51:34 +0100
+Subject: [PATCH] WIP: regulator: pca9450: add support for software triggered
+ reset
+
+WIP note: since this PMIC supports PMIC_RST_B pin, reset by software
+should be optional. Other know issue is i2c access should be atimic.
+Otherwise sleep in atomic warning will be shown.
+
+Some board design do not attach PMIC_RST_B to the SoC. In this case,
+reset detection will indicate always watchdog as the reset reason.
+
+To make reset reason detection work properly we need use software triggered
+reset.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/regulator/pca9450-regulator.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
+index 124f9227bcc2..f539ed5f1d82 100644
+--- a/drivers/regulator/pca9450-regulator.c
++++ b/drivers/regulator/pca9450-regulator.c
+@@ -12,6 +12,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/reboot.h>
+ #include <linux/regulator/driver.h>
+ #include <linux/regulator/machine.h>
+ #include <linux/regulator/of_regulator.h>
+@@ -36,6 +37,7 @@ struct pca9450 {
+ 	enum pca9450_chip_type type;
+ 	unsigned int rcnt;
+ 	int irq;
++	struct notifier_block restart_nb;
+ };
+ 
+ static const struct regmap_range pca9450_status_range = {
+@@ -662,6 +664,28 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 	},
+ };
+ 
++static int pca9450_reset_restart_handler(struct notifier_block *nb,
++				unsigned long action, void *data)
++{
++	struct pca9450 *pca9450 =
++		container_of(nb, struct pca9450, restart_nb);
++	int ret;
++
++	/*
++	 * Use Cold reset (0x64) to make it detectable by the boot loader
++	 * Other values will have following reset reason detection:
++	 * 0x05 -> Detected cold reset by WDOGB pin
++	 * 0x14 -> Detected cold reset by SW_RST
++	 * 0x35 -> Unknown reset reason
++	 * 0x64 -> Detected cold reset by SW_RST
++	 */
++	ret = regmap_set_bits(pca9450->regmap, PCA9450_REG_SWRST, 0x64);
++	if (ret)
++		dev_err(pca9450->dev, "Failed to write SWRST register\n");
++
++	return NOTIFY_DONE;
++}
++
+ static irqreturn_t pca9450_irq_handler(int irq, void *data)
+ {
+ 	struct pca9450 *pca9450 = data;
+@@ -842,6 +866,13 @@ static int pca9450_i2c_probe(struct i2c_client *i2c)
+ 				     PTR_ERR(pca9450->sd_vsel_gpio),
+ 				     "Failed to get SD_VSEL GPIO\n");
+ 
++	pca9450->restart_nb.notifier_call = pca9450_reset_restart_handler;
++	pca9450->restart_nb.priority = 255;
++
++	ret = register_restart_handler(&pca9450->restart_nb);
++	if (ret)
++		dev_warn(&i2c->dev, "Failed to register restart handler\n");
++
+ 	dev_info(&i2c->dev, "%s probed.\n",
+ 		type == PCA9450_TYPE_PCA9450A ? "pca9450a" : "pca9450bc");
+ 

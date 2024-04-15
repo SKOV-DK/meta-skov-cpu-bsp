@@ -1,0 +1,28 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Wed, 12 Sep 2018 15:45:34 +0200
+Subject: [PATCH] soc: imx: gpc: set DMA mask for PD platform devices
+
+The PD platform devices aren't DMA capable (as is correctly reflected
+in with a zero mask coherent_dma_mask). As they have a of_node attached
+they will go through of_dma_configure, which will warn if it finds an
+uninitialized DMA mask. Let the driver core know that this isn't a
+missing configuration, but a non DMA capable device by pointing the
+dma_mask to the coherent_dma_mask.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/pmdomain/imx/gpc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/pmdomain/imx/gpc.c b/drivers/pmdomain/imx/gpc.c
+index 9517cce93d8a..9f152d7ee255 100644
+--- a/drivers/pmdomain/imx/gpc.c
++++ b/drivers/pmdomain/imx/gpc.c
+@@ -496,6 +496,7 @@ static int imx_gpc_probe(struct platform_device *pdev)
+ 			pd_pdev->dev.parent = &pdev->dev;
+ 			pd_pdev->dev.of_node = np;
+ 			pd_pdev->dev.fwnode = of_fwnode_handle(np);
++			pd_pdev->dev.dma_mask = &pd_pdev->dev.coherent_dma_mask;
+ 
+ 			ret = platform_device_add(pd_pdev);
+ 			if (ret) {

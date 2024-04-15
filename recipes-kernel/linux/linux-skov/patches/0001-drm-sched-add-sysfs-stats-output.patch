@@ -6,16 +6,16 @@ This adds a sysfs entry for the drm scheduler and exports the active times
 of all scheduler instances.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
-[p.zabel@pengutronix.de: rebased onto v6.7]
+[p.zabel@pengutronix.de: rebased onto v6.8]
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/drm/scheduler/Makefile      |   2 +-
  drivers/gpu/drm/scheduler/sched_fence.c |  29 +++++-
- drivers/gpu/drm/scheduler/sched_main.c  |  12 ++-
+ drivers/gpu/drm/scheduler/sched_main.c  |  10 +-
  drivers/gpu/drm/scheduler/sched_stats.c | 176 ++++++++++++++++++++++++++++++++
  drivers/gpu/drm/scheduler/sched_stats.h |  36 +++++++
  include/drm/gpu_scheduler.h             |  12 +++
- 6 files changed, 262 insertions(+), 5 deletions(-)
+ 6 files changed, 260 insertions(+), 5 deletions(-)
  create mode 100644 drivers/gpu/drm/scheduler/sched_stats.c
  create mode 100644 drivers/gpu/drm/scheduler/sched_stats.h
 
@@ -32,7 +32,7 @@ index 53863621829f..3d46484a1546 100644
  
  obj-$(CONFIG_DRM_SCHED) += gpu-sched.o
 diff --git a/drivers/gpu/drm/scheduler/sched_fence.c b/drivers/gpu/drm/scheduler/sched_fence.c
-index 06cedfe4b486..203f89dadbda 100644
+index 0f35f009b9d3..d61d350dcd68 100644
 --- a/drivers/gpu/drm/scheduler/sched_fence.c
 +++ b/drivers/gpu/drm/scheduler/sched_fence.c
 @@ -29,6 +29,8 @@
@@ -44,7 +44,7 @@ index 06cedfe4b486..203f89dadbda 100644
  static struct kmem_cache *sched_fence_slab;
  
  static int __init drm_sched_fence_slab_init(void)
-@@ -42,7 +44,7 @@ static int __init drm_sched_fence_slab_init(void)
+@@ -40,7 +42,7 @@ static int __init drm_sched_fence_slab_init(void)
  	return 0;
  }
  
@@ -53,7 +53,7 @@ index 06cedfe4b486..203f89dadbda 100644
  {
  	rcu_barrier();
  	kmem_cache_destroy(sched_fence_slab);
-@@ -233,8 +235,29 @@ void drm_sched_fence_init(struct drm_sched_fence *fence,
+@@ -231,8 +233,29 @@ void drm_sched_fence_init(struct drm_sched_fence *fence,
  		       &fence->lock, entity->fence_context + 1, seq);
  }
  
@@ -86,10 +86,10 @@ index 06cedfe4b486..203f89dadbda 100644
  MODULE_DESCRIPTION("DRM GPU scheduler");
  MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 99797a8c836a..563d997a30e5 100644
+index 7e90c9f95611..b589e5bb4ace 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
-@@ -64,6 +64,8 @@
+@@ -87,6 +87,8 @@
  #define CREATE_TRACE_POINTS
  #include "gpu_scheduler_trace.h"
  
@@ -98,40 +98,35 @@ index 99797a8c836a..563d997a30e5 100644
  #define to_drm_sched_job(sched_job)		\
  		container_of((sched_job), struct drm_sched_job, queue_node)
  
-@@ -1145,17 +1147,23 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
- 	atomic_set(&sched->_score, 0);
+@@ -1251,7 +1253,7 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
+ 		   long timeout, struct workqueue_struct *timeout_wq,
+ 		   atomic_t *score, const char *name, struct device *dev)
+ {
+-	int i;
++	int i, ret;
+ 
+ 	sched->ops = ops;
+ 	sched->credit_limit = credit_limit;
+@@ -1311,6 +1313,10 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
  	atomic64_set(&sched->job_id_count, 0);
+ 	sched->pause_submit = false;
  
 +	ret = drm_sched_stats_init(sched);
 +	if (ret)
 +		return ret;
 +
- 	/* Each scheduler will run on a seperate kernel thread */
- 	sched->thread = kthread_run(drm_sched_main, sched, sched->name);
- 	if (IS_ERR(sched->thread)) {
- 		ret = PTR_ERR(sched->thread);
- 		sched->thread = NULL;
- 		DRM_DEV_ERROR(sched->dev, "Failed to create scheduler for %s.\n", name);
--		goto Out_unroll;
-+		goto Out_stats;
- 	}
- 
  	sched->ready = true;
  	return 0;
-+Out_stats:
-+	drm_sched_stats_fini(sched);
  Out_unroll:
- 	for (--i ; i >= DRM_SCHED_PRIORITY_MIN; i--)
- 		kfree(sched->sched_rq[i]);
-@@ -1178,6 +1186,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
+@@ -1339,6 +1345,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
  	struct drm_sched_entity *s_entity;
  	int i;
  
 +	drm_sched_stats_fini(sched);
 +
- 	if (sched->thread)
- 		kthread_stop(sched->thread);
+ 	drm_sched_wqueue_stop(sched);
  
+ 	for (i = DRM_SCHED_PRIORITY_KERNEL; i < sched->num_rqs; i++) {
 diff --git a/drivers/gpu/drm/scheduler/sched_stats.c b/drivers/gpu/drm/scheduler/sched_stats.c
 new file mode 100644
 index 000000000000..48409489deb1
@@ -357,7 +352,7 @@ index 000000000000..e3e3e73bf279
 +
 +#endif
 diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
-index d2fb81e34174..b7c0bf246dac 100644
+index 5acc64954a88..4bb1b5b72b7b 100644
 --- a/include/drm/gpu_scheduler.h
 +++ b/include/drm/gpu_scheduler.h
 @@ -27,6 +27,7 @@
@@ -368,8 +363,8 @@ index d2fb81e34174..b7c0bf246dac 100644
  #include <linux/xarray.h>
  #include <linux/workqueue.h>
  
-@@ -464,6 +465,16 @@ struct drm_sched_backend_ops {
- 	void (*free_job)(struct drm_sched_job *sched_job);
+@@ -480,6 +481,16 @@ struct drm_sched_backend_ops {
+ 	u32 (*update_job_credits)(struct drm_sched_job *sched_job);
  };
  
 +struct drm_gpu_scheduler;
@@ -385,9 +380,9 @@ index d2fb81e34174..b7c0bf246dac 100644
  /**
   * struct drm_gpu_scheduler - scheduler instance-specific data
   *
-@@ -519,6 +530,7 @@ struct drm_gpu_scheduler {
- 	bool				ready;
- 	bool				free_guilty;
+@@ -540,6 +551,7 @@ struct drm_gpu_scheduler {
+ 	bool				pause_submit;
+ 	bool				own_submit_wq;
  	struct device			*dev;
 +	struct drm_gpu_scheduler_stats	*stats;
  };

@@ -12,15 +12,13 @@ RDEPENDS:${PN} = "flex lzop"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-LINUX_VERSION = "6.7"
+SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
+#SRC_URI = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz"
+SRC_URI[sha256sum] = "da2a747ddffac0cd3f319fcb4bcb894ed943a21e22c93be19d2dbe7c1abe9d43"
 
-SRC_URI = " \
-    https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz \
-    file://defconfig \
-"
+SRC_URI += "file://defconfig"
 
 require linux-skov/patches/series.inc
-SRC_URI[sha256sum] = "ef31144a2576d080d8c31698e83ec9f66bf97c677fa2aaf0d5bbb9f3345b1069"
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
