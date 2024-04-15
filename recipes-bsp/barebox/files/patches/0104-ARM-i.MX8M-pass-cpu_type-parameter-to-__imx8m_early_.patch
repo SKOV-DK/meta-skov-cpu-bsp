@@ -1,0 +1,71 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Fri, 19 Apr 2024 08:13:27 +0200
+Subject: [PATCH] ARM: i.MX8M: pass cpu_type parameter to
+ __imx8m_early_clock_init
+
+We do some limited clock tree configuration in PBL and do the proper
+configuration later in the barebox proper drivers.
+
+The clock tree of the i.MX8MP is a bit different though than that of the
+i.MX8MM and i.MX8MN and we'll want to add some more SoC-specific
+configuration in the follow-up commit. Prepare for that by giving the
+function a cpu_type parameter that can be checked.
+
+Note that we can't use imx_cpu_type here, because it has not been set
+yet.
+
+No functional change intended.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm/mach-imx/imx8m.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-imx/imx8m.c b/arch/arm/mach-imx/imx8m.c
+index af44b089e08a..93348ac4872a 100644
+--- a/arch/arm/mach-imx/imx8m.c
++++ b/arch/arm/mach-imx/imx8m.c
+@@ -199,8 +199,9 @@ int imx8mq_init(void)
+ #define IMX8MM_CCM_ANALOG_SYS_PLL2_GEN_CTRL	0x104
+ #define IMX8MM_CCM_ANALOG_SYS_PLL3_GEN_CTRL	0x114
+ 
+-static void __imx8m_early_clock_init(unsigned long pll3_freq) /* and later */
++static void __imx8m_early_clock_init(int cpu_type)
+ {
++	unsigned long pll3_freq;
+ 	void __iomem *ana = IOMEM(MX8M_ANATOP_BASE_ADDR);
+ 	void __iomem *ccm = IOMEM(MX8M_CCM_BASE_ADDR);
+ 	u32 val;
+@@ -242,6 +243,11 @@ static void __imx8m_early_clock_init(unsigned long pll3_freq) /* and later */
+ 				   IMX8M_CCM_TARGET_ROOTn_MUX(3));
+ 	imx8m_ccgr_clock_enable(IMX8M_CCM_CCGR_GIC);
+ 
++	if (cpu_type == IMX_CPU_IMX8MN)
++		pll3_freq = 600000000UL;
++	else
++		pll3_freq = 750000000UL;
++
+ 	/* Configure SYS_PLL3 */
+ 	clk_pll1416x_early_set_rate(ana + IMX8MM_CCM_ANALOG_SYS_PLL3_GEN_CTRL,
+ 				    pll3_freq, 25000000UL);
+@@ -269,17 +275,17 @@ static void __imx8m_early_clock_init(unsigned long pll3_freq) /* and later */
+ 
+ void imx8mm_early_clock_init(void)
+ {
+-	__imx8m_early_clock_init(750000000UL);
++	__imx8m_early_clock_init(IMX_CPU_IMX8MM);
+ }
+ 
+ void imx8mn_early_clock_init(void)
+ {
+-	__imx8m_early_clock_init(600000000UL);
++	__imx8m_early_clock_init(IMX_CPU_IMX8MN);
+ }
+ 
+ void imx8mp_early_clock_init(void)
+ {
+-	__imx8m_early_clock_init(750000000UL);
++	__imx8m_early_clock_init(IMX_CPU_IMX8MP);
+ }
+ 
+ 

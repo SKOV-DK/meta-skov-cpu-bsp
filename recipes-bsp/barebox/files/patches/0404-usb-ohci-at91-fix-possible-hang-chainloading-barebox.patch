@@ -29,7 +29,7 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  3 files changed, 37 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-index 5b85c375cfed..50a766fd045a 100644
+index bb14bbf58562..32b85d813098 100644
 --- a/drivers/clk/clk.c
 +++ b/drivers/clk/clk.c
 @@ -66,7 +66,7 @@ int clk_enable(struct clk *clk)
@@ -83,7 +83,7 @@ index 867c0977be78..447d928ad4ce 100644
  
  static int at91_ohci_probe_dt(struct device *dev)
 diff --git a/include/linux/clk.h b/include/linux/clk.h
-index 82022e78e39d..92ff740785d8 100644
+index b3a444050952..827d0f25c96a 100644
 --- a/include/linux/clk.h
 +++ b/include/linux/clk.h
 @@ -82,11 +82,27 @@ int clk_enable(struct clk *clk);
