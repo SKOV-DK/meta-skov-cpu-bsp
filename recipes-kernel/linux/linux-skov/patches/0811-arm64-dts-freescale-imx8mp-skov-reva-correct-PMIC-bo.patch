@@ -19,7 +19,7 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  1 file changed, 14 insertions(+), 14 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index 3d5bbd189850..5356816ae20d 100644
+index 3d5bbd189850..691f21c4ad4b 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 @@ -265,8 +265,8 @@ pmic@25 {
@@ -39,8 +39,8 @@ index 3d5bbd189850..5356816ae20d 100644
  				regulator-name = "VDD_ARM";
 -				regulator-min-microvolt = <600000>;
 -				regulator-max-microvolt = <2187500>;
-+				regulator-min-microvolt = <800000>;
-+				regulator-max-microvolt = <10000000>;
++				regulator-min-microvolt = <850000>;
++				regulator-max-microvolt = <1000000>;
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
