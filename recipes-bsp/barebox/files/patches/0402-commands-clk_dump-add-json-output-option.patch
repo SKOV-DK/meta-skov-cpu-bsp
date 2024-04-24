@@ -1,0 +1,183 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Fri, 19 Apr 2024 08:07:59 +0200
+Subject: [PATCH] commands: clk_dump: add json output option
+
+This formats the clock tree and the enable_count and rate of each clock
+into the JSON format. This is useful to run validation scripts against
+it that were originally written for Linux' /sys/kernel/debug/clk/clk_dump.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Link: https://lore.barebox.org/20240419060759.2590652-2-a.fatoum@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/clk.c      |  8 +++++--
+ drivers/clk/clk.c   | 65 +++++++++++++++++++++++++++++++++++++++++++++--------
+ include/linux/clk.h |  1 +
+ 3 files changed, 63 insertions(+), 11 deletions(-)
+
+diff --git a/commands/clk.c b/commands/clk.c
+index 290acd842e78..210b61306a2e 100644
+--- a/commands/clk.c
++++ b/commands/clk.c
+@@ -166,11 +166,14 @@ static int do_clk_dump(int argc, char *argv[])
+ 	int opt, flags = 0;
+ 	struct clk *clk;
+ 
+-	while ((opt = getopt(argc, argv, "v")) > 0) {
++	while ((opt = getopt(argc, argv, "vj")) > 0) {
+ 		switch(opt) {
+ 		case 'v':
+ 			flags |= CLK_DUMP_VERBOSE;
+ 			break;
++		case 'j':
++			flags |= CLK_DUMP_JSON;
++			break;
+ 		default:
+ 			return -EINVAL;
+ 
+@@ -194,12 +197,13 @@ static int do_clk_dump(int argc, char *argv[])
+ BAREBOX_CMD_HELP_START(clk_dump)
+ BAREBOX_CMD_HELP_TEXT("Options:")
+ BAREBOX_CMD_HELP_OPT ("-v",  "verbose")
++BAREBOX_CMD_HELP_OPT ("-j",  "json output")
+ BAREBOX_CMD_HELP_END
+ 
+ BAREBOX_CMD_START(clk_dump)
+ 	.cmd		= do_clk_dump,
+ 	BAREBOX_CMD_DESC("show information about registered clocks")
+-	BAREBOX_CMD_OPTS("[-v] [clkname]")
++	BAREBOX_CMD_OPTS("[-vj] [clkname]")
+ 	BAREBOX_CMD_GROUP(CMD_GRP_INFO)
+ 	BAREBOX_CMD_HELP(cmd_clk_dump_help)
+ 	BAREBOX_CMD_COMPLETE(clk_name_complete)
+diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+index f9abd3147766..4c09c4e322f5 100644
+--- a/drivers/clk/clk.c
++++ b/drivers/clk/clk.c
+@@ -1033,7 +1033,7 @@ static const char *clk_parent_name_by_index(struct clk *clk, u8 idx)
+ 	return "unknown";
+ }
+ 
+-static void dump_one(struct clk *clk, int flags, int indent)
++static void dump_one_summary(struct clk *clk, int flags, int indent)
+ {
+ 	int enabled = clk_is_enabled(clk);
+ 	const char *hwstat, *stat;
+@@ -1063,6 +1063,32 @@ static void dump_one(struct clk *clk, int flags, int indent)
+ 	}
+ }
+ 
++static void dump_one_json(struct clk *clk, int flags, int indent)
++{
++	printf("\"%s\": { \"rate\": %lu,\"enable_count\": %d",
++	       clk->name,
++	       clk_get_rate(clk),
++	       clk->enable_count);
++}
++
++static void dump_one(struct clk *clk, int flags, int indent)
++{
++	if (flags & CLK_DUMP_JSON)
++		dump_one_json(clk, flags, indent);
++	else
++		dump_one_summary(clk, flags, indent);
++}
++
++static inline bool json_puts(const char *str, int flags)
++{
++	if (flags & CLK_DUMP_JSON) {
++		puts(str);
++		return true;
++	}
++
++	return false;
++}
++
+ static void dump_subtree(struct clk *clk, int flags, int indent)
+ {
+ 	struct clk *c;
+@@ -1072,21 +1098,34 @@ static void dump_subtree(struct clk *clk, int flags, int indent)
+ 	list_for_each_entry(c, &clks, list) {
+ 		struct clk *parent = clk_get_parent(c);
+ 
+-		if (parent == clk)
++		if (parent == clk) {
++			json_puts(",", flags);
+ 			dump_subtree(c, flags, indent + 1);
++		}
+ 	}
++
++	json_puts("}", flags);
+ }
+ 
+ void clk_dump(int flags)
+ {
++	bool first_node = true;
+ 	struct clk *c;
+ 
++	json_puts("{", flags);
++
+ 	list_for_each_entry(c, &clks, list) {
+ 		struct clk *parent = clk_get_parent(c);
+ 
+-		if (IS_ERR_OR_NULL(parent))
++		if (IS_ERR_OR_NULL(parent)) {
++			if (!first_node)
++				json_puts(",", flags);
++			first_node = false;
+ 			dump_subtree(c, flags, 0);
++		}
+ 	}
++
++	json_puts("}\n", flags);
+ }
+ 
+ static int clk_print_parent(struct clk *clk, int flags)
+@@ -1107,21 +1146,29 @@ static int clk_print_parent(struct clk *clk, int flags)
+ 
+ void clk_dump_one(struct clk *clk, int flags)
+ {
+-	int indent;
++	int indent = 0;
+ 	struct clk *c;
+ 
+-	indent = clk_print_parent(clk, flags);
++	if (json_puts("{", flags)) {
++		dump_one(clk, flags, indent);
++	} else {
++		indent = clk_print_parent(clk, flags);
+ 
+-	printf("\033[1m");
+-	dump_one(clk, flags, indent);
+-	printf("\033[0m");
++		printf("\033[1m");
++		dump_one(clk, flags, indent);
++		printf("\033[0m");
++	}
+ 
+ 	list_for_each_entry(c, &clks, list) {
+ 		struct clk *parent = clk_get_parent(c);
+ 
+-		if (parent == clk)
++		if (parent == clk) {
++			json_puts(",", flags);
+ 			dump_subtree(c, flags, indent + 1);
++		}
+ 	}
++
++	json_puts("}}\n", flags);
+ }
+ 
+ int clk_name_complete(struct string_list *sl, char *instr)
+diff --git a/include/linux/clk.h b/include/linux/clk.h
+index f2e3a443c20f..c467bcf8ddda 100644
+--- a/include/linux/clk.h
++++ b/include/linux/clk.h
+@@ -725,6 +725,7 @@ static inline int clk_hw_register(struct device *dev, struct clk_hw *hw)
+ struct clk *clk_lookup(const char *name);
+ 
+ #define CLK_DUMP_VERBOSE	(1 << 0)
++#define CLK_DUMP_JSON		(1 << 1)
+ void clk_dump(int flags);
+ void clk_dump_one(struct clk *clk, int flags);
+ 

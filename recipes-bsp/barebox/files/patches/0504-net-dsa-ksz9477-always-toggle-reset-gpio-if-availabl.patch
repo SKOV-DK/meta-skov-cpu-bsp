@@ -1,0 +1,45 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 23 Apr 2024 07:59:19 +0200
+Subject: [PATCH] net: dsa: ksz9477: always toggle reset gpio if available
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The barebox driver currently only ensures that the switch is out of
+reset, but doesn't actually trigger a reset pulse.
+
+The Linux driver, on the other hand, holds reset active for 10ms and
+then waits a whopping 100ms after reset deassertion.
+
+This seems excessive by a thousandfold for at least KSZ9893R[1], whose
+datasheet states:
+
+  After the de-assertion of reset, it is recommended to wait a minimum of
+  100µs before starting to program the device through any interface.
+
+Therefore, let's pulse the reset like Linux does and give the switch 100
+microseconds before continuing with the driver probe.
+
+[1]: DS00002420E-page 176
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/net/ksz9477.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/ksz9477.c b/drivers/net/ksz9477.c
+index 1abea9d04017..5c5f4ec8d995 100644
+--- a/drivers/net/ksz9477.c
++++ b/drivers/net/ksz9477.c
+@@ -433,8 +433,10 @@ static int microchip_switch_probe(struct device *dev)
+ 	if (IS_ERR(gpio)) {
+ 		dev_warn(dev, "Failed to get 'reset' GPIO (ignored)\n");
+ 	} else if (gpio) {
+-		mdelay(1);
++		gpiod_set_value(gpio, true);
++		mdelay(10);
+ 		gpiod_set_value(gpio, false);
++		udelay(100);
+ 	}
+ 
+ 	ksz_reset_switch(dev->priv);

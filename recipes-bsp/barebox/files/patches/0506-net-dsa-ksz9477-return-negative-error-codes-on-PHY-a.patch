@@ -1,0 +1,51 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 25 Apr 2024 08:37:58 +0200
+Subject: [PATCH] net: dsa: ksz9477: return negative error codes on PHY access
+ failures
+
+The ksz register accessors return a negative error code if the
+underlying transport, e.g. i2c, fails. We need to propagate this error
+code, instead of reporting incorrect data.
+
+For the case a PHY doesn't exist, reads on a physical bus return 0xFFFF
+due to the pull-ups on the MDIO line, so we leave that as is.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/net/ksz9477.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/ksz9477.c b/drivers/net/ksz9477.c
+index 5c5f4ec8d995..950eb89c09c2 100644
+--- a/drivers/net/ksz9477.c
++++ b/drivers/net/ksz9477.c
+@@ -29,12 +29,15 @@ static int ksz9477_phy_read16(struct dsa_switch *ds, int addr, int reg)
+ {
+ 	struct device *dev = ds->dev;
+ 	struct ksz_switch *priv = dev_get_priv(dev);
+-	u16 val = 0xffff;
++	int ret;
++	u16 val;
+ 
+ 	if (addr >= priv->phy_port_cnt)
+-		return val;
++		return 0xffff;
+ 
+-	ksz_pread16(priv, addr, 0x100 + (reg << 1), &val);
++	ret = ksz_pread16(priv, addr, 0x100 + (reg << 1), &val);
++	if (ret)
++		return ret;
+ 
+ 	return val;
+ }
+@@ -52,9 +55,8 @@ static int ksz9477_phy_write16(struct dsa_switch *ds, int addr, int reg,
+ 	/* No gigabit support.  Do not write to this register. */
+ 	if (!(priv->features & GBIT_SUPPORT) && reg == MII_CTRL1000)
+ 		return 0;
+-	ksz_pwrite16(priv, addr, 0x100 + (reg << 1), val);
+ 
+-	return 0;
++	return ksz_pwrite16(priv, addr, 0x100 + (reg << 1), val);
+ }
+ 
+ static int ksz9477_switch_detect(struct ksz_switch *priv)

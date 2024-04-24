@@ -1,0 +1,37 @@
+From: Soren Andersen <san@skov.com>
+Date: Tue, 16 Jan 2024 16:14:37 +0100
+Subject: [PATCH] ARM: i.MX8MP: skov: fix variant detection on boards without
+ state
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+If barebox booted a board without state partition on the eMMC it did not set a
+refined compatible at all resulting in a failure to boot into Linux userspace.
+
+Instead just default to the LVDS flavor of the board variant which at least
+leads to a working Linux userspace.
+
+Signed-off-by: Soren Andersen <san@skov.com>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+Reviewed-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 3cb7a8752a27..ce8d154a7355 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -186,10 +186,7 @@ static int skov_imx8mp_init_variant(struct skov_imx8mp_priv *priv)
+ 
+ 	if (variant->flags & SKOV_IMX8MP_HAS_HDMI) {
+ 		ret = skov_imx8mp_get_hdmi(dev);
+-		if (ret < 0)
+-			return ret;
+-
+-		if (ret)
++		if (ret == 1)
+ 			compatible = variant->dts_compatible_hdmi;
+ 		else
+ 			compatible = variant->dts_compatible;

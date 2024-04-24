@@ -1,0 +1,47 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 2 Apr 2024 11:26:53 +0200
+Subject: [PATCH] ARM: i.MX8MP: skov: add fallback for unsupported HW
+
+Add fallback support for currently not supported HW. Instead of
+completely fail, it is better to use some kind of basic devicetree with
+reduced functionality.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://lore.barebox.org/20240402092654.94523-1-o.rempel@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 3b6eb7b08057..d4cb9c8279cd 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -85,6 +85,10 @@ static const struct board_description imx8mp_variants[] = {
+ 	},
+ };
+ 
++static const struct board_description imx8mp_basic_variant = {
++	.dts_compatible = "skov,imx8mp-skov-basic",
++};
++
+ static int skov_imx8mp_fixup(struct device_node *root, void *data)
+ {
+ 	struct device_node *chosen = of_create_node(root, "/chosen");
+@@ -171,12 +175,12 @@ static int skov_imx8mp_init_variant(struct skov_imx8mp_priv *priv)
+ 	priv->variant_id = v;
+ 
+ 	if (v >= ARRAY_SIZE(imx8mp_variants)) {
+-		dev_err(dev, "Invalid variant %u\n", v);
+-		return -EINVAL;
++		dev_warn(dev, "Unsupported variant %u. Fall back to basic variant\n", v);
++		variant = &imx8mp_basic_variant;
++	} else {
++		variant = &imx8mp_variants[v];
+ 	}
+ 
+-	variant = &imx8mp_variants[v];
+-
+ 	if (variant->flags & SKOV_IMX8MP_HAS_HDMI) {
+ 		ret = skov_imx8mp_get_hdmi(dev);
+ 		if (ret < 0)
