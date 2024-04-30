@@ -2224,19 +2224,7 @@ CONFIG_SPI_IMX=y
 # CONFIG_SPI_SLAVE is not set
 # CONFIG_SPMI is not set
 # CONFIG_HSI is not set
-CONFIG_PPS=y
-# CONFIG_PPS_DEBUG is not set
-
-#
-# PPS clients support
-#
-# CONFIG_PPS_CLIENT_KTIMER is not set
-# CONFIG_PPS_CLIENT_LDISC is not set
-# CONFIG_PPS_CLIENT_GPIO is not set
-
-#
-# PPS generators support
-#
+# CONFIG_PPS is not set
 
 #
 # PTP clock support
