@@ -1,0 +1,25 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 30 Apr 2024 20:06:33 +0200
+Subject: [PATCH] uimage: have TIMESTMAP depend on UIMAGE
+
+The only users of CONFIG_TIMESTAMP are the uImage command, file system
+and the bootm integration. Therefore make it depends on UIMAGE, so
+unaffected users are not prompted for it.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ common/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common/Kconfig b/common/Kconfig
+index ea7223cffd05..07cb3d5616cc 100644
+--- a/common/Kconfig
++++ b/common/Kconfig
+@@ -556,6 +556,7 @@ config ERRNO_MESSAGES
+ config TIMESTAMP
+ 	bool
+ 	default y
++	depends on UIMAGE
+ 	select GREGORIAN_CALENDER
+ 	prompt "print timestamp information from uImages"
+ 	help

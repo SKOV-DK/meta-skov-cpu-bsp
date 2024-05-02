@@ -1,6 +1,6 @@
 # umpf-base: v2024.04.0
 # umpf-name: 2024.04.0/customers/skov/imx6
-# umpf-version: 2024.04.0/customers/skov/imx6/20240502-2
+# umpf-version: 2024.04.0/customers/skov/imx6/20240502-3
 # umpf-topic: v2024.04.0/customers/skov/imx6
 # umpf-hashinfo: f6a580a8cd520285387600d580a1fe3d1bf44daf
 # umpf-topic-range: cceb4ee7619a2601eeb0e2f976ec65e0247bc8c3..063576c6c216a2b665d45734f1bcee2f35a006a7
@@ -66,12 +66,20 @@ SRC_URI += "\
 SRC_URI += "\
   file://patches/0701-net-workaround-NICs-and-MDIO-busses-sharing-same-OF-.patch \
   "
-# umpf-release: 2024.04.0/customers/skov/imx6/20240502-2
-# umpf-topic-range: 91430459c859c3951071e4adc40fbb4d5d063447..c15f34adfcab1caa760512bbb26527ad2270274b
+# umpf-topic: v2024.04.0/topic/uimage-optional
+# umpf-hashinfo: 015c7d080a0b3c4fc1f0f8a483312bd194af6b21
+# umpf-topic-range: 91430459c859c3951071e4adc40fbb4d5d063447..0a3273599eb5a4106c09604e99781fb89aefb874
 SRC_URI += "\
-  file://patches/0801-Release-2024.04.0-customers-skov-imx6-20240502-2.patch \
+  file://patches/0801-uimage-move-file_to_sdram-implementation-to-libfile.patch \
+  file://patches/0802-bootm-allow-disabling-uImage-support.patch \
+  file://patches/0803-uimage-have-TIMESTMAP-depend-on-UIMAGE.patch \
+  "
+# umpf-release: 2024.04.0/customers/skov/imx6/20240502-3
+# umpf-topic-range: 0a3273599eb5a4106c09604e99781fb89aefb874..905ed97585507fb9cc1b583bd3b34aceb34ece32
+SRC_URI += "\
+  file://patches/0901-Release-2024.04.0-customers-skov-imx6-20240502-3.patch \
   "
 UMPF_BASE = "2024.04.0"
-UMPF_VERSION = "20240502-2"
+UMPF_VERSION = "20240502-3"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 # umpf-end

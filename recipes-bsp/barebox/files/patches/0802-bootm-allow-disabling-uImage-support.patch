@@ -1,0 +1,131 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 30 Apr 2024 20:06:32 +0200
+Subject: [PATCH] bootm: allow disabling uImage support
+
+Enabling uImage support unconditionally for bootm is a legacy left-over.
+Let's make this configurable via a separate BOOTM_UIMAGE option that can
+be disabled for new platforms.
+
+Disabling uImage support saves 4KiB in a LZO compressed ARM64 image.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ commands/Kconfig |  1 -
+ common/Kconfig   | 12 ++++++++++--
+ common/bootm.c   | 22 +++++++++++++++++-----
+ 3 files changed, 27 insertions(+), 8 deletions(-)
+
+diff --git a/commands/Kconfig b/commands/Kconfig
+index 8d0816c4d0f0..47caae141312 100644
+--- a/commands/Kconfig
++++ b/commands/Kconfig
+@@ -427,7 +427,6 @@ config CMD_BOOTM
+ 	default y
+ 	depends on BOOTM
+ 	select CRC32
+-	select UIMAGE
+ 	select UNCOMPRESS
+ 	select FILETYPE
+ 	depends on GLOBALVAR
+diff --git a/common/Kconfig b/common/Kconfig
+index 0000dac8740e..ea7223cffd05 100644
+--- a/common/Kconfig
++++ b/common/Kconfig
+@@ -564,7 +564,6 @@ config TIMESTAMP
+ 	  commands like bootm or uimage.
+ 
+ menuconfig BOOTM
+-	select UIMAGE
+ 	default y if COMMAND_SUPPORT
+ 	bool "bootm support"
+ 
+@@ -608,10 +607,19 @@ config BOOTM_OFTREE
+ 
+ 	  -o DTS  specify device tree
+ 
++config BOOTM_UIMAGE
++	def_bool y
++	prompt "support the legacy uImage format"
++	select UIMAGE
++	depends on BOOTM
++	help
++	  Support using uImages. This format has been superseded
++	  by FIT images and is not as frequently used nowadays.
++
+ config BOOTM_OFTREE_UIMAGE
+ 	bool
+ 	prompt "support passing device tree (oftree) uImages"
+-	depends on BOOTM_OFTREE
++	depends on BOOTM_OFTREE && BOOTM_UIMAGE
+ 	help
+ 	  Support using oftree uImages. Without this only raw oftree
+ 	  blobs can be used.
+diff --git a/common/bootm.c b/common/bootm.c
+index 4cc88eed76b5..09c93ac4952f 100644
+--- a/common/bootm.c
++++ b/common/bootm.c
+@@ -92,6 +92,11 @@ static int uimage_part_num(const char *partname)
+ 	return simple_strtoul(partname, NULL, 0);
+ }
+ 
++static inline bool image_is_uimage(struct image_data *data)
++{
++	return IS_ENABLED(CONFIG_BOOTM_UIMAGE) && data->os;
++}
++
+ /*
+  * bootm_load_os() - load OS to RAM
+  *
+@@ -129,7 +134,7 @@ int bootm_load_os(struct image_data *data, unsigned long load_address)
+ 		return 0;
+ 	}
+ 
+-	if (data->os) {
++	if (image_is_uimage(data)) {
+ 		int num;
+ 
+ 		num = uimage_part_num(data->os_part);
+@@ -175,6 +180,9 @@ static int bootm_open_initrd_uimage(struct image_data *data)
+ {
+ 	int ret;
+ 
++	if (!IS_ENABLED(CONFIG_BOOTM_UIMAGE))
++		return -ENOSYS;
++
+ 	if (strcmp(data->os_file, data->initrd_file)) {
+ 		data->initrd = uimage_open(data->initrd_file);
+ 		if (!data->initrd)
+@@ -482,7 +490,7 @@ int bootm_get_os_size(struct image_data *data)
+ 
+ 	if (data->elf)
+ 		return elf_get_mem_size(data->elf);
+-	if (data->os)
++	if (image_is_uimage(data))
+ 		return uimage_get_size(data->os, uimage_part_num(data->os_part));
+ 	if (data->os_fit)
+ 		return data->fit_kernel_size;
+@@ -502,6 +510,9 @@ static int bootm_open_os_uimage(struct image_data *data)
+ {
+ 	int ret;
+ 
++	if (!IS_ENABLED(CONFIG_BOOTM_UIMAGE))
++		return -ENOSYS;
++
+ 	data->os = uimage_open(data->os_file);
+ 	if (!data->os)
+ 		return -EINVAL;
+@@ -837,10 +848,11 @@ int bootm_boot(struct bootm_data *bootm_data)
+ 		release_sdram_region(data->oftree_res);
+ 	if (data->tee_res)
+ 		release_sdram_region(data->tee_res);
+-	if (data->initrd && data->initrd != data->os)
+-		uimage_close(data->initrd);
+-	if (data->os)
++	if (image_is_uimage(data)) {
++		if (data->initrd && data->initrd != data->os)
++			uimage_close(data->initrd);
+ 		uimage_close(data->os);
++	}
+ 	if (IS_ENABLED(CONFIG_ELF) && data->elf)
+ 		elf_close(data->elf);
+ 	if (IS_ENABLED(CONFIG_FITIMAGE) && data->os_fit)
