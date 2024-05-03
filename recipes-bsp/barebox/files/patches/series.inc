@@ -1,6 +1,6 @@
 # umpf-base: v2024.04.0
 # umpf-name: 2024.04.0/customers/skov/imx6
-# umpf-version: 2024.04.0/customers/skov/imx6/20240502-3
+# umpf-version: 2024.04.0/customers/skov/imx6/20240503-1
 # umpf-topic: v2024.04.0/customers/skov/imx6
 # umpf-hashinfo: f6a580a8cd520285387600d580a1fe3d1bf44daf
 # umpf-topic-range: cceb4ee7619a2601eeb0e2f976ec65e0247bc8c3..063576c6c216a2b665d45734f1bcee2f35a006a7
@@ -74,12 +74,22 @@ SRC_URI += "\
   file://patches/0802-bootm-allow-disabling-uImage-support.patch \
   file://patches/0803-uimage-have-TIMESTMAP-depend-on-UIMAGE.patch \
   "
-# umpf-release: 2024.04.0/customers/skov/imx6/20240502-3
-# umpf-topic-range: 0a3273599eb5a4106c09604e99781fb89aefb874..905ed97585507fb9cc1b583bd3b34aceb34ece32
+# umpf-topic: v2024.04.0/topic/pstore
+# umpf-hashinfo: 1daa2f9165695799d89f4b3f531baa68efe78b27
+# umpf-topic-range: 0a3273599eb5a4106c09604e99781fb89aefb874..39e89cc80d0d44781d2db5509b997f0977489b9d
 SRC_URI += "\
-  file://patches/0901-Release-2024.04.0-customers-skov-imx6-20240502-3.patch \
+  file://patches/0901-pstore-ramoops-fix-use-of-wrong-types-on-64-bit.patch \
+  file://patches/0902-pstore-fix-size-of-OF-fixup-memory-region.patch \
+  file://patches/0903-pstore-return-ENOENT-when-file-is-missing.patch \
+  file://patches/0904-pstore-move-slash-handling-into-common-function.patch \
+  file://patches/0905-pstore-add-unlink-implementation-for-deleting-pstore.patch \
+  "
+# umpf-release: 2024.04.0/customers/skov/imx6/20240503-1
+# umpf-topic-range: 39e89cc80d0d44781d2db5509b997f0977489b9d..25f65fd16c723e337848314debcd390c8a31c087
+SRC_URI += "\
+  file://patches/1001-Release-2024.04.0-customers-skov-imx6-20240503-1.patch \
   "
 UMPF_BASE = "2024.04.0"
-UMPF_VERSION = "20240502-3"
+UMPF_VERSION = "20240503-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 # umpf-end
