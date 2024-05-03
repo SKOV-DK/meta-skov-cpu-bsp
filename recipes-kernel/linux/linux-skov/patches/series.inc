@@ -1,6 +1,6 @@
 # umpf-base: v6.9-rc6
 # umpf-name: 6.9/customers/skov/imx6
-# umpf-version: 6.9/customers/skov/imx6/20240502-3
+# umpf-version: 6.9/customers/skov/imx6/20240508-1
 # umpf-topic: v6.9/topic/drm-sched-accounting
 # umpf-hashinfo: 9c0e9670990e51859d6c4ece16c12d779229baa2
 # umpf-topic-range: e67572cd2204894179d89bd7b984072f19313b03..e7dd0b1054a6b5156e0725779dd0684383f8e238
@@ -80,36 +80,36 @@ SRC_URI += "\
   file://patches/0904-arm64-dts-imx8mp-add-fsl-nominal-mode-property-into-.patch \
   "
 # umpf-topic: v6.9/topic/imx8mp-skov-dts
-# umpf-hashinfo: d83e26e094ae71a2592a044cffd5d0c7717c5ae6
-# umpf-topic-range: 19efd8349e361e09ddacbe3bb3467a6e8cfb8e82..0638bcf317cd9d772757cdffbe346a76d9337875
+# umpf-hashinfo: 68a6dd4e161b0641360d530d99ce53a04742b7fb
+# umpf-topic-range: 19efd8349e361e09ddacbe3bb3467a6e8cfb8e82..2f04cecaf479f2bf21dbd91f232e8a7af9b6b6c0
 SRC_URI += "\
   file://patches/1001-arm64-dts-freescale-imx8mp-skov-nodes-which-are-curr.patch \
   file://patches/1002-arm64-dts-freescale-imx8mp-skov-add-different-commen.patch \
-  file://patches/1003-arm64-dts-freescale-imx8mp-skov-add-pstore-support.patch \
-  file://patches/1004-arm64-dts-freescale-fixes.patch \
-  file://patches/1005-arm64-dts-freescale-imx8mp-skov-increase-I2C-clock-f.patch \
-  file://patches/1006-arm64-dts-freescale-remove-pstore.patch \
-  file://patches/1007-arm64-dts-freescale-imx8mp-skov-add-PSCR-node.patch \
-  file://patches/1008-arm64-dts-freescale-imx8mp-skov-add-basic-and-revC-B.patch \
-  file://patches/1009-arm64-dts-freescale-imx8mp-skov-reva-correct-PMIC-bo.patch \
-  file://patches/1010-arm64-dts-freescale-imx8mp-skov-operate-CPU-at-850-m.patch \
-  file://patches/1011-arm64-dts-freescale-imx8mp-skov-operate-SoC-in-nomin.patch \
+  file://patches/1003-arm64-dts-freescale-fixes.patch \
+  file://patches/1004-arm64-dts-freescale-imx8mp-skov-increase-I2C-clock-f.patch \
+  file://patches/1005-arm64-dts-freescale-imx8mp-skov-add-PSCR-node.patch \
+  file://patches/1006-arm64-dts-freescale-imx8mp-skov-add-basic-and-revC-B.patch \
+  file://patches/1007-arm64-dts-freescale-imx8mp-skov-reva-correct-PMIC-bo.patch \
+  file://patches/1008-arm64-dts-freescale-imx8mp-skov-operate-CPU-at-850-m.patch \
+  file://patches/1009-arm64-dts-freescale-imx8mp-skov-operate-SoC-in-nomin.patch \
+  file://patches/1010-arm64-dts-i.MX8MP-skov-reva-set-PMIC-restart-handler.patch \
+  file://patches/1011-arm64-dts-freescale-imx8mp-skov-revb-hdmi-use-i.MX-I.patch \
   "
 # umpf-topic: v6.9/topic/imx8mp-dt-npu
 # umpf-hashinfo: 93b80787d5aaabfa5a51e74681afce1536561405
-# umpf-topic-range: 0638bcf317cd9d772757cdffbe346a76d9337875..aebbf99929ab87fb380d6c14dd0d78147d10b677
+# umpf-topic-range: 2f04cecaf479f2bf21dbd91f232e8a7af9b6b6c0..ac0d8e046332a64258824c16d73df0e845089527
 SRC_URI += "\
   file://patches/1101-HACK-arm64-dts-imx8mp-Hook-up-MLMIX-reset-to-power-d.patch \
   "
 # umpf-topic: v6.8/topic/drm-fsl-ldb
 # umpf-hashinfo: 8b41dc23a7e169047e05bd485563734d3396038f
-# umpf-topic-range: aebbf99929ab87fb380d6c14dd0d78147d10b677..b7e6615a2877459b07e831881e35112d8139b5d0
+# umpf-topic-range: ac0d8e046332a64258824c16d73df0e845089527..8c3db2e8a45dac375b413c4ca9fcc11898e74b87
 SRC_URI += "\
   file://patches/1201-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.9/topic/regulator-mmc-under-voltage
 # umpf-hashinfo: 1070e13255533bf8de2992619242dac9daeeff39
-# umpf-topic-range: b7e6615a2877459b07e831881e35112d8139b5d0..c316c23d84f7afaa0865c973c9eb9aaf30778dd5
+# umpf-topic-range: 8c3db2e8a45dac375b413c4ca9fcc11898e74b87..42141255d188876f5234d9b72b0da8ee367a7395
 SRC_URI += "\
   file://patches/1301-WIP-mmc-core-shut-down-storage-as-early-as-possible.patch \
   file://patches/1302-rtc-pcf85063-fix-stack-corruption-in-PCF85063-NVMEM-.patch \
@@ -124,21 +124,21 @@ SRC_URI += "\
   "
 # umpf-topic: v6.8/topic/gic-v3-its
 # umpf-hashinfo: fdae192fa61f6e8b20131c838fd1b85f807ab60d
-# umpf-topic-range: c316c23d84f7afaa0865c973c9eb9aaf30778dd5..1b7075ba9a12af26180d87e5f3e0e5c20cae6e85
+# umpf-topic-range: 42141255d188876f5234d9b72b0da8ee367a7395..472f68c36466820e2643138ddd1c11548af5d4c1
 SRC_URI += "\
   file://patches/1401-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.9/topic/pca9450
-# umpf-hashinfo: ccc00a3d312af9533150443ef6680715bf5d316f
-# umpf-topic-range: 1b7075ba9a12af26180d87e5f3e0e5c20cae6e85..ac1a4f0ebc90e5474a7c5a94df66f17c72ac8b26
+# umpf-hashinfo: bf9c33a9b8d6482f49b0b3c1c46da32b6bf41c68
+# umpf-topic-range: 472f68c36466820e2643138ddd1c11548af5d4c1..0f3630fc74e760329f7e7dd2cef971f10ca438e1
 SRC_URI += "\
   file://patches/1501-regulator-pca9450-use-dev_err_probe-on-errors-claimi.patch \
-  file://patches/1502-WIP-regulator-pca9450-add-support-for-software-trigg.patch \
+  file://patches/1502-regulator-pca9450-enable-restart-handler-for-I2C-ope.patch \
   file://patches/1503-WIP-regulator-pca9450-add-vin-supply-DT-support.patch \
   "
 # umpf-topic: v6.9/topic/net-ksz8-fdb-dump
 # umpf-hashinfo: da5dfccc1f7b38c77c8fa784728d730fe36e9d5a
-# umpf-topic-range: ac1a4f0ebc90e5474a7c5a94df66f17c72ac8b26..fa0285dcb86cc993fda5cfd32dc2f2d49d7242a2
+# umpf-topic-range: 0f3630fc74e760329f7e7dd2cef971f10ca438e1..96089164bf885f4bd0f23d17b0ba02ca964be297
 SRC_URI += "\
   file://patches/1601-net-dsa-microchip-Remove-unused-FDB-timestamp-suppor.patch \
   file://patches/1602-net-dsa-microchip-Make-ksz8_r_dyn_mac_table-static.patch \
@@ -149,13 +149,13 @@ SRC_URI += "\
   file://patches/1607-net-dsa-microchip-ksz8_r_dyn_mac_table-return-read-w.patch \
   file://patches/1608-net-dsa-microchip-ksz8_r_dyn_mac_table-use-entries-v.patch \
   "
-# umpf-release: 6.9/customers/skov/imx6/20240502-3
-# umpf-topic-range: fa0285dcb86cc993fda5cfd32dc2f2d49d7242a2..5efacf82bb046679ea737574be4d8668d81b9631
+# umpf-release: 6.9/customers/skov/imx6/20240508-1
+# umpf-topic-range: 96089164bf885f4bd0f23d17b0ba02ca964be297..c43964c9e841d073bb20b9a95ab491acbe9918bb
 SRC_URI += "\
-  file://patches/1701-Release-6.9-customers-skov-imx6-20240502-3.patch \
+  file://patches/1701-Release-6.9-customers-skov-imx6-20240508-1.patch \
   "
 UMPF_BASE = "6.9-rc6"
-UMPF_VERSION = "20240502-3"
-PV = "${UMPF_BASE}-${UMPF_VERSION}"
+UMPF_VERSION = "20240508-1"
+UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION = "${UMPF_BASE}"
 # umpf-end

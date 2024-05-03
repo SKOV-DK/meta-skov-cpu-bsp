@@ -18,7 +18,7 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  3 files changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index 828edc1afb96..3a6925251935 100644
+index 53a7fbf28855..0415e74b823c 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 @@ -1,6 +1,7 @@
@@ -29,7 +29,7 @@ index 828edc1afb96..3a6925251935 100644
  
  #include <dt-bindings/leds/common.h>
  
-@@ -277,8 +278,8 @@ pmic@25 {
+@@ -275,8 +276,8 @@ pmic@25 {
  		regulators {
  			reg_vdd_soc: BUCK1 {
  				regulator-name = "VDD_SOC";

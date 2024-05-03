@@ -14,7 +14,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
-index f539ed5f1d82..12a10e77798f 100644
+index 4455b618a203..49cc0064bfdb 100644
 --- a/drivers/regulator/pca9450-regulator.c
 +++ b/drivers/regulator/pca9450-regulator.c
 @@ -481,6 +481,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {

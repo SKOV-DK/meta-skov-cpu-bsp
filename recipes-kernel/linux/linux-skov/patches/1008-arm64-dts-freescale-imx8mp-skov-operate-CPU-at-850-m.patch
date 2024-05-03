@@ -16,7 +16,7 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  1 file changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index 46bd9bcf3cb6..828edc1afb96 100644
+index db29f49ac508..53a7fbf28855 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 @@ -188,6 +188,19 @@ reg_vsd_3v3: regulator-vsd-3v3 {
@@ -39,7 +39,7 @@ index 46bd9bcf3cb6..828edc1afb96 100644
  &A53_0 {
  	cpu-supply = <&reg_vdd_arm>;
  };
-@@ -280,7 +293,7 @@ reg_vdd_arm: BUCK2 {
+@@ -278,7 +291,7 @@ reg_vdd_arm: BUCK2 {
  				regulator-boot-on;
  				regulator-always-on;
  				regulator-ramp-delay = <3125>;

@@ -19,10 +19,10 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  1 file changed, 14 insertions(+), 14 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index ff6e2f82582b..46bd9bcf3cb6 100644
+index cb2529bc9eb2..db29f49ac508 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -264,8 +264,8 @@ pmic@25 {
+@@ -262,8 +262,8 @@ pmic@25 {
  		regulators {
  			reg_vdd_soc: BUCK1 {
  				regulator-name = "VDD_SOC";
@@ -33,7 +33,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -274,8 +274,8 @@ reg_vdd_soc: BUCK1 {
+@@ -272,8 +272,8 @@ reg_vdd_soc: BUCK1 {
  
  			reg_vdd_arm: BUCK2 {
  				regulator-name = "VDD_ARM";
@@ -44,7 +44,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -286,8 +286,8 @@ reg_vdd_arm: BUCK2 {
+@@ -284,8 +284,8 @@ reg_vdd_arm: BUCK2 {
  
  			reg_vdd_3v3: BUCK4 {
  				regulator-name = "VDD_3V3";
@@ -55,7 +55,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -295,8 +295,8 @@ reg_vdd_3v3: BUCK4 {
+@@ -293,8 +293,8 @@ reg_vdd_3v3: BUCK4 {
  
  			reg_vdd_1v8: BUCK5 {
  				regulator-name = "VDD_1V8";
@@ -66,7 +66,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -304,8 +304,8 @@ reg_vdd_1v8: BUCK5 {
+@@ -302,8 +302,8 @@ reg_vdd_1v8: BUCK5 {
  
  			reg_nvcc_dram_1v1: BUCK6 {
  				regulator-name = "NVCC_DRAM_1V1";
@@ -77,7 +77,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -313,8 +313,8 @@ reg_nvcc_dram_1v1: BUCK6 {
+@@ -311,8 +311,8 @@ reg_nvcc_dram_1v1: BUCK6 {
  
  			reg_nvcc_snvs_1v8: LDO1 {
  				regulator-name = "NVCC_SNVS_1V8";
@@ -88,7 +88,7 @@ index ff6e2f82582b..46bd9bcf3cb6 100644
  				vin-supply = <&reg_5v_p>;
  				regulator-boot-on;
  				regulator-always-on;
-@@ -322,8 +322,8 @@ reg_nvcc_snvs_1v8: LDO1 {
+@@ -320,8 +320,8 @@ reg_nvcc_snvs_1v8: LDO1 {
  
  			reg_vdda_1v8: LDO3 {
  				regulator-name = "VDDA_1V8";

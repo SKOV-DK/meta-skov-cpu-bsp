@@ -12,10 +12,10 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index 68a0a5122068..929cf6f1035f 100644
+index e928e0376038..17db6e60bb9b 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-@@ -348,7 +348,7 @@ reg_nvcc_sd2: LDO5 {
+@@ -331,7 +331,7 @@ reg_nvcc_sd2: LDO5 {
  };
  
  &i2c3 {

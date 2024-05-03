@@ -14,7 +14,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
-index 153798bb6c08..68a0a5122068 100644
+index f396d45b98a2..e928e0376038 100644
 --- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 +++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
 @@ -120,7 +120,7 @@ reg_24v: regulator-24v {
@@ -26,7 +26,7 @@ index 153798bb6c08..68a0a5122068 100644
  	};
  
  	reg_can2rs: regulator-can2rs {
-@@ -228,7 +228,7 @@ adc: adc@0 {
+@@ -213,7 +213,7 @@ adc: adc@0 {
  &eqos {
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_eqos>;

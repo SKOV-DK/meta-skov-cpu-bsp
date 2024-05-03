@@ -1,0 +1,78 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 7 May 2024 15:50:15 +0200
+Subject: [PATCH] arm64: dts: freescale: imx8mp-skov-revb-hdmi: use i.MX I2C
+ for DDC
+
+The i.MX8MP HDMI_DDC_SCL/SDA pads can be muxed either to the Designware
+HDMI bridge's built-in I2C controller or to one of the general purpose
+i.MX I2C controllers.
+
+The default is to use the HDMI bridge's builtin I2C controller, which we
+did so far for EDID readout, but DDC control commands failed on Linux,
+because the driver allows only a single I2C address to work around
+hardware limitations[1].
+
+Given that the i.MX I2C controller doesn't have this limitation and that
+additionally its Linux driver has support for I2C bus recovery, let's
+mux the pins to go to there instead.
+
+[1]: https://lore.kernel.org/all/20190722181945.244395-1-mka@chromium.org/
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   | 27 ++++++++++++++++++++--
+ 1 file changed, 25 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+index 01c7420966ba..32a429437cbd 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+@@ -16,6 +16,7 @@ &hdmi_pvi {
+ &hdmi_tx {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hdmi>;
++	ddc-i2c-bus = <&i2c5>;
+ 	status = "okay";
+ };
+ 
+@@ -23,6 +24,16 @@ &hdmi_tx_phy {
+ 	status = "okay";
+ };
+ 
++&i2c5 {
++	pinctrl-names = "default", "gpio";
++	pinctrl-0 = <&pinctrl_i2c5>;
++	pinctrl-1 = <&pinctrl_i2c5_gpio>;
++	scl-gpios = <&gpio3 26 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio3 27 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	clock-frequency = <100000>;
++	status = "okay";
++};
++
+ &lcdif3 {
+ 	status = "okay";
+ };
+@@ -30,9 +41,21 @@ &lcdif3 {
+ &iomuxc {
+ 	pinctrl_hdmi: hdmigrp {
+ 		fsl,pins = <
+-			MX8MP_IOMUXC_HDMI_DDC_SCL__HDMIMIX_HDMI_SCL		0x1c3
+-			MX8MP_IOMUXC_HDMI_DDC_SDA__HDMIMIX_HDMI_SDA		0x1c3
+ 			MX8MP_IOMUXC_HDMI_HPD__HDMIMIX_HDMI_HPD			0x19
+ 		>;
+ 	};
++
++	pinctrl_i2c5: i2c5grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_HDMI_DDC_SCL__I2C5_SCL			0x400001c2
++			MX8MP_IOMUXC_HDMI_DDC_SDA__I2C5_SDA			0x400001c2
++		>;
++	};
++
++	pinctrl_i2c5_gpio: i2c5gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_HDMI_DDC_SCL__GPIO3_IO26			0x400001c2
++			MX8MP_IOMUXC_HDMI_DDC_SDA__GPIO3_IO27			0x400001c2
++		>;
++	};
+ };
