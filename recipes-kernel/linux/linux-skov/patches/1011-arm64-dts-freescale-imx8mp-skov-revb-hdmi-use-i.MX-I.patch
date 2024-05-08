@@ -21,7 +21,8 @@ mux the pins to go to there instead.
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts   | 27 ++++++++++++++++++++--
- 1 file changed, 25 insertions(+), 2 deletions(-)
+ .../boot/dts/freescale/imx8mp-skov-revc-bd500.dts  | 23 +++++++++++-------
+ 2 files changed, 40 insertions(+), 10 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
 index 01c7420966ba..32a429437cbd 100644
@@ -76,3 +77,99 @@ index 01c7420966ba..32a429437cbd 100644
 +		>;
 +	};
  };
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+index a564682e992c..36aa3f38218d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+@@ -13,50 +13,56 @@ led_system_red: led-3 {
+ 			label = "bd500:system:red";
+ 			color = <LED_COLOR_ID_RED>;
+ 			/* Inverted compared to others due to NMOS inverter */
+-			function = LED_FUNCTION_PANIC;
+ 			gpios = <&gpioexp 3 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
+ 		};
+ 
+ 		led_system_green: led-4 {
+ 			label = "bd500:system:green";
+ 			color = <LED_COLOR_ID_GREEN>;
+-			function = LED_FUNCTION_ACTIVITY;
+ 			gpios = <&gpioexp 2 GPIO_ACTIVE_LOW>;
++			default-state = "on";
+ 		};
+ 
+ 		led_lan1_red: led-5 {
+-			label = "bd500:lan1:link";
++			label = "bd500:lan1:act";
+ 			color = <LED_COLOR_ID_RED>;
+ 			linux,default-trigger = "netdev";
+ 			gpios = <&gpioexp 1 GPIO_ACTIVE_LOW>;
+ 		};
+ 
+ 		led_lan1_green: led-6 {
+-			label = "bd500:lan1:act";
++			label = "bd500:lan1:link";
+ 			color = <LED_COLOR_ID_GREEN>;
+ 			linux,default-trigger = "netdev";
+ 			gpios = <&gpioexp 0 GPIO_ACTIVE_LOW>;
+ 		};
+ 
+ 		led_lan2_red: led-7 {
+-			label = "bd500:lan2:link";
++			label = "bd500:lan2:act";
+ 			color = <LED_COLOR_ID_RED>;
+ 			linux,default-trigger = "netdev";
+ 			gpios = <&gpioexp 6 GPIO_ACTIVE_LOW>;
+ 		};
+ 
+ 		led_lan2_green: led-8 {
+-			label = "bd500:lan2:act";
++			label = "bd500:lan2:link";
+ 			color = <LED_COLOR_ID_GREEN>;
+ 			linux,default-trigger = "netdev";
+ 			gpios = <&gpioexp 7 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+ 
++	/* TODO: Can we benefit from the multicolor support?
++	 * For now add the nodes, but disabled, so they can easily
++	 * be enabled via bootloader OF fixup for evaluation in Linux.
++	 */
+ 	system-led {
+ 		compatible = "leds-group-multicolor";
+ 		color = <LED_COLOR_ID_MULTI>;
+ 		leds = <&led_lan2_red>, <&led_lan2_green>;
++		function = LED_FUNCTION_STATUS;
++		status = "disabled";
+ 	};
+ 
+ 	lan1-led {
+@@ -65,6 +71,7 @@ lan1-led {
+ 		function = LED_FUNCTION_LAN;
+ 		function-enumerator = <1>;
+ 		leds = <&led_lan1_red>, <&led_lan1_green>;
++		status = "disabled";
+ 	};
+ 
+ 	lan2-led {
+@@ -73,6 +80,7 @@ lan2-led {
+ 		function = LED_FUNCTION_LAN;
+ 		function-enumerator = <2>;
+ 		leds = <&led_system_red>, <&led_system_green>;
++		status = "disabled";
+ 	};
+ 
+ 	gpio-keys {
+@@ -80,11 +88,10 @@ gpio-keys {
+ 
+ 		button-1 {
+ 			label = "S1";
+-			linux,code = <KEY_F6>;
++			linux,code = <KEY_CONFIG>;
+ 			gpios = <&gpioexp 5 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+-
+ };
+ 
+ &i2c2 {

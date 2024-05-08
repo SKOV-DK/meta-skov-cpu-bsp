@@ -1,6 +1,6 @@
 # umpf-base: v6.9-rc6
 # umpf-name: 6.9/customers/skov/imx6
-# umpf-version: 6.9/customers/skov/imx6/20240508-1
+# umpf-version: 6.9/customers/skov/imx6/20240508-3
 # umpf-topic: v6.9/topic/drm-sched-accounting
 # umpf-hashinfo: 9c0e9670990e51859d6c4ece16c12d779229baa2
 # umpf-topic-range: e67572cd2204894179d89bd7b984072f19313b03..e7dd0b1054a6b5156e0725779dd0684383f8e238
@@ -80,8 +80,8 @@ SRC_URI += "\
   file://patches/0904-arm64-dts-imx8mp-add-fsl-nominal-mode-property-into-.patch \
   "
 # umpf-topic: v6.9/topic/imx8mp-skov-dts
-# umpf-hashinfo: 68a6dd4e161b0641360d530d99ce53a04742b7fb
-# umpf-topic-range: 19efd8349e361e09ddacbe3bb3467a6e8cfb8e82..2f04cecaf479f2bf21dbd91f232e8a7af9b6b6c0
+# umpf-hashinfo: f58676507e14c6e7740ccb67dd44c0d2ba7e56f5
+# umpf-topic-range: 19efd8349e361e09ddacbe3bb3467a6e8cfb8e82..19845d75c4e29071a702f6d8a8ca2b2369760293
 SRC_URI += "\
   file://patches/1001-arm64-dts-freescale-imx8mp-skov-nodes-which-are-curr.patch \
   file://patches/1002-arm64-dts-freescale-imx8mp-skov-add-different-commen.patch \
@@ -97,19 +97,19 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/imx8mp-dt-npu
 # umpf-hashinfo: 93b80787d5aaabfa5a51e74681afce1536561405
-# umpf-topic-range: 2f04cecaf479f2bf21dbd91f232e8a7af9b6b6c0..ac0d8e046332a64258824c16d73df0e845089527
+# umpf-topic-range: 19845d75c4e29071a702f6d8a8ca2b2369760293..9849446a02c337e7246cfdf02653fb860061b7d5
 SRC_URI += "\
   file://patches/1101-HACK-arm64-dts-imx8mp-Hook-up-MLMIX-reset-to-power-d.patch \
   "
 # umpf-topic: v6.8/topic/drm-fsl-ldb
 # umpf-hashinfo: 8b41dc23a7e169047e05bd485563734d3396038f
-# umpf-topic-range: ac0d8e046332a64258824c16d73df0e845089527..8c3db2e8a45dac375b413c4ca9fcc11898e74b87
+# umpf-topic-range: 9849446a02c337e7246cfdf02653fb860061b7d5..1c94f9ee6a40a3a907994e1f4747c098568f1339
 SRC_URI += "\
   file://patches/1201-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.9/topic/regulator-mmc-under-voltage
 # umpf-hashinfo: 1070e13255533bf8de2992619242dac9daeeff39
-# umpf-topic-range: 8c3db2e8a45dac375b413c4ca9fcc11898e74b87..42141255d188876f5234d9b72b0da8ee367a7395
+# umpf-topic-range: 1c94f9ee6a40a3a907994e1f4747c098568f1339..cb698e654480d63e9ec07cb759831fa91a6e39c1
 SRC_URI += "\
   file://patches/1301-WIP-mmc-core-shut-down-storage-as-early-as-possible.patch \
   file://patches/1302-rtc-pcf85063-fix-stack-corruption-in-PCF85063-NVMEM-.patch \
@@ -124,13 +124,13 @@ SRC_URI += "\
   "
 # umpf-topic: v6.8/topic/gic-v3-its
 # umpf-hashinfo: fdae192fa61f6e8b20131c838fd1b85f807ab60d
-# umpf-topic-range: 42141255d188876f5234d9b72b0da8ee367a7395..472f68c36466820e2643138ddd1c11548af5d4c1
+# umpf-topic-range: cb698e654480d63e9ec07cb759831fa91a6e39c1..0c908f6c449b0356e2af501cbe97968cb2bf32f1
 SRC_URI += "\
   file://patches/1401-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.9/topic/pca9450
 # umpf-hashinfo: bf9c33a9b8d6482f49b0b3c1c46da32b6bf41c68
-# umpf-topic-range: 472f68c36466820e2643138ddd1c11548af5d4c1..0f3630fc74e760329f7e7dd2cef971f10ca438e1
+# umpf-topic-range: 0c908f6c449b0356e2af501cbe97968cb2bf32f1..481f5821dd3acaddf80e0a530adde03fed8c71b5
 SRC_URI += "\
   file://patches/1501-regulator-pca9450-use-dev_err_probe-on-errors-claimi.patch \
   file://patches/1502-regulator-pca9450-enable-restart-handler-for-I2C-ope.patch \
@@ -138,7 +138,7 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/net-ksz8-fdb-dump
 # umpf-hashinfo: da5dfccc1f7b38c77c8fa784728d730fe36e9d5a
-# umpf-topic-range: 0f3630fc74e760329f7e7dd2cef971f10ca438e1..96089164bf885f4bd0f23d17b0ba02ca964be297
+# umpf-topic-range: 481f5821dd3acaddf80e0a530adde03fed8c71b5..cbf8dd9109900ccaa1e295beeda0ab27660dc340
 SRC_URI += "\
   file://patches/1601-net-dsa-microchip-Remove-unused-FDB-timestamp-suppor.patch \
   file://patches/1602-net-dsa-microchip-Make-ksz8_r_dyn_mac_table-static.patch \
@@ -149,13 +149,13 @@ SRC_URI += "\
   file://patches/1607-net-dsa-microchip-ksz8_r_dyn_mac_table-return-read-w.patch \
   file://patches/1608-net-dsa-microchip-ksz8_r_dyn_mac_table-use-entries-v.patch \
   "
-# umpf-release: 6.9/customers/skov/imx6/20240508-1
-# umpf-topic-range: 96089164bf885f4bd0f23d17b0ba02ca964be297..c43964c9e841d073bb20b9a95ab491acbe9918bb
+# umpf-release: 6.9/customers/skov/imx6/20240508-3
+# umpf-topic-range: cbf8dd9109900ccaa1e295beeda0ab27660dc340..cd7326395df3eb449d22ed62e4355a5ba8e2410f
 SRC_URI += "\
-  file://patches/1701-Release-6.9-customers-skov-imx6-20240508-1.patch \
+  file://patches/1701-Release-6.9-customers-skov-imx6-20240508-3.patch \
   "
 UMPF_BASE = "6.9-rc6"
-UMPF_VERSION = "20240508-1"
-UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
+UMPF_VERSION = "20240508-3"
+PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION = "${UMPF_BASE}"
 # umpf-end
