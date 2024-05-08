@@ -862,7 +862,7 @@ CONFIG_PHY_FSL_IMX8MQ_USB=y
 #
 # Hardware crypto devices
 #
-# CONFIG_FSL_CAAM_RNG_PBL_INIT is not set
+CONFIG_FSL_CAAM_RNG_PBL_INIT=y
 # end of Hardware crypto devices
 
 #
