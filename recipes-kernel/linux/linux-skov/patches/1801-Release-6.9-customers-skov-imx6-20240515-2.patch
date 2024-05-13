@@ -1,21 +1,21 @@
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date: Wed, 8 May 2024 13:32:30 +0200
-Subject: [PATCH] Release 6.9/customers/skov/imx6/20240508-3
+Date: Wed, 15 May 2024 22:04:47 +0200
+Subject: [PATCH] Release 6.9/customers/skov/imx6/20240515-2
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 40fb2ca6fe4c..68123a070671 100644
+index 967e97878ecd..723ed7d26050 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 9
  SUBLEVEL = 0
--EXTRAVERSION = -rc6
-+EXTRAVERSION = -rc6-20240508-3
+-EXTRAVERSION =
++EXTRAVERSION =-20240515-2
  NAME = Hurr durr I'ma ninja sloth
  
  # *DOCUMENTATION*

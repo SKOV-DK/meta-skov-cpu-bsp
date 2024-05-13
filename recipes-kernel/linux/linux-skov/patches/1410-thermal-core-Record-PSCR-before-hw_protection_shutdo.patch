@@ -18,11 +18,11 @@ debugging capabilities.
 
 Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 ---
- drivers/thermal/thermal_core.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/thermal/thermal_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/drivers/thermal/thermal_core.c b/drivers/thermal/thermal_core.c
-index 34a31bc72023..4f922308bbc5 100644
+index c046ae1a2ac8..cb3e79b55764 100644
 --- a/drivers/thermal/thermal_core.c
 +++ b/drivers/thermal/thermal_core.c
 @@ -16,6 +16,7 @@
@@ -33,12 +33,11 @@ index 34a31bc72023..4f922308bbc5 100644
  #include <linux/reboot.h>
  #include <linux/string.h>
  #include <linux/of.h>
-@@ -328,6 +329,8 @@ static void thermal_zone_device_halt(struct thermal_zone_device *tz, bool shutdo
+@@ -329,6 +330,7 @@ static void thermal_zone_device_halt(struct thermal_zone_device *tz,
  
  	dev_emerg(&tz->device, "%s: critical temperature reached\n", tz->type);
  
 +	set_power_state_change_reason(PSCR_OVERTEMPERATURE);
-+
- 	if (shutdown)
- 		hw_protection_shutdown(msg, poweroff_delay_ms);
- 	else
+ 	__hw_protection_shutdown(msg, poweroff_delay_ms, action);
+ }
+ 

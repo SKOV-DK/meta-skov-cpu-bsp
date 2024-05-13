@@ -12,9 +12,9 @@ RDEPENDS:${PN} = "flex lzop"
 PR = "r0"
 PV = "${LINUX_VERSION}"
 
-SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
-#SRC_URI = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz"
-SRC_URI[sha256sum] = "da2a747ddffac0cd3f319fcb4bcb894ed943a21e22c93be19d2dbe7c1abe9d43"
+#SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
+SRC_URI = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz"
+SRC_URI[sha256sum] = "24fa01fb989c7a3e28453f117799168713766e119c5381dac30115f18f268149"
 FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 300 --passive-ftp"
 
 SRC_URI += "file://defconfig"

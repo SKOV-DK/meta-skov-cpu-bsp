@@ -13,7 +13,7 @@ Reviewed-by: Mark Brown <broonie@kernel.org>
  1 file changed, 6 insertions(+)
 
 diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-index dabac9772741..4b5aa25a0caa 100644
+index 86c8240beea4..4201493b1f68 100644
 --- a/drivers/regulator/core.c
 +++ b/drivers/regulator/core.c
 @@ -19,6 +19,7 @@
@@ -24,7 +24,7 @@ index dabac9772741..4b5aa25a0caa 100644
  #include <linux/reboot.h>
  #include <linux/regmap.h>
  #include <linux/regulator/of_regulator.h>
-@@ -5105,6 +5106,7 @@ EXPORT_SYMBOL_GPL(regulator_bulk_free);
+@@ -5110,6 +5111,7 @@ EXPORT_SYMBOL_GPL(regulator_bulk_free);
  static void regulator_handle_critical(struct regulator_dev *rdev,
  				      unsigned long event)
  {
@@ -32,7 +32,7 @@ index dabac9772741..4b5aa25a0caa 100644
  	const char *reason = NULL;
  
  	if (!rdev->constraints->system_critical)
-@@ -5113,17 +5115,21 @@ static void regulator_handle_critical(struct regulator_dev *rdev,
+@@ -5118,17 +5120,21 @@ static void regulator_handle_critical(struct regulator_dev *rdev,
  	switch (event) {
  	case REGULATOR_EVENT_UNDER_VOLTAGE:
  		reason = "System critical regulator: voltage drop detected";
@@ -51,6 +51,6 @@ index dabac9772741..4b5aa25a0caa 100644
  		return;
  
 +	set_power_state_change_reason(pscr);
- 	hw_protection_shutdown(reason,
- 			       rdev->constraints->uv_less_critical_window_ms);
+ 	hw_protection_trigger(reason,
+ 			      rdev->constraints->uv_less_critical_window_ms);
  }
