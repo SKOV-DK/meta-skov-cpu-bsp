@@ -1,6 +1,6 @@
 # umpf-base: v6.9
 # umpf-name: 6.9/customers/skov/imx6
-# umpf-version: 6.9/customers/skov/imx6/20240515-2
+# umpf-version: 6.9/customers/skov/imx6/20240516-1
 # umpf-topic: v6.9/topic/drm-sched-accounting
 # umpf-hashinfo: 9c0e9670990e51859d6c4ece16c12d779229baa2
 # umpf-topic-range: a38297e3fb012ddfa7ce0321a7e5a8daeb1872b6..4bb0aa8d5334e166a009b002d6f44689f95c1363
@@ -16,46 +16,48 @@ SRC_URI += "\
   file://patches/0102-drm-bridge-dw_hdmi-use-rx-sense-for-plug-detection-i.patch \
   "
 # umpf-topic: v6.9/topic/etnaviv
-# umpf-hashinfo: c334bc83d9db613d6e78eaa706aa5f9b5da7700d
-# umpf-topic-range: 45907736ce14ed31d79ec108cb55119bbc46a848..3ac73658287080c155a0bd461175e8a5fb929f30
+# umpf-hashinfo: 9b7b278a8480c5fd38885f388711cc45a747439f
+# umpf-topic-range: 45907736ce14ed31d79ec108cb55119bbc46a848..ef9798faaf7ecc0f3b27b8093fae063b52fe996c
 SRC_URI += "\
   file://patches/0201-drm-etnaviv-don-t-block-scheduler-when-GPU-is-still-.patch \
   file://patches/0202-drm-etnaviv-reduce-number-of-ktime_get-calls-in-IRQ-.patch \
   file://patches/0203-drm-etnaviv-add-flight-recorder-mode.patch \
+  file://patches/0204-drm-etnaviv-don-t-disable-TS-on-MMUv2-core-when-movi.patch \
   "
 # umpf-topic: v6.9/topic/imx-drm
-# umpf-hashinfo: 5fa77275ccefdefbc9eddbd760a4ac9c97d21b22
-# umpf-topic-range: 3ac73658287080c155a0bd461175e8a5fb929f30..65f9e3b330196c9e4ffd739cd7131b4ab20e1c33
+# umpf-hashinfo: c999a606bca357f348bd64c633977028be77ae2f
+# umpf-topic-range: ef9798faaf7ecc0f3b27b8093fae063b52fe996c..b29f12e8133ab058293aa8a2441af64f36eb73f3
 SRC_URI += "\
   file://patches/0301-drm-imx-ipuv3-plane-add-debug-output.patch \
   file://patches/0302-gpu-ipu-v3-ipu-dc-setup-microcode-from-u64-array.patch \
   file://patches/0303-gpu-ipu-v3-pre-move-state-into-struct.patch \
   file://patches/0304-gpu-ipu-v3-pre-add-dynamic-buffer-layout-reconfigura.patch \
+  file://patches/0305-gpu-ipu-v3-pre-don-t-use-fixed-timeout-when-waiting-.patch \
   "
 # umpf-topic: v6.9/topic/imx-gpc
 # umpf-hashinfo: 6a25dc09f6b51ef9495c9d32de39ba667d329038
-# umpf-topic-range: 65f9e3b330196c9e4ffd739cd7131b4ab20e1c33..da9c0de2b74f8d607a35d31eb8ebc768ef60b46c
+# umpf-topic-range: b29f12e8133ab058293aa8a2441af64f36eb73f3..89f43896b6b7db160a9ad6afb2d5cb22102f37e5
 SRC_URI += "\
   file://patches/0401-soc-imx-gpc-set-DMA-mask-for-PD-platform-devices.patch \
   "
 # umpf-topic: v6.9/topic/imx-gpcv2
 # umpf-hashinfo: 493a47f15f8ccdc3e198ed3208e3ed1b340d253e
-# umpf-topic-range: da9c0de2b74f8d607a35d31eb8ebc768ef60b46c..b0df63ed3e9a5e84601706b99de099c0439b6808
+# umpf-topic-range: 89f43896b6b7db160a9ad6afb2d5cb22102f37e5..fef492ad6b4ea005e621bf55fc1ad62ab7afc6af
 SRC_URI += "\
   file://patches/0501-soc-imx-gpcv2-split-PGC-domain-probe-in-two-passes.patch \
   file://patches/0502-soc-imx-gpcv2-rename-keep_clocks-to-bus_clocks.patch \
   file://patches/0503-soc-imx-gpcv2-prepare-bus-clocks-early.patch \
   "
 # umpf-topic: v6.9/topic/imx-sdma
-# umpf-hashinfo: d4a7cc12d989ddd7e1279edc08292187cc4ecc29
-# umpf-topic-range: b0df63ed3e9a5e84601706b99de099c0439b6808..6361768a1be863304d2482f8f4dd52549d126995
+# umpf-hashinfo: 3291c2c19e9c496c0bf40bb72cf672979e308d7b
+# umpf-topic-range: fef492ad6b4ea005e621bf55fc1ad62ab7afc6af..2afeae89e1ef237689d3dce64481945465914378
 SRC_URI += "\
   file://patches/0601-firmware-add-nowarn-variant-of-request_firmware_nowa.patch \
   file://patches/0602-dmaengine-imx-sdma-don-t-print-warning-when-firmware.patch \
   "
 # umpf-topic: v6.9/topic/imx8mp-dt
 # umpf-hashinfo: 051c5eaa658c2a61d7a80c5b4682436b8a99d915
-# umpf-topic-range: 6361768a1be863304d2482f8f4dd52549d126995..3f6a08e73eb9d6dc21df468c5106bc00d8098607
+# umpf-topic-range: 2afeae89e1ef237689d3dce64481945465914378..99196659d9bdd6355a81b7959330218ec5341b89
 SRC_URI += "\
   file://patches/0701-arm64-dts-imx8mp-add-HDMI-power-domains.patch \
   file://patches/0702-arm64-dts-imx8mp-add-HDMI-irqsteer.patch \
@@ -65,14 +67,14 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/imx8mp-hdmi
 # umpf-hashinfo: 19ef13dd340c75e40a86dd23a3dd896c40b5a6ae
-# umpf-topic-range: 3f6a08e73eb9d6dc21df468c5106bc00d8098607..31f2d90af2b243be58b21a2f94635fe4deaf8431
+# umpf-topic-range: 99196659d9bdd6355a81b7959330218ec5341b89..0d16b28c69b115cfef74b17f922dee67aa5d0606
 SRC_URI += "\
   file://patches/0801-dt-bindings-phy-add-binding-for-the-i.MX8MP-HDMI-PHY.patch \
   file://patches/0802-phy-freescale-add-Samsung-HDMI-PHY.patch \
   "
 # umpf-topic: v6.9/topic/imx8mp-nominal
 # umpf-hashinfo: 4e36ce8ae8d0283b1de2f164f6ed890f6446c1a8
-# umpf-topic-range: 31f2d90af2b243be58b21a2f94635fe4deaf8431..44fb8871746f75e09ae817732f6e966b1cc7bbfd
+# umpf-topic-range: 0d16b28c69b115cfef74b17f922dee67aa5d0606..de872dcb27cbcc7730bd4c44702c9aee05391e28
 SRC_URI += "\
   file://patches/0901-arm64-dts-imx8mp-Align-both-CSI2-pixel-clock.patch \
   file://patches/0902-clk-imx8mp-inform-CCF-of-maximum-frequency-of-clocks.patch \
@@ -81,7 +83,7 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/imx8mp-skov-dts
 # umpf-hashinfo: f58676507e14c6e7740ccb67dd44c0d2ba7e56f5
-# umpf-topic-range: 44fb8871746f75e09ae817732f6e966b1cc7bbfd..f5284bbbf94a6fd6a75d8259d5439479070139f2
+# umpf-topic-range: de872dcb27cbcc7730bd4c44702c9aee05391e28..f74c46f74c707e1ddfe0f6d2d69304db2ca5b08f
 SRC_URI += "\
   file://patches/1001-arm64-dts-freescale-imx8mp-skov-nodes-which-are-curr.patch \
   file://patches/1002-arm64-dts-freescale-imx8mp-skov-add-different-commen.patch \
@@ -97,19 +99,19 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/imx8mp-dt-npu
 # umpf-hashinfo: 93b80787d5aaabfa5a51e74681afce1536561405
-# umpf-topic-range: f5284bbbf94a6fd6a75d8259d5439479070139f2..308b3b536deeb9cdf8cfc9ad43f8469771a6d969
+# umpf-topic-range: f74c46f74c707e1ddfe0f6d2d69304db2ca5b08f..22c6c82e8c98c5b9f5fa914a5793404d655c1618
 SRC_URI += "\
   file://patches/1101-HACK-arm64-dts-imx8mp-Hook-up-MLMIX-reset-to-power-d.patch \
   "
 # umpf-topic: v6.8/topic/drm-fsl-ldb
 # umpf-hashinfo: 8b41dc23a7e169047e05bd485563734d3396038f
-# umpf-topic-range: 308b3b536deeb9cdf8cfc9ad43f8469771a6d969..b9b7eade811b1cf545f8fa2aa1df1a52701c998d
+# umpf-topic-range: 22c6c82e8c98c5b9f5fa914a5793404d655c1618..4f1f1f2b24e1a1b6ecaca68d90e1b181f5c0b2d5
 SRC_URI += "\
   file://patches/1201-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.9/topic/hw_protection
 # umpf-hashinfo: 04ecd640f94a81054d1b1564fa658cd1855b6a5d
-# umpf-topic-range: b9b7eade811b1cf545f8fa2aa1df1a52701c998d..09f28c6a358c1bf64a8ba834816beed373ca7adb
+# umpf-topic-range: 4f1f1f2b24e1a1b6ecaca68d90e1b181f5c0b2d5..594a8aa3a567290d7474e4c4f5a3a9c1b36a0970
 SRC_URI += "\
   file://patches/1301-reboot-replace-__hw_protection_shutdown-bool-action-.patch \
   file://patches/1302-reboot-reboot-not-shutdown-on-hw_protection_reboot-t.patch \
@@ -122,7 +124,7 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/regulator-mmc-under-voltage
 # umpf-hashinfo: 3d2dd221e8852b440596272e9e146231a426db8b
-# umpf-topic-range: 09f28c6a358c1bf64a8ba834816beed373ca7adb..5abcda6a620c7618d7439b9653a18363dcea88b7
+# umpf-topic-range: 594a8aa3a567290d7474e4c4f5a3a9c1b36a0970..d83e1d51739b831cc74486d83b864bc1340a002b
 SRC_URI += "\
   file://patches/1401-WIP-mmc-core-shut-down-storage-as-early-as-possible.patch \
   file://patches/1402-rtc-pcf85063-fix-stack-corruption-in-PCF85063-NVMEM-.patch \
@@ -137,13 +139,13 @@ SRC_URI += "\
   "
 # umpf-topic: v6.8/topic/gic-v3-its
 # umpf-hashinfo: fdae192fa61f6e8b20131c838fd1b85f807ab60d
-# umpf-topic-range: 5abcda6a620c7618d7439b9653a18363dcea88b7..8d7b00b5e091053d9260f53874c01c26d830f350
+# umpf-topic-range: d83e1d51739b831cc74486d83b864bc1340a002b..aec1c1517e642dd0c07022360a0358ebbb558589
 SRC_URI += "\
   file://patches/1501-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.9/topic/pca9450
 # umpf-hashinfo: bf9c33a9b8d6482f49b0b3c1c46da32b6bf41c68
-# umpf-topic-range: 8d7b00b5e091053d9260f53874c01c26d830f350..470dddab6243752044870d257f9e013616b0ebe6
+# umpf-topic-range: aec1c1517e642dd0c07022360a0358ebbb558589..1eb198c3e1b20a2c044db9ac69c9f12e447964ef
 SRC_URI += "\
   file://patches/1601-regulator-pca9450-use-dev_err_probe-on-errors-claimi.patch \
   file://patches/1602-regulator-pca9450-enable-restart-handler-for-I2C-ope.patch \
@@ -151,7 +153,7 @@ SRC_URI += "\
   "
 # umpf-topic: v6.9/topic/net-ksz8-fdb-dump
 # umpf-hashinfo: da5dfccc1f7b38c77c8fa784728d730fe36e9d5a
-# umpf-topic-range: 470dddab6243752044870d257f9e013616b0ebe6..2fa5d1723e6e9d2cd6df8a656e6cd9746e1b6ae7
+# umpf-topic-range: 1eb198c3e1b20a2c044db9ac69c9f12e447964ef..85c0f512a76870df57861b6ecd370413b93ed4c9
 SRC_URI += "\
   file://patches/1701-net-dsa-microchip-Remove-unused-FDB-timestamp-suppor.patch \
   file://patches/1702-net-dsa-microchip-Make-ksz8_r_dyn_mac_table-static.patch \
@@ -162,13 +164,31 @@ SRC_URI += "\
   file://patches/1707-net-dsa-microchip-ksz8_r_dyn_mac_table-return-read-w.patch \
   file://patches/1708-net-dsa-microchip-ksz8_r_dyn_mac_table-use-entries-v.patch \
   "
-# umpf-release: 6.9/customers/skov/imx6/20240515-2
-# umpf-topic-range: 2fa5d1723e6e9d2cd6df8a656e6cd9746e1b6ae7..172cf33c9fe71a331de3da0b66445fecd11f682a
+# umpf-topic: v6.9/topic/dsa-ksz-dcb-dscp
+# umpf-hashinfo: 82a72a0dceba8c4d9d08f8608707c4232ac579b2
+# umpf-topic-range: 85c0f512a76870df57861b6ecd370413b93ed4c9..00a7a45c26d8120807581119404473e924507739
 SRC_URI += "\
-  file://patches/1801-Release-6.9-customers-skov-imx6-20240515-2.patch \
+  file://patches/1801-net-dsa-add-support-for-DCB-get-set-apptrust-configu.patch \
+  file://patches/1802-net-dsa-microchip-add-IPM-information-support.patch \
+  file://patches/1803-net-add-IEEE-802.1q-specific-helpers.patch \
+  file://patches/1804-net-dsa-microchip-add-multi-queue-support-for-KSZ88X.patch \
+  file://patches/1805-net-dsa-microchip-add-support-for-different-DCB-app-.patch \
+  file://patches/1806-net-dsa-microchip-dcb-add-special-handling-for-KSZ88.patch \
+  file://patches/1807-net-dsa-microchip-enable-ETS-support-for-KSZ989X-var.patch \
+  file://patches/1808-net-dsa-microchip-init-predictable-IPM-to-queue-mapp.patch \
+  file://patches/1809-net-dsa-microchip-let-DCB-code-do-PCP-and-DSCP-polic.patch \
+  file://patches/1810-net-dsa-add-support-switches-global-DSCP-priority-ma.patch \
+  file://patches/1811-net-dsa-microchip-add-support-DSCP-priority-mapping.patch \
+  file://patches/1812-selftests-microchip-add-test-for-QoS-support-on-KSZ9.patch \
+  file://patches/1813-net-dsa-microchip-Correct-initialization-order-for-K.patch \
+  "
+# umpf-release: 6.9/customers/skov/imx6/20240516-1
+# umpf-topic-range: 00a7a45c26d8120807581119404473e924507739..6b76617da4252b93fafd54795b088ea8e10d099a
+SRC_URI += "\
+  file://patches/1901-Release-6.9-customers-skov-imx6-20240516-1.patch \
   "
 UMPF_BASE = "6.9"
-UMPF_VERSION = "20240515-2"
+UMPF_VERSION = "20240516-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION = "${UMPF_BASE}"
 # umpf-end

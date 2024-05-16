@@ -4,13 +4,11 @@ Subject: [PATCH] firmware: add nowarn variant of request_firmware_nowait()
 
 Device drivers with optional firmware may still want to use the
 asynchronous firmware loading interface. To avoid printing a
-warining into the kernel log when the optional firmware is
+warning into the kernel log when the optional firmware is
 absent, add a nowarn variant of this interface.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
-
-Changelog:
-
+---
 v3:
 - v2-link: https://lore.kernel.org/all/20181112160143.4459-1-l.stach@pengutronix.de/
 - Rename to firmware_*
@@ -19,11 +17,11 @@ v3:
 - Sort header alphabetical
 ---
  drivers/base/firmware_loader/main.c | 90 ++++++++++++++++++++++++++-----------
- include/linux/firmware.h            | 14 +++++-
- 2 files changed, 76 insertions(+), 28 deletions(-)
+ include/linux/firmware.h            | 12 +++++
+ 2 files changed, 75 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index da8ca01d011c..f0517cbd42b2 100644
+index da8ca01d011c..a03ee4b11134 100644
 --- a/drivers/base/firmware_loader/main.c
 +++ b/drivers/base/firmware_loader/main.c
 @@ -1172,34 +1172,11 @@ static void request_firmware_work_func(struct work_struct *work)
@@ -124,8 +122,8 @@ index da8ca01d011c..f0517cbd42b2 100644
 + * @cont: function will be called asynchronously when the firmware
 + *	request is over.
 + *
-+ * Similar in fucntion to request_firmware_nowait(), but doesn't print a warning
-+ * when the firmware file could not be found and always send a uevent to copy
++ * Similar in function to request_firmware_nowait(), but doesn't print a warning
++ * when the firmware file could not be found and always sends a uevent to copy
 + * the firmware image.
 + */
 +int firmware_request_nowait_nowarn(
@@ -142,7 +140,7 @@ index da8ca01d011c..f0517cbd42b2 100644
  static ASYNC_DOMAIN_EXCLUSIVE(fw_cache_domain);
  
 diff --git a/include/linux/firmware.h b/include/linux/firmware.h
-index f026f8926d79..3934d7b42f1e 100644
+index f026f8926d79..aae1b85ffc10 100644
 --- a/include/linux/firmware.h
 +++ b/include/linux/firmware.h
 @@ -98,6 +98,10 @@ static inline bool firmware_request_builtin(struct firmware *fw,
@@ -160,7 +158,7 @@ index f026f8926d79..3934d7b42f1e 100644
  	return -EINVAL;
  }
  
-+static int firmware_request_nowait_nowarn(
++static inline int firmware_request_nowait_nowarn(
 +	struct module *module, const char *name,
 +	struct device *device, gfp_t gfp, void *context,
 +	void (*cont)(const struct firmware *fw, void *context))
@@ -171,12 +169,3 @@ index f026f8926d79..3934d7b42f1e 100644
  static inline int firmware_request_nowarn(const struct firmware **fw,
  					  const char *name,
  					  struct device *device)
-@@ -137,7 +149,7 @@ static inline int firmware_request_platform(const struct firmware **fw,
- 	return -EINVAL;
- }
- 
--static inline int request_firmware_nowait(
-+static inline int request_firmware_nowait_nowarn(
- 	struct module *module, bool uevent,
- 	const char *name, struct device *device, gfp_t gfp, void *context,
- 	void (*cont)(const struct firmware *fw, void *context))

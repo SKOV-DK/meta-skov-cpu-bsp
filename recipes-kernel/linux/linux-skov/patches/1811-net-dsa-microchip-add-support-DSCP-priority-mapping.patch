@@ -1,0 +1,183 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 23 Apr 2024 19:05:19 +0200
+Subject: [PATCH] net: dsa: microchip: add support DSCP priority mapping
+
+Microchip KSZ and LAN variants do not have per port DSCP priority
+configuration. Instead there is a global DSCP mapping table.
+
+This patch provides write access to this global DSCP map. In case entry
+is "deleted", we map corresponding DSCP entry to a best effort prio,
+which is expected to be the default priority for all untagged traffic.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+changes v8:
+- add function comments
+---
+ drivers/net/dsa/microchip/ksz_common.c |  3 ++
+ drivers/net/dsa/microchip/ksz_dcb.c    | 91 ++++++++++++++++++++++++++++------
+ drivers/net/dsa/microchip/ksz_dcb.h    |  2 +
+ 3 files changed, 81 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/net/dsa/microchip/ksz_common.c b/drivers/net/dsa/microchip/ksz_common.c
+index 97ac7388cd65..ebe912328bbd 100644
+--- a/drivers/net/dsa/microchip/ksz_common.c
++++ b/drivers/net/dsa/microchip/ksz_common.c
+@@ -2313,6 +2313,7 @@ static int ksz_setup(struct dsa_switch *ds)
+ 	ksz_init_mib_timer(dev);
+ 
+ 	ds->configure_vlan_while_not_filtering = false;
++	ds->dscp_prio_mapping_is_global = true;
+ 
+ 	if (dev->dev_ops->setup) {
+ 		ret = dev->dev_ops->setup(ds);
+@@ -3949,6 +3950,8 @@ static const struct dsa_switch_ops ksz_switch_ops = {
+ 	.port_get_default_prio	= ksz_port_get_default_prio,
+ 	.port_set_default_prio	= ksz_port_set_default_prio,
+ 	.port_get_dscp_prio	= ksz_port_get_dscp_prio,
++	.port_add_dscp_prio	= ksz_port_add_dscp_prio,
++	.port_del_dscp_prio	= ksz_port_del_dscp_prio,
+ 	.port_get_apptrust	= ksz_port_get_apptrust,
+ 	.port_set_apptrust	= ksz_port_set_apptrust,
+ };
+diff --git a/drivers/net/dsa/microchip/ksz_dcb.c b/drivers/net/dsa/microchip/ksz_dcb.c
+index bff61b9289a3..4511491eb301 100644
+--- a/drivers/net/dsa/microchip/ksz_dcb.c
++++ b/drivers/net/dsa/microchip/ksz_dcb.c
+@@ -306,6 +306,30 @@ int ksz_port_get_dscp_prio(struct dsa_switch *ds, int port, u8 dscp)
+ 	return (data >> shift) & mask;
+ }
+ 
++/**
++ * ksz_set_global_dscp_entry - Sets the global DSCP-to-priority mapping entry
++ * @dev: Pointer to the KSZ switch device structure
++ * @dscp: DSCP value for which to set the priority
++ * @ipm: Priority value to set
++ *
++ * This function sets the global DSCP-to-priority mapping entry for the
++ * specified DSCP value.
++ *
++ * Return: 0 on success, or a negative error code on failure.
++ */
++static int ksz_set_global_dscp_entry(struct ksz_device *dev, u8 dscp, u8 ipm)
++{
++	int reg, per_reg, shift;
++	u8 mask;
++
++	ksz_get_dscp_prio_reg(dev, &reg, &per_reg, &mask);
++
++	shift = (dscp % per_reg) * (8 / per_reg);
++
++	return ksz_rmw8(dev, reg + (dscp / per_reg), mask << shift,
++			ipm << shift);
++}
++
+ /**
+  * ksz_init_global_dscp_map - Initializes the global DSCP-to-priority mapping
+  * @dev: Pointer to the KSZ switch device structure
+@@ -317,9 +341,7 @@ int ksz_port_get_dscp_prio(struct dsa_switch *ds, int port, u8 dscp)
+  */
+ static int ksz_init_global_dscp_map(struct ksz_device *dev)
+ {
+-	int reg, per_reg, ret, dscp;
+-	u8 data = 0;
+-	u8 mask;
++	int ret, dscp;
+ 
+ 	/* On KSZ9xxx variants, DSCP remapping is disabled by default.
+ 	 * Enable to have, predictable and reproducible behavior across
+@@ -333,10 +355,8 @@ static int ksz_init_global_dscp_map(struct ksz_device *dev)
+ 			return ret;
+ 	}
+ 
+-	ksz_get_dscp_prio_reg(dev, &reg, &per_reg, &mask);
+-
+ 	for (dscp = 0; dscp < DSCP_MAX; dscp++) {
+-		int ipm, shift, tt;
++		int ipm, tt;
+ 
+ 		/* Map DSCP to Traffic Type, which is corresponding to the
+ 		 * Internal Priority Map (IPM) in the switch.
+@@ -358,19 +378,60 @@ static int ksz_init_global_dscp_map(struct ksz_device *dev)
+ 		if (ipm < 0)
+ 			return ipm;
+ 
+-		shift = (dscp % per_reg) * (8 / per_reg);
+-		data |= (ipm & mask) << shift;
++		ret = ksz_set_global_dscp_entry(dev, dscp, ipm);
++	}
+ 
+-		if (dscp % per_reg == per_reg - 1) {
+-			ret = ksz_write8(dev, reg + (dscp / per_reg), data);
+-			if (ret)
+-				return ret;
++	return 0;
++}
+ 
+-			data = 0;
+-		}
++/**
++ * ksz_port_add_dscp_prio - Adds a DSCP-to-priority mapping entry for a port on
++ *			    a KSZ switch.
++ * @ds: Pointer to the DSA switch structure
++ * @port: Port number for which to add the DSCP-to-priority mapping entry
++ * @dscp: DSCP value for which to add the priority
++ * @prio: Priority value to set
++ *
++ * Return: 0 on success, or a negative error code on failure
++ */
++int ksz_port_add_dscp_prio(struct dsa_switch *ds, int port, u8 dscp, u8 prio)
++{
++	struct ksz_device *dev = ds->priv;
++
++	if (prio >= dev->info->num_ipms)
++		return -ERANGE;
++
++	return ksz_set_global_dscp_entry(dev, dscp, prio);
++}
++
++/**
++ * ksz_port_del_dscp_prio - Deletes a DSCP-to-priority mapping entry for a port
++ *			    on a KSZ switch.
++ * @ds: Pointer to the DSA switch structure
++ * @port: Port number for which to delete the DSCP-to-priority mapping entry
++ * @dscp: DSCP value for which to delete the priority
++ * @prio: Priority value to delete
++ *
++ * Return: 0 on success, or a negative error code on failure
++ */
++int ksz_port_del_dscp_prio(struct dsa_switch *ds, int port, u8 dscp, u8 prio)
++{
++	struct ksz_device *dev = ds->priv;
++	int ipm;
++
++	if (ksz_port_get_dscp_prio(ds, port, dscp) != prio)
++		return 0;
++
++	if (is_ksz8(dev)) {
++		ipm = ieee8021q_tt_to_tc(IEEE8021Q_TT_BE,
++					 dev->info->num_tx_queues);
++		if (ipm < 0)
++			return ipm;
++	} else {
++		ipm = IEEE8021Q_TT_BE;
+ 	}
+ 
+-	return 0;
++	return ksz_set_global_dscp_entry(dev, dscp, ipm);
+ }
+ 
+ /**
+diff --git a/drivers/net/dsa/microchip/ksz_dcb.h b/drivers/net/dsa/microchip/ksz_dcb.h
+index 254c0e7bdafc..e2065223ba90 100644
+--- a/drivers/net/dsa/microchip/ksz_dcb.h
++++ b/drivers/net/dsa/microchip/ksz_dcb.h
+@@ -11,6 +11,8 @@
+ int ksz_port_get_default_prio(struct dsa_switch *ds, int port);
+ int ksz_port_set_default_prio(struct dsa_switch *ds, int port, u8 prio);
+ int ksz_port_get_dscp_prio(struct dsa_switch *ds, int port, u8 dscp);
++int ksz_port_add_dscp_prio(struct dsa_switch *ds, int port, u8 dscp, u8 prio);
++int ksz_port_del_dscp_prio(struct dsa_switch *ds, int port, u8 dscp, u8 prio);
+ int ksz_port_set_apptrust(struct dsa_switch *ds, int port,
+ 			  const unsigned char *sel,
+ 			  int nsel);

@@ -3,16 +3,14 @@ Date: Wed, 12 Sep 2018 15:11:30 +0200
 Subject: [PATCH] dmaengine: imx-sdma: don't print warning when firmware is
  absent
 
-The SDMA firmware is optional and a usable fallabck to the internal
+The SDMA firmware is optional and a usable fallback to the internal
 ROM firmware is present in the driver. There is already a message
 printed informing the user that the internal firmware is used, so
 there is no need to print a scary warning for what is normal operation
 on most systems.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
-
-Changelog:
-
+---
 v3:
 - v2-link: https://lore.kernel.org/all/20181112160143.4459-1-l.stach@pengutronix.de/
 - Adapt to new firmware_* API
