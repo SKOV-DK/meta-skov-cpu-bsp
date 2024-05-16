@@ -1,1 +1,0 @@
-global linux.bootargs.system.reset="system.reset=$global.system.reset"
