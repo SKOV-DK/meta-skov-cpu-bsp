@@ -7,12 +7,12 @@ COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu"
 require barebox-skov-deploy.inc
 
 DEPENDS:append:imx8-cpu = "\
-        firmware-imx-8m \
+        imx-boot-firmware-files \
         trusted-firmware-a \
 "
 
 BAREBOX_FIRMWARE_DEP = ""
-BAREBOX_FIRMWARE_DEP:imx8-cpu = "firmware-imx-8m:do_deploy"
+BAREBOX_FIRMWARE_DEP:imx8-cpu = "imx-boot-firmware-files:do_deploy"
 
 do_configure[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
