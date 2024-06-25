@@ -31,7 +31,7 @@ DEPENDS = " \
 RDEPENDS:${PN} = " \
     bash \
     mmc-utils \
-    bmap-tools \
+    bmaptool \
     util-linux-blkdiscard \
     zstd \
     parted \
