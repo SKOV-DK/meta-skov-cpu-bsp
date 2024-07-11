@@ -1,0 +1,28 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 2 May 2024 12:17:24 +0200
+Subject: [PATCH] mfd: pca9450: print reset reason as hex if unknown
+
+On an i.MX93-based board, it was observed that a potential ELE-induced
+reset ended up with an unknown reset reason. To aid in debugging this,
+print the value in hexadecimal when no mapping is known.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Link: https://lore.barebox.org/20240502101724.2609941-1-a.fatoum@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mfd/pca9450.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mfd/pca9450.c b/drivers/mfd/pca9450.c
+index 8fa5363f8a60..be357c10239f 100644
+--- a/drivers/mfd/pca9450.c
++++ b/drivers/mfd/pca9450.c
+@@ -52,7 +52,7 @@ static int pca9450_get_reset_source(struct device *dev, struct regmap *map)
+ 		type = RESET_EXT;
+ 		break;
+ 	default:
+-		dev_warn(dev, "Could not determine reset reason.\n");
++		dev_warn(dev, "Unknown reset reason: 0x%02x\n", reg);
+ 		type = RESET_UKWN;
+ 	}
+ 

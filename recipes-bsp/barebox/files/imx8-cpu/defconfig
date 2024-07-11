@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Barebox/arm64 2024.04.0-20240502-3 Configuration
+# Barebox/arm64 2024.04.0-20240711-2 Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_LINUX=y
@@ -713,7 +713,7 @@ CONFIG_MFD_SYSCON=y
 # CONFIG_MFD_TWL4030 is not set
 # CONFIG_MFD_TWL6030 is not set
 # CONFIG_MFD_STPMIC1 is not set
-# CONFIG_MFD_PCA9450 is not set
+CONFIG_MFD_PCA9450=y
 # CONFIG_MFD_RN568PMIC is not set
 # CONFIG_MFD_ATMEL_FLEXCOM is not set
 # CONFIG_MFD_RK808 is not set
