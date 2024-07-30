@@ -17,6 +17,6 @@ SRC_URI[sha256sum] = "c7c00f99dfe9d43b4619b34196ae1cd107136ea917c998ee0ab696c1e5
 do_compile:prepend () {
 	if [ -n "${BAREBOX_AUTOBOOT_TIMEOUT}" ]; then
 		mkdir -p ${WORKDIR}/env/nv
-		printf "${BAREBOX_AUTOBOOT_TIMEOUT}" > ${WORKDIR}/env/nv/autoboot_timeout
+		printf "${BAREBOX_AUTOBOOT_TIMEOUT}\n" > ${WORKDIR}/env/nv/autoboot_timeout
 	fi
 }
