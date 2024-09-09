@@ -192,4 +192,3 @@ UMPF_VERSION = "20240516-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION = "${UMPF_BASE}"
 # umpf-end
-SRC_URI += "file://patches/2000-sw-reset.patch"
