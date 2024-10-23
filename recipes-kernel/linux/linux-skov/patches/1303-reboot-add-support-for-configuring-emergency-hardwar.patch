@@ -110,7 +110,7 @@ index 5bb906098697..2e21b5594f81 100644
  #define CAP_SYS_ADMIN        21
  
 diff --git a/kernel/reboot.c b/kernel/reboot.c
-index 9089d727bc59..51f4363b3e21 100644
+index 0b38761cae84..c7fb52c54c02 100644
 --- a/kernel/reboot.c
 +++ b/kernel/reboot.c
 @@ -36,6 +36,8 @@ enum reboot_mode reboot_mode DEFAULT_REBOOT_MODE;
@@ -122,7 +122,7 @@ index 9089d727bc59..51f4363b3e21 100644
  /*
   * This variable is used privately to keep track of whether or not
   * reboot_type is still set to its default value (i.e., reboot= hasn't
-@@ -1022,6 +1024,8 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+@@ -1023,6 +1025,8 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
  	if (!atomic_dec_and_test(&allow_proceed))
  		return;
  
@@ -131,7 +131,7 @@ index 9089d727bc59..51f4363b3e21 100644
  	/*
  	 * Queue a backup emergency shutdown in the event of
  	 * orderly_poweroff failure
-@@ -1034,6 +1038,48 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+@@ -1035,6 +1039,48 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
  }
  EXPORT_SYMBOL_GPL(__hw_protection_shutdown);
  
@@ -180,7 +180,7 @@ index 9089d727bc59..51f4363b3e21 100644
  static int __init reboot_setup(char *str)
  {
  	for (;;) {
-@@ -1293,6 +1339,7 @@ static struct kobj_attribute reboot_cpu_attr = __ATTR_RW(cpu);
+@@ -1294,6 +1340,7 @@ static struct kobj_attribute reboot_cpu_attr = __ATTR_RW(cpu);
  #endif
  
  static struct attribute *reboot_attrs[] = {

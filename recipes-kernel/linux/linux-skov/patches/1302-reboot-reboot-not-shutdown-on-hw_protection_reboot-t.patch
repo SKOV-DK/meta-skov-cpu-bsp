@@ -21,11 +21,11 @@ is called and the orderly reboot takes too long.
 Fixes: 79fa723ba84c ("reboot: Introduce thermal_zone_device_critical_reboot()")
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
- kernel/reboot.c | 60 ++++++++++++++++++++++++++++++++++++++++-----------------
- 1 file changed, 42 insertions(+), 18 deletions(-)
+ kernel/reboot.c | 37 +++++++++++++++++++++++++++++++------
+ 1 file changed, 31 insertions(+), 6 deletions(-)
 
 diff --git a/kernel/reboot.c b/kernel/reboot.c
-index 49c88a9a68d4..9089d727bc59 100644
+index 49c88a9a68d4..0b38761cae84 100644
 --- a/kernel/reboot.c
 +++ b/kernel/reboot.c
 @@ -925,6 +925,20 @@ void orderly_reboot(void)
@@ -49,52 +49,40 @@ index 49c88a9a68d4..9089d727bc59 100644
  /**
   * hw_failure_emergency_poweroff_func - emergency poweroff work after a known delay
   * @work: work_struct associated with the emergency poweroff function
-@@ -934,37 +948,47 @@ EXPORT_SYMBOL_GPL(orderly_reboot);
+@@ -934,6 +948,11 @@ EXPORT_SYMBOL_GPL(orderly_reboot);
   */
  static void hw_failure_emergency_poweroff_func(struct work_struct *work)
  {
--	/*
--	 * We have reached here after the emergency shutdown waiting period has
--	 * expired. This means orderly_poweroff has not been able to shut off
--	 * the system for some reason.
--	 *
--	 * Try to shut down the system immediately using kernel_power_off
--	 * if populated
--	 */
++	const char *action_str = hw_protection_action_str(hw_failure_emergency_action);
++
++	pr_emerg("Hardware protection timed-out. Trying forced %s\n",
++		 action_str);
++
+ 	/*
+ 	 * We have reached here after the emergency shutdown waiting period has
+ 	 * expired. This means orderly_poweroff has not been able to shut off
+@@ -942,13 +961,17 @@ static void hw_failure_emergency_poweroff_func(struct work_struct *work)
+ 	 * Try to shut down the system immediately using kernel_power_off
+ 	 * if populated
+ 	 */
 -	pr_emerg("Hardware protection timed-out. Trying forced poweroff\n");
 -	kernel_power_off();
-+	pr_emerg("Hardware protection timed-out. Trying forced %s\n",
-+		 hw_protection_action_str(hw_failure_emergency_action));
- 
--	/*
--	 * Worst of the worst case trigger emergency restart
--	 */
--	pr_emerg("Hardware protection shutdown failed. Trying emergency restart\n");
--	emergency_restart();
-+	switch (hw_failure_emergency_action) {
-+	case HWPROT_ACT_SHUTDOWN:
-+	default:
-+		/*
-+		 * We have reached here after the emergency shutdown waiting period has
-+		 * expired. This means orderly_poweroff has not been able to shut off
-+		 * the system for some reason.
-+		 *
-+		 * Try to shut down the system immediately using kernel_power_off
-+		 * if populated
-+		 */
-+		kernel_power_off();
 +
-+		/*
-+		 * Worst of the worst case trigger emergency restart
-+		 */
-+		pr_emerg("Hardware protection shutdown failed. Trying emergency restart\n");
-+		fallthrough;
-+	case HWPROT_ACT_REBOOT:
-+		emergency_restart();
-+	}
++	if (hw_failure_emergency_action == HWPROT_ACT_REBOOT)
++		kernel_restart(NULL);
++	else
++		kernel_power_off();
+ 
+ 	/*
+ 	 * Worst of the worst case trigger emergency restart
+ 	 */
+-	pr_emerg("Hardware protection shutdown failed. Trying emergency restart\n");
++	pr_emerg("Hardware protection %s failed. Trying emergency restart\n",
++		 action_str);
+ 	emergency_restart();
  }
  
- static DECLARE_DELAYED_WORK(hw_failure_emergency_poweroff_work,
+@@ -956,15 +979,17 @@ static DECLARE_DELAYED_WORK(hw_failure_emergency_poweroff_work,
  			    hw_failure_emergency_poweroff_func);
  
  /**
@@ -114,7 +102,7 @@ index 49c88a9a68d4..9089d727bc59 100644
  	schedule_delayed_work(&hw_failure_emergency_poweroff_work,
  			      msecs_to_jiffies(poweroff_delay_ms));
  }
-@@ -1002,7 +1026,7 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+@@ -1002,7 +1027,7 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
  	 * Queue a backup emergency shutdown in the event of
  	 * orderly_poweroff failure
  	 */
