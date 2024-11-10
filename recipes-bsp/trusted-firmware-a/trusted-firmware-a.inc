@@ -1,13 +1,15 @@
 DESCRIPTION = "Trusted Firmware-A"
-LICENSE = "BSD-3-Clause & MIT"
+LICENSE = "BSD-2-Clause & BSD-3-Clause & MIT & Apache-2.0"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit deploy
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;name=tfa;branch=master"
+SRC_URI_TRUSTED_FIRMWARE_A ?= "git://review.trustedfirmware.org/TF-A/trusted-firmware-a;protocol=https"
+SRCBRANCH = "master"
+SRC_URI = "${SRC_URI_TRUSTED_FIRMWARE_A};name=tfa;branch=${SRCBRANCH}"
 
-UPSTREAM_CHECK_GITTAGREGEX = "^v(?P<pver>\d+(\.\d+)+)$"
+UPSTREAM_CHECK_GITTAGREGEX = "^(lts-)?v(?P<pver>\d+(\.\d+)+)$"
 
 SRCREV_FORMAT = "tfa"
 
@@ -101,9 +103,9 @@ def remove_options_tail (in_string):
     from itertools import takewhile
     return ' '.join(takewhile(lambda x: not x.startswith('-'), in_string.split(' ')))
 
-EXTRA_OEMAKE += "LD=${@remove_options_tail(d.getVar('LD'))}"
+EXTRA_OEMAKE += "LD='${@remove_options_tail(d.getVar('LD'))}'"
 
-EXTRA_OEMAKE += "CC=${@remove_options_tail(d.getVar('CC'))}"
+EXTRA_OEMAKE += "CC='${@remove_options_tail(d.getVar('CC'))}'"
 
 # Verbose builds, no -Werror
 EXTRA_OEMAKE += "V=1 E=0"
@@ -166,7 +168,7 @@ BUILD_DIR .= "/${@'debug' if d.getVar("TFA_DEBUG") == '1' else 'release'}"
 do_compile() {
     # This is still needed to have the native tools executing properly by
     # setting the RPATH
-    sed -i '/^LDLIBS/ s,$, \$\{BUILD_LDFLAGS},' ${S}/tools/fiptool/Makefile
+    sed -i '/^LDOPTS/ s,$, \$\{BUILD_LDFLAGS},' ${S}/tools/fiptool/Makefile
     sed -i '/^INCLUDE_PATHS/ s,$, \$\{BUILD_CFLAGS},' ${S}/tools/fiptool/Makefile
     sed -i '/^LIB/ s,$, \$\{BUILD_LDFLAGS},' ${S}/tools/cert_create/Makefile
 
