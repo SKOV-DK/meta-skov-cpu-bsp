@@ -1,0 +1,30 @@
+From: =?UTF-8?q?Sven=20P=C3=BCschel?= <s.pueschel@pengutronix.de>
+Date: Mon, 18 Nov 2024 17:34:35 +0100
+Subject: [PATCH] ARM: dts: i.MX8MP: imx8mp-skov: skip sd/sdio detection on the
+ eMMC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Skip sd/sdio detection on the eMMC to reduce the detection time by
+about 270ms. This change is already part of the kernel dtsi file
+(see  dts/src/arm64/freescale/imx8mp-skov-reva.dtsi).
+
+Signed-off-by: Sven Püschel <s.pueschel@pengutronix.de>
+---
+ arch/arm/dts/imx8mp-skov.dts | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/dts/imx8mp-skov.dts b/arch/arm/dts/imx8mp-skov.dts
+index 3761da89cae7..ddf2438560d6 100644
+--- a/arch/arm/dts/imx8mp-skov.dts
++++ b/arch/arm/dts/imx8mp-skov.dts
+@@ -406,6 +406,8 @@ &usdhc3 {
+ 	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
+ 	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
+ 	bus-width = <8>;
++	no-sd;
++	no-sdio;
+ 	non-removable;
+ 	status = "okay";
+ };
