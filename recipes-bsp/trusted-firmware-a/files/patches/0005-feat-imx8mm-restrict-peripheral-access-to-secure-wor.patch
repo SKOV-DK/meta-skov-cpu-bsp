@@ -1,0 +1,32 @@
+From: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+Date: Mon, 4 Mar 2024 12:00:57 +0100
+Subject: [PATCH] feat(imx8mm): restrict peripheral access to secure world
+
+This restricts and locks all security relevant peripherals to only be
+changeable by the secure world. Otherwise the normal world can simply
+change the access settings and defeat all security measures put in
+place.
+
+Change-Id: I484a2c8164e58b68256d829470e00d5ec473e266
+Upstream-Status: Pending
+
+Signed-off-by: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index f57928141341..bff8fb4e88e0 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -77,7 +77,9 @@ static const struct imx_rdc_cfg rdc[] = {
+ 
+ static const struct imx_csu_cfg csu_cfg[] = {
+ 	/* peripherals csl setting */
+-	CSU_CSLx(0x1, CSU_SEC_LEVEL_0, UNLOCKED),
++	CSU_CSLx(CSU_CSL_RDC, CSU_SEC_LEVEL_3, LOCKED),
++	CSU_CSLx(CSU_CSL_TZASC, CSU_SEC_LEVEL_5, LOCKED),
++	CSU_CSLx(CSU_CSL_CSU, CSU_SEC_LEVEL_5, LOCKED),
+ 
+ 	/* master HP0~1 */
+ 

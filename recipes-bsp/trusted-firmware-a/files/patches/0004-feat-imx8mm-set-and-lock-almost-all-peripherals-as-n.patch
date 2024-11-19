@@ -1,0 +1,51 @@
+From: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+Date: Mon, 4 Mar 2024 12:00:24 +0100
+Subject: [PATCH] feat(imx8mm): set and lock almost all peripherals as
+ non-secure
+
+This sets and locks all peripheral type-1 masters, except CAAM, access
+as non-secure, so that they can't access secure world resources from the
+normal world.
+
+The CAAM itself is TrustZone aware and handles memory access between the
+normal world and the secure world on its own. Pinning it as non-secure
+access results in bus aborts if the secure memory region is protected by
+the TZASC380.
+
+Change-Id: Idba4d8a491ccce0491489c61e73545baab1889c4
+Upstream-Status: Pending
+
+Signed-off-by: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index dc9dd5949798..f57928141341 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -82,6 +82,24 @@ static const struct imx_csu_cfg csu_cfg[] = {
+ 	/* master HP0~1 */
+ 
+ 	/* SA setting */
++	CSU_SA(CSU_SA_M4, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_SDMA1, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_PCIE_CTRL1, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_USB1, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_USB2, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_VPU, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_GPU, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_APBHDMA, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_ENET, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_USDHC1, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_USDHC2, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_USDHC3, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_HUGO, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_DAP, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_SDMA2, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_SDMA3, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_LCDIF, NON_SEC_ACCESS, LOCKED),
++	CSU_SA(CSU_SA_CSI, NON_SEC_ACCESS, LOCKED),
+ 
+ 	/* HP control setting */
+ 
