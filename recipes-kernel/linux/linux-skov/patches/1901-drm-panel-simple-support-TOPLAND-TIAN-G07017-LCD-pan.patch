@@ -1,0 +1,68 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 27 Nov 2024 09:49:46 +0100
+Subject: [PATCH] drm: panel-simple: support TOPLAND TIAN G07017 LCD panel
+
+The TIAN-G07017-01 is a 7" TFT-LCD module by TOPLAND ELECTRONICS (H.K).
+The panel features 1024x600 24-bit RGB pixels driven over LVDS as well
+as a PWM backlight and I2C-connected capacitive touch.
+
+The panel description is taken from the Datasheet V0 (2024.5.23), but
+it lists no timings and there were provided by the vendor separately.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/gpu/drm/panel/panel-simple.c | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 20e3df1c59d4..d1717085b15c 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -4090,6 +4090,37 @@ static const struct panel_desc ti_nspire_classic_lcd_panel = {
+ 	.bus_flags = DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE,
+ };
+ 
++static const struct display_timing topland_tian_g07017_01_timing = {
++	.pixelclock = { 44900000, 51200000, 63000000 },
++	.hactive = { 1024, 1024, 1024 },
++	.hfront_porch = { 16, 160, 216 },
++	.hback_porch = { 160, 160, 160 },
++	.hsync_len = { 1, 1, 140 },
++	.vactive = { 600, 600, 600 },
++	.vfront_porch = { 1, 12, 127 },
++	.vback_porch = { 23, 23, 23 },
++	.vsync_len = { 1, 1, 20 },
++};
++
++static const struct panel_desc topland_tian_g07017_01= {
++	.timings = &topland_tian_g07017_01_timing,
++	.num_timings = 1,
++	.bpc = 8,  /* 6.6 Data input format */
++	.size = { /* 3. General Specification */
++		.width = 154,
++		.height = 86,
++	},
++	.delay = {
++		.prepare = 1, /* 6.5. AC electrical characteristics: 150µs PLL wake-up time */
++		.enable = 100,  /* 6.4 - Power on: 6 VSyncs */
++		.disable = 84, /* 6.4. - Power off: 5 Vsyncs */
++		.unprepare = 50, /* 6.4. - Power off: 3 Vsyncs */
++	},
++	.bus_format = MEDIA_BUS_FMT_RGB888_1X7X4_SPWG, /* 6.6 Data input format */
++	.connector_type = DRM_MODE_CONNECTOR_LVDS, /* 3. General Specification */
++	.bus_flags = DRM_BUS_FLAG_DE_HIGH,  /* 6.7 Input Clock and data timing diagram */
++};
++
+ static const struct drm_display_mode toshiba_lt089ac29000_mode = {
+ 	.clock = 79500,
+ 	.hdisplay = 1280,
+@@ -4711,6 +4742,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "toshiba,lt089ac29000",
+ 		.data = &toshiba_lt089ac29000,
++	}, {
++		.compatible = "topland,tian-g07017-01",
++		.data = &topland_tian_g07017_01,
+ 	}, {
+ 		.compatible = "tpk,f07a-0102",
+ 		.data = &tpk_f07a_0102,

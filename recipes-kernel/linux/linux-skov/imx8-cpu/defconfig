@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 6.9.0-rc6-20240502-3 Kernel Configuration
+# Linux/arm64 6.9.0-20241127-5 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="aarch64-pmc-linux-gcc (GCC) 11.4.0"
 CONFIG_CC_IS_GCC=y
@@ -1327,6 +1327,7 @@ CONFIG_FIB_RULES=y
 # CONFIG_LWTUNNEL is not set
 CONFIG_DST_CACHE=y
 CONFIG_GRO_CELLS=y
+CONFIG_NET_IEEE8021Q_HELPERS=y
 CONFIG_NET_SELFTESTS=y
 CONFIG_NET_SOCK_MSG=y
 CONFIG_NET_DEVLINK=y
