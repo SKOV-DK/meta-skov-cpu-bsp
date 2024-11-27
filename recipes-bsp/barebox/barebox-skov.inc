@@ -44,3 +44,74 @@ do_compile:prepend:imx8-cpu() {
                 cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${BAREBOX_FIRMWARE_DIR}
         done
 }
+
+inherit signing
+
+BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
+BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
+
+DEPENDS:append:imx8-cpu = "\
+        virtual/imx-hab-signing \
+        extract-cert-native \
+        imx-cst-native \
+"
+
+python __anonymous() {
+    key_role = d.getVar("BAREBOX_HABV4_SIGNING_KEY_ROLE")
+    if key_role[:-1] != "imx_habv4_srk" or key_role[-1] not in "1234":
+        bb.fatal("Unexpected BAREBOX_HABV4_SIGNING_KEY_ROLE, expected 'imx_habv4_srk{1,2,3,4}', got '%s'" % key_role)
+    key_index = key_role[-1]
+
+    # set which SRK the ROM code should validate against
+    d.setVar("BAREBOX_SRK_INDEX", str(int(key_index) - 1))
+    d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
+}
+
+do_compile:prepend:imx8-cpu() {
+        signing_prepare
+
+        # ---- HAB bootloader signing ----
+        for i in 1 2 3 4; do
+            signing_use_role "imx_habv4_srk${i}"
+            extract-cert "${PKCS11_URI}" "${B}/srk${i}.der"
+        done
+
+        srktool --hab_ver 4 \
+            --table "${B}/imx-srk-table.bin" \
+            --efuses "${B}/imx-srk-fuse.bin" \
+            --digest sha256 \
+            --certs "${B}/srk1.der,${B}/srk2.der,${B}/srk3.der,${B}/srk4.der"
+
+        # Prepare the installation of imx-srk-fuse.bin into barebox' environment
+        # to simplify burning it
+        mkdir -p "${WORKDIR}/env"
+        cp "${B}/imx-srk-fuse.bin" "${WORKDIR}/env"
+
+        signing_use_role imx_habv4_csf"${BAREBOX_SRK_INDEX_CSF_IMG}"
+        export CSF_URI="${PKCS11_URI}"
+
+        signing_use_role imx_habv4_img"${BAREBOX_SRK_INDEX_CSF_IMG}"
+        export IMG_URI="${PKCS11_URI}"
+
+        # Switch cst's backend to PKCS#11
+        export CST_EXTRA_CMDLINE_OPTIONS="-b pkcs11"
+
+        # Adjust barebox' configuration by setting the SRK index, SRK table and
+        # CSF/IMG certificates. See the CST patch for the __ENV__ trick. We
+        # can't use CONFIG_HAB_CERTS_ENV due to shell/gcc & PKCS#11-URI escaping
+        # issues.
+        sed -e "s,^\(CONFIG_HABV4_SRK_INDEX=\).*$,\1${BAREBOX_SRK_INDEX}," \
+            -e "s,^\(CONFIG_HABV4_TABLE_BIN=\"\).*\"$,\1${B}/imx-srk-table.bin\"," \
+            -e "s,^\(CONFIG_HABV4_CSF_CRT_PEM=\"\).*\"$,\1__ENV__CSF_URI\"," \
+            -e "s,^\(CONFIG_HABV4_IMG_CRT_PEM=\"\).*\"$,\1__ENV__IMG_URI\"," \
+            -i ${B}/.config
+}
+
+do_install:append:imx8-cpu() {
+        install -d ${D}/boot/
+        install -m 0644 ${B}/imx-srk-fuse.bin ${D}/boot/
+}
+
+IMX_SRK_FUSE_BIN = ""
+IMX_SRK_FUSE_BIN:imx8-cpu = "/boot/imx-srk-fuse.bin"
+FILES:${PN} += "${IMX_SRK_FUSE_BIN}"
