@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Barebox/arm64 2024.04.0-20240711-2 Configuration
+# Barebox/arm64 2024.04.0-20241127-1 Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_LINUX=y
