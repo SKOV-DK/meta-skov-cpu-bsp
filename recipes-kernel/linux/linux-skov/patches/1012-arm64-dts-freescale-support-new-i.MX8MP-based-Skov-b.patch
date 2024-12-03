@@ -71,8 +71,8 @@ index 000000000000..8ea95fae1ea4
 +		pinctrl-0 = <&pinctrl_touchscreen>;
 +		interrupts-extended = <&gpio4 28 IRQ_TYPE_EDGE_FALLING>;
 +		reset-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
-+		touchscreen-size-x = <1280>;
-+		touchscreen-size-y = <800>;
++		touchscreen-size-x = <1024>;
++		touchscreen-size-y = <600>;
 +		vcc-supply = <&reg_vdd_3v3>;
 +		iovcc-supply = <&reg_vdd_3v3>;
 +		wakeup-source;
