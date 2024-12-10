@@ -65,7 +65,7 @@ index 000000000000..8ea95fae1ea4
 +	status = "okay";
 +
 +	touchscreen@38 {
-+		compatible = "edt,edt-ft5406";
++		compatible = "edt,edt-ft5506";
 +		reg = <0x38>;
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pinctrl_touchscreen>;
