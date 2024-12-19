@@ -50,11 +50,18 @@ inherit signing
 BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 
+FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
+
 DEPENDS:append:imx8-cpu = "\
         virtual/imx-hab-signing \
+        virtual/fit-signing \
         extract-cert-native \
         imx-cst-native \
+        openssl-native \
+        openssl \
 "
+
+export HOST_EXTRACFLAGS
 
 python __anonymous() {
     key_role = d.getVar("BAREBOX_HABV4_SIGNING_KEY_ROLE")
@@ -66,6 +73,27 @@ python __anonymous() {
     d.setVar("BAREBOX_SRK_INDEX", str(int(key_index) - 1))
     d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
 }
+
+# Citation from the sed info page [1]: To include a literal \, &, or newline in
+# the final replacement, be sure to precede the desired \, &, or newline in the
+# REPLACEMENT with a \.
+#
+# As PKCS#11-URIs potentially contain ampersands they need to be escaped
+# accordingly.
+#
+# [1] https://www.gnu.org/software/sed/manual/sed.html#The-_0022s_0022-Command
+escape_as_sed_replacement() {
+        # The first three sed-statements read all input lines into sed's pattern
+        # space (to be compatible with non-GNU sed-implementations they need to
+        # be split into single '-e' options). The final s///-commands do the
+        # real work and at first escape existing backslashes to not touch those
+        # inserted by escaping ampersands or newlines.
+        printf "%s" "$*" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\\/\\\\/g; s/&/\\&/g; s/\n/\\n/g'
+}
+
+# Enforce export of the function to run.do_compile
+# (presumably at least required until Yocto's styhead release)
+do_compile[vardeps] += "escape_as_sed_replacement"
 
 do_compile:prepend:imx8-cpu() {
         signing_prepare
@@ -96,6 +124,9 @@ do_compile:prepend:imx8-cpu() {
         # Switch cst's backend to PKCS#11
         export CST_EXTRA_CMDLINE_OPTIONS="-b pkcs11"
 
+        signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
+        FIT_URI="$(escape_as_sed_replacement "${PKCS11_URI}")"
+
         # Adjust barebox' configuration by setting the SRK index, SRK table and
         # CSF/IMG certificates. See the CST patch for the __ENV__ trick. We
         # can't use CONFIG_HAB_CERTS_ENV due to shell/gcc & PKCS#11-URI escaping
@@ -104,6 +135,7 @@ do_compile:prepend:imx8-cpu() {
             -e "s,^\(CONFIG_HABV4_TABLE_BIN=\"\).*\"$,\1${B}/imx-srk-table.bin\"," \
             -e "s,^\(CONFIG_HABV4_CSF_CRT_PEM=\"\).*\"$,\1__ENV__CSF_URI\"," \
             -e "s,^\(CONFIG_HABV4_IMG_CRT_PEM=\"\).*\"$,\1__ENV__IMG_URI\"," \
+            -e "s,^\(CONFIG_CRYPTO_PUBLIC_KEYS=\"\).*\"$,\1${FITIMAGE_SIGNING_KEY_ROLE}:${FIT_URI}\"," \
             -i ${B}/.config
 }
 
