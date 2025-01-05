@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# SD card slot, first partition
-mkdir -p /mnt/disk0.0
-automount -d /mnt/disk0.0 'detect mci0 && [ -e /dev/disk0.0 ] && mount /dev/disk0.0 /mnt/disk0.0'
-
-mkdir -p /mnt/nfs
-automount -d /mnt/nfs 'ifup -a && mount -t nfs 192.168.86.201:/nfsboot/arm9 /mnt/nfs'
