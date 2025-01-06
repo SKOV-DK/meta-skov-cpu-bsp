@@ -1,6 +1,6 @@
 require barebox-skov.inc
 
-COMPATIBLE_MACHINE = "imx6-cpu|arm9-cpu|imx8-cpu"
+COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu"
 
 do_install:append () {
 	install -d ${D}/boot/

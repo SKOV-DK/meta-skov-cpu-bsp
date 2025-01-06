@@ -1,3 +1,0 @@
-#!/bin/sh
-
-global.linux.bootargs.mem="mem=${global.board.mem}M"
