@@ -29,3 +29,5 @@ COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu"
 
 # do not install kernel images to the rootfs
 RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
+
+KERNEL_IMAGETYPES:append:imx8-cpu = " Image.gz"
