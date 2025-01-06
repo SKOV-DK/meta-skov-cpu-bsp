@@ -14,7 +14,7 @@ SYSTEMD_SERVICE:${PN} = "factory-install.service"
 
 MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
-PART_NO = "6"
+PART_NO = "9"
 WIC = "${FACTORY_INSTALL_IMAGE}-${MACHINE}.rootfs.wic"
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET:imx8-cpu = "${BAREBOX_PADDING_OFFSET}K"

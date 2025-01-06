@@ -20,6 +20,8 @@ SRC_URI += "\
   file://env/nv/bootchooser.targets \
   file://env/nv/bootchooser.system0.boot \
   file://env/nv/bootchooser.system1.boot \
+  file://env/boot/failsafe \
+  file://env/boot/sd \
   file://env/boot/system0 \
   file://env/boot/system1 \
   file://env/init/bootargs \

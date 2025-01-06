@@ -1,8 +1,11 @@
 #!/bin/sh
 
 global bootm.appendroot=1
-global bootm.root_dev=mmc2.system0.root-FS
-global bootm.image=/dev/mmc2.system0.fit
+global bootm.root_dev=/dev/mmc1.system.root-FS
+global bootm.image=/dev/mmc1.system.fit
 global linux.bootargs.dyn.rootwait=rootwait
+global linux.bootargs.dyn.rauc=rauc.external
 
 global linux.bootargs.dyn.bootentries="init=/usr/sbin/platsch fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot"
+
+detect mmc1
