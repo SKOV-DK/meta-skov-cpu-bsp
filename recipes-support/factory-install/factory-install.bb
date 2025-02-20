@@ -15,14 +15,14 @@ SYSTEMD_SERVICE:${PN} = "factory-install.service"
 MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
 PART_NO = "9"
-WIC = "${FACTORY_INSTALL_IMAGE}-${MACHINE}.rootfs.wic"
+WIC = "${FACTORY_INSTALL_IMAGE}-secbootimg-${MACHINE}..rootfs.wic"
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET:imx8-cpu = "${BAREBOX_PADDING_OFFSET}K"
 BAREBOX_RENAME ?= "${BAREBOX_IMAGE}"
 BAREBOX_RENAME:imx8-cpu = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
 
 # Ensure that all needed artifacts are available for inclusion
-do_compile[depends] += "${FACTORY_INSTALL_IMAGE}:do_image_complete"
+do_compile[depends] += "${FACTORY_INSTALL_IMAGE}-secbootimg:do_image_complete"
 do_compile[depends] += "virtual/bootloader:do_deploy"
 
 DEPENDS = " \
