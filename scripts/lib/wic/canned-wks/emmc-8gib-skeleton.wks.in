@@ -38,6 +38,6 @@ part --part-name system1.fit         --part-type FE3A2A5D-4F32-41A7-B725-ACCC328
 part --part-name system1.root-FS     --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 2048M --source empty
 part --part-name failsafe.fit        --part-type FE3A2A5D-4F32-41A7-B725-ACCC3285A309 --align 1024 --fixed-size 64M   --source rawcopy --sourceparams="file=${FAILSAFE_FITIMAGE_IMAGE_LINK_NAME}"
 part --part-name failsafe.root-FS    --part-type B921B045-1DF0-41C3-AF44-4C6F280D3FAE --align 1024 --fixed-size 512M  --source rawcopy --sourceparams="file=${FAILSAFE_ROOTFS_IMAGE_LINK_NAME}"
-part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --align 1024 --fixed-size 2652M --fstype=ext4
+part --part-name home                --part-type 933AC7E1-2EB4-4F13-B844-0E14E2AEF915 --align 1024 --fixed-size 2652M --source rootfs  --change-directory home/ --fstype=ext4
 
 bootloader --ptable gpt
