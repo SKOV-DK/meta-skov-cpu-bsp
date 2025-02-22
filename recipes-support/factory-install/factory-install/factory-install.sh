@@ -24,7 +24,6 @@ BOOT1_FORCE_RO=/sys/class/block/@TGT_MMC@boot1/force_ro
 WIC=@WIC@
 BAREBOX_RENAME=@BAREBOX_RENAME@
 DATADIR=@DATADIR@
-PART_NO=@PART_NO@
 
 
 show_splash () {
@@ -76,21 +75,6 @@ fi
 echo "Flashing ${WIC} into ${MEDIUM} using bmaptool."
 if ! bmaptool copy --bmap "${DATADIR}${WIC}.bmap" "${DATADIR}${WIC}.zst" "${TGT_DEV}"; then
     failure "Failed to flash ${WIC} into ${MEDIUM} using bmaptool."
-fi
-
-echo "Fixing alternate GPT header at the end of ${MEDIUM}."
-if ! parted ---pretend-input-tty "${TGT_DEV}" -- print <<< fix; then
-    failure "Failed to fix alternate GPT header at the end of ${MEDIUM}."
-fi
-
-echo "Expanding ${PART_NO}th partition of ${MEDIUM} to the end of the device."
-if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" -64s; then
-    failure "Failed to expand ${PART_NO}th partition of ${MEDIUM} to the end of the device."
-fi
-
-echo "Resizing ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
-if ! resize2fs -p "${TGT_DEV}"p"${PART_NO}"; then
-    failure "Failed to resize ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
 fi
 
 echo "Disabling the ${MEDIUM}'s first boot partition's read-only mode."

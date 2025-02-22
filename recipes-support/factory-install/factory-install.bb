@@ -14,8 +14,7 @@ SYSTEMD_SERVICE:${PN} = "factory-install.service"
 
 MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
-PART_NO = "9"
-WIC = "${FACTORY_INSTALL_IMAGE}-secbootimg-${MACHINE}..rootfs.wic"
+WIC = "${FACTORY_INSTALL_IMAGE}-secbootimg-${MACHINE}.rootfs.wic"
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET:imx8-cpu = "${BAREBOX_PADDING_OFFSET}K"
 BAREBOX_RENAME ?= "${BAREBOX_IMAGE}"
@@ -34,8 +33,6 @@ RDEPENDS:${PN} = " \
     bmaptool \
     util-linux-blkdiscard \
     zstd \
-    parted \
-    e2fsprogs-resize2fs \
     splash-factory-install \
 "
 
@@ -54,7 +51,6 @@ do_install() {
         --expression=s,@WIC@,${WIC}, \
         --expression=s,@BAREBOX_RENAME@,${BAREBOX_RENAME}, \
         --expression=s,@DATADIR@,${datadir}/factory-install/, \
-        --expression=s,@PART_NO@,${PART_NO}, \
         --in-place ${D}${bindir}/factory-install.sh
 
     install -d ${D}${datadir}/factory-install
