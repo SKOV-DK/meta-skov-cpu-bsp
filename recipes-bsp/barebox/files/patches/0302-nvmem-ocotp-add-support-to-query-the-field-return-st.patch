@@ -1,0 +1,108 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 16 Apr 2024 19:33:11 +0200
+Subject: [PATCH] nvmem: ocotp: add support to query the field-return sticky
+ bit
+
+The i.MX8M* devices do have an sticky bit which indicates if the
+field-return fuse can be written. Add support to query the lock bit.
+
+To make it easy to read align the STICKY bit definitions as well.
+
+Upstream-Status: Pending
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+---
+ drivers/nvmem/ocotp.c    | 24 ++++++++++++++++++++++++
+ include/mach/imx/ocotp.h |  1 +
+ 2 files changed, 25 insertions(+)
+
+diff --git a/drivers/nvmem/ocotp.c b/drivers/nvmem/ocotp.c
+index c0517980fb18..87cc95a636f3 100644
+--- a/drivers/nvmem/ocotp.c
++++ b/drivers/nvmem/ocotp.c
+@@ -91,6 +91,7 @@
+ #define OCOTP_TIMING_WAIT		GENMASK(27, 22)
+ 
+ #define OCOTP_SW_STICKY_SRK_REVOKE_LOCK		BIT(1)
++#define OCOTP_SW_STICKY_FIELD_RETURN_LOCK	BIT(2)
+ 
+ #define OCOTP_READ_CTRL_READ_FUSE	BIT(1)
+ 
+@@ -152,6 +153,7 @@ struct imx_ocotp_data {
+ 	int (*fuse_blow)(struct ocotp_priv *priv, u32 addr, u32 value);
+ 	bool (*srk_revoke_locked)(struct ocotp_priv *priv);
+ 	void (*lock_srk_revoke)(struct ocotp_priv *priv);
++	bool (*field_return_locked)(struct ocotp_priv *priv);
+ 	u8  mac_offsets[MAX_MAC_OFFSETS];
+ 	u8  mac_offsets_num;
+ 	struct imx8m_featctrl_data *feat;
+@@ -292,6 +294,11 @@ static void imx8m_lock_srk_revoke(struct ocotp_priv *priv)
+ 	writel(val, priv->base + OCOTP_SW_STICKY);
+ }
+ 
++static bool imx8m_field_return_locked(struct ocotp_priv *priv)
++{
++	return readl(priv->base + OCOTP_SW_STICKY) & OCOTP_SW_STICKY_FIELD_RETURN_LOCK;
++}
++
+ static int imx6_fuse_read_addr(struct ocotp_priv *priv, u32 addr, u32 *pdata)
+ {
+ 	const u32 bm_ctrl_error = priv->data->ctrl->bm_error;
+@@ -674,6 +681,20 @@ int imx_ocotp_lock_srk_revoke(void)
+ 	return -ENOSYS;
+ }
+ 
++int imx_ocotp_field_return_locked(void)
++{
++	int ret;
++
++	ret = imx_ocotp_ensure_probed();
++	if (ret)
++		return ret;
++
++	if (imx_ocotp->data->field_return_locked)
++		return imx_ocotp->data->field_return_locked(imx_ocotp);
++
++	return -ENOSYS;
++}
++
+ static void imx_ocotp_format_mac(u8 *dst, const u8 *src,
+ 				 enum imx_ocotp_format_mac_direction dir)
+ {
+@@ -1036,6 +1057,7 @@ static struct imx_ocotp_data imx8mp_ocotp_data = {
+ 	.fuse_read = imx6_fuse_read_addr,
+ 	.srk_revoke_locked = imx8m_srk_revoke_locked,
+ 	.lock_srk_revoke = imx8m_lock_srk_revoke,
++	.field_return_locked = imx8m_field_return_locked,
+ 	.ctrl = &ocotp_ctrl_reg_8mp,
+ };
+ 
+@@ -1067,6 +1089,7 @@ static struct imx_ocotp_data imx8mm_ocotp_data = {
+ 	.fuse_read = imx6_fuse_read_addr,
+ 	.srk_revoke_locked = imx8m_srk_revoke_locked,
+ 	.lock_srk_revoke = imx8m_lock_srk_revoke,
++	.field_return_locked = imx8m_field_return_locked,
+ 	.feat = &imx8mm_featctrl_data,
+ 	.ctrl = &ocotp_ctrl_reg_default,
+ };
+@@ -1087,6 +1110,7 @@ static struct imx_ocotp_data imx8mn_ocotp_data = {
+ 	.fuse_read = imx6_fuse_read_addr,
+ 	.srk_revoke_locked = imx8m_srk_revoke_locked,
+ 	.lock_srk_revoke = imx8m_lock_srk_revoke,
++	.field_return_locked = imx8m_field_return_locked,
+ 	.feat = &imx8mn_featctrl_data,
+ 	.ctrl = &ocotp_ctrl_reg_default,
+ };
+diff --git a/include/mach/imx/ocotp.h b/include/mach/imx/ocotp.h
+index 7a516ff789b9..e6f62a9da48c 100644
+--- a/include/mach/imx/ocotp.h
++++ b/include/mach/imx/ocotp.h
+@@ -38,6 +38,7 @@ int imx_ocotp_permanent_write(int enable);
+ int imx_ocotp_sense_enable(bool enable);
+ int imx_ocotp_srk_revoke_locked(void);
+ int imx_ocotp_lock_srk_revoke(void);
++int imx_ocotp_field_return_locked(void);
+ 
+ static inline u64 imx_ocotp_read_uid(void __iomem *ocotp)
+ {

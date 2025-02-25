@@ -14,6 +14,8 @@ wait longer by considerably increasing the number of retries. Let this increase
 depend on the "display.external" state variable's content to not catch a
 noticeable penalty in boot time for a controller with parallel panel.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  drivers/video/edid.c | 5 +++++

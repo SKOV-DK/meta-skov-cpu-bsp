@@ -12,6 +12,8 @@ let's detect this situation and delay startup. This way, Linux can
 detect the ongoing voltage loss, power down the eMMC, reboot into
 barebox and barebox will delay boot as long as the problem persists.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/lowlevel.c | 46 ++++++++++++++++++++++++++++++++++

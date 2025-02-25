@@ -8,13 +8,15 @@ functions to always output. Let's do that, so we have a very early
 character (>) printed to console to indicate that barebox was entered,
 even if further boot was to hang shortly after for whatever reason.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/lowlevel.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm/boards/skov-imx8mp/lowlevel.c b/arch/arm/boards/skov-imx8mp/lowlevel.c
-index 4338d511c4c2..d84fd73261ca 100644
+index 2d5289b8bbad..dc6aa4fde226 100644
 --- a/arch/arm/boards/skov-imx8mp/lowlevel.c
 +++ b/arch/arm/boards/skov-imx8mp/lowlevel.c
 @@ -45,7 +45,7 @@ static void setup_uart(void)

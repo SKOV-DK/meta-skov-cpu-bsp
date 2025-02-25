@@ -8,6 +8,8 @@ the power sequencing. Workaround this, by moving the switch into reset
 as early as possible to avoid erratic behavior until the driver is ready
 to take it out of reset.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/lowlevel.c | 7 +++++++

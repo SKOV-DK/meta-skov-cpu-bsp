@@ -4,6 +4,8 @@ Subject: [PATCH] ARM: i.MX8MP: skov: add new 7" g07017 variant support
 
 Add new 7" TIAN G07017 board variant.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/board.c | 4 ++++

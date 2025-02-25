@@ -8,9 +8,9 @@ require files/patches/series.inc
 require files/patches-skov/series.inc
 require files/${MACHINE}/env/env.inc
 
-DEPENDS += "coreutils-native"
+DEPENDS += "coreutils-native lz4-native"
 
-SRC_URI[sha256sum] = "c7c00f99dfe9d43b4619b34196ae1cd107136ea917c998ee0ab696c1e5b4edbf"
+SRC_URI[sha256sum] = "6da5f9e98a8c93f6eead3badefe133ed5fd865395b1a3c0192fdbdd9eb4f7311"
 
 # Allow autoboot_timeout adjustment for automation from local.conf or
 # environment via BAREBOX_AUTOBOOT_TIMEOUT

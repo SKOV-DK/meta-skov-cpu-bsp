@@ -1,0 +1,114 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Wed, 6 Mar 2024 13:01:53 +0100
+Subject: [PATCH] i.MX: HAB: add imx_hab_revoke_key support
+
+Add an helper to revoke an i.MX SRK key. At the moment the helper
+supprts i.MX8M devices only, but adding support for other SoCs can be
+done easily by providing the .revoke_key() hook.
+
+Upstream-Status: Pending
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+---
+ drivers/hab/hab.c                | 45 ++++++++++++++++++++++++++++++++++++++++
+ include/hab.h                    |  1 +
+ include/mach/imx/ocotp-fusemap.h |  1 +
+ 3 files changed, 47 insertions(+)
+
+diff --git a/drivers/hab/hab.c b/drivers/hab/hab.c
+index f684e9f1cc20..b966410eacfe 100644
+--- a/drivers/hab/hab.c
++++ b/drivers/hab/hab.c
+@@ -231,6 +231,27 @@ static int imx8m_hab_device_locked_down_ocotp(void)
+ 	return v;
+ }
+ 
++static int imx8m_hab_revoke_key_ocotp(unsigned key_idx)
++{
++	int ret;
++
++	/* Prohibit revocation of last possible key */
++	if (key_idx >= 4)
++		return -EINVAL;
++
++	ret = imx_ocotp_srk_revoke_locked();
++	if (ret < 0)
++		return ret;
++
++	/* Return -EINVAL in case the SRK_REVOKE write is locked */
++	if (ret == 1)
++		return -EINVAL;
++
++	ret = imx_ocotp_write_field(MX8M_OCOTP_SRK_REVOKE, BIT(key_idx));
++
++	return ret;
++}
++
+ struct imx_hab_ops {
+ 	int (*write_srk_hash)(const u8 *srk, unsigned flags);
+ 	int (*read_srk_hash)(u8 *srk);
+@@ -238,6 +259,7 @@ struct imx_hab_ops {
+ 	int (*lockdown_device)(unsigned flags);
+ 	int (*device_locked_down)(void);
+ 	int (*print_status)(void);
++	int (*revoke_key)(unsigned key_idx);
+ };
+ 
+ static struct imx_hab_ops imx_hab_ops_iim = {
+@@ -265,6 +287,7 @@ static struct imx_hab_ops imx8m_hab_ops_ocotp = {
+ 	.device_locked_down = imx8m_hab_device_locked_down_ocotp,
+ 	.permanent_write_enable = imx_hab_permanent_write_enable_ocotp,
+ 	.print_status = imx8m_hab_print_status,
++	.revoke_key = imx8m_hab_revoke_key_ocotp,
+ };
+ 
+ static int imx_ahab_write_srk_hash(const u8 *__newsrk, unsigned flags)
+@@ -538,3 +561,25 @@ static int init_imx_hab_print_status(void)
+ 	return 0;
+ }
+ postmmu_initcall(init_imx_hab_print_status);
++
++int imx_hab_revoke_key(unsigned key_idx, bool permanent)
++{
++	struct imx_hab_ops *ops = imx_get_hab_ops();
++	int ret;
++
++	if (!ops || !ops->revoke_key)
++		return -ENOSYS;
++
++	if (permanent) {
++		ret = ops->permanent_write_enable(1);
++		if (ret)
++			return ret;
++	}
++
++	ret = ops->revoke_key(key_idx);
++
++	if (permanent)
++		ops->permanent_write_enable(0);
++
++	return ret;
++}
+diff --git a/include/hab.h b/include/hab.h
+index 2cef3841d149..7a70c67f0488 100644
+--- a/include/hab.h
++++ b/include/hab.h
+@@ -51,5 +51,6 @@ int imx_hab_read_srk_hash(void *buf);
+ int imx_hab_lockdown_device(unsigned flags);
+ int imx_hab_device_locked_down(void);
+ int imx_hab_print_status(void);
++int imx_hab_revoke_key(unsigned key_idx, bool permanent);
+ 
+ #endif /* __HABV4_H */
+diff --git a/include/mach/imx/ocotp-fusemap.h b/include/mach/imx/ocotp-fusemap.h
+index c4f94e61e8f8..e6fa96b40ba9 100644
+--- a/include/mach/imx/ocotp-fusemap.h
++++ b/include/mach/imx/ocotp-fusemap.h
+@@ -57,5 +57,6 @@
+ #define MX8M_OCOTP_SRK_LOCK		(OCOTP_WORD(0x400) | OCOTP_BIT(9) | OCOTP_WIDTH(1))
+ #define MX8M_OCOTP_SEC_CONFIG_1		(OCOTP_WORD(0x470) | OCOTP_BIT(25) | OCOTP_WIDTH(1))
+ #define MX8MQ_OCOTP_DIR_BT_DIS		(OCOTP_WORD(0x470) | OCOTP_BIT(27) | OCOTP_WIDTH(1))
++#define MX8M_OCOTP_SRK_REVOKE		(OCOTP_WORD(0x670) | OCOTP_BIT(0) | OCOTP_WIDTH(4))
+ 
+ #endif /* __MACH_IMX_OCOTP_FUSEMAP_H */

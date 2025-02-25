@@ -9,6 +9,8 @@ mode, but we want to run the SoC in nominal mode instead as that's what
 the heat sink was specced for. Nominal mode is 850mV, so configure BUCK1
 RUN voltage to exactly that value.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/lowlevel.c | 16 ++++++++--------
@@ -51,7 +53,7 @@ index c35ffe526dae..692482f43580 100644
  
  static void power_init_board(void)
 diff --git a/arch/arm/dts/imx8mp-skov.dts b/arch/arm/dts/imx8mp-skov.dts
-index 254e68feca16..3761da89cae7 100644
+index 5271c9deabe5..12348342bbf1 100644
 --- a/arch/arm/dts/imx8mp-skov.dts
 +++ b/arch/arm/dts/imx8mp-skov.dts
 @@ -4,6 +4,7 @@

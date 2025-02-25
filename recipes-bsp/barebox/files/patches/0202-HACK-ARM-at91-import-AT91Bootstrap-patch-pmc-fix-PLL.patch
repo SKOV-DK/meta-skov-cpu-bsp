@@ -19,6 +19,8 @@ was ported to barebox doesn't suffice. Booting Linux with or without this patch
 didn't show apparent differences, but given that this is only meant for recovery,
 we'll play it safe and apply the patch, but this is not upstreaming material.
 
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
  arch/arm/mach-at91/at91_pmc_ll.c | 8 ++++++++

@@ -1,0 +1,79 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Wed, 20 Nov 2024 10:37:22 +0100
+Subject: [PATCH] ARM: i.MX8MP: skov: halt startup until power is good
+
+This provisional commit has been created on the basis of Kim Christensen's
+Commit [1] in Skov's Yocto-BSP. It needs to be revised before being submitted
+upstream (e.g. by a fixup created via "git commit --fixup=amend:<commit>").
+
+[1] b0c9fca3dc9f ("[CHG CORE-19777] Barebox: Stay in bootloader until power is detected OK")
+
+Upstream-Status: Pending
+---
+ arch/arm/boards/skov-imx8mp/lowlevel.c | 40 +++++++++++++++++++++-------------
+ 1 file changed, 25 insertions(+), 15 deletions(-)
+
+diff --git a/arch/arm/boards/skov-imx8mp/lowlevel.c b/arch/arm/boards/skov-imx8mp/lowlevel.c
+index 4338d511c4c2..2d5289b8bbad 100644
+--- a/arch/arm/boards/skov-imx8mp/lowlevel.c
++++ b/arch/arm/boards/skov-imx8mp/lowlevel.c
+@@ -79,15 +79,18 @@ static inline bool power_good(void)
+ static void wait_for_power_good(void)
+ {
+ 	void __iomem *gpio4 = IOMEM(MX8MP_GPIO4_BASE_ADDR);
+-	int timeout_ms = 100;
++	int timeout_ms = 0;
++   bool led = true;
+ 
+ 	imx8mp_setup_pad(MX8MP_PAD_SAI2_RXD0__GPIO4_IO23 | PGOOD_PAD_CTRL);
+ 	imx8m_gpio_direction_input(gpio4, 23);
+ 
++   imx8m_gpio_direction_output(IOMEM(MX8MP_GPIO1_BASE_ADDR), 5, led); // LED D1 ON
++
+ 	if (power_good())
+ 		return;
+-
+-	pr_debug("Delaying boot until power stabilizes");
++   
++	pr_warn("\nDelaying boot until power stabilizes\n");
+ 
+ 	/* If we reach this, because Linux did a hw_protection_reboot, we don't
+ 	 * want to continue booting right away.
+@@ -96,18 +99,25 @@ static void wait_for_power_good(void)
+ 	 * to reach a low enough level for the PMIC to detect VSYS_UVLO going
+ 	 * lower than allowed
+ 	 */
+-	while (!power_good() && timeout_ms > 0) {
+-		pr_debug(".");
+-		udelay(1000);
+-		timeout_ms--;
+-	}
+-
+-	if (!timeout_ms)
+-		pr_warn("\nIMX_SHDN_MF stuck low for >%ums. Continuing anyway\n",
+-			timeout_ms);
+-	/* The else branch is never reached, because power good toggling also
+-	 * resets the SoC
+-	 */
++
++   while (1) {
++      if (power_good()) {
++         // wait 10ms longer and check if it still good
++         udelay(10000);
++         if (power_good()) {
++      		pr_info("IMX_SHDN_MF stuck low for ~%ums.\n", timeout_ms);
++            break;
++         }
++      }
++      // fast blink LED D1
++      if (timeout_ms % 100 == 0) {
++   		pr_debug(".");
++         imx8m_gpio_direction_output(IOMEM(MX8MP_GPIO1_BASE_ADDR), 5, led);
++         led = !led;
++      }
++      udelay(1000);
++      timeout_ms++;
++   }
+ 
+ }
+ 
