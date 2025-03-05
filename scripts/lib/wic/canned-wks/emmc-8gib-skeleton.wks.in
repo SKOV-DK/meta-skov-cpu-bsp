@@ -30,14 +30,14 @@
 #
 # recipes-core/images/tc-ci.bbappend:WIC_CREATE_EXTRA_ARGS = "--rootfs-dir rootfs1=tc-ci --rootfs-dir rootfs2=pmc-failsafe"
 
-part --part-name barebox-environment --part-type ${PART_TYPE_BAREBOX_ENV}   --align 1024 --fixed-size 1M    --source empty
-part --part-name barebox-state       --part-type ${PART_TYPE_BAREBOX_STATE} --align 1024 --fixed-size 1M    --source empty
-part --part-name system0.fit         --part-type ${PART_TYPE_FIT_IMAGE}     --align 1024 --fixed-size 64M   --source rawcopy --sourceparams="file=${FITIMAGE_IMAGE_LINK_NAME}"
-part --part-name system0.root-FS     --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 2048M --source rawcopy --sourceparams="file=${ROOTFS_IMAGE_LINK_NAME}"
-part --part-name system1.fit         --part-type ${PART_TYPE_FIT_IMAGE}     --align 1024 --fixed-size 64M   --source empty
-part --part-name system1.root-FS     --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 2048M --source empty
-part --part-name failsafe.fit        --part-type ${PART_TYPE_FIT_IMAGE}     --align 1024 --fixed-size 64M   --source rawcopy --sourceparams="file=${FAILSAFE_FITIMAGE_IMAGE_LINK_NAME}"
-part --part-name failsafe.root-FS    --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 512M  --source rawcopy --sourceparams="file=${FAILSAFE_ROOTFS_IMAGE_LINK_NAME}"
-part --part-name home                --part-type ${PART_TYPE_HOME}          --align 1024 --fixed-size 64M   --source rootfs  --change-directory home/ --fstype=ext4
+part --part-name barebox-environment --part-type ${PART_TYPE_BAREBOX_ENV}    --align 1024 --fixed-size 1M    --source empty
+part --part-name barebox-state       --part-type ${PART_TYPE_BAREBOX_STATE}  --align 1024 --fixed-size 1M    --source empty
+part --part-name system0.fit         --part-type ${PART_TYPE_LINUX_RESERVED} --align 1024 --fixed-size 64M   --source rawcopy --sourceparams="file=${FITIMAGE_IMAGE_LINK_NAME}"
+part --part-name system0.root-FS     --part-type ${PART_TYPE_ROOT_ARM64}     --align 1024 --fixed-size 2048M --source rawcopy --sourceparams="file=${ROOTFS_IMAGE_LINK_NAME}"
+part --part-name system1.fit         --part-type ${PART_TYPE_LINUX_RESERVED} --align 1024 --fixed-size 64M   --source empty
+part --part-name system1.root-FS     --part-type ${PART_TYPE_ROOT_ARM64}     --align 1024 --fixed-size 2048M --source empty
+part --part-name failsafe.fit        --part-type ${PART_TYPE_LINUX_RESERVED} --align 1024 --fixed-size 64M   --source rawcopy --sourceparams="file=${FAILSAFE_FITIMAGE_IMAGE_LINK_NAME}"
+part --part-name failsafe.root-FS    --part-type ${PART_TYPE_ROOT_ARM64}     --align 1024 --fixed-size 512M  --source rawcopy --sourceparams="file=${FAILSAFE_ROOTFS_IMAGE_LINK_NAME}"
+part --part-name home                --part-type ${PART_TYPE_HOME}           --align 1024 --fixed-size 64M   --source rootfs  --change-directory home/ --fstype=ext4
 
 bootloader --ptable gpt
