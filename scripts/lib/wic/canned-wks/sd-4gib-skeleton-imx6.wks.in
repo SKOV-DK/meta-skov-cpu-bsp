@@ -13,6 +13,6 @@
 # part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET}k --no-table
 
 part --part-name barebox-environment --part-type ${PART_TYPE_BAREBOX_ENV} --align 1024 --fixed-size 1M    --source empty
-part --part-name system              --part-type ${PART_TYPE_ROOT_ARM64}  --align 1024 --fixed-size 3813M --source rootfs --fstype=ext4
+part --part-name system              --part-type ${PART_TYPE_ROOT_ARM}    --align 1024 --fixed-size 3813M --source rootfs --fstype=ext4
 
 bootloader --ptable gpt
