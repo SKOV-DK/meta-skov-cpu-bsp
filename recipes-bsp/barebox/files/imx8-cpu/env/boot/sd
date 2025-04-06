@@ -6,6 +6,6 @@ global bootm.image=/dev/mmc1.system.fit
 global linux.bootargs.dyn.rootwait=rootwait
 global linux.bootargs.dyn.rauc=rauc.external
 
-global linux.bootargs.dyn.bootentries="init=/usr/sbin/platsch fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot"
+global linux.bootargs.dyn.bootentries="init=/usr/sbin/platsch fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot net.ifnames=0"
 
 detect mmc1
