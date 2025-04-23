@@ -193,6 +193,8 @@ SRC_URI += "\
 # umpf-topic-range: adfa940a7520cc821554a5a30d0eeb9932379fff..5b57b328907b952b82a7bab58d270653a2dbd266
 SRC_URI += "\
   file://patches/2001-Release-6.9-customers-skov-imx6-20241127-5.patch \
+  file://patches/2002-rtc-pcf85063-do-a-software-reset-if-POR-failed.patch \
+  file://patches/2003-rtc-pcf85063-ensure-12-hour-mode-is-disabled.patch \
   "
 UMPF_BASE = "6.9"
 UMPF_VERSION = "20241127-5"

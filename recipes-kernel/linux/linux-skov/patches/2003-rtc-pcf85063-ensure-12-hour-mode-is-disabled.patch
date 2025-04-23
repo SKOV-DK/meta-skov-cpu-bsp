@@ -1,0 +1,38 @@
+From: Christian Wendt <cwe@skov.com>
+Date: Wed, 23 Apr 2025 15:50:23 +0200
+Subject: [PATCH] rtc: pcf85063.c: ensure 12 hour mode is disabled
+
+Force 12 hour operation to disabled, the rtc_read code expects
+all registers in 24 hour mode.
+
+---
+
+diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
+--- a/drivers/rtc/rtc-pcf85063.c	2025-04-23 13:04:25.727133544 +0200
++++ b/drivers/rtc/rtc-pcf85063.c	2025-04-23 15:32:25.814129387 +0200
+@@ -33,6 +33,7 @@
+ 
+ #define PCF85063_REG_CTRL1		0x00 /* status */
+ #define PCF85063_REG_CTRL1_CAP_SEL	BIT(0)
++#define PCF85063_REG_CTRL1_12_24	BIT(1)
+ #define PCF85063_REG_CTRL1_STOP		BIT(5)
+ #define PCF85063_REG_CTRL1_EXT_TEST	BIT(7)
+ #define PCF85063_REG_CTRL1_SWR		0x58
+@@ -120,7 +121,8 @@
+ 	 */
+ 	rc = regmap_update_bits(pcf85063->regmap, PCF85063_REG_CTRL1,
+ 				PCF85063_REG_CTRL1_EXT_TEST |
+-				PCF85063_REG_CTRL1_STOP,
++				PCF85063_REG_CTRL1_STOP |
++				PCF85063_REG_CTRL1_12_24,
+ 				PCF85063_REG_CTRL1_STOP);
+ 	if (rc)
+ 		return rc;
+@@ -372,6 +374,7 @@
+ 	}
+ 
+ 	return regmap_update_bits(pcf85063->regmap, PCF85063_REG_CTRL1,
++				  PCF85063_REG_CTRL1_12_24 |
+ 				  PCF85063_REG_CTRL1_CAP_SEL, reg);
+ }
+ 
