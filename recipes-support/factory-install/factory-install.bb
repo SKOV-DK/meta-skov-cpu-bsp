@@ -10,18 +10,26 @@ inherit systemd
 
 S = "${WORKDIR}"
 
+COMPATIBLE_MACHINE = "imx8-cpu|imx8s-cpu"
+
 SYSTEMD_SERVICE:${PN} = "factory-install.service"
 
 MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
-WIC = "${FACTORY_INSTALL_IMAGE}-secbootimg-${MACHINE}.rootfs.wic"
+PART_NO ?= ""
+PART_NO:imx8-cpu = "6"
+WIC_IMAGE ?= "${FACTORY_INSTALL_IMAGE}"
+WIC_IMAGE:imx8s-cpu = "${FACTORY_INSTALL_IMAGE}-secbootimg"
+
+WIC ?= "${WIC_IMAGE}-${MACHINE}.rootfs.wic"
+
 BAREBOX_OFFSET ?= "0"
-BAREBOX_OFFSET:imx8-cpu = "${BAREBOX_PADDING_OFFSET}K"
+BAREBOX_OFFSET = "${BAREBOX_PADDING_OFFSET}K"
 BAREBOX_RENAME ?= "${BAREBOX_IMAGE}"
-BAREBOX_RENAME:imx8-cpu = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
+BAREBOX_RENAME = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
 
 # Ensure that all needed artifacts are available for inclusion
-do_compile[depends] += "${FACTORY_INSTALL_IMAGE}-secbootimg:do_image_complete"
+do_compile[depends] += "${WIC_IMAGE}:do_image_complete"
 do_compile[depends] += "virtual/bootloader:do_deploy"
 
 DEPENDS = " \
@@ -33,6 +41,8 @@ RDEPENDS:${PN} = " \
     bmaptool \
     util-linux-blkdiscard \
     zstd \
+    parted \
+    e2fsprogs-resize2fs \
     splash-factory-install \
 "
 
@@ -51,6 +61,7 @@ do_install() {
         --expression=s,@WIC@,${WIC}, \
         --expression=s,@BAREBOX_RENAME@,${BAREBOX_RENAME}, \
         --expression=s,@DATADIR@,${datadir}/factory-install/, \
+        --expression=s,@PART_NO@,${PART_NO}, \
         --in-place ${D}${bindir}/factory-install.sh
 
     install -d ${D}${datadir}/factory-install

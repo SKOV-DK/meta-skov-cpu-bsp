@@ -1,0 +1,32 @@
+kernel_namespaces:
+  description: |
+    According to [1] kernel config option USER_NS is a prerequisite for the
+    upower package.
+    [1] acad6dfca5a2 ("[CORE-10031] imx6-cpu/defconfig: Try to fix the coredump Core dump - core.20220117T204044_BatteryStatusNo.1626.7.7.0.Build.25              Try to enable upower, which neets the kernel feature CONFIG_USER_NS=y to run              When upower is running chromium is not complaining about              Feb 10 19:28:45 house1-dol532t-01-94-8d chromium[531]: [526:590:0210/192845.518962:ERROR:object_proxy.cc(621)] Failed to call method: org.freedesktop.DBus.Properties.Get: object_path= /org/freedesktop/UPower: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files Feb 10 19:28:45 house1-dol532t-01-94-8d chromium[531]: [526:590:0210/192845.521567:ERROR:object_proxy.cc(621)] Failed to call method: org.freedesktop.UPower.GetDisplayDevice: object_path= /org/freedesktop/UPower: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files Feb 10 19:28:45 house1-dol532t-01-94-8d chromium[531]: [526:590:0210/192845.524955:ERROR:object_proxy.cc(621)] Failed to call method: org.freedesktop.UPower.EnumerateDevices: object_path= /org/freedesktop/UPower: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files")
+  value: True
+
+skov_kernel_namespaces:
+  description: |
+    This rule is related to reason's native rule 'kernel_namespaces' (overridden
+    above): namespace support is not needed on most embedded systems (except
+    NET_NS and UTS_NS for systemd and specifically for this BSP USER_NS for
+    upower).
+  type: bool
+  analyzer: |
+    kconfig.KernelConfig()['IPC_NS'] or
+    kconfig.KernelConfig()['PID_NS']
+  value: False
+
+skov_imx8_multitouch:
+  description: |
+    Skov's i.MX8MP based design is equipped with a multitouch capable panel that
+    needs "Generic support for HID multitouch panels" enabled.
+  type: bool
+  analyzer: |
+    kconfig.KernelConfig()['HID_MULTITOUCH']
+  value: True
+
+# vim: syntax=yaml
+# Local Variables:
+# mode: yaml
+# End:

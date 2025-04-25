@@ -25,9 +25,10 @@ S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
 # file. Leaving it empty here ensures an early explicit build failure.
-COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu"
+COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu|imx8s-cpu"
 
 # do not install kernel images to the rootfs
 RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
 
 KERNEL_IMAGETYPES:append:imx8-cpu = " Image.gz"
+KERNEL_IMAGETYPES:append:imx8s-cpu = " Image.gz"

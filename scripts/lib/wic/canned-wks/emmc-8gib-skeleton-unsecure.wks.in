@@ -1,0 +1,40 @@
+# short-description: Create A/B image to flash on an eMMC
+# long-description: Creates a GPT partitioned eMMC image with barebox-
+# environment and barebox-state partitions, two partitions for the root-FSs, a
+# partition for a recovery system and a partition for /home. The first two as
+# well as partitions four & five are empty and the remaining partitions are
+# filled with the contents of the root-FS this WKS file is applied to.
+#
+# https://docs.yoctoproject.org/dev/ref-manual/kickstart.html#openembedded-kickstart-wks-reference
+#
+# See: https://github.com/intel/luv-yocto/blob/master/scripts/lib/wic/canned-wks/directdisk-multi-rootfs.wks
+#
+# short-description: Create multi rootfs image using rootfs plugin
+# long-description: Creates a partitioned disk image with two rootfs partitions
+# using rootfs plugin.
+#
+# Partitions can use either
+#   - indirect rootfs references to image recipe(s):
+#     wic create directdisk-multi-indirect-recipes -e core-image-minimal \
+#         --rootfs-dir rootfs1=core-image-minimal
+#         --rootfs-dir rootfs2=core-image-minimal-dev
+#
+#   - or paths to rootfs directories:
+#     wic create directdisk-multi-rootfs \
+#         --rootfs-dir rootfs1=tmp/work/qemux86_64-poky-linux/core-image-minimal/1.0-r0/rootfs/
+#         --rootfs-dir rootfs2=tmp/work/qemux86_64-poky-linux/core-image-minimal-dev/1.0-r0/rootfs/
+#
+#   - or any combinations of -r and --rootfs command line options
+#
+# To configure these rootfs, specify them as WIC_CREATE_EXTRA_ARGS in your image recipe, e.g.:
+#
+# recipes-core/images/tc-ci.bbappend:WIC_CREATE_EXTRA_ARGS = "--rootfs-dir rootfs1=tc-ci --rootfs-dir rootfs2=pmc-failsafe"
+
+part --part-name barebox-environment --part-type ${PART_TYPE_BAREBOX_ENV}   --align 1024 --fixed-size 1M    --source empty
+part --part-name barebox-state       --part-type ${PART_TYPE_BAREBOX_STATE} --align 1024 --fixed-size 1M    --source empty
+part --part-name system0             --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 2048M --source rootfs --exclude-path     home/ --fstype=ext4 --rootfs-dir rootfs1
+part --part-name system1             --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 2048M --source empty
+part --part-name failsafe            --part-type ${PART_TYPE_ROOT_ARM64}    --align 1024 --fixed-size 512M  --source rootfs --exclude-path     home/ --fstype=ext4 --rootfs-dir rootfs2
+part --part-name home                --part-type ${PART_TYPE_HOME}          --align 1024 --fixed-size 2844M --source rootfs --change-directory home/ --fstype=ext4 --rootfs-dir rootfs1
+
+bootloader --ptable gpt

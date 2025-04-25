@@ -26,12 +26,19 @@ DEPENDS:append:imx8-cpu = "\
         trusted-firmware-a \
 "
 
+DEPENDS:append:imx8s-cpu = "\
+        imx-boot-firmware-files \
+        trusted-firmware-a \
+"
+
 BAREBOX_FIRMWARE_DEP = ""
 BAREBOX_FIRMWARE_DEP:imx8-cpu = "imx-boot-firmware-files:do_deploy"
+BAREBOX_FIRMWARE_DEP:imx8s-cpu = "imx-boot-firmware-files:do_deploy"
 
 do_configure[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
 BAREBOX_FIRMWARE_DIR:imx8-cpu = "${S}/firmware"
+BAREBOX_FIRMWARE_DIR:imx8s-cpu = "${S}/firmware"
 
 do_compile:prepend:imx8-cpu() {
         mkdir -p ${BAREBOX_FIRMWARE_DIR}
@@ -45,14 +52,27 @@ do_compile:prepend:imx8-cpu() {
         done
 }
 
-inherit signing
+do_compile:prepend:imx8s-cpu() {
+        mkdir -p ${BAREBOX_FIRMWARE_DIR}
+
+        # copy tf-a
+        cp ${STAGING_DIR_TARGET}/firmware/bl31-imx8mp.bin ${BAREBOX_FIRMWARE_DIR}/imx8mp-bl31.bin
+
+        # copy imx-firmware
+        for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
+                cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${BAREBOX_FIRMWARE_DIR}
+        done
+}
+
+#inherit signing
+inherit ${@'signing' if d.getVar('MACHINE') == 'imx8s-cpu' else ''}
 
 BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 
 FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
-DEPENDS:append:imx8-cpu = "\
+DEPENDS:append:imx8s-cpu = "\
         virtual/imx-hab-signing \
         virtual/fit-signing \
         extract-cert-native \
@@ -95,7 +115,7 @@ escape_as_sed_replacement() {
 # (presumably at least required until Yocto's styhead release)
 do_compile[vardeps] += "escape_as_sed_replacement"
 
-do_compile:prepend:imx8-cpu() {
+do_compile:prepend:imx8s-cpu() {
         signing_prepare
 
         # ---- HAB bootloader signing ----
@@ -139,11 +159,11 @@ do_compile:prepend:imx8-cpu() {
             -i ${B}/.config
 }
 
-do_install:append:imx8-cpu() {
+do_install:append:imx8s-cpu() {
         install -d ${D}/boot/
         install -m 0644 ${B}/imx-srk-fuse.bin ${D}/boot/
 }
 
 IMX_SRK_FUSE_BIN = ""
-IMX_SRK_FUSE_BIN:imx8-cpu = "/boot/imx-srk-fuse.bin"
+IMX_SRK_FUSE_BIN:imx8s-cpu = "/boot/imx-srk-fuse.bin"
 FILES:${PN} += "${IMX_SRK_FUSE_BIN}"
