@@ -20,6 +20,8 @@ FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 300 --passive-ftp"
 SRC_URI += "file://defconfig"
 
 require linux-skov/patches/series.inc
+# Patches not yet folded into the Pengutronix patch stack
+require linux-skov/patches-skov/series.inc
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
