@@ -8,6 +8,7 @@ require files/patches/series.inc
 require files/patches-skov/series.inc
 require files/${MACHINE}/env/env.inc
 
+PV = "${UMPF_BASE}"
 DEPENDS += "coreutils-native lz4-native"
 
 LICENSE = "GPL-2.0-only"
