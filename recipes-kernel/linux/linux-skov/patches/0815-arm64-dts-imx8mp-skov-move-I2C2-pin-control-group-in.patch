@@ -1,0 +1,73 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 6 Jan 2025 17:22:46 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: move I2C2 pin control group into
+ DTSI
+
+I2C2 is exposed on a pin header on the base board, so its pinmux is
+always the same if it's enabled.
+
+Therefore, move the definition to the common DTSI, so board DTs only
+need to override the status to enable it.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi          | 12 ++++++++++++
+ .../boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts   | 11 -----------
+ 2 files changed, 12 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 8dd282e24dfa..1c91c2ffb25c 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -354,6 +354,11 @@ reg_nvcc_sd2: LDO5 {
+ 	};
+ };
+ 
++&i2c2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_i2c2>;
++};
++
+ &i2c3 {
+ 	clock-frequency = <400000>;
+ 	pinctrl-names = "default";
+@@ -601,6 +606,13 @@ MX8MP_IOMUXC_I2C1_SDA__I2C1_SDA				0x400001c2
+ 		>;
+ 	};
+ 
++	pinctrl_i2c2: i2c2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL				0x400001c2
++			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA				0x400001c2
++		>;
++	};
++
+ 	pinctrl_i2c3: i2c3grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL				0x400001c2
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+index a13f6d76a495..45c9a6d55bc9 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+@@ -27,8 +27,6 @@ &backlight {
+ 
+ &i2c2 {
+ 	clock-frequency = <100000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_i2c2>;
+ 	status = "okay";
+ 
+ 	touchscreen@38 {
+@@ -81,12 +79,3 @@ &reg_tft_vcom {
+ 	voltage-table = <3160000 73>;
+ 	status = "okay";
+ };
+-
+-&iomuxc {
+-	pinctrl_i2c2: i2c2grp {
+-		fsl,pins = <
+-			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL				0x400001c2
+-			MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA				0x400001c2
+-		>;
+-	};
+-};

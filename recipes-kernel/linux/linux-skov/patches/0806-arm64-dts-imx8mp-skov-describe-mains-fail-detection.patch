@@ -1,0 +1,46 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 17 Dec 2024 12:22:42 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: describe mains fail detection
+
+The main 24V regulator will toggle GPIO4_IO23 to signal imminent voltage
+loss. Reflect this in the DT, so the OS can take appropriate action when
+this happens.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+v1 -> v2:
+  - no change
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 8b8fda3c0721..15989be3e006 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -117,6 +117,11 @@ reg_24v: regulator-24v {
+ 		regulator-name = "24V";
+ 		regulator-min-microvolt = <24000000>;
+ 		regulator-max-microvolt = <24000000>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_reg24v>;
++		interrupts-extended = <&gpio4 23 IRQ_TYPE_EDGE_FALLING>;
++		system-critical-regulator;
++		regulator-uv-less-critical-window-ms = <50>;
+ 	};
+ 
+ 	reg_can2rs: regulator-can2rs {
+@@ -592,6 +597,12 @@ MX8MP_IOMUXC_SAI3_MCLK__PWM4_OUT			0x116
+ 		>;
+ 	};
+ 
++	pinctrl_reg24v: reg24vgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI2_RXD0__GPIO4_IO23			0x154
++		>;
++	};
++
+ 	pinctrl_reg_vsd_3v3: regvsd3v3grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_SD2_RESET_B__GPIO2_IO19	0x40

@@ -1,0 +1,27 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 2 Dec 2024 19:01:00 +0100
+Subject: [PATCH] drm/etnaviv: dump outstanding read/write debug registers on
+ GPU hang
+
+To diagnose GPU hangs it might be helpful to know if there are any
+outstanding memory transactions.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_dump.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_dump.c b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+index 4162976f5d81..54ebda4f5ecb 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_dump.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+@@ -55,6 +55,9 @@ static const unsigned short etnaviv_dump_registers[] = {
+ 	VIVS_MC_MEMORY_BASE_ADDR_PEZ,
+ 	VIVS_MC_MEMORY_BASE_ADDR_PE,
+ 	VIVS_MC_MEMORY_TIMING_CONTROL,
++	VIVS_MC_DEBUG_READ0,
++	VIVS_MC_DEBUG_READ1,
++	VIVS_MC_DEBUG_WRITE,
+ 	VIVS_MC_BUS_CONFIG,
+ 	VIVS_FE_DMA_STATUS,
+ 	VIVS_FE_DMA_DEBUG_STATE,

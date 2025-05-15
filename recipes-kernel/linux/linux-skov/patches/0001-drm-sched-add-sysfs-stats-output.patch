@@ -6,7 +6,7 @@ This adds a sysfs entry for the drm scheduler and exports the active times
 of all scheduler instances.
 
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
-[p.zabel@pengutronix.de: rebased onto v6.8]
+[p.zabel@pengutronix.de: rebased onto v6.12]
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/drm/scheduler/Makefile      |   2 +-
@@ -86,7 +86,7 @@ index 0f35f009b9d3..d61d350dcd68 100644
  MODULE_DESCRIPTION("DRM GPU scheduler");
  MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 7e90c9f95611..b589e5bb4ace 100644
+index 57da84908752..4e504a129643 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
 @@ -87,6 +87,8 @@
@@ -95,10 +95,10 @@ index 7e90c9f95611..b589e5bb4ace 100644
  
 +#include "sched_stats.h"
 +
- #define to_drm_sched_job(sched_job)		\
- 		container_of((sched_job), struct drm_sched_job, queue_node)
- 
-@@ -1251,7 +1253,7 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
+ #ifdef CONFIG_LOCKDEP
+ static struct lockdep_map drm_sched_lockdep_map = {
+ 	.name = "drm_sched_lockdep_map"
+@@ -1262,7 +1264,7 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
  		   long timeout, struct workqueue_struct *timeout_wq,
  		   atomic_t *score, const char *name, struct device *dev)
  {
@@ -107,7 +107,7 @@ index 7e90c9f95611..b589e5bb4ace 100644
  
  	sched->ops = ops;
  	sched->credit_limit = credit_limit;
-@@ -1311,6 +1313,10 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
+@@ -1328,6 +1330,10 @@ int drm_sched_init(struct drm_gpu_scheduler *sched,
  	atomic64_set(&sched->job_id_count, 0);
  	sched->pause_submit = false;
  
@@ -118,7 +118,7 @@ index 7e90c9f95611..b589e5bb4ace 100644
  	sched->ready = true;
  	return 0;
  Out_unroll:
-@@ -1339,6 +1345,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
+@@ -1370,6 +1376,8 @@ void drm_sched_fini(struct drm_gpu_scheduler *sched)
  	struct drm_sched_entity *s_entity;
  	int i;
  
@@ -352,7 +352,7 @@ index 000000000000..e3e3e73bf279
 +
 +#endif
 diff --git a/include/drm/gpu_scheduler.h b/include/drm/gpu_scheduler.h
-index 5acc64954a88..4bb1b5b72b7b 100644
+index 95e17504e46a..8b9d9ba71748 100644
 --- a/include/drm/gpu_scheduler.h
 +++ b/include/drm/gpu_scheduler.h
 @@ -27,6 +27,7 @@
@@ -363,7 +363,7 @@ index 5acc64954a88..4bb1b5b72b7b 100644
  #include <linux/xarray.h>
  #include <linux/workqueue.h>
  
-@@ -480,6 +481,16 @@ struct drm_sched_backend_ops {
+@@ -491,6 +492,16 @@ struct drm_sched_backend_ops {
  	u32 (*update_job_credits)(struct drm_sched_job *sched_job);
  };
  
@@ -380,7 +380,7 @@ index 5acc64954a88..4bb1b5b72b7b 100644
  /**
   * struct drm_gpu_scheduler - scheduler instance-specific data
   *
-@@ -540,6 +551,7 @@ struct drm_gpu_scheduler {
+@@ -551,6 +562,7 @@ struct drm_gpu_scheduler {
  	bool				pause_submit;
  	bool				own_submit_wq;
  	struct device			*dev;

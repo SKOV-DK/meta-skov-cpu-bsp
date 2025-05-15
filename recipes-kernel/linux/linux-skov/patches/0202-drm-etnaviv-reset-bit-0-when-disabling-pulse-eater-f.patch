@@ -1,0 +1,30 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 2 Dec 2024 18:40:06 +0100
+Subject: [PATCH] drm/etnaviv: reset bit 0 when disabling pulse eater for reset
+
+It seems this bit is sticky across the reset. The downstream driver
+pulses this bit on and off in the reset sequence, which had been
+missed when porting this part over from the Vivante driver.
+
+While no bad behavior has been observed when the bit is active after
+reset, better be safe than sorry and copy this part verbatim.
+
+Fixes: b0da08559c74 ("drm/etnaviv: disable MLCG and pulse eater on GPU reset")
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 1f7adfbad38a..57d16debfed4 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -550,6 +550,8 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 		gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
+ 		pulse_eater |= BIT(0);
+ 		gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
++		pulse_eater &= ~BIT(0);
++		gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
+ 
+ 		/* enable clock */
+ 		control = VIVS_HI_CLOCK_CONTROL_FSCALE_VAL(fscale);

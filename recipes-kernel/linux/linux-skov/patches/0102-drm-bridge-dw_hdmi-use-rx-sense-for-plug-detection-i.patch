@@ -14,18 +14,18 @@ Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
  1 file changed, 14 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-index 1c0cc8903455..c7b6da7a113b 100644
+index c1d88c037f24..0d9e3bec674a 100644
 --- a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 +++ b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-@@ -142,6 +142,7 @@ struct dw_hdmi {
- 	struct clk *iahb_clk;
- 	struct clk *cec_clk;
+@@ -139,6 +139,7 @@ struct dw_hdmi {
+ 	struct platform_device *cec;
+ 	struct device *dev;
  	struct dw_hdmi_i2c *i2c;
 +	bool hpd_unreliable;
  
  	struct hdmi_data_info hdmi_data;
  	const struct dw_hdmi_plat_data *plat_data;
-@@ -1689,7 +1690,12 @@ static void dw_hdmi_phy_disable(struct dw_hdmi *hdmi, void *data)
+@@ -1686,7 +1687,12 @@ static void dw_hdmi_phy_disable(struct dw_hdmi *hdmi, void *data)
  enum drm_connector_status dw_hdmi_phy_read_hpd(struct dw_hdmi *hdmi,
  					       void *data)
  {
@@ -39,7 +39,7 @@ index 1c0cc8903455..c7b6da7a113b 100644
  		connector_status_connected : connector_status_disconnected;
  }
  EXPORT_SYMBOL_GPL(dw_hdmi_phy_read_hpd);
-@@ -1699,7 +1705,7 @@ void dw_hdmi_phy_update_hpd(struct dw_hdmi *hdmi, void *data,
+@@ -1696,7 +1702,7 @@ void dw_hdmi_phy_update_hpd(struct dw_hdmi *hdmi, void *data,
  {
  	u8 old_mask = hdmi->phy_mask;
  
@@ -48,7 +48,7 @@ index 1c0cc8903455..c7b6da7a113b 100644
  		hdmi->phy_mask |= HDMI_PHY_RX_SENSE;
  	else
  		hdmi->phy_mask &= ~HDMI_PHY_RX_SENSE;
-@@ -3062,7 +3068,7 @@ void dw_hdmi_setup_rx_sense(struct dw_hdmi *hdmi, bool hpd, bool rx_sense)
+@@ -3059,7 +3065,7 @@ void dw_hdmi_setup_rx_sense(struct dw_hdmi *hdmi, bool hpd, bool rx_sense)
  		 * If the RX sense status indicates we're disconnected,
  		 * clear the software rxsense status.
  		 */
@@ -57,7 +57,7 @@ index 1c0cc8903455..c7b6da7a113b 100644
  			hdmi->rxsense = false;
  
  		/*
-@@ -3125,7 +3131,9 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
+@@ -3122,7 +3128,9 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
  			mutex_unlock(&hdmi->cec_notifier_mutex);
  		}
  
@@ -68,8 +68,8 @@ index 1c0cc8903455..c7b6da7a113b 100644
  			status = connector_status_connected;
  
  		if (!(phy_stat & (HDMI_PHY_HPD | HDMI_PHY_RX_SENSE)))
-@@ -3506,6 +3514,8 @@ struct dw_hdmi *dw_hdmi_probe(struct platform_device *pdev,
- 		goto err_iahb;
+@@ -3458,6 +3466,8 @@ struct dw_hdmi *dw_hdmi_probe(struct platform_device *pdev,
+ 		goto err_res;
  	}
  
 +	hdmi->hpd_unreliable = of_property_read_bool(np, "hpd-unreliable");

@@ -1,0 +1,38 @@
+From: Christian Wendt <cwe@skov.com>
+Date: Wed, 23 Apr 2025 15:50:23 +0200
+Subject: [PATCH] rtc: pcf85063: ensure 12 hour mode is disabled
+
+Force 12 hour operation to disabled, the rtc_read code expects
+all registers in 24 hour mode.
+
+Link: https://www.nxp.com/docs/en/data-sheet/PCF85063A.pdf
+Signed-off-by: Christian Wendt <cwe@skov.com>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/rtc/rtc-pcf85063.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/rtc/rtc-pcf85063.c b/drivers/rtc/rtc-pcf85063.c
+index 73848f764559..d9d115bc6b43 100644
+--- a/drivers/rtc/rtc-pcf85063.c
++++ b/drivers/rtc/rtc-pcf85063.c
+@@ -33,6 +33,7 @@
+ 
+ #define PCF85063_REG_CTRL1		0x00 /* status */
+ #define PCF85063_REG_CTRL1_CAP_SEL	BIT(0)
++#define PCF85063_REG_CTRL1_12_24	BIT(1)
+ #define PCF85063_REG_CTRL1_STOP		BIT(5)
+ #define PCF85063_REG_CTRL1_EXT_TEST	BIT(7)
+ #define PCF85063_REG_CTRL1_SWR		0x58
+@@ -616,6 +617,11 @@ static int pcf85063_probe(struct i2c_client *client)
+ 				 "SW reset failed, trying to continue\n");
+ 	}
+ 
++	err = regmap_update_bits(pcf85063->regmap, PCF85063_REG_CTRL1,
++			         PCF85063_REG_CTRL1_12_24, 0);
++	if (err < 0)
++		dev_warn(&client->dev, "failed to disable 12h clock mode\n");
++
+ 	err = pcf85063_load_capacitance(pcf85063, client->dev.of_node,
+ 					config->force_cap_7000 ? 7000 : 0);
+ 	if (err < 0)

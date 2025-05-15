@@ -1,0 +1,26 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 14 Nov 2023 11:35:04 +0100
+Subject: [PATCH] arm64: dts: freescale: reduce
+ regulator-uv-less-critical-window-ms
+
+Reduce regulator-uv-less-critical-window-ms time. So, we are able to
+store reset reason in the RTC clock.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index b54d1516991c..8dd282e24dfa 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -130,7 +130,7 @@ reg_24v: regulator-24v {
+ 		pinctrl-0 = <&pinctrl_reg24v>;
+ 		interrupts-extended = <&gpio4 23 IRQ_TYPE_EDGE_FALLING>;
+ 		system-critical-regulator;
+-		regulator-uv-less-critical-window-ms = <50>;
++		regulator-uv-less-critical-window-ms = <10>;
+ 	};
+ 
+ 	reg_can2rs: regulator-can2rs {

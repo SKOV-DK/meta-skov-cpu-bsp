@@ -1,0 +1,30 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 13 Jan 2025 17:16:01 +0100
+Subject: [PATCH] reboot: describe do_kernel_restart's cmd argument in
+ kernel-doc
+
+A W=1 build rightfully complains about the function's kernel-doc
+being incomplete.
+
+Describe its single parameter to fix this.
+
+Reviewed-by: Tzung-Bi Shih <tzungbi@kernel.org>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ kernel/reboot.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/kernel/reboot.c b/kernel/reboot.c
+index 9461b6b0baa3..d4d74ff073a6 100644
+--- a/kernel/reboot.c
++++ b/kernel/reboot.c
+@@ -229,6 +229,9 @@ EXPORT_SYMBOL(unregister_restart_handler);
+ /**
+  *	do_kernel_restart - Execute kernel restart handler call chain
+  *
++ *	@cmd: pointer to buffer containing command to execute for restart
++ *		or %NULL
++ *
+  *	Calls functions registered with register_restart_handler.
+  *
+  *	Expected to be called from machine_restart as last step of the restart

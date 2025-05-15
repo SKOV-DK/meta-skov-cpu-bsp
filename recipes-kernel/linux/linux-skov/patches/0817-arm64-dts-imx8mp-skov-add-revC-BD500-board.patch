@@ -1,0 +1,154 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Thu, 14 Mar 2024 11:30:16 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: add revC BD500 board
+
+The BD500 replaces the touch display with 3 bicolor LEDs and a push
+button on top of a Skov i.MX8-CPU revision C.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/Makefile             |   1 +
+ .../boot/dts/freescale/imx8mp-skov-revc-bd500.dts  | 121 +++++++++++++++++++++
+ 2 files changed, 122 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+
+diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+index ea4da899b44b..6ee3a7ffe479 100644
+--- a/arch/arm64/boot/dts/freescale/Makefile
++++ b/arch/arm64/boot/dts/freescale/Makefile
+@@ -197,6 +197,7 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-basic.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-hdmi.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-lt6.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revb-mi1010ait-1cp1.dtb
++dtb-$(CONFIG_ARCH_MXC) += imx8mp-skov-revc-bd500.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mpxl.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-tqma8mpql-mba8mp-ras314.dtb
+ dtb-$(CONFIG_ARCH_MXC) += imx8mp-var-som-symphony.dtb
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+new file mode 100644
+index 000000000000..3a19288dde98
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+@@ -0,0 +1,121 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
++
++/dts-v1/;
++
++#include "imx8mp-skov-reva.dtsi"
++
++/ {
++	model = "SKOV IMX8MP CPU revC - bd500";
++	compatible = "skov,imx8mp-skov-revc-bd500", "fsl,imx8mp";
++
++	leds {
++		led_system_red: led-3 {
++			label = "bd500:system:red";
++			color = <LED_COLOR_ID_RED>;
++			/* Inverted compared to others due to NMOS inverter */
++			gpios = <&gpioexp 3 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++
++		led_system_green: led-4 {
++			label = "bd500:system:green";
++			color = <LED_COLOR_ID_GREEN>;
++			gpios = <&gpioexp 2 GPIO_ACTIVE_LOW>;
++			default-state = "on";
++		};
++
++		led_lan1_red: led-5 {
++			label = "bd500:lan1:act";
++			color = <LED_COLOR_ID_RED>;
++			linux,default-trigger = "netdev";
++			gpios = <&gpioexp 1 GPIO_ACTIVE_LOW>;
++		};
++
++		led_lan1_green: led-6 {
++			label = "bd500:lan1:link";
++			color = <LED_COLOR_ID_GREEN>;
++			linux,default-trigger = "netdev";
++			gpios = <&gpioexp 0 GPIO_ACTIVE_LOW>;
++		};
++
++		led_lan2_red: led-7 {
++			label = "bd500:lan2:act";
++			color = <LED_COLOR_ID_RED>;
++			linux,default-trigger = "netdev";
++			gpios = <&gpioexp 6 GPIO_ACTIVE_LOW>;
++		};
++
++		led_lan2_green: led-8 {
++			label = "bd500:lan2:link";
++			color = <LED_COLOR_ID_GREEN>;
++			linux,default-trigger = "netdev";
++			gpios = <&gpioexp 7 GPIO_ACTIVE_LOW>;
++		};
++	};
++
++	/* TODO: Can we benefit from the multicolor support?
++	 * For now add the nodes, but disabled, so they can easily
++	 * be enabled via bootloader OF fixup for evaluation in Linux.
++	 */
++	system-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		leds = <&led_lan2_red>, <&led_lan2_green>;
++		function = LED_FUNCTION_STATUS;
++		status = "disabled";
++	};
++
++	lan1-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		function = LED_FUNCTION_LAN;
++		function-enumerator = <1>;
++		leds = <&led_lan1_red>, <&led_lan1_green>;
++		status = "disabled";
++	};
++
++	lan2-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		function = LED_FUNCTION_LAN;
++		function-enumerator = <2>;
++		leds = <&led_system_red>, <&led_system_green>;
++		status = "disabled";
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++
++		button-1 {
++			label = "S1";
++			linux,code = <KEY_CONFIG>;
++			gpios = <&gpioexp 5 GPIO_ACTIVE_LOW>;
++		};
++	};
++};
++
++&i2c2 {
++	clock-frequency = <100000>;
++	status = "okay";
++
++	gpioexp: gpio@20 {
++		compatible = "nxp,pca6408";
++		reg = <0x20>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_gpio_exp>;
++		interrupts-extended = <&gpio4 28 IRQ_TYPE_EDGE_FALLING>;
++		reset-gpios = <&gpio4 29 GPIO_ACTIVE_LOW>;
++		vcc-supply = <&reg_vdd_3v3>;
++		gpio-controller;
++		#gpio-cells = <2>;
++	};
++};
++
++&iomuxc {
++	pinctrl_gpio_exp: gpioexpgrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_SAI3_RXFS__GPIO4_IO28	0x0
++			MX8MP_IOMUXC_SAI3_RXC__GPIO4_IO29	0x0
++		>;
++	};
++};

@@ -1,0 +1,54 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Fri, 3 Nov 2023 11:10:11 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: describe HDMI display pipeline
+
+Back when this device tree was first added, there were no i.MX8MP
+HDMI bindings upstream yet. This has changed now, so let's use them
+to describe the HDMI on the imx8mp-skov-revb-hdmi board.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+v1 -> v2:
+  - no change
+---
+ .../boot/dts/freescale/imx8mp-skov-revb-hdmi.dts      | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+index 206116be8166..32a429437cbd 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-hdmi.dts
+@@ -9,6 +9,21 @@ / {
+ 	compatible = "skov,imx8mp-skov-revb-hdmi", "fsl,imx8mp";
+ };
+ 
++&hdmi_pvi {
++	status = "okay";
++};
++
++&hdmi_tx {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_hdmi>;
++	ddc-i2c-bus = <&i2c5>;
++	status = "okay";
++};
++
++&hdmi_tx_phy {
++	status = "okay";
++};
++
+ &i2c5 {
+ 	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c5>;
+@@ -19,6 +34,10 @@ &i2c5 {
+ 	status = "okay";
+ };
+ 
++&lcdif3 {
++	status = "okay";
++};
++
+ &iomuxc {
+ 	pinctrl_hdmi: hdmigrp {
+ 		fsl,pins = <

@@ -1,0 +1,107 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 5 Oct 2023 10:10:39 +0200
+Subject: [PATCH] WIP: regulator: pca9450: add vin-supply DT support
+
+For now, hard-code vin supplier to tell regulator framework that we
+use vin-supply DT properties.
+
+Properly we should probably walk over DT subnodes and verify which
+actually have vin-supply property.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/regulator/pca9450-regulator.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/regulator/pca9450-regulator.c b/drivers/regulator/pca9450-regulator.c
+index 395602c10a2d..6dc9d1903442 100644
+--- a/drivers/regulator/pca9450-regulator.c
++++ b/drivers/regulator/pca9450-regulator.c
+@@ -496,6 +496,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.n_ramp_values = ARRAY_SIZE(pca9450_dvs_buck_ramp_table),
+ 			.owner = THIS_MODULE,
+ 			.of_parse_cb = pca9450_set_dvs_levels,
++			.supply_name = "vin",
+ 		},
+ 		.dvs = {
+ 			.run_reg = PCA9450_REG_BUCK1OUT_DVS0,
+@@ -526,6 +527,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.n_ramp_values = ARRAY_SIZE(pca9450_dvs_buck_ramp_table),
+ 			.owner = THIS_MODULE,
+ 			.of_parse_cb = pca9450_set_dvs_levels,
++			.supply_name = "vin",
+ 		},
+ 		.dvs = {
+ 			.run_reg = PCA9450_REG_BUCK2OUT_DVS0,
+@@ -551,6 +553,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_mask = BUCK4_ENMODE_MASK,
+ 			.enable_val = BUCK_ENMODE_ONREQ,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -570,6 +573,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_mask = BUCK5_ENMODE_MASK,
+ 			.enable_val = BUCK_ENMODE_ONREQ,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -589,6 +593,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_mask = BUCK6_ENMODE_MASK,
+ 			.enable_val = BUCK_ENMODE_ONREQ,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -607,6 +612,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO1CTRL,
+ 			.enable_mask = LDO1_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -625,6 +631,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO2CTRL,
+ 			.enable_mask = LDO2_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -643,6 +650,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO3CTRL,
+ 			.enable_mask = LDO3_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -661,6 +669,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO4CTRL,
+ 			.enable_mask = LDO4_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ 	{
+@@ -679,6 +688,7 @@ static const struct pca9450_regulator_desc pca9450bc_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO5CTRL_L,
+ 			.enable_mask = LDO5H_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ };
+@@ -869,6 +879,7 @@ static const struct pca9450_regulator_desc pca9451a_regulators[] = {
+ 			.enable_reg = PCA9450_REG_LDO5CTRL_L,
+ 			.enable_mask = LDO5H_EN_MASK,
+ 			.owner = THIS_MODULE,
++			.supply_name = "vin",
+ 		},
+ 	},
+ };

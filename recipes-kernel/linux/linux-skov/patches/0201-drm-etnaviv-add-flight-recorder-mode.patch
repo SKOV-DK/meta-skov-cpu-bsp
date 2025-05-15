@@ -1,0 +1,164 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Fri, 15 Mar 2024 16:58:16 +0100
+Subject: [PATCH] drm/etnaviv: add flight-recorder mode
+
+When enabled the flight recoder will keep already finished jobs
+around, so they can be dumped in case of a GPU hang. This might
+be useful when trying to track down issues that might be caused
+by state leaking from one job to another.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_dump.c  | 16 ++++++++++++++++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c   | 19 +++++++++++++++++++
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.h   |  1 +
+ drivers/gpu/drm/etnaviv/etnaviv_sched.c | 18 +++++++++++++++++-
+ 4 files changed, 53 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_dump.c b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+index 2cd223461eba..4162976f5d81 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_dump.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
+@@ -120,6 +120,7 @@ void etnaviv_core_dump(struct etnaviv_gem_submit *submit)
+ 	struct etnaviv_gpu *gpu = submit->gpu;
+ 	struct core_dump_iterator iter;
+ 	struct etnaviv_gem_object *obj;
++	struct drm_sched_job *s_job;
+ 	unsigned int n_obj, n_bomap_pages;
+ 	size_t file_size, mmu_size;
+ 	__le64 *bomap, *bomap_start;
+@@ -141,6 +142,12 @@ void etnaviv_core_dump(struct etnaviv_gem_submit *submit)
+ 			sizeof(struct etnaviv_dump_registers) +
+ 		    mmu_size + gpu->buffer.size + submit->cmdbuf.size;
+ 
++	/* Add cmdbufs from the flight data recorder */
++	list_for_each_entry(s_job, &gpu->fdr_head, list) {
++		file_size += to_etnaviv_submit(s_job)->cmdbuf.size;
++		n_obj++;
++	}
++
+ 	/* Add in the active buffer objects */
+ 	for (i = 0; i < submit->nr_bos; i++) {
+ 		obj = submit->bos[i].obj;
+@@ -184,6 +191,15 @@ void etnaviv_core_dump(struct etnaviv_gem_submit *submit)
+ 			      etnaviv_cmdbuf_get_va(&submit->cmdbuf,
+ 					&submit->mmu_context->cmdbuf_mapping));
+ 
++	list_for_each_entry(s_job, &gpu->fdr_head, list) {
++		struct etnaviv_gem_submit *fdr_sub = to_etnaviv_submit(s_job);
++
++		etnaviv_core_dump_mem(&iter, ETDUMP_BUF_CMD,
++			fdr_sub->cmdbuf.vaddr, fdr_sub->cmdbuf.size,
++			etnaviv_cmdbuf_get_va(&fdr_sub->cmdbuf,
++					      &fdr_sub->mmu_context->cmdbuf_mapping));
++	}
++
+ 	mutex_unlock(&submit->mmu_context->lock);
+ 
+ 	/* Reserve space for the bomap */
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index cf0d9049bcf1..1f7adfbad38a 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -1473,6 +1473,7 @@ static void sync_point_worker(struct work_struct *work)
+ 
+ void etnaviv_gpu_recover_hang(struct etnaviv_gem_submit *submit)
+ {
++	struct drm_sched_job *free_job, *tmp_job;
+ 	struct etnaviv_gpu *gpu = submit->gpu;
+ 	char *comm = NULL, *cmd = NULL;
+ 	struct task_struct *task;
+@@ -1506,6 +1507,16 @@ void etnaviv_gpu_recover_hang(struct etnaviv_gem_submit *submit)
+ 		event_free(gpu, i);
+ 	spin_unlock(&gpu->event_spinlock);
+ 
++	/*
++	 * Drop old flight-recorder entries, as they are no longer useful after
++	 * a GPU reset. The GPU state those jobs might have contributed is
++	 * cleared by the reset.
++	 */
++	list_for_each_entry_safe(free_job, tmp_job, &gpu->fdr_head, list) {
++		list_del(&free_job->list);
++		etnaviv_submit_put(to_etnaviv_submit(free_job));
++	}
++
+ 	etnaviv_gpu_hw_init(gpu);
+ 
+ 	mutex_unlock(&gpu->lock);
+@@ -1808,6 +1819,8 @@ static int etnaviv_gpu_bind(struct device *dev, struct device *master,
+ 	INIT_WORK(&gpu->sync_point_work, sync_point_worker);
+ 	init_waitqueue_head(&gpu->fence_event);
+ 
++	INIT_LIST_HEAD(&gpu->fdr_head);
++
+ 	priv->gpu[priv->num_gpus++] = gpu;
+ 
+ 	return 0;
+@@ -1829,6 +1842,7 @@ static void etnaviv_gpu_unbind(struct device *dev, struct device *master,
+ 	void *data)
+ {
+ 	struct etnaviv_gpu *gpu = dev_get_drvdata(dev);
++	struct drm_sched_job *free_job, *tmp_job;
+ 
+ 	DBG("%s", dev_name(gpu->dev));
+ 
+@@ -1844,6 +1858,11 @@ static void etnaviv_gpu_unbind(struct device *dev, struct device *master,
+ 		etnaviv_gpu_clk_disable(gpu);
+ 	}
+ 
++	list_for_each_entry_safe(free_job, tmp_job, &gpu->fdr_head, list) {
++		list_del(&free_job->list);
++		etnaviv_submit_put(to_etnaviv_submit(free_job));
++	}
++
+ 	if (gpu->mmu_context)
+ 		etnaviv_iommu_context_put(gpu->mmu_context);
+ 
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+index 5cb46c84e03a..c7ec58da12aa 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -147,6 +147,7 @@ struct etnaviv_gpu {
+ 	u32 hangcheck_dma_addr;
+ 	u32 hangcheck_primid;
+ 	u32 hangcheck_fence;
++	struct list_head fdr_head;
+ 
+ 	void __iomem *mmio;
+ 	int irq;
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_sched.c b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+index 5b67eda122db..849536122375 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -17,6 +17,8 @@ static int etnaviv_job_hang_limit = 0;
+ module_param_named(job_hang_limit, etnaviv_job_hang_limit, int , 0444);
+ static int etnaviv_hw_jobs_limit = 4;
+ module_param_named(hw_job_limit, etnaviv_hw_jobs_limit, int , 0444);
++static int etnaviv_fdr_jobs = 0;
++module_param_named(fdr_jobs, etnaviv_fdr_jobs, int , 0600);
+ 
+ static struct dma_fence *etnaviv_sched_run_job(struct drm_sched_job *sched_job)
+ {
+@@ -99,7 +101,21 @@ static void etnaviv_sched_free_job(struct drm_sched_job *sched_job)
+ 
+ 	drm_sched_job_cleanup(sched_job);
+ 
+-	etnaviv_submit_put(submit);
++	if (unlikely(etnaviv_fdr_jobs)) {
++		struct etnaviv_gpu *gpu = submit->gpu;
++
++		list_add_tail(&submit->sched_job.list, &gpu->fdr_head);
++		if (list_count_nodes(&gpu->fdr_head) > etnaviv_fdr_jobs) {
++			struct drm_sched_job *free_job;
++
++			free_job = list_first_entry(&gpu->fdr_head,
++						    struct drm_sched_job, list);
++			list_del(&free_job->list);
++			etnaviv_submit_put(to_etnaviv_submit(free_job));
++		}
++	} else {
++		etnaviv_submit_put(submit);
++	}
+ }
+ 
+ static const struct drm_sched_backend_ops etnaviv_sched_ops = {

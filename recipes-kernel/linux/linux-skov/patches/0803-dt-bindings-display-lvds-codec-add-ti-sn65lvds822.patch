@@ -1,0 +1,40 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Fri, 3 Nov 2023 11:10:11 +0100
+Subject: [PATCH] dt-bindings: display/lvds-codec: add ti,sn65lvds822
+
+Add compatible strings for TI SN65LVDS822, a FlatLink LVDS receiver.
+
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+v1 -> v2:
+  - Add Rob's Acked-by
+
+To: Andrzej Hajda <andrzej.hajda@intel.com> (maintainer:DRM DRIVERS FOR BRIDGE CHIPS)
+To: Neil Armstrong <neil.armstrong@linaro.org> (maintainer:DRM DRIVERS FOR BRIDGE CHIPS)
+To: Robert Foss <rfoss@kernel.org> (maintainer:DRM DRIVERS FOR BRIDGE CHIPS)
+Cc: Laurent Pinchart <Laurent.pinchart@ideasonboard.com> (reviewer:DRM DRIVERS FOR BRIDGE CHIPS,in file)
+Cc: Jonas Karlman <jonas@kwiboo.se> (reviewer:DRM DRIVERS FOR BRIDGE CHIPS)
+Cc: Jernej Skrabec <jernej.skrabec@gmail.com> (reviewer:DRM DRIVERS FOR BRIDGE CHIPS)
+Cc: David Airlie <airlied@gmail.com> (maintainer:DRM DRIVERS)
+Cc: Simona Vetter <simona@ffwll.ch> (maintainer:DRM DRIVERS)
+Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com> (maintainer:DRM DRIVERS AND MISC GPU PATCHES)
+Cc: Maxime Ripard <mripard@kernel.org> (maintainer:DRM DRIVERS AND MISC GPU PATCHES)
+Cc: Thomas Zimmermann <tzimmermann@suse.de> (maintainer:DRM DRIVERS AND MISC GPU PATCHES)
+Cc: dri-devel@lists.freedesktop.org (open list:DRM DRIVERS)
+---
+ Documentation/devicetree/bindings/display/bridge/lvds-codec.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/display/bridge/lvds-codec.yaml b/Documentation/devicetree/bindings/display/bridge/lvds-codec.yaml
+index 6ceeed76e88e..0487bbffd7f7 100644
+--- a/Documentation/devicetree/bindings/display/bridge/lvds-codec.yaml
++++ b/Documentation/devicetree/bindings/display/bridge/lvds-codec.yaml
+@@ -41,6 +41,7 @@ properties:
+           - enum:
+               - ti,ds90cf364a # For the DS90CF364A FPD-Link LVDS Receiver
+               - ti,ds90cf384a # For the DS90CF384A FPD-Link LVDS Receiver
++              - ti,sn65lvds822  # For the SN65LVDS822 FlatLink LVDS Receiver
+               - ti,sn65lvds94 # For the SN65DS94 LVDS serdes
+           - const: lvds-decoder # Generic LVDS decoders compatible fallback
+       - enum:

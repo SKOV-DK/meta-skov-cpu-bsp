@@ -1,0 +1,38 @@
+From: Holger Assmann <h.assmann@pengutronix.de>
+Date: Fri, 19 Apr 2024 08:29:01 +0200
+Subject: [PATCH] regulator: dt-bindings: pca9450: add restart handler priority
+
+This property defines the priority the PCA9450 restart handler will be
+registered with. It defaults to SYS_OFF_PRIO_DEFAULT.
+
+Signed-off-by: Holger Assmann <h.assmann@pengutronix.de>
+---
+ .../devicetree/bindings/regulator/nxp,pca9450-regulator.yaml      | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml b/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
+index 68709a7dc43f..aebca369735b 100644
+--- a/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
++++ b/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
+@@ -22,6 +22,9 @@ description: |
+ # LDO1, LDO2, LDO3, LDO4, LDO5
+ # Note: Buck3 removed on PCA9450B and connect with Buck1 on PCA9450C.
+ 
++allOf:
++  - $ref: /schemas/power/reset/restart-handler.yaml#
++
+ properties:
+   compatible:
+     enum:
+@@ -37,6 +40,11 @@ properties:
+   interrupts:
+     maxItems: 1
+ 
++  priority:
++    default: 0
++    description: |
++      System restart handler priority.
++
+   regulators:
+     type: object
+     description: |

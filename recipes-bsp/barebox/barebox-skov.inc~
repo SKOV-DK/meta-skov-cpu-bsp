@@ -11,7 +11,7 @@ require files/${MACHINE}/env/env.inc
 DEPENDS += "coreutils-native lz4-native"
 
 LICENSE = "GPL-2.0-only"
-LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
+LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 SRC_URI[sha256sum] = "6da5f9e98a8c93f6eead3badefe133ed5fd865395b1a3c0192fdbdd9eb4f7311"
 
 # Allow autoboot_timeout adjustment for automation from local.conf or

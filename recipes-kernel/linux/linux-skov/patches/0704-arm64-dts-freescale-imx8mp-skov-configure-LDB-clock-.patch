@@ -1,0 +1,56 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 18 Dec 2024 08:01:50 +0100
+Subject: [PATCH] arm64: dts: freescale: imx8mp-skov: configure LDB clock
+ automatically
+
+The comment in the DT mentions that "currently it is not possible to let
+display clocks configure automatically, so we need to set them manually".
+
+Since commit ff06ea04e4cf ("clk: imx: clk-imx8mp: Allow media_disp pixel
+clock reconfigure parent rate"), this is no longer the case.
+
+Make use of this new functionality by dropping the now unneeded
+assigned-clock-rates in &media_blk_ctrl.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ .../dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts | 19 +++++--------------
+ 1 file changed, 5 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+index 2c75da5f064f..a13f6d76a495 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revb-mi1010ait-1cp1.dts
+@@ -51,8 +51,11 @@ &lcdif2 {
+ };
+ 
+ &lvds_bridge {
+-	/* IMX8MP_CLK_MEDIA_LDB = IMX8MP_CLK_MEDIA_DISP2_PIX * 7 */
+-	assigned-clock-rates = <490000000>;
++	assigned-clocks = <&clk IMX8MP_CLK_MEDIA_LDB>,
++				 <&clk IMX8MP_VIDEO_PLL1>;
++	assigned-clock-parents = <&clk IMX8MP_VIDEO_PLL1_OUT>;
++	/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_DISP2_PIX * 2 * 7 */
++	assigned-clock-rates = <0>, <980000000>;
+ 	status = "okay";
+ 
+ 	ports {
+@@ -64,18 +67,6 @@ ldb_lvds_ch0: endpoint {
+ 	};
+ };
+ 
+-&media_blk_ctrl {
+-	/* currently it is not possible to let display clocks confugure
+-	 * automatically, so we need to set them manually
+-	 */
+-	assigned-clock-rates = <500000000>, <200000000>, <0>,
+-		/* IMX8MP_CLK_MEDIA_DISP2_PIX = pixelclk of lvds panel */
+-		<70000000>,
+-		<500000000>,
+-		/* IMX8MP_VIDEO_PLL1 = IMX8MP_CLK_MEDIA_LDB */
+-		<490000000>;
+-};
+-
+ &pwm4 {
+ 	status = "okay";
+ };

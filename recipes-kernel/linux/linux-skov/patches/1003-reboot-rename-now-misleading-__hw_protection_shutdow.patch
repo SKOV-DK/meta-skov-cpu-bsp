@@ -1,0 +1,78 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 18 Dec 2024 13:42:05 +0100
+Subject: [PATCH] reboot: rename now misleading __hw_protection_shutdown
+ symbols
+
+The __hw_protection_shutdown function name has become misleading
+since it can cause either a shutdown (poweroff) or a reboot
+depending on its argument.
+
+To avoid further confusion, let's rename it, so it doesn't suggest
+that a poweroff is all it can do.
+
+Reviewed-by: Tzung-Bi Shih <tzungbi@kernel.org>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ include/linux/reboot.h | 8 ++++----
+ kernel/reboot.c        | 8 ++++----
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/include/linux/reboot.h b/include/linux/reboot.h
+index e97f6b8e8586..53c64e31b3cf 100644
+--- a/include/linux/reboot.h
++++ b/include/linux/reboot.h
+@@ -188,17 +188,17 @@ extern void orderly_reboot(void);
+  */
+ enum hw_protection_action { HWPROT_ACT_SHUTDOWN, HWPROT_ACT_REBOOT };
+ 
+-void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+-			      enum hw_protection_action action);
++void __hw_protection_trigger(const char *reason, int ms_until_forced,
++			     enum hw_protection_action action);
+ 
+ static inline void hw_protection_reboot(const char *reason, int ms_until_forced)
+ {
+-	__hw_protection_shutdown(reason, ms_until_forced, HWPROT_ACT_REBOOT);
++	__hw_protection_trigger(reason, ms_until_forced, HWPROT_ACT_REBOOT);
+ }
+ 
+ static inline void hw_protection_shutdown(const char *reason, int ms_until_forced)
+ {
+-	__hw_protection_shutdown(reason, ms_until_forced, HWPROT_ACT_SHUTDOWN);
++	__hw_protection_trigger(reason, ms_until_forced, HWPROT_ACT_SHUTDOWN);
+ }
+ 
+ /*
+diff --git a/kernel/reboot.c b/kernel/reboot.c
+index d4d74ff073a6..34e48668b433 100644
+--- a/kernel/reboot.c
++++ b/kernel/reboot.c
+@@ -1009,7 +1009,7 @@ static void hw_failure_emergency_schedule(enum hw_protection_action action,
+ }
+ 
+ /**
+- * __hw_protection_shutdown - Trigger an emergency system shutdown or reboot
++ * __hw_protection_trigger - Trigger an emergency system shutdown or reboot
+  *
+  * @reason:		Reason of emergency shutdown or reboot to be printed.
+  * @ms_until_forced:	Time to wait for orderly shutdown or reboot before
+@@ -1023,8 +1023,8 @@ static void hw_failure_emergency_schedule(enum hw_protection_action action,
+  * pending even if the previous request has given a large timeout for forced
+  * shutdown/reboot.
+  */
+-void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+-			      enum hw_protection_action action)
++void __hw_protection_trigger(const char *reason, int ms_until_forced,
++			     enum hw_protection_action action)
+ {
+ 	static atomic_t allow_proceed = ATOMIC_INIT(1);
+ 
+@@ -1044,7 +1044,7 @@ void __hw_protection_shutdown(const char *reason, int ms_until_forced,
+ 	else
+ 		orderly_poweroff(true);
+ }
+-EXPORT_SYMBOL_GPL(__hw_protection_shutdown);
++EXPORT_SYMBOL_GPL(__hw_protection_trigger);
+ 
+ static int __init reboot_setup(char *str)
+ {

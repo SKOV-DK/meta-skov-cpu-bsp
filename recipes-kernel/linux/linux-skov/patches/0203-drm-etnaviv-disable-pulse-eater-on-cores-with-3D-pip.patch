@@ -1,0 +1,32 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 2 Dec 2024 18:43:01 +0100
+Subject: [PATCH] drm/etnaviv: disable pulse eater on cores with 3D pipe and
+ revision > 0x5420
+
+The downstream driver switched from only disabling internal DFS on those
+cores to clearing bit 16 and setting bit 17 in commit "MGS-3448: gpu-viv:
+fix 6.2.4 remaning issues". This, as far as is known, completely disables
+the pulse eater.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 57d16debfed4..947883e22d4a 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -750,9 +750,10 @@ static void etnaviv_gpu_setup_pulse_eater(struct etnaviv_gpu *gpu)
+ 	if ((gpu->identity.revision > 0x5420) &&
+ 	    (gpu->identity.features & chipFeatures_PIPE_3D))
+ 	{
+-		/* Performance fix: disable internal DFS */
++		/* Performance fix: disable internal DFS and pulse-eater */
+ 		pulse_eater = gpu_read_power(gpu, VIVS_PM_PULSE_EATER);
+-		pulse_eater |= BIT(18);
++		pulse_eater &= ~BIT(16);
++		pulse_eater |= BIT(18) | BIT(17);
+ 	}
+ 
+ 	gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);

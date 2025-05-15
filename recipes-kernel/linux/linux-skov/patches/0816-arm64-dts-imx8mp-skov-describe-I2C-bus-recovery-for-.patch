@@ -1,0 +1,122 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 6 Jan 2025 17:24:19 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: describe I2C bus recovery for all
+ controllers
+
+I2C bus recovery can be used to recover when SCL/SDA are stuck low.
+To be able to use it, add the necessary GPIO and pinctrl entries.
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ .../arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 48 ++++++++++++++++++++--
+ 1 file changed, 44 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 1c91c2ffb25c..cda5bb321150 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -261,8 +261,11 @@ &flexcan2 {
+ 
+ &i2c1 {
+ 	clock-frequency = <100000>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c1>;
++	pinctrl-1 = <&pinctrl_i2c1_gpio>;
++	scl-gpios = <&gpio5 14 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 15 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 	status = "okay";
+ 
+ 	pmic@25 {
+@@ -355,14 +358,20 @@ reg_nvcc_sd2: LDO5 {
+ };
+ 
+ &i2c2 {
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c2>;
++	pinctrl-1 = <&pinctrl_i2c2_gpio>;
++	scl-gpios = <&gpio5 16 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ };
+ 
+ &i2c3 {
+ 	clock-frequency = <400000>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c3>;
++	pinctrl-1 = <&pinctrl_i2c3_gpio>;
++	scl-gpios = <&gpio5 18 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 19 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 	status = "okay";
+ 
+ 	i2c_rtc: rtc@51 {
+@@ -393,8 +402,11 @@ reboot_mode@0,4 {
+ 
+ &i2c4 {
+ 	clock-frequency = <380000>;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c4>;
++	pinctrl-1 = <&pinctrl_i2c4_gpio>;
++	scl-gpios = <&gpio5 20 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++	sda-gpios = <&gpio5 21 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 	status = "okay";
+ 
+ 	switch: switch@5f {
+@@ -606,6 +618,13 @@ MX8MP_IOMUXC_I2C1_SDA__I2C1_SDA				0x400001c2
+ 		>;
+ 	};
+ 
++	pinctrl_i2c1_gpio: i2c1gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C1_SCL__GPIO5_IO14			0x400001c2
++			MX8MP_IOMUXC_I2C1_SDA__GPIO5_IO15			0x400001c2
++		>;
++	};
++
+ 	pinctrl_i2c2: i2c2grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_I2C2_SCL__I2C2_SCL				0x400001c2
+@@ -613,6 +632,13 @@ MX8MP_IOMUXC_I2C2_SDA__I2C2_SDA				0x400001c2
+ 		>;
+ 	};
+ 
++	pinctrl_i2c2_gpio: i2c2gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C2_SCL__GPIO5_IO16			0x400001c2
++			MX8MP_IOMUXC_I2C2_SDA__GPIO5_IO17			0x400001c2
++		>;
++	};
++
+ 	pinctrl_i2c3: i2c3grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_I2C3_SCL__I2C3_SCL				0x400001c2
+@@ -620,6 +646,13 @@ MX8MP_IOMUXC_I2C3_SDA__I2C3_SDA				0x400001c2
+ 		>;
+ 	};
+ 
++	pinctrl_i2c3_gpio: i2c3gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C3_SCL__GPIO5_IO18			0x400001c2
++			MX8MP_IOMUXC_I2C3_SDA__GPIO5_IO19			0x400001c2
++		>;
++	};
++
+ 	pinctrl_i2c4: i2c4grp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_I2C4_SCL__I2C4_SCL				0x400001c3
+@@ -627,6 +660,13 @@ MX8MP_IOMUXC_I2C4_SDA__I2C4_SDA				0x400001c3
+ 		>;
+ 	};
+ 
++	pinctrl_i2c4_gpio: i2c4gpiogrp {
++		fsl,pins = <
++			MX8MP_IOMUXC_I2C4_SCL__GPIO5_IO20			0x400001c3
++			MX8MP_IOMUXC_I2C4_SDA__GPIO5_IO21			0x400001c3
++		>;
++	};
++
+ 	pinctrl_pmic: pmicirqgrp {
+ 		fsl,pins = <
+ 			MX8MP_IOMUXC_GPIO1_IO03__GPIO1_IO03			0x41

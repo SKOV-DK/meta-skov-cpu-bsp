@@ -1,0 +1,43 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Tue, 16 Jan 2024 13:05:57 +0100
+Subject: [PATCH] thermal: core: Record PSCR before hw_protection_shutdown()
+
+Enhance the thermal core to record the Power State Change Reason (PSCR)
+prior to invoking hw_protection_shutdown(). This change integrates the
+PSCR framework with the thermal subsystem, ensuring that reasons for
+power state changes, such as overtemperature events, are stored in a
+dedicated non-volatile memory (NVMEM) cell.
+
+This 'black box' recording is crucial for post-mortem analysis, enabling
+a deeper understanding of system failures and abrupt shutdowns,
+especially in scenarios where PMICs or watchdog timers are incapable of
+logging such events.  The recorded data can be utilized during system
+recovery routines in the bootloader or early kernel stages of subsequent
+boots, significantly enhancing system diagnostics, reliability, and
+debugging capabilities.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/thermal/thermal_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/thermal/thermal_core.c b/drivers/thermal/thermal_core.c
+index 5847729419f2..2e391b62500a 100644
+--- a/drivers/thermal/thermal_core.c
++++ b/drivers/thermal/thermal_core.c
+@@ -16,6 +16,7 @@
+ #include <linux/kdev_t.h>
+ #include <linux/idr.h>
+ #include <linux/thermal.h>
++#include <linux/pscrr.h>
+ #include <linux/reboot.h>
+ #include <linux/string.h>
+ #include <linux/of.h>
+@@ -381,6 +382,7 @@ static void thermal_zone_device_halt(struct thermal_zone_device *tz,
+ 
+ 	dev_emerg(&tz->device, "%s: critical temperature reached\n", tz->type);
+ 
++	set_power_state_change_reason(PSCR_OVERTEMPERATURE);
+ 	__hw_protection_trigger(msg, poweroff_delay_ms, action);
+ }
+ 
