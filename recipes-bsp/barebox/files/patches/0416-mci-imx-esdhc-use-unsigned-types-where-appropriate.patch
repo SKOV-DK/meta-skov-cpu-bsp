@@ -1,0 +1,36 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Sun, 15 Dec 2024 13:56:22 +0100
+Subject: [PATCH] mci: imx-esdhc: use unsigned types where appropriate
+
+clock rate and register values are both unsigned quantities, so
+use the proper types for them.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/imx-esdhc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mci/imx-esdhc.c b/drivers/mci/imx-esdhc.c
+index 84eabdb86f87..b49bd2940204 100644
+--- a/drivers/mci/imx-esdhc.c
++++ b/drivers/mci/imx-esdhc.c
+@@ -48,7 +48,7 @@ static void set_sysctl(struct mci_host *mci, u32 clock, bool ddr)
+ {
+ 	int div, pre_div, ddr_pre_div = 1;
+ 	struct fsl_esdhc_host *host = to_fsl_esdhc(mci);
+-	int sdhc_clk = clk_get_rate(host->clk);
++	unsigned sdhc_clk = clk_get_rate(host->clk);
+ 	u32 clk;
+ 	unsigned long  cur_clock;
+ 
+@@ -199,7 +199,7 @@ static int esdhc_card_present(struct mci_host *mci)
+ 
+ static int esdhc_reset(struct fsl_esdhc_host *host)
+ {
+-	int val;
++	u32 val;
+ 
+ 	/* reset the controller */
+ 	sdhci_write32(&host->sdhci, SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET,

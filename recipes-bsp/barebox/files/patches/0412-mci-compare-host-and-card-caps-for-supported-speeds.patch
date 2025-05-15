@@ -1,0 +1,126 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 30 Apr 2025 15:41:18 +0200
+Subject: [PATCH] mci: compare host and card caps for supported speeds
+
+We currently support only a single speed mode that needs tuning, so we
+took the existence of execute_tuning to mean that higher speed modes are
+supported.
+
+This breaks down once we have multiple speed modes that need tuning and
+is different to what Linux does, which instead sets capabilities on the
+host, which are compared with the capabilities of the card.
+
+Do the same in barebox to get rid of this quirk.
+
+No functional change intended.
+
+Suggested-by: Lucas Stach <l.stach@pengutronix.de>
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/arasan-sdhci.c |  1 +
+ drivers/mci/mci-core.c     | 22 ++++++++++------------
+ include/mci.h              |  1 +
+ 3 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mci/arasan-sdhci.c b/drivers/mci/arasan-sdhci.c
+index abbef8fd1a45..9646e600f34d 100644
+--- a/drivers/mci/arasan-sdhci.c
++++ b/drivers/mci/arasan-sdhci.c
+@@ -772,6 +772,7 @@ static int arasan_sdhci_probe(struct device *dev)
+ 	if (of_device_is_compatible(np, "xlnx,zynqmp-8.9a")) {
+ 		if (IS_ENABLED(CONFIG_MCI_TUNING))
+ 			mci->ops.execute_tuning = arasan_zynqmp_execute_tuning;
++		mci->caps2 |= MMC_CAP2_HS200;
+ 		arasan_sdhci->quirks |= SDHCI_ARASAN_QUIRK_CLOCK_25_BROKEN;
+ 	}
+ 
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index f8caba717296..0d2905fac329 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -1559,14 +1559,8 @@ int mci_execute_tuning(struct mci *mci)
+ 	struct mci_host *host = mci->host;
+ 	u32 opcode;
+ 
+-	if (!host->ops.execute_tuning) {
+-		/*
+-		 * For us, implementing ->execute_tuning is mandatory to
+-		 * support higher speed modes
+-		 */
+-		dev_warn(&mci->dev, "tuning failed: no host diver support\n");
+-		return -EOPNOTSUPP;
+-	}
++	if (!host->ops.execute_tuning)
++		return 0;
+ 
+ 	/* Tuning is only supported for MMC / HS200 */
+ 	if (mmc_card_hs200(mci))
+@@ -1603,29 +1597,35 @@ static void mmc_select_max_dtr(struct mci *mci)
+ 	u32 caps = mci->card_caps;
+ 	unsigned int hs_max_dtr = 0;
+ 	unsigned int hs200_max_dtr = 0;
++	unsigned int avail_type = 0;
+ 
+ 	if ((caps & MMC_CAP_MMC_HIGHSPEED) &&
+ 	    (card_type & EXT_CSD_CARD_TYPE_26)) {
+ 		hs_max_dtr = MMC_HIGH_26_MAX_DTR;
++		avail_type |= EXT_CSD_CARD_TYPE_26;
+ 	}
+ 
+ 	if ((caps & MMC_CAP_MMC_HIGHSPEED) &&
+ 	    (card_type & EXT_CSD_CARD_TYPE_52)) {
+ 		hs_max_dtr = MMC_HIGH_52_MAX_DTR;
++		avail_type |= EXT_CSD_CARD_TYPE_52;
+ 	}
+ 
+ 	if ((caps2 & MMC_CAP2_HS200_1_8V_SDR) &&
+ 	    (card_type & EXT_CSD_CARD_TYPE_HS200_1_8V)) {
+ 		hs200_max_dtr = MMC_HS200_MAX_DTR;
++		avail_type |= EXT_CSD_CARD_TYPE_HS200_1_8V;
+ 	}
+ 
+ 	if ((caps2 & MMC_CAP2_HS200_1_2V_SDR) &&
+ 	    (card_type & EXT_CSD_CARD_TYPE_HS200_1_2V)) {
+ 		hs200_max_dtr = MMC_HS200_MAX_DTR;
++		avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
+ 	}
+ 
+ 	mci->host->hs200_max_dtr = hs200_max_dtr;
+ 	mci->host->hs_max_dtr = hs_max_dtr;
++	mci->host->mmc_avail_type = avail_type;
+ }
+ /*
+  * For device supporting HS200 mode, the following sequence
+@@ -1710,16 +1710,14 @@ static void mmc_set_bus_speed(struct mci *mci)
+  */
+ int mmc_select_timing(struct mci *mci)
+ {
+-	unsigned int mmc_avail_type;
+ 	int err = 0;
+ 
+ 	mmc_select_max_dtr(mci);
+ 
+-	mmc_avail_type = mci->ext_csd[EXT_CSD_DEVICE_TYPE] & EXT_CSD_CARD_TYPE_MASK;
+-	if (mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
++	if (mci->host->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
+ 		err = mmc_select_hs200(mci);
+ 		if (err == -EBADMSG)
+-			mmc_avail_type &= ~EXT_CSD_CARD_TYPE_HS200;
++			mci->host->mmc_avail_type &= ~EXT_CSD_CARD_TYPE_HS200;
+ 		else
+ 			goto out;
+ 	}
+diff --git a/include/mci.h b/include/mci.h
+index 8b5d89e2cc39..2b964e1e8919 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -609,6 +609,7 @@ struct mci_host {
+ 	unsigned f_max;		/**< host interface upper limit */
+ 	unsigned actual_clock;
+ 	struct mci_ios ios;		/* current io bus settings */
++	unsigned mmc_avail_type;	/**< supported device type by both host and card */
+ 	unsigned hs_max_dtr;
+ 	unsigned hs200_max_dtr;
+ 	unsigned max_req_size;

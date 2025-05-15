@@ -1,0 +1,120 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 1 Apr 2025 12:50:03 +0200
+Subject: [PATCH] printk: make dev_printf a PBL stub
+
+dev_printf is identical to pr_printf except for ignoring the dev
+argument. Make it a macro to avoid compile errors when building without
+CONFIG_PBL_CONSOLE && !CONFIG_CONSOLE_NONE.
+
+This has the nice extra benefit of saving some binary space.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Link: https://lore.kernel.org/r/20250401105003.3961046-1-a.fatoum@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mci/atmel-sdhci-common.c |  4 ----
+ drivers/mci/atmel_mci_common.c   |  8 --------
+ drivers/mci/imx-esdhc-common.c   |  4 ----
+ include/linux/printk.h           |  8 ++------
+ pbl/console.c                    | 15 ---------------
+ 5 files changed, 2 insertions(+), 37 deletions(-)
+
+diff --git a/drivers/mci/atmel-sdhci-common.c b/drivers/mci/atmel-sdhci-common.c
+index 082ce842f7a2..12b71bc2ded3 100644
+--- a/drivers/mci/atmel-sdhci-common.c
++++ b/drivers/mci/atmel-sdhci-common.c
+@@ -17,10 +17,6 @@
+ 
+ #ifdef __PBL__
+ #define udelay early_udelay
+-#undef  dev_err
+-#define dev_err(d, ...)		pr_err(__VA_ARGS__)
+-#undef  dev_warn
+-#define dev_warn(d, ...)	pr_warn(__VA_ARGS__)
+ #endif
+ 
+ #include "atmel-sdhci.h"
+diff --git a/drivers/mci/atmel_mci_common.c b/drivers/mci/atmel_mci_common.c
+index 7b11e9134e65..170c021eba4b 100644
+--- a/drivers/mci/atmel_mci_common.c
++++ b/drivers/mci/atmel_mci_common.c
+@@ -14,14 +14,6 @@
+ 
+ #ifdef __PBL__
+ #define udelay early_udelay
+-#undef  dev_err
+-#define dev_err(d, ...)		pr_err(__VA_ARGS__)
+-#undef  dev_warn
+-#define dev_warn(d, ...)	pr_warn(__VA_ARGS__)
+-#undef  dev_dbg
+-#define dev_dbg(d, ...)		pr_debug(__VA_ARGS__)
+-#undef  dev_info
+-#define dev_info(d, ...)	pr_info(__VA_ARGS__)
+ #undef	clk_enable
+ #define clk_enable(...)
+ #undef	clk_disable
+diff --git a/drivers/mci/imx-esdhc-common.c b/drivers/mci/imx-esdhc-common.c
+index 3d938891436b..a51e38734cb3 100644
+--- a/drivers/mci/imx-esdhc-common.c
++++ b/drivers/mci/imx-esdhc-common.c
+@@ -105,10 +105,6 @@ static void __udelay(int us)
+ }
+ 
+ #define udelay(n)	__udelay(n)
+-#undef  dev_err
+-#undef  dev_dbg
+-#define dev_err(d, ...)	pr_err(__VA_ARGS__)
+-#define dev_dbg(d, ...)	pr_debug(__VA_ARGS__)
+ 
+ #endif
+ 
+diff --git a/include/linux/printk.h b/include/linux/printk.h
+index 67bdd2dc155d..1c717a6f6676 100644
+--- a/include/linux/printk.h
++++ b/include/linux/printk.h
+@@ -28,15 +28,11 @@
+ /* debugging and troubleshooting/diagnostic helpers. */
+ struct device;
+ 
+-#ifndef CONFIG_CONSOLE_NONE
++#if !defined(CONFIG_CONSOLE_NONE) && IN_PROPER
+ int dev_printf(int level, const struct device *dev, const char *format, ...)
+ 	__attribute__ ((format(__printf__, 3, 4)));
+ #else
+-static inline int dev_printf(int level, const struct device *dev,
+-			     const char *format, ...)
+-{
+-	return 0;
+-}
++#define dev_printf(level, dev, ...) pr_print(((void)dev, (level)), __VA_ARGS__)
+ #endif
+ 
+ #if (IN_PROPER && !defined(CONFIG_CONSOLE_NONE)) || \
+diff --git a/pbl/console.c b/pbl/console.c
+index d81bf580d52f..66652320149d 100644
+--- a/pbl/console.c
++++ b/pbl/console.c
+@@ -86,21 +86,6 @@ int pr_print(int level, const char *fmt, ...)
+ 	return i;
+ }
+ 
+-int dev_printf(int level, const struct device *dev, const char *fmt, ...)
+-{
+-	va_list args;
+-	uint i;
+-	char printbuffer[CFG_PBSIZE];
+-
+-	va_start(args, fmt);
+-	i = vsnprintf(printbuffer, sizeof(printbuffer), fmt, args);
+-	va_end(args);
+-
+-	console_puts(CONSOLE_STDERR, printbuffer);
+-
+-	return i;
+-}
+-
+ int ctrlc(void)
+ {
+ 	return 0;

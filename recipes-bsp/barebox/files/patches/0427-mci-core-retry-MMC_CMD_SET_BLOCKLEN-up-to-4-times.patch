@@ -1,0 +1,26 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 16 Dec 2024 16:24:38 +0100
+Subject: [PATCH] mci: core: retry MMC_CMD_SET_BLOCKLEN up to 4 times
+
+This is what Linux is doing, so follow suit for reliability.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/mci-core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index 7ef6bac5ec71..e5ce0f2cb705 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -125,7 +125,7 @@ static int mci_set_blocklen(struct mci *mci, unsigned len)
+ 		return 0;
+ 
+ 	mci_setup_cmd(&cmd, MMC_CMD_SET_BLOCKLEN, len, MMC_RSP_R1);
+-	return mci_send_cmd(mci, &cmd, NULL);
++	return mci_send_cmd_retry(mci, &cmd, NULL, 4);
+ }
+ 
+ static void *sector_buf;

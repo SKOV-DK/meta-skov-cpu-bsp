@@ -1,0 +1,454 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 5 May 2025 01:57:46 +0200
+Subject: [PATCH] mci: move most recent I/O settings into mci_host::ios
+
+We already keep around mci_host::{clock,bus_width,timing}, which hold
+the last configured I/O settings.
+
+Before duplicating yet another member in struct mci_host, let's do as
+Linux does and embed the active struct mmc_ios directly directly into
+the MCI object.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/arasan-sdhci.c           | 14 +++++------
+ drivers/mci/atmel_mci.c              |  4 +--
+ drivers/mci/mci-core.c               | 48 ++++++++++++++++++------------------
+ drivers/mci/mmci.c                   | 18 +++++++-------
+ drivers/mci/rockchip-dwcmshc-sdhci.c |  2 +-
+ drivers/mci/sdhci.c                  | 10 ++++----
+ drivers/mci/stm32_sdmmc2.c           | 12 ++++-----
+ include/mci.h                        | 10 +++-----
+ 8 files changed, 58 insertions(+), 60 deletions(-)
+
+diff --git a/drivers/mci/arasan-sdhci.c b/drivers/mci/arasan-sdhci.c
+index 112fb5a669d5..ee990332cd5c 100644
+--- a/drivers/mci/arasan-sdhci.c
++++ b/drivers/mci/arasan-sdhci.c
+@@ -155,7 +155,7 @@ static int arasan_zynqmp_execute_tuning(struct mci_host *mci, u32 opcode)
+ 	int err;
+ 
+ 	/* ZynqMP SD controller does not perform auto tuning in DDR50 mode */
+-	if (mci->timing == MMC_TIMING_UHS_DDR50)
++	if (mci->ios.timing == MMC_TIMING_UHS_DDR50)
+ 		return 0;
+ 
+ 	arasan_zynqmp_dll_reset(host, device_id);
+@@ -205,9 +205,9 @@ static void arasan_sdhci_set_clock(struct mci_host *mci, unsigned int clock)
+ 	}
+ 
+ 	clk_set_phase(clk_data->sampleclk,
+-		      clk_data->clk_phase_in[mci->mci->host->timing]);
++		      clk_data->clk_phase_in[mci->mci->host->ios.timing]);
+ 	clk_set_phase(clk_data->sdcardclk,
+-		      clk_data->clk_phase_out[mci->mci->host->timing]);
++		      clk_data->clk_phase_out[mci->mci->host->ios.timing]);
+ 
+ 	sdhci_set_clock(&host->sdhci, clock, mci->f_max);
+ }
+@@ -312,9 +312,9 @@ static void sdhci_arasan_set_clk_delays(struct sdhci *host)
+ 	struct sdhci_arasan_clk_data *clk_data = &arasan_sdhci->clk_data;
+ 
+ 	clk_set_phase(clk_data->sampleclk,
+-		      clk_data->clk_phase_in[mci->timing]);
++		      clk_data->clk_phase_in[mci->ios.timing]);
+ 	clk_set_phase(clk_data->sdcardclk,
+-		      clk_data->clk_phase_out[mci->timing]);
++		      clk_data->clk_phase_out[mci->ios.timing]);
+ }
+ 
+ static void arasan_dt_read_clk_phase(struct device *dev,
+@@ -372,7 +372,7 @@ static int arasan_zynqmp_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+ 	/* Assert DLL Reset */
+ 	zynqmp_pm_sd_dll_reset(node_id, PM_DLL_RESET_ASSERT);
+ 
+-	switch (host->timing) {
++	switch (host->ios.timing) {
+ 	case MMC_TIMING_MMC_HS:
+ 	case MMC_TIMING_SD_HS:
+ 	case MMC_TIMING_UHS_DDR50:
+@@ -441,7 +441,7 @@ static int arasan_zynqmp_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
+ 	if (sdhci_arasan->sdhci.version < SDHCI_SPEC_300)
+ 		return 0;
+ 
+-	switch (host->timing) {
++	switch (host->ios.timing) {
+ 	case MMC_TIMING_MMC_HS:
+ 	case MMC_TIMING_SD_HS:
+ 	case MMC_TIMING_UHS_DDR50:
+diff --git a/drivers/mci/atmel_mci.c b/drivers/mci/atmel_mci.c
+index 18d623f20823..1012feb6c226 100644
+--- a/drivers/mci/atmel_mci.c
++++ b/drivers/mci/atmel_mci.c
+@@ -35,9 +35,9 @@ static void atmci_info(struct device *mci_dev)
+ {
+ 	struct atmel_mci *host = mci_dev->priv;
+ 
+-	printf("  Bus data width: %d bit\n", host->mci.bus_width);
++	printf("  Bus data width: %d bit\n", host->mci.ios.bus_width);
+ 
+-	printf("  Bus frequency: %u Hz\n", host->mci.clock);
++	printf("  Bus frequency: %u Hz\n", host->mci.ios.clock);
+ 	printf("  Frequency limits: ");
+ 	if (host->mci.f_min == 0)
+ 		printf("no lower limit ");
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index 2619024db9aa..8ba2d8261f65 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -121,7 +121,7 @@ static int mci_set_blocklen(struct mci *mci, unsigned len)
+ {
+ 	struct mci_cmd cmd = {};
+ 
+-	if (mci->host->timing == MMC_TIMING_MMC_DDR52)
++	if (mci->host->ios.timing == MMC_TIMING_MMC_DDR52)
+ 		return 0;
+ 
+ 	mci_setup_cmd(&cmd, MMC_CMD_SET_BLOCKLEN, len, MMC_RSP_R1);
+@@ -1009,14 +1009,14 @@ static void mci_set_ios(struct mci *mci)
+ {
+ 	struct mci_host *host = mci->host;
+ 	struct mci_ios ios = {
+-		.bus_width = host->bus_width,
+-		.clock = host->clock,
+-		.timing = host->timing,
++		.bus_width = host->ios.bus_width,
++		.clock = host->ios.clock,
++		.timing = host->ios.timing,
+ 	};
+ 
+ 	host->ops.set_ios(host, &ios);
+ 
+-	host->actual_clock = host->clock;
++	host->actual_clock = host->ios.clock;
+ }
+ 
+ /**
+@@ -1035,7 +1035,7 @@ static void mci_set_clock(struct mci *mci, unsigned clock)
+ 	if (clock < host->f_min)
+ 		clock = host->f_min;
+ 
+-	host->clock = clock;	/* the new target frequency */
++	host->ios.clock = clock;	/* the new target frequency */
+ 	mci_set_ios(mci);
+ }
+ 
+@@ -1048,7 +1048,7 @@ static void mci_set_bus_width(struct mci *mci, enum mci_bus_width width)
+ {
+ 	struct mci_host *host = mci->host;
+ 
+-	host->bus_width = width;	/* the new target bus width */
++	host->ios.bus_width = width;	/* the new target bus width */
+ 	mci_set_ios(mci);
+ }
+ 
+@@ -1409,7 +1409,7 @@ static int mci_startup_sd(struct mci *mci)
+ 	}
+ 
+ 	if (mci->tran_speed > 25000000)
+-		mci->host->timing = MMC_TIMING_SD_HS;
++		mci->host->ios.timing = MMC_TIMING_SD_HS;
+ 
+ 	mci_set_clock(mci, mci->tran_speed);
+ 
+@@ -1448,7 +1448,7 @@ static int mci_mmc_try_bus_width(struct mci *mci, enum mci_bus_width bus_width,
+ 	if (err < 0)
+ 		goto out;
+ 
+-	mci->host->timing = timing;
++	mci->host->ios.timing = timing;
+ 	mci_set_bus_width(mci, bus_width);
+ 
+ 	switch (bus_width) {
+@@ -1503,7 +1503,7 @@ static int mci_mmc_select_bus_width(struct mci *mci)
+ 		 * 4bit transfer mode. On success set the corresponding
+ 		 * bus width on the host.
+ 		 */
+-		ret = mci_mmc_try_bus_width(mci, bus_widths[idx], host->timing);
++		ret = mci_mmc_try_bus_width(mci, bus_widths[idx], host->ios.timing);
+ 		if (ret > 0)
+ 			break;
+ 	}
+@@ -1525,9 +1525,9 @@ static int mci_mmc_select_hs_ddr(struct mci *mci)
+ 	if (!(mci_caps(mci) & (MMC_CAP_MMC_1_8V_DDR | MMC_CAP_MMC_3_3V_DDR)))
+ 		return 0;
+ 
+-	ret = mci_mmc_try_bus_width(mci, host->bus_width, MMC_TIMING_MMC_DDR52);
++	ret = mci_mmc_try_bus_width(mci, host->ios.bus_width, MMC_TIMING_MMC_DDR52);
+ 	if (ret < 0)
+-		return mci_mmc_try_bus_width(mci, host->bus_width, MMC_TIMING_MMC_HS);
++		return mci_mmc_try_bus_width(mci, host->ios.bus_width, MMC_TIMING_MMC_HS);
+ 
+ 	/* Block length is fixed to 512 bytes while in DDR mode */
+ 	mci->read_bl_len = SECTOR_SIZE;
+@@ -1643,10 +1643,10 @@ static int mmc_select_hs200(struct mci *mci)
+ 		 * NB: We can't move to full (HS200) speeds until after we've
+ 		 * successfully switched over.
+ 		 */
+-		old_timing = mci->host->timing;
+-		old_clock = mci->host->clock;
++		old_timing = mci->host->ios.timing;
++		old_clock = mci->host->ios.clock;
+ 
+-		mci->host->timing = MMC_TIMING_MMC_HS200;
++		mci->host->ios.timing = MMC_TIMING_MMC_HS200;
+ 		mci_set_ios(mci);
+ 		mci_set_clock(mci, mci->host->hs_max_dtr);
+ 
+@@ -1657,8 +1657,8 @@ static int mmc_select_hs200(struct mci *mci)
+ 		 * it is a switch error.
+ 		 */
+ 		if (err == -EBADMSG) {
+-			mci->host->clock = old_clock;
+-			mci->host->timing = old_timing;
++			mci->host->ios.clock = old_clock;
++			mci->host->ios.timing = old_timing;
+ 			mci_set_ios(mci);
+ 		}
+ 	}
+@@ -1736,7 +1736,7 @@ static int mci_startup_mmc(struct mci *mci)
+ 		else
+ 			mci->tran_speed = 26000000;
+ 
+-		host->timing = MMC_TIMING_MMC_HS;
++		host->ios.timing = MMC_TIMING_MMC_HS;
+ 	}
+ 
+ 	if (IS_ENABLED(CONFIG_MCI_TUNING)) {
+@@ -1751,7 +1751,7 @@ static int mci_startup_mmc(struct mci *mci)
+ 			ret = mmc_hs200_tuning(mci);
+ 
+ 		if (ret) {
+-			host->timing = MMC_TIMING_MMC_HS;
++			host->ios.timing = MMC_TIMING_MMC_HS;
+ 			mci_switch(mci, EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS);
+ 		}
+ 	}
+@@ -2423,17 +2423,17 @@ static void mci_info(struct device *dev)
+ 	}
+ 
+ 	printf("Host information:\n");
+-	printf("  current clock: %d\n", host->clock);
++	printf("  current clock: %d\n", host->ios.clock);
+ 
+-	if (host->bus_width == MMC_BUS_WIDTH_8)
++	if (host->ios.bus_width == MMC_BUS_WIDTH_8)
+ 		bw = 8;
+-	else if (host->bus_width == MMC_BUS_WIDTH_4)
++	else if (host->ios.bus_width == MMC_BUS_WIDTH_4)
+ 		bw = 4;
+ 	else
+ 		bw = 1;
+ 
+ 	printf("  current buswidth: %d\n", bw);
+-	printf("  current timing: %s\n", mci_timing_tostr(host->timing));
++	printf("  current timing: %s\n", mci_timing_tostr(host->ios.timing));
+ 	mci_print_caps(host->host_caps);
+ 
+ 	printf("Card information:\n");
+@@ -2772,7 +2772,7 @@ static int mci_card_probe(struct mci *mci)
+ 
+ on_error:
+ 	if (rc != 0) {
+-		host->clock = 0;	/* disable the MCI clock */
++		host->ios.clock = 0;	/* disable the MCI clock */
+ 		mci_set_ios(mci);
+ 		regulator_disable(host->supply);
+ 		mci->nr_parts = 0;
+diff --git a/drivers/mci/mmci.c b/drivers/mci/mmci.c
+index c811d3980f98..1a70776bb125 100644
+--- a/drivers/mci/mmci.c
++++ b/drivers/mci/mmci.c
+@@ -472,35 +472,35 @@ static void mci_set_ios(struct mci_host *mci, struct mci_ios *ios)
+ 	sdi_clkcr = mmci_readl(host, MMCICLOCK);
+ 
+ 	/* Ramp up the clock rate */
+-	if (mci->clock) {
++	if (mci->ios.clock) {
+ 		u32 clkdiv = 0;
+ 		u32 tmp_clock;
+ 
+ 		dev_dbg(host->hw_dev, "setting clock and bus width in the host:");
+-		if (mci->clock >= mci->f_max) {
++		if (mci->ios.clock >= mci->f_max) {
+ 			clkdiv = 0;
+-			mci->clock = mci->f_max;
++			mci->ios.clock = mci->f_max;
+ 		} else {
+-			clkdiv = (host->mclk / mci->clock) - 2;
++			clkdiv = (host->mclk / mci->ios.clock) - 2;
+ 		}
+ 		tmp_clock = host->mclk / (clkdiv + 2);
+-		while (tmp_clock > mci->clock) {
++		while (tmp_clock > mci->ios.clock) {
+ 			clkdiv++;
+ 			tmp_clock = host->mclk / (clkdiv + 2);
+ 		}
+ 		if (clkdiv > MCI_CLK_CLKDIV_MASK)
+ 			clkdiv = MCI_CLK_CLKDIV_MASK;
+ 		tmp_clock = host->mclk / (clkdiv + 2);
+-		mci->clock = tmp_clock;
++		mci->ios.clock = tmp_clock;
+ 		sdi_clkcr &= ~(MCI_CLK_CLKDIV_MASK);
+ 		sdi_clkcr |= clkdiv;
+ 	}
+ 
+ 	/* Set the bus width */
+-	if (mci->bus_width) {
++	if (mci->ios.bus_width) {
+ 		u32 buswidth = 0;
+ 
+-		switch (mci->bus_width) {
++		switch (mci->ios.bus_width) {
+ 		case MMC_BUS_WIDTH_1:
+ 			buswidth |= MCI_1BIT_BUS;
+ 			break;
+@@ -511,7 +511,7 @@ static void mci_set_ios(struct mci_host *mci, struct mci_ios *ios)
+ 			buswidth |= MCI_ST_8BIT_BUS;
+ 			break;
+ 		default:
+-			dev_err(host->hw_dev, "Invalid bus width (%d)\n", mci->bus_width);
++			dev_err(host->hw_dev, "Invalid bus width (%d)\n", mci->ios.bus_width);
+ 			break;
+ 		}
+ 		sdi_clkcr &= ~(MCI_xBIT_BUS_MASK);
+diff --git a/drivers/mci/rockchip-dwcmshc-sdhci.c b/drivers/mci/rockchip-dwcmshc-sdhci.c
+index 41cdaa60dd59..3bc166e16c49 100644
+--- a/drivers/mci/rockchip-dwcmshc-sdhci.c
++++ b/drivers/mci/rockchip-dwcmshc-sdhci.c
+@@ -130,7 +130,7 @@ static void rk_sdhci_set_clock(struct rk_sdhci_host *host, unsigned int clock)
+ 	u32 txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT, extra;
+ 	int err;
+ 
+-	host->mci.clock = 0;
++	host->mci.ios.clock = 0;
+ 
+ 	/* DO NOT TOUCH THIS SETTING */
+ 	extra = DWCMSHC_EMMC_DLL_DLYENA |
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index 2c12f00ab967..f54cc6d58b2c 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -87,7 +87,7 @@ static int sdhci_send_tuning(struct sdhci *host, u32 opcode)
+ 	 * to 64 here.
+ 	 */
+ 	if (cmd.cmdidx == MMC_SEND_TUNING_BLOCK_HS200 &&
+-	    host->mci->bus_width == MMC_BUS_WIDTH_8) {
++	    host->mci->ios.bus_width == MMC_BUS_WIDTH_8) {
+ 		sdhci_write16(host, SDHCI_BLOCK_SIZE, SDHCI_MAKE_BLKSZ(7, 128));
+ 	} else {
+ 		sdhci_write16(host, SDHCI_BLOCK_SIZE, SDHCI_MAKE_BLKSZ(7, 64));
+@@ -196,7 +196,7 @@ int sdhci_execute_tuning(struct sdhci *sdhci, u32 opcode)
+ 	 * If the Host Controller supports the HS200 mode then the
+ 	 * tuning function has to be executed.
+ 	 */
+-	switch (host->timing) {
++	switch (host->ios.timing) {
+ 	/* HS400 tuning is done in HS200 mode */
+ 	case MMC_TIMING_MMC_HS400:
+ 		err = -EINVAL;
+@@ -859,9 +859,9 @@ void sdhci_set_clock(struct sdhci *host, unsigned int clock, unsigned int input_
+ 
+ 	BUG_ON(!host->mci); /* Call sdhci_setup_host() before using this */
+ 
+-	host->mci->clock = 0;
++	host->mci->ios.clock = 0;
+ 
+-	sdhci_set_uhs_signaling(host, host->mci->timing);
++	sdhci_set_uhs_signaling(host, host->mci->ios.timing);
+ 
+ 	sdhci_wait_idle_data(host, NULL);
+ 
+@@ -870,7 +870,7 @@ void sdhci_set_clock(struct sdhci *host, unsigned int clock, unsigned int input_
+ 	if (clock == 0)
+ 		return;
+ 
+-	clk = sdhci_calc_clk(host, clock, &host->mci->clock, input_clock);
++	clk = sdhci_calc_clk(host, clock, &host->mci->ios.clock, input_clock);
+ 	sdhci_enable_clk(host, clk);
+ }
+ 
+diff --git a/drivers/mci/stm32_sdmmc2.c b/drivers/mci/stm32_sdmmc2.c
+index 64a7171d2cae..f420ae123621 100644
+--- a/drivers/mci/stm32_sdmmc2.c
++++ b/drivers/mci/stm32_sdmmc2.c
+@@ -254,7 +254,7 @@ static void stm32_sdmmc2_pwron(struct stm32_sdmmc2_priv *priv)
+ 	       priv->base + SDMMC_POWER);
+ 
+ 	/* during the first 74 SDMMC_CK cycles the SDMMC is still disabled. */
+-	udelay(DIV_ROUND_UP(74 * USEC_PER_SEC, priv->mci.clock));
++	udelay(DIV_ROUND_UP(74 * USEC_PER_SEC, priv->mci.ios.clock));
+ }
+ 
+ static dma_addr_t stm32_sdmmc2_start_data(struct stm32_sdmmc2_priv *priv,
+@@ -539,17 +539,17 @@ static int stm32_sdmmc2_send_cmd(struct mci_host *mci, struct mci_cmd *cmd,
+ static void stm32_sdmmc2_set_ios(struct mci_host *mci, struct mci_ios *ios)
+ {
+ 	struct stm32_sdmmc2_priv *priv = to_mci_host(mci);
+-	u32 desired = mci->clock;
++	u32 desired = mci->ios.clock;
+ 	u32 sys_clock = clk_get_rate(priv->clk);
+ 	u32 clk = 0, ddr = 0;
+ 
+ 	dev_dbg(priv->dev, "%s: bus_width = %d, clock = %d\n", __func__,
+-		mci->bus_width, mci->clock);
++		mci->ios.bus_width, mci->ios.clock);
+ 
+ 	if (mci_timing_is_ddr(ios->timing))
+ 		ddr = SDMMC_CLKCR_DDR;
+ 
+-	if (mci->clock)
++	if (mci->ios.clock)
+ 		stm32_sdmmc2_pwron(priv);
+ 	else
+ 		stm32_sdmmc2_pwrcycle(priv);
+@@ -570,9 +570,9 @@ static void stm32_sdmmc2_set_ios(struct mci_host *mci, struct mci_ios *ios)
+ 
+ 	clk |= ddr;
+ 
+-	if (mci->bus_width == MMC_BUS_WIDTH_4)
++	if (mci->ios.bus_width == MMC_BUS_WIDTH_4)
+ 		clk |= SDMMC_CLKCR_WIDBUS_4;
+-	if (mci->bus_width == MMC_BUS_WIDTH_8)
++	if (mci->ios.bus_width == MMC_BUS_WIDTH_8)
+ 		clk |= SDMMC_CLKCR_WIDBUS_8;
+ 
+ 	writel(clk | priv->clk_reg_msk | SDMMC_CLKCR_HWFC_EN,
+diff --git a/include/mci.h b/include/mci.h
+index 2b1bdfb7cab3..1b27be356bdf 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -599,10 +599,8 @@ struct mci_host {
+ #define MMC_CAP2_CRYPTO		0
+ 	unsigned f_min;		/**< host interface lower limit */
+ 	unsigned f_max;		/**< host interface upper limit */
+-	unsigned clock;		/**< Current clock used to talk to the card */
+ 	unsigned actual_clock;
+-	enum mci_bus_width bus_width;	/**< used data bus width to the card */
+-	enum mci_timing timing;	/**< used timing specification to the card */
++	struct mci_ios ios;		/* current io bus settings */
+ 	unsigned hs_max_dtr;
+ 	unsigned hs200_max_dtr;
+ 	unsigned max_req_size;
+@@ -728,8 +726,8 @@ static inline struct mci *mci_get_device_by_devpath(const char *devpath)
+ 
+ static inline int mmc_card_hs(struct mci *mci)
+ {
+-	return mci->host->timing == MMC_TIMING_SD_HS ||
+-		mci->host->timing == MMC_TIMING_MMC_HS;
++	return mci->host->ios.timing == MMC_TIMING_SD_HS ||
++		mci->host->ios.timing == MMC_TIMING_MMC_HS;
+ }
+ 
+ /*
+@@ -743,7 +741,7 @@ int mmc_select_timing(struct mci *mci);
+ 
+ static inline bool mmc_card_hs200(struct mci *mci)
+ {
+-	return mci->host->timing == MMC_TIMING_MMC_HS200;
++	return mci->host->ios.timing == MMC_TIMING_MMC_HS200;
+ }
+ 
+ #endif /* _MCI_H_ */

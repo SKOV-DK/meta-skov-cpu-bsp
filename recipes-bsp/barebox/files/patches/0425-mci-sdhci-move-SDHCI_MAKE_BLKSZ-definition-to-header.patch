@@ -1,0 +1,38 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 16 Dec 2024 16:22:05 +0100
+Subject: [PATCH] mci: sdhci: move SDHCI_MAKE_BLKSZ definition to header
+
+This is going to be used outside of sdhci.c, so move it into the header.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/sdhci.c | 1 -
+ drivers/mci/sdhci.h | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index 4af49d6cb5db..a4b56a6e9286 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -10,7 +10,6 @@
+ #include "sdhci.h"
+ 
+ #define MAX_TUNING_LOOP 40
+-#define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
+ 
+ enum sdhci_reset_reason {
+ 	SDHCI_RESET_FOR_INIT,
+diff --git a/drivers/mci/sdhci.h b/drivers/mci/sdhci.h
+index 9c5d192533b0..c0ea15c11ec6 100644
+--- a/drivers/mci/sdhci.h
++++ b/drivers/mci/sdhci.h
+@@ -23,6 +23,7 @@
+ #define  SDHCI_DEFAULT_BOUNDARY_ARG		SDHCI_DMA_BOUNDARY_512K
+ #define  SDHCI_TRANSFER_BLOCK_SIZE(x)		((x) & 0xfff)
+ #define SDHCI_BLOCK_COUNT					0x06
++#define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
+ #define SDHCI_ARGUMENT						0x08
+ #define SDHCI_TRANSFER_MODE__COMMAND				0x0c
+ #define SDHCI_TRANSFER_MODE					0x0c

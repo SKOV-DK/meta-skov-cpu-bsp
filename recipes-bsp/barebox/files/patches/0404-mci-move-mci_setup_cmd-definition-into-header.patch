@@ -1,0 +1,90 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Tue, 22 Apr 2025 07:26:29 +0200
+Subject: [PATCH] mci: move mci_setup_cmd definition into header
+
+For use outside of mci-core, e.g. in PBL drivers, move the helper
+function into the header.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Link: https://lore.barebox.org/20250422052635.3423961-4-a.fatoum@pengutronix.de
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mci/dwcmshc-sdhci.c |  8 --------
+ drivers/mci/mci-core.c      | 15 ---------------
+ include/mci.h               | 16 ++++++++++++++++
+ 3 files changed, 16 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/mci/dwcmshc-sdhci.c b/drivers/mci/dwcmshc-sdhci.c
+index a7306fdb44a4..8398889a703c 100644
+--- a/drivers/mci/dwcmshc-sdhci.c
++++ b/drivers/mci/dwcmshc-sdhci.c
+@@ -40,14 +40,6 @@ static inline struct dwcmshc_host *priv_from_mci_host(struct mci_host *h)
+ 	return container_of(h, struct dwcmshc_host, mci);
+ }
+ 
+-static void mci_setup_cmd(struct mci_cmd *p, unsigned int cmd, unsigned int arg,
+-			  unsigned int response)
+-{
+-	p->cmdidx = cmd;
+-	p->cmdarg = arg;
+-	p->resp_type = response;
+-}
+-
+ static int do_abort_sequence(struct mci_host *mci, struct mci_cmd *current_cmd)
+ {
+ 	int ret = 0;
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index ae532cabe63f..2619024db9aa 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -97,21 +97,6 @@ static int mci_send_cmd_retry(struct mci *mci, struct mci_cmd *cmd,
+ 	return ret;
+ }
+ 
+-/**
+- * @param p Command definition to setup
+- * @param cmd Valid SD/MMC command (refer MMC_CMD_* / SD_CMD_*)
+- * @param arg Argument for the command (optional)
+- * @param response Command's response type (refer MMC_RSP_*)
+- *
+- * Note: When calling, the 'response' must match command's requirements
+- */
+-static void mci_setup_cmd(struct mci_cmd *p, unsigned cmd, unsigned arg, unsigned response)
+-{
+-	p->cmdidx = cmd;
+-	p->cmdarg = arg;
+-	p->resp_type = response;
+-}
+-
+ /**
+  * configure optional DSR value
+  * @param mci_dev MCI instance
+diff --git a/include/mci.h b/include/mci.h
+index f0db1f9ea057..2b1bdfb7cab3 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -475,6 +475,22 @@ struct mci_cmd {
+ 	unsigned response[4];	/**< card's response */
+ };
+ 
++/**
++ * @param p Command definition to setup
++ * @param cmd Valid SD/MMC command (refer MMC_CMD_* / SD_CMD_*)
++ * @param arg Argument for the command (optional)
++ * @param response Command's response type (refer MMC_RSP_*)
++ *
++ * Note: When calling, the 'response' must match command's requirements
++ */
++static inline void mci_setup_cmd(struct mci_cmd *p, unsigned cmd,
++				 unsigned arg, unsigned response)
++{
++	p->cmdidx = cmd;
++	p->cmdarg = arg;
++	p->resp_type = response;
++}
++
+ /** data information to be used with some SD/MMC commands */
+ struct mci_data {
+ 	union {

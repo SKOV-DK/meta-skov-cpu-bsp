@@ -1,0 +1,100 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Sat, 14 Dec 2024 08:02:50 +0100
+Subject: [PATCH] mci: sdhci: add support for struct mci_data::timeout_ns
+
+With tuning sequences, we will want to associate the busy timeout with
+the struct mci_data, so add a timeout_ns member to it like Linux does.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/sdhci.c | 21 ++++++++++++---------
+ drivers/mci/sdhci.h |  2 +-
+ include/mci.h       |  1 +
+ 3 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index d0caee22f2f7..61934bcad937 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -813,11 +813,10 @@ void sdhci_enable_clk(struct sdhci *host, u16 clk)
+ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *data)
+ {
+ 	u32 mask;
+-	unsigned timeout_ms;
++	u64 timeout_ns;
+ 	int ret;
+ 
+ 	mask = SDHCI_CMD_INHIBIT_CMD;
+-	timeout_ms = SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_MS;
+ 
+ 	if (data || (cmd && (cmd->resp_type & MMC_RSP_BUSY)))
+ 		mask |= SDHCI_CMD_INHIBIT_DATA;
+@@ -825,10 +824,14 @@ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *da
+ 	if (cmd && cmd->cmdidx == MMC_CMD_STOP_TRANSMISSION)
+ 		mask &= ~SDHCI_CMD_INHIBIT_DATA;
+ 
+-	if (cmd && cmd->busy_timeout != 0)
+-		timeout_ms = cmd->busy_timeout;
++	if (data && data->timeout_ns != 0)
++		timeout_ns = data->timeout_ns;
++	else if (cmd && cmd->busy_timeout != 0)
++		timeout_ns = cmd->busy_timeout * (u64)NSEC_PER_MSEC;
++	else
++		timeout_ns = SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS;
+ 
+-	ret = wait_on_timeout(timeout_ms * MSECOND,
++	ret = wait_on_timeout(timeout_ns,
+ 			!(sdhci_read32(host, SDHCI_PRESENT_STATE) & mask));
+ 
+ 	if (ret) {
+@@ -843,19 +846,19 @@ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *da
+ int sdhci_wait_idle_data(struct sdhci *host, struct mci_cmd *cmd)
+ {
+ 	u32 mask;
+-	unsigned timeout_ms;
++	unsigned timeout_ns;
+ 	int ret;
+ 
+ 	mask = SDHCI_CMD_INHIBIT_CMD | SDHCI_CMD_INHIBIT_DATA;
+-	timeout_ms = SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_MS;
++	timeout_ns = SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS;
+ 
+ 	if (cmd && cmd->cmdidx == MMC_CMD_STOP_TRANSMISSION)
+ 		mask &= ~SDHCI_CMD_INHIBIT_DATA;
+ 
+ 	if (cmd && cmd->busy_timeout != 0)
+-		timeout_ms = cmd->busy_timeout;
++		timeout_ns = cmd->busy_timeout;
+ 
+-	ret = wait_on_timeout(timeout_ms * MSECOND,
++	ret = wait_on_timeout(timeout_ns,
+ 			!(sdhci_read32(host, SDHCI_PRESENT_STATE) & mask));
+ 
+ 	if (ret) {
+diff --git a/drivers/mci/sdhci.h b/drivers/mci/sdhci.h
+index d3b681153134..d3cb45c36248 100644
+--- a/drivers/mci/sdhci.h
++++ b/drivers/mci/sdhci.h
+@@ -201,7 +201,7 @@
+ #define SDHCI_MAX_DIV_SPEC_200	256
+ #define SDHCI_MAX_DIV_SPEC_300	2046
+ 
+-#define SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_MS 10
++#define SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS	(10 * NSEC_PER_MSEC)
+ 
+ struct sdhci {
+ 	u32 (*read32)(struct sdhci *host, int reg);
+diff --git a/include/mci.h b/include/mci.h
+index 2b964e1e8919..d874156fc18d 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -508,6 +508,7 @@ struct mci_data {
+ 	unsigned flags;		/**< refer MMC_DATA_* to define direction */
+ 	unsigned blocks;	/**< block count to handle in this command */
+ 	unsigned blocksize;	/**< block size in bytes (mostly 512) */
++	unsigned timeout_ns;	/**< data timeout in ns */
+ };
+ 
+ enum mci_timing {

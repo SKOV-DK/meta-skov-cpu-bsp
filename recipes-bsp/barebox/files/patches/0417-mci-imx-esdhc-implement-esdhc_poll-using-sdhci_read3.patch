@@ -1,0 +1,226 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Sun, 15 Dec 2024 13:53:44 +0100
+Subject: [PATCH] mci: imx-esdhc: implement esdhc_poll using
+ sdhci_read32_poll_timeout
+
+esdhc_match32 is not flexible enough for use in the upcoming HS200
+tuning code, so reimplement it in terms of sdhci_read32_poll_timeout
+to allow custom conditions.
+
+No functional change.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/imx-esdhc-common.c | 65 +++++++++++++-----------------------------
+ drivers/mci/imx-esdhc.c        | 15 +++++-----
+ drivers/mci/imx-esdhc.h        | 29 +++++++++++++++++--
+ 3 files changed, 53 insertions(+), 56 deletions(-)
+
+diff --git a/drivers/mci/imx-esdhc-common.c b/drivers/mci/imx-esdhc-common.c
+index 7673220fe8d4..dae88bb977c6 100644
+--- a/drivers/mci/imx-esdhc-common.c
++++ b/drivers/mci/imx-esdhc-common.c
+@@ -78,49 +78,24 @@ static int esdhc_setup_data(struct fsl_esdhc_host *host, struct mci_data *data,
+ 	return 0;
+ }
+ 
+-static bool esdhc_match32(struct fsl_esdhc_host *host, unsigned int off,
+-			  unsigned int mask, unsigned int val)
++static u64 esdhc_compute_timeout(struct mci_cmd *cmd,
++				 struct mci_data *data,
++				 u64 default_value)
+ {
+-	const unsigned int reg = sdhci_read32(&host->sdhci, off) & mask;
++	if (data && data->timeout_ns != 0)
++		return data->timeout_ns;
+ 
+-	return reg == val;
+-}
+-
+-#ifdef __PBL__
+-/*
+- * Stubs to make timeout logic below work in PBL
+- */
+-
+-#define get_time_ns()		0
+-/*
+- * Use time in us (approx) as a busy counter timeout value
+- */
+-#define is_timeout(s, t)	((s)++ > ((t) / 1024))
++	if (cmd && cmd->busy_timeout != 0)
++		return cmd->busy_timeout * NSEC_PER_MSEC;
+ 
+-static void __udelay(int us)
+-{
+-	volatile int i;
+-
+-	for (i = 0; i < us * 4; i++);
+-}
+-
+-#define udelay(n)	__udelay(n)
+-
+-#endif
+-
+-int esdhc_poll(struct fsl_esdhc_host *host, unsigned int off,
+-	       unsigned int mask, unsigned int val,
+-	       uint64_t timeout)
+-{
+-	return wait_on_timeout(timeout,
+-			       esdhc_match32(host, off, mask, val));
++	return default_value;
+ }
+ 
+ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 		     struct mci_data *data)
+ {
+ 	u32	xfertyp, mixctrl, command;
+-	u32	irqstat;
++	u32	val, irqstat;
+ 	dma_addr_t dma = SDHCI_NO_DMA;
+ 	int ret;
+ 
+@@ -159,8 +134,8 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 		      command << 16 | xfertyp);
+ 
+ 	/* Wait for the command to complete */
+-	ret = esdhc_poll(host, SDHCI_INT_STATUS,
+-			 SDHCI_INT_CMD_COMPLETE, SDHCI_INT_CMD_COMPLETE,
++	ret = esdhc_poll(host, SDHCI_INT_STATUS, val,
++			 val & SDHCI_INT_CMD_COMPLETE,
+ 			 100 * MSECOND);
+ 	if (ret) {
+ 		dev_dbg(host->dev, "timeout 1\n");
+@@ -185,9 +160,9 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 		 * Poll on DATA0 line for cmd with busy signal for
+ 		 * timout / 10 usec since DLA polling can be insecure.
+ 		 */
+-		ret = esdhc_poll(host, SDHCI_PRESENT_STATE,
+-				 PRSSTAT_DAT0, PRSSTAT_DAT0,
+-				 2500 * MSECOND);
++		ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
++				 val & PRSSTAT_DAT0,
++				 esdhc_compute_timeout(cmd, NULL, 2500 * MSECOND));
+ 		if (ret) {
+ 			dev_err(host->dev, "timeout PRSSTAT_DAT0\n");
+ 			goto undo_setup_data;
+@@ -210,17 +185,17 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 	sdhci_write32(&host->sdhci, SDHCI_INT_STATUS, -1);
+ 
+ 	/* Wait for the bus to be idle */
+-	ret = esdhc_poll(host, SDHCI_PRESENT_STATE,
+-			 SDHCI_CMD_INHIBIT_CMD | SDHCI_CMD_INHIBIT_DATA, 0,
+-			 SECOND);
++	ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
++			 (val & (SDHCI_CMD_INHIBIT_CMD | SDHCI_CMD_INHIBIT_DATA)) == 0,
++			 esdhc_compute_timeout(cmd, data, SECOND));
+ 	if (ret) {
+ 		dev_err(host->dev, "timeout 2\n");
+ 		return -ETIMEDOUT;
+ 	}
+ 
+-	ret = esdhc_poll(host, SDHCI_PRESENT_STATE,
+-			 SDHCI_DATA_LINE_ACTIVE, 0,
+-			 100 * MSECOND);
++	ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
++			 (val & SDHCI_DATA_LINE_ACTIVE) == 0,
++			 esdhc_compute_timeout(cmd, NULL, 100 * MSECOND));
+ 	if (ret) {
+ 		dev_err(host->dev, "timeout 3\n");
+ 		return -ETIMEDOUT;
+diff --git a/drivers/mci/imx-esdhc.c b/drivers/mci/imx-esdhc.c
+index b49bd2940204..021b172888f6 100644
+--- a/drivers/mci/imx-esdhc.c
++++ b/drivers/mci/imx-esdhc.c
+@@ -49,7 +49,7 @@ static void set_sysctl(struct mci_host *mci, u32 clock, bool ddr)
+ 	int div, pre_div, ddr_pre_div = 1;
+ 	struct fsl_esdhc_host *host = to_fsl_esdhc(mci);
+ 	unsigned sdhc_clk = clk_get_rate(host->clk);
+-	u32 clk;
++	u32 val, clk;
+ 	unsigned long  cur_clock;
+ 
+ 	if (esdhc_is_usdhc(host) && ddr)
+@@ -92,8 +92,8 @@ static void set_sysctl(struct mci_host *mci, u32 clock, bool ddr)
+ 	esdhc_clrsetbits32(host, SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET,
+ 			SYSCTL_CLOCK_MASK, clk);
+ 
+-	esdhc_poll(host, SDHCI_PRESENT_STATE,
+-		   PRSSTAT_SDSTB, PRSSTAT_SDSTB,
++	esdhc_poll(host, SDHCI_PRESENT_STATE, val,
++		   val & PRSSTAT_SDSTB,
+ 		   10 * MSECOND);
+ 
+ 	clk = SYSCTL_PEREN | SYSCTL_CKEN | SYSCTL_INITA;
+@@ -101,8 +101,8 @@ static void set_sysctl(struct mci_host *mci, u32 clock, bool ddr)
+ 	esdhc_setbits32(host, SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET,
+ 			clk);
+ 
+-	esdhc_poll(host, SDHCI_CLOCK_CONTROL,
+-		   SYSCTL_INITA, SYSCTL_INITA,
++	esdhc_poll(host, SDHCI_CLOCK_CONTROL, val,
++		   val & SYSCTL_INITA,
+ 		   10 * MSECOND);
+ }
+ 
+@@ -217,9 +217,8 @@ static int esdhc_reset(struct fsl_esdhc_host *host)
+ 	}
+ 
+ 	/* hardware clears the bit when it is done */
+-	if (esdhc_poll(host,
+-		       SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET,
+-		       SYSCTL_RSTA, 0, 100 * MSECOND)) {
++	if (esdhc_poll(host, SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET,
++		       val, (val & SYSCTL_RSTA) == 0, 100 * MSECOND)) {
+ 		dev_err(host->dev, "Reset never completed.\n");
+ 		return -EIO;
+ 	}
+diff --git a/drivers/mci/imx-esdhc.h b/drivers/mci/imx-esdhc.h
+index eff556f2ff79..2930676d5328 100644
+--- a/drivers/mci/imx-esdhc.h
++++ b/drivers/mci/imx-esdhc.h
+@@ -10,6 +10,10 @@
+ #include <errno.h>
+ #include <asm/byteorder.h>
+ #include <linux/bitfield.h>
++#include <linux/math.h>
++#include <linux/ktime.h>
++
++#include "sdhci.h"
+ 
+ #define SYSCTL_INITA		0x08000000
+ #define SYSCTL_TIMEOUT_MASK	0x000f0000
+@@ -163,10 +167,29 @@ esdhc_setbits32(struct fsl_esdhc_host *host, unsigned int reg,
+ }
+ 
+ void esdhc_populate_sdhci(struct fsl_esdhc_host *host);
+-int esdhc_poll(struct fsl_esdhc_host *host, unsigned int off,
+-	       unsigned int mask, unsigned int val,
+-	       uint64_t timeout);
+ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 		     struct mci_data *data);
+ 
++#ifdef __PBL__
++#undef	read_poll_get_time_ns
++#define read_poll_get_time_ns()		0
++/* Use time in us (approx) as a busy counter timeout value */
++#undef	read_poll_is_timeout
++#define read_poll_is_timeout(s, t)	((s)++ > ((t) / 1024))
++
++static inline void __udelay(int us)
++{
++	volatile int i;
++
++	for (i = 0; i < us * 4; i++);
++}
++
++#define udelay(n)	__udelay(n)
++
++#endif
++
++#define esdhc_poll(host, reg, val, cond, timeout_ns)	\
++	sdhci_read32_poll_timeout(&host->sdhci, reg, val, cond, \
++				  ktime_to_us(timeout_ns))
++
+ #endif  /* __FSL_ESDHC_H__ */

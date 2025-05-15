@@ -1,0 +1,121 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Sun, 27 Apr 2025 14:54:58 +0200
+Subject: [PATCH] video: IPUv3-LDB: fix LVDS serial clock configuration
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The precision improvement in Commit af3d99396a8b ("clk: imx: improve
+precision of AV PLL to 1 Hz") broke the LVDS boot splash on the
+imx6q-skov-reve-mi1010ait-1cp1 board, because recalculating the clock
+rates broke the 7-fold relation between 7MHz pixel clock and the serial
+clock.
+
+Before:
+
+pll5_video (rate 980041992
+    pll5_post_div (rate 490020996
+        pll5_video_div (rate 490020996
+            ldb_di0_sel (rate 490020996		   <-- 49MHz / 7 = 7 MHz
+                ldb_di0_div_3_5 (rate 140005998                        |
+                    ldb_di0_podf (rate 70002999                        ≈
+                        ipu1_di0_sel (rate 70002999                    |
+                            ipu1_di0 (rate 70002999                    v
+                                2400000.ipu@2400000.of_di0_pixel (rate 70002992
+
+After:
+
+pll5_video (rate 980042001
+    pll5_post_div (rate 980042001
+        pll5_video_div (rate 980042001
+            ldb_di0_sel (rate 980042001		  <-- 98MHz / 7 = 14 MHz
+                ldb_di0_div_3_5 (rate 280012000                        |
+                    ldb_di0_podf (rate 140006000                       ≉
+                        ipu1_di0_sel (rate 140006000                   |
+                            ipu1_di0 (rate 140006000                   v
+                                2400000.ipu@2400000.of_di0_pixel (rate 70002992
+
+By adding an explicit clk_set_rate to the 7-fold frequency before
+setting the pixel clock, we restore the ratio again:
+
+pll5_video (rate 980042000
+        pll5_post_div (rate 980042000
+            pll5_video_div (rate 490021000
+                ldb_di0_sel (rate 490021000              <-- 49MHz / 7 = 7 MHz
+                    ldb_di0_div_3_5 (rate 140006000                      |
+                        ldb_di0_podf (rate 70003000                      ≈
+                            ipu1_di0_sel (rate 70003000                  |
+                                ipu1_di0 (rate 70003000                  v
+                                    2400000.ipu@2400000.of_di0_pixel (rate 70002992
+
+Fixes: af3d99396a8b ("clk: imx: improve precision of AV PLL to 1 Hz")
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+Cc: Philipp Zabel <p.zabel@pengutronix.de>
+
+Philipp, I wasn't completely sure about whether the dual frequency
+calculation is correct, can you take a look?
+---
+ drivers/video/imx-ipu-v3/imx-ldb.c | 25 ++++++++++++++++++-------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/video/imx-ipu-v3/imx-ldb.c b/drivers/video/imx-ipu-v3/imx-ldb.c
+index 3ed6d44f5be6..b1225f519e85 100644
+--- a/drivers/video/imx-ipu-v3/imx-ldb.c
++++ b/drivers/video/imx-ipu-v3/imx-ldb.c
+@@ -138,9 +138,10 @@ static int imx_ldb_prepare(struct imx_ldb_channel *imx_ldb_ch, struct fb_videomo
+ 	return 0;
+ }
+ 
+-static int imx6q_set_clock(struct imx_ldb *ldb, int ipuno, int dino, int chno, unsigned long pixclk)
++static int imx6q_set_clock(struct imx_ldb *ldb, int ipuno, int dino, int chno,
++			   unsigned long serial_clk, unsigned long di_clk)
+ {
+-	struct clk *diclk, *ldbclk;
++	struct clk *diclk, *ldbclk, *ldbdiclk;
+ 	char *clkname;
+ 	int ret;
+ 
+@@ -160,14 +161,24 @@ static int imx6q_set_clock(struct imx_ldb *ldb, int ipuno, int dino, int chno, u
+ 		return PTR_ERR(ldbclk);
+ 	}
+ 
++	clkname = basprintf("ldb_di%d_sel", chno);
++	ldbdiclk = clk_lookup(clkname);
++	free(clkname);
++	if (IS_ERR(ldbdiclk)) {
++		dev_err(ldb->dev, "failed to get ldb di clk: %pe\n", ldbdiclk);
++		return PTR_ERR(ldbdiclk);
++	}
++
+ 	ret = clk_set_parent(diclk, ldbclk);
+ 	if (ret) {
+ 		dev_err(ldb->dev, "failed to set display clock parent: %s\n", strerror(-ret));
+ 		return ret;
+ 	}
+ 
+-	clk_set_rate(clk_get_parent(ldbclk), pixclk);
+-	clk_set_rate(ldbclk, pixclk);
++	clk_set_rate(ldbdiclk, serial_clk);
++
++	clk_set_rate(clk_get_parent(ldbclk), di_clk);
++	clk_set_rate(ldbclk, di_clk);
+ 
+ 	return 0;
+ }
+@@ -189,10 +200,10 @@ static int imx6q_ldb_prepare(struct imx_ldb_channel *imx_ldb_ch, int di,
+ 		pixclk *= 2;
+ 
+ 	if (dual) {
+-		imx6q_set_clock(ldb, ipuno, dino, 0, pixclk);
+-		imx6q_set_clock(ldb, ipuno, dino, 1, pixclk);
++		imx6q_set_clock(ldb, ipuno, dino, 0, pixclk * 7, pixclk);
++		imx6q_set_clock(ldb, ipuno, dino, 1, pixclk * 7, pixclk);
+ 	} else {
+-		imx6q_set_clock(ldb, ipuno, dino, imx_ldb_ch->chno, pixclk);
++		imx6q_set_clock(ldb, ipuno, dino, imx_ldb_ch->chno, pixclk * 7, pixclk);
+ 	}
+ 
+ 	val = readl(gpr3);

@@ -1,0 +1,209 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 16 Dec 2024 16:21:26 +0100
+Subject: [PATCH] mci: imx-esdhc: add support for setting drive strength
+
+With increasing clock rates, drive strength may need to be reduced. Add
+support for that to the i.MX eSDHC driver and to the core.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/imx-esdhc.c |  2 ++
+ drivers/mci/mci-core.c  | 40 ++++++++++++++++++++++++++++++++++++++--
+ drivers/mci/sdhci.c     | 29 +++++++++++++++++++++++++++++
+ drivers/mci/sdhci.h     |  6 ++++++
+ include/mci.h           | 10 ++++++++++
+ 5 files changed, 85 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mci/imx-esdhc.c b/drivers/mci/imx-esdhc.c
+index 0f5ef247b4cc..96fcd6d6b8a5 100644
+--- a/drivers/mci/imx-esdhc.c
++++ b/drivers/mci/imx-esdhc.c
+@@ -207,6 +207,8 @@ static void esdhc_set_ios(struct mci_host *mci, struct mci_ios *ios)
+ 	/* Set the clock speed */
+ 	set_sysctl(mci, ios->clock, mci_timing_is_ddr(ios->timing));
+ 
++	sdhci_set_drv_type(&host->sdhci, ios->drv_type);
++
+ 	/* Set the bus width */
+ 	esdhc_clrbits32(host, SDHCI_HOST_CONTROL__POWER_CONTROL__BLOCK_GAP_CONTROL,
+ 			PROCTL_DTW_4 | PROCTL_DTW_8);
+diff --git a/drivers/mci/mci-core.c b/drivers/mci/mci-core.c
+index 2e952b5d3fb8..7ef6bac5ec71 100644
+--- a/drivers/mci/mci-core.c
++++ b/drivers/mci/mci-core.c
+@@ -1603,6 +1603,28 @@ int mci_send_abort_tuning(struct mci *mci, u32 opcode)
+ }
+ EXPORT_SYMBOL_GPL(mci_send_abort_tuning);
+ 
++static void mmc_select_driver_type(struct mci *mci)
++{
++	int card_drv_type, drive_strength;
++	int fixed_drv_type = mci->host->fixed_drv_type;
++
++	card_drv_type = mci->ext_csd[EXT_CSD_DRIVER_STRENGTH] |
++			mmc_driver_type_mask(0);
++
++	if (mci->host->fixed_drv_type_valid)
++		drive_strength = card_drv_type & mmc_driver_type_mask(fixed_drv_type)
++				 ? fixed_drv_type : 0;
++	else
++		drive_strength = 0;
++
++	mci->host->drive_strength = drive_strength;
++
++	/* Linux only sets the drive strength immediately if the driver
++	 * implements select_drive_strength, which none of our drivers
++	 * do yet
++	 */
++}
++
+ static void mmc_select_max_dtr(struct mci *mci)
+ {
+ 	u8 card_type = mci->ext_csd[EXT_CSD_DEVICE_TYPE];
+@@ -1675,6 +1697,8 @@ static int mmc_select_hs200(struct mci *mci)
+ 	int err = -EINVAL;
+ 	u8 val;
+ 
++	mmc_select_driver_type(mci);
++
+ 	/*
+ 	 * Set the bus width(4 or 8) with host's support and
+ 	 * switch to HS200 mode if bus width is set successfully.
+@@ -1682,8 +1706,7 @@ static int mmc_select_hs200(struct mci *mci)
+ 	/* find out maximum bus width and then try DDR if supported */
+ 	err = mci_mmc_select_bus_width(mci);
+ 	if (err > 0) {
+-		/* TODO  actually set drive strength instead of 0. Currently unsupported. */
+-		val = EXT_CSD_TIMING_HS200 | 0 << EXT_CSD_DRV_STR_SHIFT;
++		val = EXT_CSD_TIMING_HS200 | (mci->host->drive_strength << EXT_CSD_DRV_STR_SHIFT);
+ 		err = mci_switch(mci, EXT_CSD_HS_TIMING, val);
+ 		if (err == -EIO)
+ 			return -EBADMSG;
+@@ -3018,6 +3041,8 @@ void mci_of_parse_node(struct mci_host *host,
+ 	if (of_property_read_bool(np, "no-mmc"))
+ 		host->caps2 |= MMC_CAP2_NO_MMC;
+ 	if (IS_ENABLED(CONFIG_MCI_TUNING)) {
++		u32 drv_type;
++
+ 		if (of_property_read_bool(np, "mmc-hs200-1_8v"))
+ 			host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+ 		if (of_property_read_bool(np, "mmc-hs200-1_2v"))
+@@ -3042,6 +3067,17 @@ void mci_of_parse_node(struct mci_host *host,
+ 			 */
+ 			host->caps2 &= ~(MMC_CAP2_HSX00_1_8V | MMC_CAP2_HS400_ES);
+ 		}
++
++		/* Must be after "non-removable" check */
++		if (of_property_read_u32(np, "fixed-emmc-driver-type", &drv_type) == 0) {
++			if (host->non_removable) {
++				host->fixed_drv_type = drv_type;
++				host->fixed_drv_type_valid = true;
++			 } else {
++				dev_err(host->hw_dev,
++					"can't use fixed driver type, media is removable\n");
++			 }
++		}
+ 	}
+ }
+ 
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index fe0c0001f9de..4af49d6cb5db 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -893,6 +893,35 @@ void sdhci_set_clock(struct sdhci *host, unsigned int clock, unsigned int input_
+ 	sdhci_enable_clk(host, clk);
+ }
+ 
++void sdhci_set_drv_type(struct sdhci *host, unsigned drv_type)
++{
++	u16 ctrl_2;
++
++	if (host->preset_enabled)
++		return;
++
++	/*
++	 * We only need to set Driver Strength if the
++	 * preset value enable is not set.
++	 */
++	ctrl_2 = sdhci_read16(host, SDHCI_HOST_CONTROL2);
++	ctrl_2 &= ~SDHCI_CTRL_DRV_TYPE_MASK;
++	if (drv_type == MMC_SET_DRIVER_TYPE_A)
++		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
++	else if (drv_type == MMC_SET_DRIVER_TYPE_B)
++		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_B;
++	else if (drv_type == MMC_SET_DRIVER_TYPE_C)
++		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
++	else if (drv_type == MMC_SET_DRIVER_TYPE_D)
++		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_D;
++	else {
++		dev_warn(sdhci_dev(host), "invalid driver type, default to driver type B\n");
++		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_B;
++	}
++
++	sdhci_write16(host, ctrl_2, SDHCI_HOST_CONTROL2);
++}
++
+ static void sdhci_do_enable_v4_mode(struct sdhci *host)
+ {
+ 	u16 ctrl2;
+diff --git a/drivers/mci/sdhci.h b/drivers/mci/sdhci.h
+index 93303016a584..9c5d192533b0 100644
+--- a/drivers/mci/sdhci.h
++++ b/drivers/mci/sdhci.h
+@@ -131,6 +131,11 @@
+ #define   SDHCI_CTRL_UHS_SDR104			0x3
+ #define   SDHCI_CTRL_UHS_DDR50			0x4
+ #define   SDHCI_CTRL_HS400			0x5 /* Non-standard */
++#define  SDHCI_CTRL_DRV_TYPE_MASK		GENMASK(5, 4)
++#define   SDHCI_CTRL_DRV_TYPE_B			0x0000
++#define   SDHCI_CTRL_DRV_TYPE_A			0x0010
++#define   SDHCI_CTRL_DRV_TYPE_C			0x0020
++#define   SDHCI_CTRL_DRV_TYPE_D			0x0030
+ #define  SDHCI_CTRL_EXEC_TUNING			BIT(6)
+ #define  SDHCI_CTRL_TUNED_CLK			BIT(7)
+ #define  SDHCI_CTRL_64BIT_ADDR			BIT(13)
+@@ -335,6 +340,7 @@ u16 sdhci_calc_clk(struct sdhci *host, unsigned int clock,
+ 		   unsigned int *actual_clock, unsigned int input_clock);
+ void sdhci_set_clock(struct sdhci *host, unsigned int clock, unsigned int input_clock);
+ void sdhci_enable_clk(struct sdhci *host, u16 clk);
++void sdhci_set_drv_type(struct sdhci *host, unsigned drv_type);
+ void sdhci_enable_v4_mode(struct sdhci *host);
+ int sdhci_setup_host(struct sdhci *host);
+ void __sdhci_read_caps(struct sdhci *host, const u16 *ver,
+diff --git a/include/mci.h b/include/mci.h
+index eab8efa41115..761d7d993b58 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -204,6 +204,8 @@
+ #define SD_ERASE_ARG			0x00000000
+ #define SD_DISCARD_ARG			0x00000001
+ 
++#define mmc_driver_type_mask(n)		(1 << (n))
++
+ /*
+  * EXT_CSD fields
+  */
+@@ -555,6 +557,7 @@ struct mci_ios {
+ 	unsigned int		clock;			/* clock rate */
+ 	enum mci_bus_width	bus_width;		/* data bus width */
+ 	enum mci_timing		timing;			/* timing specification used */
++	unsigned char		drv_type;		/* driver type (A, B, C, D) */
+ };
+ 
+ struct mci;
+@@ -625,6 +628,13 @@ struct mci_host {
+ 	int broken_cd;		/**< card detect is broken */
+ 	bool non_removable;	/**< device is non removable */
+ 	bool disable_wp;	/**< ignore write-protect detection logic */
++	bool fixed_drv_type_valid;
++	unsigned char fixed_drv_type;	/**< fixed driver type for non-removable media */
++	unsigned char	drive_strength;	/**< driver type (A, B, C, D) */
++#define MMC_SET_DRIVER_TYPE_B	0
++#define MMC_SET_DRIVER_TYPE_A	1
++#define MMC_SET_DRIVER_TYPE_C	2
++#define MMC_SET_DRIVER_TYPE_D	3
+ 	struct regulator *supply;
+ 	struct mci_ops ops;
+ };

@@ -1,0 +1,46 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Sun, 15 Dec 2024 15:41:18 +0100
+Subject: [PATCH] mci: arasan: introduce mmc_op_tuning helper
+
+Instead of duplicating the check most tuning related places, add a
+helper like Linux does that checks if a command is sending a tuning
+block.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/mci/arasan-sdhci.c | 2 +-
+ include/mci.h              | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mci/arasan-sdhci.c b/drivers/mci/arasan-sdhci.c
+index 93bb6f3a0fdc..c320aae13a87 100644
+--- a/drivers/mci/arasan-sdhci.c
++++ b/drivers/mci/arasan-sdhci.c
+@@ -280,7 +280,7 @@ static int arasan_sdhci_send_cmd(struct mci_host *mci, struct mci_cmd *cmd,
+ 	sdhci_write16(&host->sdhci, SDHCI_COMMAND, command);
+ 
+ 	/* CMD19/21 generate _only_ Buffer Read Ready interrupt */
+-	if (cmd->cmdidx == MMC_SEND_TUNING_BLOCK || cmd->cmdidx == MMC_SEND_TUNING_BLOCK_HS200)
++	if (mmc_op_tuning(cmd->cmdidx))
+ 		mask = SDHCI_INT_DATA_AVAIL;
+ 
+ 	ret = sdhci_wait_for_done(&host->sdhci, mask);
+diff --git a/include/mci.h b/include/mci.h
+index d874156fc18d..eab8efa41115 100644
+--- a/include/mci.h
++++ b/include/mci.h
+@@ -499,6 +499,12 @@ static inline void mci_setup_cmd(struct mci_cmd *p, unsigned cmd,
+ 	p->resp_type = response;
+ }
+ 
++static inline bool mmc_op_tuning(u32 cmdidx)
++{
++	return cmdidx == MMC_SEND_TUNING_BLOCK ||
++	       cmdidx == MMC_SEND_TUNING_BLOCK_HS200;
++}
++
+ /** data information to be used with some SD/MMC commands */
+ struct mci_data {
+ 	union {

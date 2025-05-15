@@ -1,0 +1,51 @@
+From: Alexander Shiyan <eagle.alexander923@gmail.com>
+Date: Mon, 28 Apr 2025 12:25:06 +0300
+Subject: [PATCH] clk: Fix incorrect rate comparison in clk_set_rate()
+
+The original condition in clk_set_rate() compared the current clock rate
+against clk_round_rate(clk, rate). However, when the clock driver doesn't
+implement .round_rate(), clk_round_rate() falls back to returning the
+current clock rate via clk_get_rate(). This created a situation where:
+clk_get_rate(clk) == clk_round_rate(clk, rate)
+would always evaluate to true when .round_rate() is unimplemented.
+
+Upstream-Status: Pending
+
+Signed-off-by: Alexander Shiyan <eagle.alexander923@gmail.com>
+Link: https://lore.barebox.org/20250428092506.27200-1-eagle.alexander923@gmail.com
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/clk/clk.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+index 4c09c4e322f5..0de5f24a830e 100644
+--- a/drivers/clk/clk.c
++++ b/drivers/clk/clk.c
+@@ -166,7 +166,7 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
+ {
+ 	struct clk_hw *hw;
+ 	struct clk *parent;
+-	unsigned long parent_rate = 0;
++	unsigned long parent_rate = 0, current_rate;
+ 	int ret;
+ 
+ 	if (!clk)
+@@ -175,8 +175,15 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
+ 	if (IS_ERR(clk))
+ 		return PTR_ERR(clk);
+ 
+-	if (clk_get_rate(clk) == clk_round_rate(clk, rate))
+-		return 0;
++	current_rate = clk_get_rate(clk);
++
++	if (clk->ops->round_rate) {
++		if (current_rate == clk_round_rate(clk, rate))
++			return 0;
++	} else {
++		if (current_rate == rate)
++			return 0;
++	}
+ 
+ 	if (!clk->ops->set_rate)
+ 		return -ENOSYS;
