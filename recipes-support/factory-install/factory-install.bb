@@ -18,10 +18,11 @@ MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
 PART_NO ?= ""
 PART_NO:imx8-cpu = "6"
-WIC_IMAGE ?= "${FACTORY_INSTALL_IMAGE}"
+
+WIC_IMAGE:imx8-cpu = "${FACTORY_INSTALL_IMAGE}"
 WIC_IMAGE:imx8s-cpu = "${FACTORY_INSTALL_IMAGE}-secbootimg"
 
-WIC ?= "${WIC_IMAGE}-${MACHINE}.rootfs.wic"
+WIC = "${WIC_IMAGE}-${MACHINE}.rootfs.wic"
 
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET = "${BAREBOX_PADDING_OFFSET}K"
