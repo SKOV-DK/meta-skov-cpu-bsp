@@ -1,7 +1,7 @@
 
 Content of SKOV-BSP:
-- Barebox bootloader v2025.04.0 with patches
-- Linux kernel v6.14.5 with patches
+- Barebox bootloader with patches
+- Linux kernel with patches
 - Kernel and bootloader configuration 
 - SKOV flash layout skeletons
 
