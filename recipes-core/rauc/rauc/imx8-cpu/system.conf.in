@@ -26,9 +26,14 @@ type=ext4
 bootname=system1
 resize=true
 
+[slot.failsafe-fit.0]
+device=/dev/mmcblk2p7
+type=raw
+parent=failsafe.0
+
 [slot.failsafe.0]
-device=/dev/mmcblk2p5
-type=ext4
+device=/dev/mmcblk2p8
+type=raw
 
 [slot.recovery.0]
 device=/dev/mmcblk1p2
