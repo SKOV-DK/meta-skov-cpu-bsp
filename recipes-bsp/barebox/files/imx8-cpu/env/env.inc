@@ -23,5 +23,7 @@ SRC_URI += "\
   file://env/boot/system0 \
   file://env/boot/system1 \
   file://env/init/bootargs \
+  file://env/boot/failsafe \
+  file://env/boot/sd \
   "
 

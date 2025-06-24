@@ -1,0 +1,2 @@
+#!/bin/sh
+boot mmc2.failsafe

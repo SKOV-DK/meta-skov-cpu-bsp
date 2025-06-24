@@ -1,0 +1,5 @@
+#!/bin/sh
+detect mmc1
+boot mmc1.system
+
+
