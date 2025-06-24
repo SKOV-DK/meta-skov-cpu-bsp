@@ -1,7 +1,7 @@
 #!/bin/sh
 
 global bootm.appendroot=1
-global bootm.root_dev=mmc2.failsafe.root-FS
+global bootm.root_dev=mmc2.failsafe
 global bootm.image=/dev/mmc2.failsafe.fit
 global linux.bootargs.dyn.rootwait=rootwait
 
