@@ -9,12 +9,6 @@ kernel_namespaces:
   present:
   - USER_NS
 
-kernel_swap:
-  description: |
-    Swap was explicitly enabled to stay compatible with the imx6-cpu, see commit [1].
-    [1] 1d185d194579 ("[WIP] imx8-cpu/defconfig: Add ZRAM, for be compatibel with our imx6-cpu systems, which use it")
-  value: True
-
 skov_imx8_multitouch:
   description: |
     Skov's i.MX8MP based design is equipped with a multitouch capable panel that
