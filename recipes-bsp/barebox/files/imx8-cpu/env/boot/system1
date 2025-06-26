@@ -1,1 +1,2 @@
-boot mmc2.3
+#!/bin/sh
+boot mmc2.system1
