@@ -22,6 +22,7 @@ SRC_URI += "file://defconfig"
 require linux-skov/patches/series.inc
 # Patches not yet folded into the Pengutronix patch stack
 require linux-skov/patches-skov/series.inc
+include recipes-kernel/linux/cve-exclusion.inc
 
 S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
