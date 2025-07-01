@@ -1,6 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/rauc:"
 
 RAUC_BUNDLE_COMPATIBLE ??= "default"
+RAUC_DATA_DIR ??= "/home/etc/rauc"
 
 def get_basename(d, file):
    return os.path.basename(file)
@@ -14,6 +15,7 @@ do_install:append() {
       bbwarn "Please overwrite RAUC_BUNDLE_COMPATIBLE with a project specific one!"
    fi
    sed --expression=s,@RAUC_BUNDLE_COMPATIBLE@,'${RAUC_BUNDLE_COMPATIBLE}', \
+       --expression=s,@RAUC_DATA_DIR@,'${RAUC_DATA_DIR}', \
        --expression=s,@RAUC_KEYRING_FILE@,'${KEYRING_FILE}', \
        --in-place ${D}${sysconfdir}/rauc/system.conf
 }
