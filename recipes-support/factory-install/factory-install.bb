@@ -18,6 +18,7 @@ MEDIUM = "eMMC"
 TGT_MMC = "mmcblk2"
 PART_NO ?= ""
 PART_NO:imx8-cpu = "6"
+PART_NO:imx8s-cpu = "9"
 
 WIC_IMAGE:imx8-cpu = "${FACTORY_INSTALL_IMAGE}"
 WIC_IMAGE:imx8s-cpu = "${FACTORY_INSTALL_IMAGE}-secbootimg"
