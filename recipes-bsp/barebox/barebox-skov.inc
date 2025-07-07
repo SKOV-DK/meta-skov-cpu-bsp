@@ -13,7 +13,7 @@ DEPENDS += "coreutils-native lz4-native"
 
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
-SRC_URI[sha256sum] = "3124f3c2b69d9ce0512b2d40fa17cace9c356f65f005a63da0474387b8839c41"
+SRC_URI[sha256sum] = "6db91951143129941adbb5e6b26c7af8be170ea6b5a7b56900ec66029f1d2958"
 
 # Allow autoboot_timeout adjustment for automation from local.conf or
 # environment via BAREBOX_AUTOBOOT_TIMEOUT

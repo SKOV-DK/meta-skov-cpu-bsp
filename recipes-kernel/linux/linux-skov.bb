@@ -14,7 +14,7 @@ PV = "${LINUX_VERSION}"
 
 #SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz"
-SRC_URI[sha256sum] = "28207ec52bbeaa3507010aeff944f442f7d9f22b286b79caf45ec6df1b24f409"
+SRC_URI[sha256sum] = "3f1ccd0a6dc9c9777cb6fcef357c77e4a2386c84c52b6d5bbcda79c16af33b1b"
 FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 300 --passive-ftp"
 
 SRC_URI += "file://defconfig"

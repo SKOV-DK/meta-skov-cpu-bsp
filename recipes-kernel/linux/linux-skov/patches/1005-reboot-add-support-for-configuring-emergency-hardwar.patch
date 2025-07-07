@@ -48,7 +48,7 @@ index 837330fb2511..e117aba46be0 100644
 +		overtemperature or imminent voltage loss.
 +		Valid values are: reboot shutdown
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 56be1fc99bdd..222e654b6063 100644
+index a8e98f75b610..7ad0c52fc653 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -1933,6 +1933,12 @@
