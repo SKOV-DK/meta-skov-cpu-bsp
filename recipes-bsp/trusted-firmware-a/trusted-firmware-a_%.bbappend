@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-require files/patches/series.inc
-PV = "${UMPF_PV}"
+#require files/patches/series.inc
+#PV = "${UMPF_PV}"
 
 COMPATIBLE_MACHINE = "imx8-cpu|imx8s-cpu"
 
