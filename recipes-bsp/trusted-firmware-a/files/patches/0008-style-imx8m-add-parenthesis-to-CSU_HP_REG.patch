@@ -1,0 +1,27 @@
+From: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+Date: Tue, 5 Mar 2024 10:00:33 +0100
+Subject: [PATCH] style(imx8m): add parenthesis to CSU_HP_REG
+
+To be inline with CSU_SA_REG and CSU_HPCONTROL_REG.
+
+Change-Id: Ia7332096312df41a8cf994d58fad76a99493dd02
+Upstream-Status: Pending
+
+Signed-off-by: Stefan Kerkmann <s.kerkmann@pengutronix.de>
+---
+ plat/imx/imx8m/include/imx8m_csu.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/imx/imx8m/include/imx8m_csu.h b/plat/imx/imx8m/include/imx8m_csu.h
+index 572b0299521a..3851e91359d7 100644
+--- a/plat/imx/imx8m/include/imx8m_csu.h
++++ b/plat/imx/imx8m/include/imx8m_csu.h
+@@ -30,7 +30,7 @@
+ #define CSLx_LOCK(x)		((0x1 << (((x) % 2) * 16 + 8)))
+ #define CSLx_CFG(x, n)		((x) << (((n) % 2) * 16))
+ 
+-#define CSU_HP_REG(x)		(IMX_CSU_BASE + ((x) / 16) * 4 + 0x200)
++#define CSU_HP_REG(x)		(IMX_CSU_BASE + (((x) / 16) * 4) + 0x200)
+ #define CSU_HP_LOCK(x)		((0x1 << (((x) % 16) * 2 + 1)))
+ #define CSU_HP_CFG(x, n)	((x) << (((n) % 16) * 2))
+ 
