@@ -78,28 +78,10 @@ python __anonymous() {
     d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
 }
 
-# Citation from the sed info page [1]: To include a literal \, &, or newline in
-# the final replacement, be sure to precede the desired \, &, or newline in the
-# REPLACEMENT with a \.
-#
-# As PKCS#11-URIs potentially contain ampersands they need to be escaped
-# accordingly.
-#
-# [1] https://www.gnu.org/software/sed/manual/sed.html#The-_0022s_0022-Command
-escape_as_sed_replacement() {
-        # The first three sed-statements read all input lines into sed's pattern
-        # space (to be compatible with non-GNU sed-implementations they need to
-        # be split into single '-e' options). The final s///-commands do the
-        # real work and at first escape existing backslashes to not touch those
-        # inserted by escaping ampersands or newlines.
-        printf "%s" "$*" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\\/\\\\/g; s/&/\\&/g; s/\n/\\n/g'
-}
-
-# Enforce export of the function to run.do_compile
-# (presumably at least required until Yocto's styhead release)
-do_compile[vardeps] += "escape_as_sed_replacement"
-
 do_compile:prepend:imx8s-cpu() {
+        # kconfig helper
+        config="${S}/scripts/config --file ${B}/.config"
+
         signing_prepare
 
         # ---- HAB bootloader signing ----
@@ -129,18 +111,17 @@ do_compile:prepend:imx8s-cpu() {
         export CST_EXTRA_CMDLINE_OPTIONS="-b pkcs11"
 
         signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
-        FIT_URI="$(escape_as_sed_replacement "${PKCS11_URI}")"
+        FIT_URI="${PKCS11_URI}"
 
         # Adjust barebox' configuration by setting the SRK index, SRK table and
         # CSF/IMG certificates. See the CST patch for the __ENV__ trick. We
         # can't use CONFIG_HAB_CERTS_ENV due to shell/gcc & PKCS#11-URI escaping
         # issues.
-        sed -e "s,^\(CONFIG_HABV4_SRK_INDEX=\).*$,\1${BAREBOX_SRK_INDEX}," \
-            -e "s,^\(CONFIG_HABV4_TABLE_BIN=\"\).*\"$,\1${B}/imx-srk-table.bin\"," \
-            -e "s,^\(CONFIG_HABV4_CSF_CRT_PEM=\"\).*\"$,\1__ENV__CSF_URI\"," \
-            -e "s,^\(CONFIG_HABV4_IMG_CRT_PEM=\"\).*\"$,\1__ENV__IMG_URI\"," \
-            -e "s,^\(CONFIG_CRYPTO_PUBLIC_KEYS=\"\).*\"$,\1${FITIMAGE_SIGNING_KEY_ROLE}:${FIT_URI}\"," \
-            -i ${B}/.config
+        ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX} \
+            --set-str HABV4_TABLE_BIN  ${B}/imx-srk-table.bin \
+            --set-str HABV4_CSF_CRT_PEM  __ENV__CSF_URI \
+            --set-str HABV4_IMG_CRT_PEM  __ENV__IMG_URI \
+            --set-str CRYPTO_PUBLIC_KEYS  "${FITIMAGE_SIGNING_KEY_ROLE}:${FIT_URI}"
 }
 
 do_install:append:imx8s-cpu() {
