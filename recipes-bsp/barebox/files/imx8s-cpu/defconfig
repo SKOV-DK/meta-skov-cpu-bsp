@@ -81,11 +81,8 @@ CONFIG_HABV4=y
 # CONFIG_HABV4_QSPI is not set
 # CONFIG_HABV4_CSF_SRK_REVOKE_UNLOCK is not set
 # CONFIG_HABV4_CSF_UNLOCK_FIELD_RETURN is not set
-# CONFIG_HAB_CERTS_ENV is not set
+CONFIG_HAB_CERTS_ENV=y
 CONFIG_HABV4_SRK_INDEX=0
-CONFIG_HABV4_TABLE_BIN="This placeholder will be substituted by do_compile()"
-CONFIG_HABV4_CSF_CRT_PEM="This placeholder will be substituted by do_compile()"
-CONFIG_HABV4_IMG_CRT_PEM="This placeholder will be substituted by do_compile()"
 CONFIG_HABV4_IMAGE_SIGNED=y
 # CONFIG_HABV4_IMAGE_SIGNED_ENCRYPTED is not set
 # end of i.MX specific settings

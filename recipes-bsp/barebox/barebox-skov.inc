@@ -101,11 +101,13 @@ do_compile:prepend:imx8s-cpu() {
         mkdir -p "${WORKDIR}/env"
         cp "${B}/imx-srk-fuse.bin" "${WORKDIR}/env"
 
+        export CONFIG_HABV4_TABLE_BIN="${B}/imx-srk-table.bin"
+
         signing_use_role imx_habv4_csf"${BAREBOX_SRK_INDEX_CSF_IMG}"
-        export CSF_URI="${PKCS11_URI}"
+        export CONFIG_HABV4_CSF_CRT_PEM="${PKCS11_URI}"
 
         signing_use_role imx_habv4_img"${BAREBOX_SRK_INDEX_CSF_IMG}"
-        export IMG_URI="${PKCS11_URI}"
+        export CONFIG_HABV4_IMG_CRT_PEM="${PKCS11_URI}"
 
         # Switch cst's backend to PKCS#11
         export CST_EXTRA_CMDLINE_OPTIONS="-b pkcs11"
@@ -113,14 +115,8 @@ do_compile:prepend:imx8s-cpu() {
         signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
         FIT_URI="${PKCS11_URI}"
 
-        # Adjust barebox' configuration by setting the SRK index, SRK table and
-        # CSF/IMG certificates. See the CST patch for the __ENV__ trick. We
-        # can't use CONFIG_HAB_CERTS_ENV due to shell/gcc & PKCS#11-URI escaping
-        # issues.
+        # Adjust barebox' configuration by setting the SRK index.
         ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX} \
-            --set-str HABV4_TABLE_BIN  ${B}/imx-srk-table.bin \
-            --set-str HABV4_CSF_CRT_PEM  __ENV__CSF_URI \
-            --set-str HABV4_IMG_CRT_PEM  __ENV__IMG_URI \
             --set-str CRYPTO_PUBLIC_KEYS  "${FITIMAGE_SIGNING_KEY_ROLE}:${FIT_URI}"
 }
 
