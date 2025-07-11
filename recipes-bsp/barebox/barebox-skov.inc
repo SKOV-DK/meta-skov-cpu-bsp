@@ -51,6 +51,7 @@ do_compile:prepend:mx8m-generic-bsp() {
 inherit ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'signing', '' , d)}
 
 BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
+# Remember to keep the value of barebox' CONFIG_HABV4_SRK_INDEX in sync!
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 
 # Remember to keep the value of barebox' CONFIG_CRYPTO_PUBLIC_KEYS in sync!
@@ -73,15 +74,24 @@ python __anonymous() {
 
     key_role = d.getVar("BAREBOX_HABV4_SIGNING_KEY_ROLE")
     if key_role[:-1] != "imx_habv4_srk" or key_role[-1] not in "1234":
-        bb.fatal("Unexpected BAREBOX_HABV4_SIGNING_KEY_ROLE, expected 'imx_habv4_srk{1,2,3,4}', got '%s'" % key_role)
+        bb.fatal(f"Unexpected BAREBOX_HABV4_SIGNING_KEY_ROLE, expected 'imx_habv4_srk{1,2,3,4}', got '{key_role}'")
     key_index = key_role[-1]
 
-    # set which SRK the ROM code should validate against
-    d.setVar("BAREBOX_SRK_INDEX", str(int(key_index) - 1))
     d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
 
-    # Add SRK table generation as prefunc
+    # Add SRK table generation and check of indices as prefuncs.
     d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
+    d.appendVarFlag("do_compile", "prefuncs", " barebox_habv4_srk_index_check")
+}
+
+python barebox_habv4_srk_index_check() {
+    # Retrieve CONFIG_HABV4_SRK_INDEX from barebox config. Counter starts at 0.
+    config_key_index, _ = bb.process.run(f"{d.getVar('S')}/scripts/config --file {d.getVar('B')}/.config --state HABV4_SRK_INDEX")
+    config_key_index = config_key_index.strip()
+
+    expected_key_index = str(int(d.getVar("BAREBOX_SRK_INDEX_CSF_IMG")) - 1)
+    if config_key_index != expected_key_index:
+        bb.fatal(f"Unexpected CONFIG_HABV4_SRK_INDEX, expected '{expected_key_index}', got '{config_key_index}'")
 }
 
 barebox_habv4_generate_imx_srk_table() {
@@ -103,9 +113,6 @@ barebox_habv4_generate_imx_srk_table[cleandirs] = "${B}"
 
 do_compile:prepend() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
-        # kconfig helper
-        config="${S}/scripts/config --file ${B}/.config"
-
         signing_prepare
 
         # Prepare the installation of imx-srk-fuse.bin into barebox' environment
@@ -126,9 +133,6 @@ do_compile:prepend() {
 
         signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
         export PKCS11_FIT_URI="${PKCS11_URI}"
-
-        # Adjust barebox' configuration by setting the SRK index.
-        ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX}
     fi
 }
 
