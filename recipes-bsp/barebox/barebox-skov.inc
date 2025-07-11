@@ -77,7 +77,7 @@ python __anonymous() {
         bb.fatal(f"Unexpected BAREBOX_HABV4_SIGNING_KEY_ROLE, expected 'imx_habv4_srk{1,2,3,4}', got '{key_role}'")
     key_index = key_role[-1]
 
-    d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
+    d.setVar("BAREBOX_SRK_INDEX", key_index)
 
     # Add SRK table generation and check of indices as prefuncs.
     d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
@@ -89,7 +89,7 @@ python barebox_habv4_srk_index_check() {
     config_key_index, _ = bb.process.run(f"{d.getVar('S')}/scripts/config --file {d.getVar('B')}/.config --state HABV4_SRK_INDEX")
     config_key_index = config_key_index.strip()
 
-    expected_key_index = str(int(d.getVar("BAREBOX_SRK_INDEX_CSF_IMG")) - 1)
+    expected_key_index = str(int(d.getVar("BAREBOX_SRK_INDEX")) - 1)
     if config_key_index != expected_key_index:
         bb.fatal(f"Unexpected CONFIG_HABV4_SRK_INDEX, expected '{expected_key_index}', got '{config_key_index}'")
 }
@@ -122,10 +122,10 @@ do_compile:prepend() {
 
         export CONFIG_HABV4_TABLE_BIN="${B}/imx-srk-table.bin"
 
-        signing_use_role imx_habv4_csf"${BAREBOX_SRK_INDEX_CSF_IMG}"
+        signing_use_role imx_habv4_csf"${BAREBOX_SRK_INDEX}"
         export CONFIG_HABV4_CSF_CRT_PEM="${PKCS11_URI}"
 
-        signing_use_role imx_habv4_img"${BAREBOX_SRK_INDEX_CSF_IMG}"
+        signing_use_role imx_habv4_img"${BAREBOX_SRK_INDEX}"
         export CONFIG_HABV4_IMG_CRT_PEM="${PKCS11_URI}"
 
         # Switch cst's backend to PKCS#11
