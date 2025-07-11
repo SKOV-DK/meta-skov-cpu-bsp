@@ -24,38 +24,19 @@ do_compile:prepend () {
 	fi
 }
 
-DEPENDS:append:imx8-cpu = "\
-        imx-boot-firmware-files \
-        trusted-firmware-a \
-"
-
-DEPENDS:append:imx8s-cpu = "\
+DEPENDS:append:mx8m-generic-bsp = "\
         imx-boot-firmware-files \
         trusted-firmware-a \
 "
 
 BAREBOX_FIRMWARE_DEP = ""
-BAREBOX_FIRMWARE_DEP:imx8-cpu = "imx-boot-firmware-files:do_deploy"
-BAREBOX_FIRMWARE_DEP:imx8s-cpu = "imx-boot-firmware-files:do_deploy"
+BAREBOX_FIRMWARE_DEP:mx8m-generic-bsp = "imx-boot-firmware-files:do_deploy"
 
 do_configure[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
-BAREBOX_FIRMWARE_DIR:imx8-cpu = "${S}/firmware"
-BAREBOX_FIRMWARE_DIR:imx8s-cpu = "${S}/firmware"
+BAREBOX_FIRMWARE_DIR:mx8m-generic-bsp = "${S}/firmware"
 
-do_compile:prepend:imx8-cpu() {
-        mkdir -p ${BAREBOX_FIRMWARE_DIR}
-
-        # copy tf-a
-        cp ${STAGING_DIR_TARGET}/firmware/bl31-imx8mp.bin ${BAREBOX_FIRMWARE_DIR}/imx8mp-bl31.bin
-
-        # copy imx-firmware
-        for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
-                cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${BAREBOX_FIRMWARE_DIR}
-        done
-}
-
-do_compile:prepend:imx8s-cpu() {
+do_compile:prepend:mx8m-generic-bsp() {
         mkdir -p ${BAREBOX_FIRMWARE_DIR}
 
         # copy tf-a
