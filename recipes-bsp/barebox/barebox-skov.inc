@@ -79,7 +79,27 @@ python __anonymous() {
     # set which SRK the ROM code should validate against
     d.setVar("BAREBOX_SRK_INDEX", str(int(key_index) - 1))
     d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
+
+    # Add SRK table generation as prefunc
+    d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
 }
+
+barebox_habv4_generate_imx_srk_table() {
+    signing_prepare
+
+    for i in 1 2 3 4; do
+        signing_use_role "imx_habv4_srk${i}"
+        extract-cert "${PKCS11_URI}" "${B}/srk${i}.der"
+    done
+
+    srktool --hab_ver 4 \
+        --table "${B}/imx-srk-table.bin" \
+        --efuses "${B}/imx-srk-fuse.bin" \
+        --digest sha256 \
+        --certs "${B}/srk1.der,${B}/srk2.der,${B}/srk3.der,${B}/srk4.der"
+}
+# Make sure no previous key material is accidentally used.
+barebox_habv4_generate_imx_srk_table[cleandirs] = "${B}"
 
 do_compile:prepend() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
@@ -87,18 +107,6 @@ do_compile:prepend() {
         config="${S}/scripts/config --file ${B}/.config"
 
         signing_prepare
-
-        # ---- HAB bootloader signing ----
-        for i in 1 2 3 4; do
-            signing_use_role "imx_habv4_srk${i}"
-            extract-cert "${PKCS11_URI}" "${B}/srk${i}.der"
-        done
-
-        srktool --hab_ver 4 \
-            --table "${B}/imx-srk-table.bin" \
-            --efuses "${B}/imx-srk-fuse.bin" \
-            --digest sha256 \
-            --certs "${B}/srk1.der,${B}/srk2.der,${B}/srk3.der,${B}/srk4.der"
 
         # Prepare the installation of imx-srk-fuse.bin into barebox' environment
         # to simplify burning it
