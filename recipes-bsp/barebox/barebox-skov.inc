@@ -54,6 +54,7 @@ inherit ${@'signing' if d.getVar('MACHINE') == 'imx8s-cpu' else ''}
 BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 
+# Remember to keep the value of barebox' CONFIG_CRYPTO_PUBLIC_KEYS in sync!
 FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
 DEPENDS:append:imx8s-cpu = "\
@@ -113,11 +114,10 @@ do_compile:prepend:imx8s-cpu() {
         export CST_EXTRA_CMDLINE_OPTIONS="-b pkcs11"
 
         signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
-        FIT_URI="${PKCS11_URI}"
+        export PKCS11_FIT_URI="${PKCS11_URI}"
 
         # Adjust barebox' configuration by setting the SRK index.
-        ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX} \
-            --set-str CRYPTO_PUBLIC_KEYS  "${FITIMAGE_SIGNING_KEY_ROLE}:${FIT_URI}"
+        ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX}
 }
 
 do_install:append:imx8s-cpu() {
