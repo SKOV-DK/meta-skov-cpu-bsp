@@ -48,8 +48,7 @@ do_compile:prepend:mx8m-generic-bsp() {
         done
 }
 
-#inherit signing
-inherit ${@'signing' if d.getVar('MACHINE') == 'imx8s-cpu' else ''}
+inherit ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'signing', '' , d)}
 
 BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signing barebox. Must be one of 'imx_habv4_srk{1,2,3,4}'"
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
@@ -57,18 +56,21 @@ BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 # Remember to keep the value of barebox' CONFIG_CRYPTO_PUBLIC_KEYS in sync!
 FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
-DEPENDS:append:imx8s-cpu = "\
-        virtual/imx-hab-signing \
-        virtual/fit-signing \
-        extract-cert-native \
-        imx-cst-native \
-        openssl-native \
-        openssl \
-"
+DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', ' \
+                   virtual/imx-hab-signing \
+                   virtual/fit-signing \
+                   extract-cert-native \
+                   imx-cst-native \
+                   openssl-native \
+                   openssl \
+                   ', '' , d)}"
 
 export HOST_EXTRACFLAGS
 
 python __anonymous() {
+    if not bb.utils.contains("MACHINE_FEATURES", "habv4", True, False, d):
+        return
+
     key_role = d.getVar("BAREBOX_HABV4_SIGNING_KEY_ROLE")
     if key_role[:-1] != "imx_habv4_srk" or key_role[-1] not in "1234":
         bb.fatal("Unexpected BAREBOX_HABV4_SIGNING_KEY_ROLE, expected 'imx_habv4_srk{1,2,3,4}', got '%s'" % key_role)
@@ -79,7 +81,8 @@ python __anonymous() {
     d.setVar("BAREBOX_SRK_INDEX_CSF_IMG", key_index)
 }
 
-do_compile:prepend:imx8s-cpu() {
+do_compile:prepend() {
+    if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
         # kconfig helper
         config="${S}/scripts/config --file ${B}/.config"
 
@@ -118,13 +121,14 @@ do_compile:prepend:imx8s-cpu() {
 
         # Adjust barebox' configuration by setting the SRK index.
         ${config} --set-val HABV4_SRK_INDEX  ${BAREBOX_SRK_INDEX}
+    fi
 }
 
-do_install:append:imx8s-cpu() {
+do_install:append() {
+    if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
         install -d ${D}/boot/
         install -m 0644 ${B}/imx-srk-fuse.bin ${D}/boot/
+    fi
 }
 
-IMX_SRK_FUSE_BIN = ""
-IMX_SRK_FUSE_BIN:imx8s-cpu = "/boot/imx-srk-fuse.bin"
-FILES:${PN} += "${IMX_SRK_FUSE_BIN}"
+FILES:${PN} += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', '/boot/imx-srk-fuse.bin', '' , d)}"
