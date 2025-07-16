@@ -14,36 +14,28 @@ path=@RAUC_KEYRING_FILE@
 device=/dev/mmcblk2
 type=boot-emmc
 
-[slot.fit.0]
-device=/dev/mmcblk2p3
-type=raw
-parent=rootfs.0
-
 [slot.rootfs.0]
-device=/dev/mmcblk2p4
-type=raw
+device=/dev/mmcblk2p3
+type=ext4
 bootname=system0
-
-[slot.fit.1]
-device=/dev/mmcblk2p5
-type=raw
-parent=rootfs.1
+resize=true
 
 [slot.rootfs.1]
-device=/dev/mmcblk2p6
-type=raw
+device=/dev/mmcblk2p4
+type=ext4
 bootname=system1
-
-[slot.failsafe-fit.0]
-device=/dev/mmcblk2p7
-type=raw
-parent=failsafe.0
+resize=true
 
 [slot.failsafe.0]
-device=/dev/mmcblk2p8
-type=raw
+device=/dev/mmcblk2p5
+type=ext4
 
 [slot.recovery.0]
 device=/dev/mmcblk1p2
 type=ext4
 readonly=true
+
+[handlers]
+pre-install=@RAUC_HANDLER_PRE_INSTALL@
+post-install=@RAUC_HANDLER_POST_INSTALL@
+system-info=@RAUC_HANDLER_SYSTEM_INFO@
