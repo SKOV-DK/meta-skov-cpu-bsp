@@ -4,8 +4,8 @@
 compatible=@RAUC_BUNDLE_COMPATIBLE@
 bootloader=barebox
 mountprefix=/run/rauc
-data-directory=/home/etc/rauc
-statusfile=/home/etc/rauc/system.raucs
+data-directory=@RAUC_DATA_DIR@
+statusfile=@RAUC_DATA_DIR@/system.raucs
 
 [keyring]
 path=@RAUC_KEYRING_FILE@
@@ -24,3 +24,8 @@ bootname=system1
 device=/dev/mmcblk2p2
 type=ext4
 readonly=true
+
+[handlers]
+pre-install=@RAUC_HANDLER_PRE_INSTALL@
+post-install=@RAUC_HANDLER_POST_INSTALL@
+system-info=@RAUC_HANDLER_SYSTEM_INFO@
