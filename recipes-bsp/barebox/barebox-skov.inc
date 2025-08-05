@@ -26,21 +26,32 @@ do_compile:prepend () {
 
 BAREBOX_FIRMWARE_DEP = ""
 BAREBOX_FIRMWARE_DEP:mx8m-generic-bsp = "trusted-firmware-a:do_deploy imx-boot-firmware-files:do_deploy"
+BAREBOX_FIRMWARE_DEP:append:imx8s-cpu = " optee-os:do_deploy"
 
 do_compile[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
 BAREBOX_FIRMWARE_DIR:mx8m-generic-bsp = "${S}/firmware"
 
+BAREBOX_TFA_BIN:imx8-cpu = "imx8mp-bl31.bin"
+BAREBOX_TFA_BIN:imx8s-cpu = "imx8mp-bl31.bin-optee"
+
 do_compile:prepend:mx8m-generic-bsp() {
         mkdir -p ${BAREBOX_FIRMWARE_DIR}
 
         ## ---- Copy runtime Firmware (BL31): TF-A ----
-        cp -L ${DEPLOY_DIR_IMAGE}/imx8mp-bl31.bin ${BAREBOX_FIRMWARE_DIR}
+        cp -L ${DEPLOY_DIR_IMAGE}/${BAREBOX_TFA_BIN} ${BAREBOX_FIRMWARE_DIR}
 
         # copy imx-firmware
         for ddr_firmware in ${DDR_FIRMWARE_NAME}; do
                 cp ${DEPLOY_DIR_IMAGE}/${ddr_firmware} ${BAREBOX_FIRMWARE_DIR}
         done
+}
+
+do_compile:prepend:imx8s-cpu() {
+        mkdir -p ${BAREBOX_FIRMWARE_DIR}
+
+        ## ---- Copy secure OS (BL32): OP-TEE ----
+        cp ${DEPLOY_DIR_IMAGE}/optee/tee.bin ${BAREBOX_FIRMWARE_DIR}/imx8mp-bl32.bin
 }
 
 inherit ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'signing', '' , d)}
@@ -77,6 +88,7 @@ python __anonymous() {
     # Add SRK table generation and check of indices as prefuncs.
     d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
     d.appendVarFlag("do_compile", "prefuncs", " barebox_habv4_srk_index_check")
+    d.appendVarFlag("do_compile", "prefuncs", " barebox_optee_check")
 }
 
 python barebox_habv4_srk_index_check() {
@@ -87,6 +99,22 @@ python barebox_habv4_srk_index_check() {
     expected_key_index = str(int(d.getVar("BAREBOX_SRK_INDEX")) - 1)
     if config_key_index != expected_key_index:
         bb.fatal(f"Unexpected CONFIG_HABV4_SRK_INDEX, expected '{expected_key_index}', got '{config_key_index}'")
+}
+
+python barebox_optee_check() {
+    # Retrieve CONFIG_OPTEE_SIZE & CONFIG_OPTEE_SHM_SIZE from barebox config.
+    config_optee_size, _ = bb.process.run(f"{d.getVar('S')}/scripts/config --file {d.getVar('B')}/.config --state OPTEE_SIZE")
+    config_optee_size = int(config_optee_size, base=16)
+    config_optee_shm_size, _ = bb.process.run(f"{d.getVar('S')}/scripts/config --file {d.getVar('B')}/.config --state OPTEE_SHM_SIZE")
+    config_optee_shm_size = int(config_optee_shm_size, base=16)
+
+    expected_optee_shm_size = int(d.getVar("OPTEE_SHMEM_SIZE"), base=16)
+    expected_optee_size = int(d.getVar("OPTEE_CORE_SIZE"), base=16) + expected_optee_shm_size
+
+    if config_optee_size != expected_optee_size:
+        bb.fatal(f"Unexpected CONFIG_OPTEE_SIZE, expected '{hex(expected_optee_size)}', got '{hex(config_optee_size)}'")
+    if config_optee_shm_size != expected_optee_shm_size:
+        bb.fatal(f"Unexpected CONFIG_OPTEE_SHM_SIZE, expected '{hex(expected_optee_shm_size)}', got '{hex(config_optee_shm_size)}'")
 }
 
 barebox_habv4_generate_imx_srk_table() {
