@@ -39,6 +39,7 @@ EXTRA_OEMAKE:append = " \
     CFG_INSECURE=n \
     CFG_GP_SOCKETS=n \
     CFG_WITH_SOFTWARE_PRNG=y \
+    CFG_IN_TREE_EARLY_TAS='trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c' \
 "
 
 # OP-TEE debugging options
