@@ -29,12 +29,16 @@ EXTRA_OEMAKE:append = " \
     CFG_TZASC_REGION0_SECURE=y \
     CFG_TZASC_CHECK_ENABLED=y \
     CFG_CAAM_INC_PRIBLOB=y \
+    CFG_NXP_CAAM=y \
+    CFG_NXP_CAAM_RNG_DRV=y \
+    CFG_NXP_CAAM_RUNTIME_JR=y \
 "
 
 # OP-TEE core options
 EXTRA_OEMAKE:append = " \
     CFG_INSECURE=y \
     CFG_GP_SOCKETS=n \
+    CFG_WITH_SOFTWARE_PRNG=y \
 "
 
 # OP-TEE debugging options
