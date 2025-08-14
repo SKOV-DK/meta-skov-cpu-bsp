@@ -13,8 +13,14 @@ OPTEEMACHINE:imx8s-cpu = "imx-mx8mp"
 
 SKOV_OPTEE_DEVEL ?= "0"
 SKOV_OPTEE_DEVEL[doc] = "Set to 1 to have OP-TEE send debugging output to the console."
+# Todo: This is only a preliminary solution requiring one barebox instance for
+# production and another one to use in the field.
+# IMPORTANT: The production instance should never be leaked!
+SKOV_OPTEE_RPMB_WRITE_KEY ?= "0"
+SKOV_OPTEE_RPMB_WRITE_KEY[doc] = "Set to 1 to have OP-TEE write the RPMB security key - take care this is a one-time operation."
 
 do_configure[vardeps] += "SKOV_OPTEE_DEVEL"
+do_configure[vardeps] += "SKOV_OPTEE_RPMB_WRITE_KEY"
 
 # OP-TEE machine specific options
 EXTRA_OEMAKE:append = " \
@@ -41,6 +47,7 @@ EXTRA_OEMAKE:append = " \
     CFG_WITH_SOFTWARE_PRNG=y \
     CFG_IN_TREE_EARLY_TAS='trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c pkcs11/fd02c9da-306c-48c7-a49c-bbd827ae86ee' \
     CFG_PKCS11_TA=y \
+    CFG_RPMB_FS=y \
     CFG_RPMB_FS_DEV_ID=2 \
 "
 
@@ -53,4 +60,9 @@ EXTRA_OEMAKE:append = " \
     CFG_TEE_CORE_TA_TRACE=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
     CFG_ENABLE_EMBEDDED_TESTS=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
     CFG_TA_MBEDTLS_SELF_TEST=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+"
+
+# Conditionally enable writing of the RPMB security key
+EXTRA_OEMAKE:append = " \
+    CFG_RPMB_WRITE_KEY=${@oe.utils.vartrue('SKOV_OPTEE_RPMB_WRITE_KEY', 'y', 'n', d)} \
 "
