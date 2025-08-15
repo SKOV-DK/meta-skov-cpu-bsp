@@ -1,6 +1,6 @@
 # umpf-base: v6.14.11
 # umpf-name: 6.14/customers/skov/imx6
-# umpf-version: 6.14/customers/skov/imx6/20250722-1
+# umpf-version: 6.14/customers/skov/imx6/20250815-1
 # umpf-topic: v6.12/topic/drm-sched-accounting
 # umpf-hashinfo: a886925c1b1aedf839db4297e1b6a8e87e01b63d
 # umpf-topic-range: b9d5d463c216763cec719c04536ea9e14512cad4..a522d517242f4bf26bcfb8b64f179ffce4d108af
@@ -63,8 +63,8 @@ UMPF_SRC_URI += "\
   file://patches/0705-arm64-dts-freescale-imx8mp-skov-operate-SoC-in-nomin.patch \
   "
 # umpf-topic: v6.14/topic/imx8mp-skov-dts
-# umpf-hashinfo: e96bf58df53a1d1a21b874db20d7207643664be5
-# umpf-topic-range: 9992121369fd8f6c6ce5fd4842042fc8dbc213eb..97fe030e376c7cc1ce16647a67a8a38291487572
+# umpf-hashinfo: 974d9c2fed9fe7e864cc7d922694db853e9feba0
+# umpf-topic-range: 9992121369fd8f6c6ce5fd4842042fc8dbc213eb..35da0ac46acd0ed0f55c75661b9f48ede8ac8276
 UMPF_SRC_URI += "\
   file://patches/0801-arm64-dts-imx8mp-skov-use-I2C5-for-DDC.patch \
   file://patches/0802-arm64-dts-imx8mp-skov-describe-HDMI-display-pipeline.patch \
@@ -89,16 +89,17 @@ UMPF_SRC_URI += "\
   file://patches/0821-arm64-dts-imx8mp-skov-support-new-10-panel-board.patch \
   file://patches/0822-drm-panel-simple-add-JuTouch-JT070TM041.patch \
   file://patches/0823-arm64-dts-imx8mp-skov-support-new-7inch-panel-board.patch \
+  file://patches/0824-arm64-dts-imx8mp-skov-disable-caam-job-ring-2.patch \
   "
 # umpf-topic: v6.8/topic/drm-fsl-ldb
 # umpf-hashinfo: 8b41dc23a7e169047e05bd485563734d3396038f
-# umpf-topic-range: 97fe030e376c7cc1ce16647a67a8a38291487572..50331c02ae04bef78c5f9092d09b61a318ddc5b1
+# umpf-topic-range: 35da0ac46acd0ed0f55c75661b9f48ede8ac8276..0d2c964384ede8174ce30ddc55ce7ad162a60aa6
 UMPF_SRC_URI += "\
   file://patches/0901-drm-bridge-fsl-ldb-Fix-EPROBE_DEFER-error-on-bridge-.patch \
   "
 # umpf-topic: v6.14/topic/hw_protection
 # umpf-hashinfo: 62041d9dfc4d156556c209cd6109e75421d7bfcf
-# umpf-topic-range: 50331c02ae04bef78c5f9092d09b61a318ddc5b1..aa43d8a383862795633c690d960ef991c9454712
+# umpf-topic-range: 0d2c964384ede8174ce30ddc55ce7ad162a60aa6..6e2837ddf26060c99025d4da0a1fe6778d4c7c8c
 UMPF_SRC_URI += "\
   file://patches/1001-docs-thermal-sync-hardware-protection-doc-with-code.patch \
   file://patches/1002-reboot-describe-do_kernel_restart-s-cmd-argument-in-.patch \
@@ -113,7 +114,7 @@ UMPF_SRC_URI += "\
   "
 # umpf-topic: v6.14/topic/regulator-mmc-under-voltage
 # umpf-hashinfo: 87f91a081ae53360efcef3063b505a8eabbec5b2
-# umpf-topic-range: aa43d8a383862795633c690d960ef991c9454712..6a0a50c16c62ea8bba47c22a59f8654251edfd16
+# umpf-topic-range: 6e2837ddf26060c99025d4da0a1fe6778d4c7c8c..2d114afd5b05578cb1ea0b133d896c11381f0970
 UMPF_SRC_URI += "\
   file://patches/1101-WIP-mmc-core-shut-down-storage-as-early-as-possible.patch \
   file://patches/1102-power-Extend-power_on_reason.h-for-upcoming-PSCRR-fr.patch \
@@ -127,13 +128,13 @@ UMPF_SRC_URI += "\
   "
 # umpf-topic: v6.8/topic/gic-v3-its
 # umpf-hashinfo: fdae192fa61f6e8b20131c838fd1b85f807ab60d
-# umpf-topic-range: 6a0a50c16c62ea8bba47c22a59f8654251edfd16..73a543ec534e149d5e3def43610d724bf6ecec08
+# umpf-topic-range: 2d114afd5b05578cb1ea0b133d896c11381f0970..d8c219288be2312dcb7531419fe87dccd15f4752
 UMPF_SRC_URI += "\
   file://patches/1201-irqchip-gic-v3-its-Degrade-warning-when-no-ITS-avail.patch \
   "
 # umpf-topic: v6.14/topic/pca9450
 # umpf-hashinfo: faa472d8da2ede80fb4083c357119270a3615f22
-# umpf-topic-range: 73a543ec534e149d5e3def43610d724bf6ecec08..65999fc87eb4c80c50952ab38e6b90f9c82debc7
+# umpf-topic-range: d8c219288be2312dcb7531419fe87dccd15f4752..4d178b649daee0aa259ca7a29c5ec2d9e400cc19
 UMPF_SRC_URI += "\
   file://patches/1301-regulator-pca9450-introduce-system-restart-handler.patch \
   file://patches/1302-regulator-dt-bindings-pca9450-add-restart-handler-pr.patch \
@@ -141,25 +142,25 @@ UMPF_SRC_URI += "\
   "
 # umpf-topic: v6.14/topic/rtc-pcf85063
 # umpf-hashinfo: 3cc474c7cd4f3c32229f30ec39e9bbbe627e33fb
-# umpf-topic-range: 65999fc87eb4c80c50952ab38e6b90f9c82debc7..cc8d32051710aab73b16f5d583da3198331ea218
+# umpf-topic-range: 4d178b649daee0aa259ca7a29c5ec2d9e400cc19..b3b3883a238bafbe9cba3f06114fe1263bf6361c
 UMPF_SRC_URI += "\
   file://patches/1401-rtc-pcf85063-ensure-12-hour-mode-is-disabled.patch \
   "
 # umpf-topic: v6.14/topic/imx-gpio-base-warning
 # umpf-hashinfo: 773cf25f8d2da5bc69df651e76c4442a00fd4dab
-# umpf-topic-range: cc8d32051710aab73b16f5d583da3198331ea218..9065a6ba38590f504557ce0b6f1ffa95222b3e0d
+# umpf-topic-range: b3b3883a238bafbe9cba3f06114fe1263bf6361c..bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e
 UMPF_SRC_URI += "\
   file://patches/1501-gpio-mxc-configure-dynamic-GPIO-base-for-CONFIG_GPIO.patch \
   "
-# umpf-release: 6.14/customers/skov/imx6/20250722-1
-# umpf-topic-range: 9065a6ba38590f504557ce0b6f1ffa95222b3e0d..24e32b66e21145e5743babef2b92db42103471ec
+# umpf-release: 6.14/customers/skov/imx6/20250815-1
+# umpf-topic-range: bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e..cb3f25a8df08ac535e13eb8f4884bc6d4229353d
 UMPF_SRC_URI += "\
-  file://patches/1601-Release-6.14-customers-skov-imx6-20250722-1.patch \
+  file://patches/1601-Release-6.14-customers-skov-imx6-20250815-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "6.14.11"
-UMPF_VERSION = "20250722-1"
+UMPF_VERSION = "20250815-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION ?= "${UMPF_BASE}"
 # umpf-end
