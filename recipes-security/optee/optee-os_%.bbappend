@@ -28,6 +28,7 @@ EXTRA_OEMAKE:append = " \
     CFG_TZC380=y \
     CFG_TZASC_REGION0_SECURE=y \
     CFG_TZASC_CHECK_ENABLED=y \
+    CFG_CAAM_INC_PRIBLOB=y \
 "
 
 # OP-TEE core options
