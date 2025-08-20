@@ -25,6 +25,9 @@ EXTRA_OEMAKE:append = " \
     CFG_CORE_LARGE_PHYS_ADDR=y \
     CFG_CORE_ARM64_PA_BITS=36 \
     CFG_UART_BASE=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'UART2_BASE', '0', d)} \
+    CFG_TZC380=y \
+    CFG_TZASC_REGION0_SECURE=y \
+    CFG_TZASC_CHECK_ENABLED=y \
 "
 
 # OP-TEE core options
