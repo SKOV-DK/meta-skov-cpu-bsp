@@ -1,0 +1,46 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 5 Mar 2024 14:49:26 +0100
+Subject: [PATCH] drivers: imx_ocotp: fix error/busy defines for i.MX8MP
+
+The i.MX8MP has an OCOTP_CTRL_ADDR field which is 8-bit wide compared to
+all other current supported i.MX SoCs. Due to the larger ADDR field all
+bits shifted by 1 bit.
+
+Also make some minor style fixes while on it by replacing the mix of
+tabs and spaces with tabs-only.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/imx_ocotp.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/core/drivers/imx_ocotp.c b/core/drivers/imx_ocotp.c
+index 93d0beaa0f1a..717000fe9203 100644
+--- a/core/drivers/imx_ocotp.c
++++ b/core/drivers/imx_ocotp.c
+@@ -11,14 +11,20 @@
+ #include <drivers/imx_ocotp.h>
+ #include <kernel/tee_common_otp.h>
+ 
+-#define OCOTP_CTRL		    0x0
+-#define OCOTP_CTRL_ERROR	    BIT32(9)
+-#define OCOTP_CTRL_BUSY		    BIT32(8)
++#define OCOTP_CTRL			0x0
++
++#if defined(CFG_MX8MP)
++#define OCOTP_CTRL_ERROR		BIT32(10)
++#define OCOTP_CTRL_BUSY			BIT32(9)
++#else
++#define OCOTP_CTRL_ERROR		BIT32(9)
++#define OCOTP_CTRL_BUSY			BIT32(8)
++#endif
+ 
+ #if defined(CFG_MX6) || defined(CFG_MX7ULP)
+-#define OCOTP_SHADOW_OFFSET(_b, _w) ((_b) * (0x80) + (_w) * (0x10) + 0x400)
++#define OCOTP_SHADOW_OFFSET(_b, _w)	((_b) * (0x80) + (_w) * (0x10) + 0x400)
+ #else
+-#define OCOTP_SHADOW_OFFSET(_b, _w) ((_b) * (0x40) + (_w) * (0x10) + 0x400)
++#define OCOTP_SHADOW_OFFSET(_b, _w)	((_b) * (0x40) + (_w) * (0x10) + 0x400)
+ #endif
+ 
+ struct ocotp_instance {

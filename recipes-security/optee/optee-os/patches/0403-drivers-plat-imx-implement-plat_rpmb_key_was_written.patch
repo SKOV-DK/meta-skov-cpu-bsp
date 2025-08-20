@@ -1,0 +1,96 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 28 Feb 2024 17:52:56 +0100
+Subject: [PATCH] drivers: plat-imx: implement plat_rpmb_key_was_written()
+
+Populate the platform specific hooks to test if the RPMB key exchange
+was already written and to burn it once the key-exchange was triggered
+and successful.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
+---
+ core/arch/arm/plat-imx/conf.mk | 22 ++++++++++++++++++++++
+ core/arch/arm/plat-imx/main.c  | 27 +++++++++++++++++++++++++++
+ 2 files changed, 49 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index 018aad21b8ea..333cbc6beb38 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -569,6 +569,28 @@ CFG_HWSUPP_MEM_PERM_WXN = n
+ CFG_IMX_WDOG ?= y
+ endif
+ 
++ifeq ($(filter y, $(CFG_MX6QP) $(CFG_MX6Q) $(CFG_MX6D) $(CFG_MX6DL) $(CFG_MX6S) $(CFG_MX6ULL)), y)
++# Referenece manual says: OTP Bank 4 Word 6 (HW Capabilities) (OCOTP_GP1)
++CFG_IMX_OCOTP_RPMB_WRITTEN_BANK  ?= 4
++CFG_IMX_OCOTP_RPMB_WRITTEN_WORD  ?= 6
++CFG_IMX_OCOTP_RPMB_WRITTEN_BIT   ?= 0
++CFG_IMX_OCOTP_RPMB_WRITTEN_WRITE ?= n
++endif
++
++ifeq ($(filter y, $(CFG_MX93)), y)
++CFG_IMX_OCOTP_RPMB_WRITTEN_BANK  ?= 47
++CFG_IMX_OCOTP_RPMB_WRITTEN_WORD  ?= 0
++CFG_IMX_OCOTP_RPMB_WRITTEN_BIT   ?= 0
++CFG_IMX_OCOTP_RPMB_WRITTEN_WRITE ?= n
++endif
++
++ifeq ($(filter y, $(CFG_MX8M)), y)
++CFG_IMX_OCOTP_RPMB_WRITTEN_BANK  ?= 14
++CFG_IMX_OCOTP_RPMB_WRITTEN_WORD  ?= 0
++CFG_IMX_OCOTP_RPMB_WRITTEN_BIT   ?= 0
++CFG_IMX_OCOTP_RPMB_WRITTEN_WRITE ?= n
++endif
++
+ ifeq ($(CFG_ARM64_core),y)
+ # arm-v8 platforms
+ include core/arch/arm/cpu/cortex-armv8-0.mk
+diff --git a/core/arch/arm/plat-imx/main.c b/core/arch/arm/plat-imx/main.c
+index 07b01f76519a..ff2ad4fcc1ce 100644
+--- a/core/arch/arm/plat-imx/main.c
++++ b/core/arch/arm/plat-imx/main.c
+@@ -32,12 +32,14 @@
+ #include <console.h>
+ #include <drivers/gic.h>
+ #include <drivers/imx_uart.h>
++#include <drivers/imx_ocotp.h>
+ #include <imx.h>
+ #include <kernel/boot.h>
+ #include <mm/core_memprot.h>
+ #include <mm/core_mmu.h>
+ #include <platform_config.h>
+ #include <stdint.h>
++#include <tee/tee_fs.h>
+ 
+ static struct imx_uart_data console_data __nex_bss;
+ 
+@@ -120,3 +122,28 @@ void boot_secondary_init_intc(void)
+ 	gic_init_per_cpu();
+ }
+ #endif
++
++#if defined(CFG_RPMB_FS) && defined(CFG_IMX_OCOTP_RPMB_WRITTEN_BANK) && defined(CFG_IMX_OCOTP_RPMB_WRITTEN_BIT)
++bool plat_rpmb_key_was_written(void)
++{
++	TEE_Result res;
++	uint32_t val = 0;
++
++	res = imx_ocotp_read(CFG_IMX_OCOTP_RPMB_WRITTEN_BANK, CFG_IMX_OCOTP_RPMB_WRITTEN_WORD, &val);
++	if (res) {
++		EMSG("Failed to read RPMB written fuse. Assuming already written.");
++		return true;
++	}
++
++	return val & BIT(CFG_IMX_OCOTP_RPMB_WRITTEN_BIT);
++}
++
++void plat_notify_tee_rpmb_key_write_key_post(TEE_Result res)
++{
++	if (res != TEE_SUCCESS)
++		return;
++
++	if(IS_ENABLED(CFG_IMX_OCOTP_RPMB_WRITTEN_WRITE))
++		imx_ocotp_write(CFG_IMX_OCOTP_RPMB_WRITTEN_BANK, CFG_IMX_OCOTP_RPMB_WRITTEN_WORD, BIT(CFG_IMX_OCOTP_RPMB_WRITTEN_BIT));
++}
++#endif

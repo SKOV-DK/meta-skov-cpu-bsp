@@ -1,0 +1,21 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Wed, 20 Aug 2025 12:01:50 +0200
+Subject: [PATCH] Release v4.6/customers/skov/imx6/20250820-1
+
+---
+ mk/config.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mk/config.mk b/mk/config.mk
+index 1b374e291e12..2033a7c2c523 100644
+--- a/mk/config.mk
++++ b/mk/config.mk
+@@ -128,7 +128,7 @@ CFG_OS_REV_REPORTS_GIT_SHA1 ?= y
+ # that TEE_IMPL_VERSION contains the major and minor revision numbers.
+ CFG_OPTEE_REVISION_MAJOR ?= 4
+ CFG_OPTEE_REVISION_MINOR ?= 6
+-CFG_OPTEE_REVISION_EXTRA ?=
++CFG_OPTEE_REVISION_EXTRA ?=-20250820-1
+ 
+ # Trusted OS implementation version
+ TEE_IMPL_VERSION ?= $(shell git describe --always --dirty=-dev 2>/dev/null || \

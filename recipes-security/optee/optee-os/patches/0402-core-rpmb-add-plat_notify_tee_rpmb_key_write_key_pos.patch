@@ -1,0 +1,56 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 7 Mar 2024 17:14:05 +0100
+Subject: [PATCH] core: rpmb: add plat_notify_tee_rpmb_key_write_key_post
+ notification
+
+Add a notification hook which can be used by platforms to do some
+post-processing like burning SoC fuses.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/include/tee/tee_fs.h | 6 ++++++
+ core/tee/tee_rpmb_fs.c    | 7 +++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/core/include/tee/tee_fs.h b/core/include/tee/tee_fs.h
+index 1441bfd919e6..b6d097a974df 100644
+--- a/core/include/tee/tee_fs.h
++++ b/core/include/tee/tee_fs.h
+@@ -80,6 +80,12 @@ bool plat_rpmb_key_is_ready(void);
+  * writting the RPMB key twice.
+  */
+ bool plat_rpmb_key_was_written(void);
++
++/**
++ * Weak function which can be overridden by platforms to get notified once the
++ * RPMB key was written. The res contains the key write and verify result.
++ */
++void plat_notify_tee_rpmb_key_write_key_post(TEE_Result res);
+ #else
+ static inline TEE_Result tee_rpmb_reinit(void)
+ {
+diff --git a/core/tee/tee_rpmb_fs.c b/core/tee/tee_rpmb_fs.c
+index 2fcb261225ab..052b09c2f0f3 100644
+--- a/core/tee/tee_rpmb_fs.c
++++ b/core/tee/tee_rpmb_fs.c
+@@ -1100,6 +1100,9 @@ static TEE_Result tee_rpmb_write_and_verify_key(void)
+ 		DMSG("RPMB INIT: Verifying Key");
+ 		res = tee_rpmb_init_read_wr_cnt(&rpmb_ctx->wr_cnt);
+ 	}
++
++	plat_notify_tee_rpmb_key_write_key_post(res);
++
+ 	return res;
+ }
+ #else
+@@ -3185,6 +3188,10 @@ bool __weak plat_rpmb_key_was_written(void)
+ 	return false;
+ }
+ 
++void __weak plat_notify_tee_rpmb_key_write_key_post(TEE_Result res)
++{
++}
++
+ #ifdef CFG_WITH_STATS
+ TEE_Result rpmb_mem_stats(struct pta_stats_alloc *stats, bool reset)
+ {

@@ -1,0 +1,44 @@
+From: Rouven Czerwinski <r.czerwinski@pengutronix.de>
+Date: Thu, 6 Mar 2025 15:26:42 +0100
+Subject: [PATCH] drivers: imx_ocotp: write support i.MX6Q/D/S/DL/UL
+
+Reuse the same write functions as for i.MX8M SoC since they seem to use
+the same OCOTP IP core according to the reference manual.
+
+Signed-off-by: Rouven Czerwinski <r.czerwinski@pengutronix.de>
+---
+ core/drivers/imx_ocotp.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/core/drivers/imx_ocotp.c b/core/drivers/imx_ocotp.c
+index 682ac0373412..93d21b6a1355 100644
+--- a/core/drivers/imx_ocotp.c
++++ b/core/drivers/imx_ocotp.c
+@@ -46,7 +46,11 @@
+ #define OCOTP_SHADOW_OFFSET(_b, _w)	((_b) * (0x40) + (_w) * (0x10) + 0x400)
+ #endif
+ 
++#if defined(CFG_MX6) || defined(CFG_MX7ULP)
++#define OCOTP_ADDR(_b, _w)		(((_b) * (0x80) + (_w) * (0x10)) / 0x10)
++#else
+ #define OCOTP_ADDR(_b, _w)		(((_b) * (0x40) + (_w) * (0x10)) / 0x10)
++#endif
+ 
+ #define TIMING_STROBE_PROG_US		10	/* Min time to blow a fuse */
+ #define TIMING_STROBE_READ_NS		37	/* Min time before read */
+@@ -343,6 +347,7 @@ static const struct ocotp_instance ocotp_imx6q = {
+ 	.nb_banks = 16,
+ 	.nb_words = 8,
+ 	.get_die_id = ocotp_get_die_id_mx,
++	.write_fuse = ocotp_mx8m_write_fuse,
+ };
+ 
+ static const struct ocotp_instance ocotp_imx6sl = {
+@@ -367,6 +372,7 @@ static const struct ocotp_instance ocotp_imx6ul = {
+ 	.nb_banks = 16,
+ 	.nb_words = 8,
+ 	.get_die_id = ocotp_get_die_id_mx,
++	.write_fuse = ocotp_mx8m_write_fuse,
+ };
+ 
+ static const struct ocotp_instance ocotp_imx6ull = {
