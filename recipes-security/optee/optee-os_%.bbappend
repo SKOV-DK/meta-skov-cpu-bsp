@@ -36,7 +36,7 @@ EXTRA_OEMAKE:append = " \
 
 # OP-TEE core options
 EXTRA_OEMAKE:append = " \
-    CFG_INSECURE=y \
+    CFG_INSECURE=n \
     CFG_GP_SOCKETS=n \
     CFG_WITH_SOFTWARE_PRNG=y \
 "
