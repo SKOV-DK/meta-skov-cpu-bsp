@@ -8,16 +8,29 @@ upstream (e.g. by a fixup created via "git commit --fixup=amend:<commit>").
 
 [1] b0c9fca3dc9f ("[CHG CORE-19777] Barebox: Stay in bootloader until power is detected OK")
 
-Upstream-Status: Pending
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
 ---
- arch/arm/boards/skov-imx8mp/lowlevel.c | 40 +++++++++++++++++++++-------------
- 1 file changed, 25 insertions(+), 15 deletions(-)
+ arch/arm/boards/skov-imx8mp/lowlevel.c | 46 ++++++++++++++++++----------------
+ 1 file changed, 25 insertions(+), 21 deletions(-)
 
 diff --git a/arch/arm/boards/skov-imx8mp/lowlevel.c b/arch/arm/boards/skov-imx8mp/lowlevel.c
-index 4338d511c4c2..2d5289b8bbad 100644
+index 6a4cb72ae38e..dc6aa4fde226 100644
 --- a/arch/arm/boards/skov-imx8mp/lowlevel.c
 +++ b/arch/arm/boards/skov-imx8mp/lowlevel.c
-@@ -79,15 +79,18 @@ static inline bool power_good(void)
+@@ -33,12 +33,6 @@ extern char __dtb_z_imx8mp_skov_start[];
+ 				     MX8MP_PAD_CTL_PUE | \
+ 				     MX8MP_PAD_CTL_PE)
+ 
+-static inline void led_d1_toggle(bool *on)
+-{
+-	imx8m_gpio_direction_output(IOMEM(MX8MP_GPIO1_BASE_ADDR), 5, *on);
+-	*on = !*on;
+-}
+-
+ static void setup_uart(void)
+ {
+ 	void __iomem *uart = IOMEM(MX8M_UART2_BASE_ADDR);
+@@ -85,15 +79,18 @@ static inline bool power_good(void)
  static void wait_for_power_good(void)
  {
  	void __iomem *gpio4 = IOMEM(MX8MP_GPIO4_BASE_ADDR);
@@ -39,7 +52,7 @@ index 4338d511c4c2..2d5289b8bbad 100644
  
  	/* If we reach this, because Linux did a hw_protection_reboot, we don't
  	 * want to continue booting right away.
-@@ -96,18 +99,25 @@ static void wait_for_power_good(void)
+@@ -102,18 +99,25 @@ static void wait_for_power_good(void)
  	 * to reach a low enough level for the PMIC to detect VSYS_UVLO going
  	 * lower than allowed
  	 */

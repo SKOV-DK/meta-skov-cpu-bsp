@@ -1,0 +1,28 @@
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Date: Wed, 25 Jun 2025 15:07:44 +0200
+Subject: [PATCH] dt-bindings: vendor-prefixes: Add JuTouch Technology Co, Ltd
+
+JuTouch is a chinese touch screen supplier dedicated to manufacturing
+high-end touch display products for the global industrial market.
+(www.jutouch.com)
+
+Add a vendor prefix for it.
+
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+---
+ Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+index b5979832ddce..ca82974b6be1 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
++++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+@@ -778,6 +778,8 @@ patternProperties:
+     description: Jide Tech
+   "^joz,.*":
+     description: JOZ BV
++  "^jutouch,.*":
++    description: JuTouch Technology Co., Ltd.
+   "^kam,.*":
+     description: Kamstrup A/S
+   "^karo,.*":

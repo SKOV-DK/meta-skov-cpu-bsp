@@ -49,8 +49,6 @@ pll5_video (rate 980042000
                                     2400000.ipu@2400000.of_di0_pixel (rate 70002992
 
 Fixes: af3d99396a8b ("clk: imx: improve precision of AV PLL to 1 Hz")
-Upstream-Status: Pending
-
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
 Cc: Philipp Zabel <p.zabel@pengutronix.de>
@@ -62,7 +60,7 @@ calculation is correct, can you take a look?
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/video/imx-ipu-v3/imx-ldb.c b/drivers/video/imx-ipu-v3/imx-ldb.c
-index 3ed6d44f5be6..b1225f519e85 100644
+index 54a5899ebb2c..85bbc6d62e94 100644
 --- a/drivers/video/imx-ipu-v3/imx-ldb.c
 +++ b/drivers/video/imx-ipu-v3/imx-ldb.c
 @@ -138,9 +138,10 @@ static int imx_ldb_prepare(struct imx_ldb_channel *imx_ldb_ch, struct fb_videomo
@@ -92,7 +90,7 @@ index 3ed6d44f5be6..b1225f519e85 100644
 +
  	ret = clk_set_parent(diclk, ldbclk);
  	if (ret) {
- 		dev_err(ldb->dev, "failed to set display clock parent: %s\n", strerror(-ret));
+ 		dev_err(ldb->dev, "failed to set display clock parent: %pe\n", ERR_PTR(ret));
  		return ret;
  	}
  

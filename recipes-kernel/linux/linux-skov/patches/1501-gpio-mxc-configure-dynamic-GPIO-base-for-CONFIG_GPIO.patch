@@ -1,0 +1,52 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 7 May 2025 10:58:56 +0200
+Subject: [PATCH] gpio: mxc: configure dynamic GPIO base for
+ CONFIG_GPIO_SYSFS=n
+
+i.MX GPIO numbering has been deterministic since commit 7e6086d9e54a
+("gpio/mxc: specify gpio base for device tree probe"), a year after
+device tree support was first added back in 2011.
+
+Reverting to dynamically allocated GPIO base now would break most
+systems making use of the sysfs API. These systems will be eventually
+broken by the removal of the sysfs API, but that would result in GPIO
+scripts not working instead of essentially toggling at random according
+to probe order, which would happen if we unconditionally set base to -1.
+
+Yet, the warning is annoying and has resulted in many rejected attempts
+to remove it over the years[1][2][3].
+
+As the i.MX GPIO driver is device tree only, GPIO_SYSFS is the only
+consumer of the deterministic GPIO numbering. Let's therefore restrict the
+static base and the warning that comes with it to configurations
+with CONFIG_GPIO_SYSFS enabled.
+
+[1]: https://lore.kernel.org/all/20230226205319.1013332-1-dario.binacchi@amarulasolutions.com/
+[2]: https://lore.kernel.org/all/20230506085928.933737-2-haibo.chen@nxp.com/
+[3]: https://lore.kernel.org/all/20241121145515.3087855-1-catalin.popescu@leica-geosystems.com/
+
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+---
+ drivers/gpio/gpio-mxc.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpio/gpio-mxc.c b/drivers/gpio/gpio-mxc.c
+index 619b6fb9d833..38504c9486b0 100644
+--- a/drivers/gpio/gpio-mxc.c
++++ b/drivers/gpio/gpio-mxc.c
+@@ -490,7 +490,14 @@ static int mxc_gpio_probe(struct platform_device *pdev)
+ 	port->gc.request = mxc_gpio_request;
+ 	port->gc.free = mxc_gpio_free;
+ 	port->gc.to_irq = mxc_gpio_to_irq;
+-	port->gc.base = of_alias_get_id(np, "gpio") * 32;
++	/*
++	 * Driver is DT-only, so a fixed base needs only be maintained for legacy
++	 * userspace with sysfs interface.
++	 */
++	if (IS_ENABLED(CONFIG_GPIO_SYSFS))
++		port->gc.base = of_alias_get_id(np, "gpio") * 32;
++	else /* silence boot time warning */
++		port->gc.base = -1;
+ 
+ 	err = devm_gpiochip_add_data(&pdev->dev, &port->gc, port);
+ 	if (err)
