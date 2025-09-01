@@ -1,7 +1,7 @@
 require backports-meta-arm-whinlatter/recipes-bsp/trusted-firmware-a/trusted-firmware-a.inc
 
-# TF-A v2.12.3
-SRCREV_tfa = "799fa03173b6c5ab85f70e583dd7d12719592436"
+# TF-A v2.12.6
+SRCREV_tfa = "10ae965e520d612c27866796632090222ce9036d"
 SRCBRANCH = "lts-v2.12"
 
 LIC_FILES_CHKSUM += "file://docs/license.rst;md5=83b7626b8c7a37263c6a58af8d19bee1"
