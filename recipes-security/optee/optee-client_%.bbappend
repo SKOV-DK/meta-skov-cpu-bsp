@@ -11,4 +11,5 @@ do_configure[vardeps] += "SKOV_OPTEE_DEVEL"
 EXTRA_OECMAKE += " \
 	-DCFG_TEE_CLIENT_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '1', d)}  \
 	-DCFG_TEE_SUPP_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '1', d)}  \
+	-DRPMB_EMU=n \
 "
