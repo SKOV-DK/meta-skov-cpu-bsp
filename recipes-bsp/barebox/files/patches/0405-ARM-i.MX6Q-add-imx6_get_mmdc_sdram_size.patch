@@ -1,0 +1,42 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 26 Jun 2025 16:45:23 +0200
+Subject: [PATCH] ARM: i.MX6Q: add imx6_get_mmdc_sdram_size
+
+Add a helper to query the MMDC configured SDRAM size.
+
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/mach-imx/esdctl.c | 5 +++++
+ include/mach/imx/esdctl.h  | 1 +
+ 2 files changed, 6 insertions(+)
+
+diff --git a/arch/arm/mach-imx/esdctl.c b/arch/arm/mach-imx/esdctl.c
+index 4b67b52ca45e..4c4c3528e1a6 100644
+--- a/arch/arm/mach-imx/esdctl.c
++++ b/arch/arm/mach-imx/esdctl.c
+@@ -286,6 +286,11 @@ static inline resource_size_t imx6_mmdc_sdram_size(void __iomem *mmdcbase)
+ 	return size;
+ }
+ 
++resource_size_t imx6_get_mmdc_sdram_size(void)
++{
++	return imx6_mmdc_sdram_size(IOMEM(MX6_MMDC_P0_BASE_ADDR));
++}
++
+ static int imx6_mmdc_add_mem(void *mmdcbase, const struct imx_esdctl_data *data)
+ {
+ 	return arm_add_mem_device("ram0", data->base0,
+diff --git a/include/mach/imx/esdctl.h b/include/mach/imx/esdctl.h
+index d79bf17959e6..97bd444b1a4c 100644
+--- a/include/mach/imx/esdctl.h
++++ b/include/mach/imx/esdctl.h
+@@ -151,6 +151,7 @@ void __noreturn imx7d_barebox_entry(void *boarddata);
+ void __noreturn imx93_barebox_entry(void *boarddata);
+ #define imx6sx_barebox_entry(boarddata) imx6ul_barebox_entry(boarddata)
+ void imx_esdctl_disable(void);
++resource_size_t imx6_get_mmdc_sdram_size(void);
+ resource_size_t imx8m_barebox_earlymem_size(unsigned buswidth);
+ resource_size_t imx9_ddrc_sdram_size(void);
+ #endif

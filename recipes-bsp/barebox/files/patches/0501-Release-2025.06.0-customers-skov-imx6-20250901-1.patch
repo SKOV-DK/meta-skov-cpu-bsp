@@ -1,13 +1,13 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Date: Fri, 27 Jun 2025 12:26:33 +0200
-Subject: [PATCH] Release 2025.06.0/customers/skov/imx6/20250627-2
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 1 Sep 2025 14:29:31 +0200
+Subject: [PATCH] Release 2025.06.0/customers/skov/imx6/20250901-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 2aa1762ac454..9651a91646f8 100644
+index 2aa1762ac454..1e67447499c0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -15,7 +15,7 @@ index 2aa1762ac454..9651a91646f8 100644
  PATCHLEVEL = 06
  SUBLEVEL = 1
 -EXTRAVERSION =
-+EXTRAVERSION =-20250627-2
++EXTRAVERSION =-20250901-1
  NAME = None
  
  # *DOCUMENTATION*

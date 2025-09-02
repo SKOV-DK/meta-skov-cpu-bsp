@@ -1,0 +1,225 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 27 Jun 2025 10:45:34 +0200
+Subject: [PATCH] ARM: add exception handling support for PBL
+
+Exception handling in PBL can be very useful for debugging PBL code.
+This patch adds support for it.
+
+This is currently only implemented for ARMv7 and ARMv8. Only on these
+architectures we can tell the CPU where the exception table is. On ARMv6
+and older we would have to copy the exception table either to 0x0 or
+0xffff0000. Not all SoCs have writable memory at these locations, so we
+would have to utilize the MMU to map writable memory there. We are not
+there yet, so for now skip exception handling support on these older
+architectures.
+
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/Kconfig                   | 10 ++++++++++
+ arch/arm/cpu/Makefile              |  1 +
+ arch/arm/cpu/interrupts_32.c       | 24 +++++++++++++++---------
+ arch/arm/cpu/interrupts_64.c       | 20 +++++++++++---------
+ arch/arm/cpu/uncompress.c          |  2 ++
+ arch/arm/include/asm/barebox-arm.h | 20 ++++++++++++++++++++
+ arch/arm/lib/pbl.lds.S             |  4 ++++
+ 7 files changed, 63 insertions(+), 18 deletions(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 0800b15d784c..eaccee9f2f7a 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -378,6 +378,16 @@ config ARM_EXCEPTIONS
+ 	bool "enable arm exception handling support"
+ 	default y
+ 
++config ARM_EXCEPTIONS_PBL
++	select ARCH_HAS_DATA_ABORT_MASK_PBL
++	depends on CPU_V7 || CPU_V8
++	bool "enable arm exception handling support in PBL"
++	help
++	  Say yes here to enable exception handling in PBL. Note that the exception
++	  table has to be initialized by calling arm_pbl_init_exceptions(). This is
++	  done in barebox_pbl_start(). If you need exception handling earlier then
++	  you have to call arm_pbl_init_exceptions() earlier from your board code.
++
+ config ARM_UNWIND
+ 	bool "enable stack unwinding support"
+ 	depends on AEABI
+diff --git a/arch/arm/cpu/Makefile b/arch/arm/cpu/Makefile
+index 39e59c2a2f73..955059279670 100644
+--- a/arch/arm/cpu/Makefile
++++ b/arch/arm/cpu/Makefile
+@@ -3,6 +3,7 @@
+ obj-pbl-y += cpu.o
+ 
+ obj-$(CONFIG_ARM_EXCEPTIONS) += exceptions_$(S64_32).o interrupts_$(S64_32).o
++pbl-$(CONFIG_ARM_EXCEPTIONS_PBL) += exceptions_$(S64_32).o interrupts_$(S64_32).o
+ obj-$(CONFIG_MMU) += mmu-common.o
+ obj-pbl-$(CONFIG_MMU) += mmu_$(S64_32).o
+ obj-$(CONFIG_MMU) += dma_$(S64_32).o
+diff --git a/arch/arm/cpu/interrupts_32.c b/arch/arm/cpu/interrupts_32.c
+index 623efb3966f0..b8b9210197ea 100644
+--- a/arch/arm/cpu/interrupts_32.c
++++ b/arch/arm/cpu/interrupts_32.c
+@@ -12,6 +12,7 @@
+ #include <asm/ptrace.h>
+ #include <asm/barebox-arm.h>
+ #include <asm/unwind.h>
++#include <asm/system_info.h>
+ #include <init.h>
+ 
+ /* Avoid missing prototype warning, called from assembly */
+@@ -61,7 +62,7 @@ void show_regs (struct pt_regs *regs)
+ 		fast_interrupts_enabled (regs) ? "on" : "off",
+ 		processor_modes[processor_mode (regs)],
+ 		thumb_mode (regs) ? " (T)" : "");
+-#ifdef CONFIG_ARM_UNWIND
++#if defined CONFIG_ARM_UNWIND && IN_PROPER
+ 	unwind_backtrace(regs);
+ #endif
+ }
+@@ -110,16 +111,10 @@ void do_prefetch_abort (struct pt_regs *pt_regs)
+ 
+ static const char *data_abort_reason(ulong far)
+ {
+-	ulong guard_page;
+-
+ 	if (far < PAGE_SIZE)
+ 		return "NULL pointer dereference";
+-
+-	if (IS_ENABLED(CONFIG_STACK_GUARD_PAGE)) {
+-		guard_page = arm_mem_guard_page_get();
+-		if (guard_page <= far && far < guard_page + PAGE_SIZE)
+-			return "stack overflow";
+-	}
++	if (inside_stack_guard_page(far))
++		return "stack overflow";
+ 
+ 	return "paging request";
+ }
+@@ -181,3 +176,14 @@ int data_abort_unmask(void)
+ 
+ 	return arm_data_abort_occurred != 0;
+ }
++
++#if IS_ENABLED(CONFIG_ARM_EXCEPTIONS_PBL)
++void arm_pbl_init_exceptions(void)
++{
++	if (cpu_architecture() < CPU_ARCH_ARMv7)
++		return;
++
++	set_vbar((unsigned long)__exceptions_start);
++	arm_fixup_vectors();
++}
++#endif
+diff --git a/arch/arm/cpu/interrupts_64.c b/arch/arm/cpu/interrupts_64.c
+index 4d4ef2bab88e..b4787783978e 100644
+--- a/arch/arm/cpu/interrupts_64.c
++++ b/arch/arm/cpu/interrupts_64.c
+@@ -88,7 +88,8 @@ static void __noreturn do_exception(struct pt_regs *pt_regs)
+ {
+ 	show_regs(pt_regs);
+ 
+-	unwind_backtrace(pt_regs);
++	if (IN_PROPER)
++		unwind_backtrace(pt_regs);
+ 
+ 	panic_no_stacktrace("panic: unhandled exception");
+ }
+@@ -146,16 +147,10 @@ extern volatile int arm_data_abort_occurred;
+ 
+ static const char *data_abort_reason(ulong far)
+ {
+-	ulong guard_page;
+-
+ 	if (far < PAGE_SIZE)
+ 		return "NULL pointer dereference: ";
+-
+-	if (IS_ENABLED(CONFIG_STACK_GUARD_PAGE)) {
+-		guard_page = arm_mem_guard_page_get();
+-		if (guard_page <= far && far < guard_page + PAGE_SIZE)
+-			return "Stack overflow: ";
+-	}
++	if (inside_stack_guard_page(far))
++		return "Stack overflow: ";
+ 
+ 	return NULL;
+ }
+@@ -226,3 +221,10 @@ static int aarch64_init_vectors(void)
+ 	return 0;
+ }
+ core_initcall(aarch64_init_vectors);
++
++#if IS_ENABLED(CONFIG_ARM_EXCEPTIONS_PBL)
++void arm_pbl_init_exceptions(void)
++{
++	aarch64_init_vectors();
++}
++#endif
+diff --git a/arch/arm/cpu/uncompress.c b/arch/arm/cpu/uncompress.c
+index 4657a4828e67..4529ef5e3821 100644
+--- a/arch/arm/cpu/uncompress.c
++++ b/arch/arm/cpu/uncompress.c
+@@ -63,6 +63,8 @@ void __noreturn barebox_pbl_start(unsigned long membase, unsigned long memsize,
+ 
+ 	pr_debug("memory at 0x%08lx, size 0x%08lx\n", membase, memsize);
+ 
++	arm_pbl_init_exceptions();
++
+ 	if (IS_ENABLED(CONFIG_MMU))
+ 		mmu_early_enable(membase, memsize);
+ 	else if (IS_ENABLED(CONFIG_ARMV7R_MPU))
+diff --git a/arch/arm/include/asm/barebox-arm.h b/arch/arm/include/asm/barebox-arm.h
+index 7d35e88c8123..e99fd5699521 100644
+--- a/arch/arm/include/asm/barebox-arm.h
++++ b/arch/arm/include/asm/barebox-arm.h
+@@ -52,6 +52,14 @@ static inline void arm_fixup_vectors(void)
+ }
+ #endif
+ 
++#if IS_ENABLED(CONFIG_ARM_EXCEPTIONS_PBL)
++void arm_pbl_init_exceptions(void);
++#else
++static inline void arm_pbl_init_exceptions(void)
++{
++}
++#endif
++
+ void *barebox_arm_boot_dtb(void);
+ 
+ /*
+@@ -159,6 +167,18 @@ static inline unsigned long arm_mem_guard_page_get(void)
+ 	return arm_mem_guard_page(arm_mem_endmem_get());
+ }
+ 
++static inline bool inside_stack_guard_page(ulong addr)
++{
++	if (IS_ENABLED(CONFIG_STACK_GUARD_PAGE) && IN_PROPER) {
++		ulong guard_page = arm_mem_guard_page_get();
++
++		if (guard_page <= addr && addr < guard_page + PAGE_SIZE)
++			return true;
++	}
++
++	return false;
++}
++
+ /*
+  * When using compressed images in conjunction with relocatable images
+  * the PBL code must pick a suitable place where to uncompress the barebox
+diff --git a/arch/arm/lib/pbl.lds.S b/arch/arm/lib/pbl.lds.S
+index dad37c9e9bca..9c51f5eb3a3d 100644
+--- a/arch/arm/lib/pbl.lds.S
++++ b/arch/arm/lib/pbl.lds.S
+@@ -52,6 +52,10 @@ SECTIONS
+ 		__bare_init_start = .;
+ 		*(.text_bare_init*)
+ 		__bare_init_end = .;
++		. = ALIGN(0x20);
++		__exceptions_start = .;
++		KEEP(*(.text_exceptions*))
++		__exceptions_stop = .;
+ 		*(.text*)
+ 	}
+ 

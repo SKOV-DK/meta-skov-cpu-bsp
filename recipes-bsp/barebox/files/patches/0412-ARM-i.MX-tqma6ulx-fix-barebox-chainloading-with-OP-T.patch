@@ -1,0 +1,81 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Thu, 26 Jun 2025 15:47:32 +0200
+Subject: [PATCH] ARM: i.MX: tqma6ulx: fix barebox chainloading with OP-TEE
+ enabled
+
+When barebox starts we have to guess if we have to start OP-TEE or not.
+The current detection works by checking if the first stage passed us a
+device tree pointer. This is not robust and might have security issues
+[1], so replace that with the check with imx6_can_access_tzasc(). If we
+can access the TZASC then we are the first stage and configure it and
+start OP-TEE, otherwise assume that we are chainloaded and continue
+without starting OP-TEE.
+
+Chainloading barebox with OP-TEE enabled contained several bugs, so it
+never actually worked. This patch fixes them.
+
+[1] https://lore.kernel.org/70b41f3b-4329-48f7-827f-1924e002ab04@pengutronix.de
+
+Reviewed-by: Marco Felsch <m.felsch@pengutronix.de>
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/boards/tqma6ulx/lowlevel.c | 22 +++++++++-------------
+ 1 file changed, 9 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm/boards/tqma6ulx/lowlevel.c b/arch/arm/boards/tqma6ulx/lowlevel.c
+index 5fd997d2ec7e..da67e6753716 100644
+--- a/arch/arm/boards/tqma6ulx/lowlevel.c
++++ b/arch/arm/boards/tqma6ulx/lowlevel.c
+@@ -16,6 +16,8 @@
+ #include <pbl/i2c.h>
+ #include <boards/tq/tq_eeprom.h>
+ #include <tee/optee.h>
++#include <mach/imx/tzasc.h>
++#include <tee/optee.h>
+ 
+ #include "tqma6ulx.h"
+ 
+@@ -66,7 +68,7 @@ static void *read_eeprom(void)
+ 	return fdt;
+ }
+ 
+-static void noinline start_mba6ulx(u32 r0)
++static void noinline start_mba6ulx(void)
+ {
+ 	void *fdt;
+ 	int tee_size;
+@@ -76,21 +78,15 @@ static void noinline start_mba6ulx(u32 r0)
+ 
+ 	fdt = read_eeprom();
+ 
+-	/* Enable normal/secure r/w for TZC380 region0 */
+-	writel(0xf0000000, 0x021D0108);
+-
+ 	/*
+-	 * Chainloading barebox will pass a device tree within the RAM in r0,
+-	 * skip OP-TEE early loading in this case
++	 * Skip loading barebox when we are chainloaded. We can detect that by detecting
++	 * if we can access the TZASC.
+ 	 */
+-	if (IS_ENABLED(CONFIG_FIRMWARE_TQMA6UL_OPTEE) &&
+-	    !(r0 > MX6_MMDC_P0_BASE_ADDR &&
+-	      r0 < MX6_MMDC_P0_BASE_ADDR + SZ_256M)) {
+-		get_builtin_firmware(mba6ul_optee_bin, &tee, &tee_size);
++	if (IS_ENABLED(CONFIG_FIRMWARE_TQMA6UL_OPTEE) && imx6_can_access_tzasc()) {
+ 
+-		memset((void *)OPTEE_OVERLAY_LOCATION, 0, 0x1000);
++		get_builtin_firmware(mba6ul_optee_bin, &tee, &tee_size);
+ 
+-		start_optee_early(NULL, tee);
++		imx6ul_start_optee_early(NULL, tee, (void *)OPTEE_OVERLAY_LOCATION, 0x1000);
+ 	}
+ 
+ 	imx6ul_barebox_entry(fdt);
+@@ -112,5 +108,5 @@ ENTRY_FUNCTION(start_imx6ul_mba6ulx, r0, r1, r2)
+ 	setup_c();
+ 	barrier();
+ 
+-	start_mba6ulx(r0);
++	start_mba6ulx();
+ }

@@ -1,0 +1,41 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 27 Jun 2025 10:02:52 +0200
+Subject: [PATCH] arch: Allow data_abort_mask() in PBL
+
+With this architecures which want to support data_abort_mask() in
+PBL can select ARCH_HAS_DATA_ABORT_MASK_PBL.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/Kconfig    | 3 +++
+ include/abort.h | 3 ++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/Kconfig b/arch/Kconfig
+index dc5d1e454df5..5edfd6f7e8d4 100644
+--- a/arch/Kconfig
++++ b/arch/Kconfig
+@@ -68,6 +68,9 @@ config ARCH_HAS_STACK_DUMP
+ config ARCH_HAS_DATA_ABORT_MASK
+ 	bool
+ 
++config ARCH_HAS_DATA_ABORT_MASK_PBL
++	bool
++
+ config ARCH_HAS_ZERO_PAGE
+ 	bool
+ 
+diff --git a/include/abort.h b/include/abort.h
+index 95db1b54d6d9..c623a4c51041 100644
+--- a/include/abort.h
++++ b/include/abort.h
+@@ -2,7 +2,8 @@
+ #ifndef __ABORT_H
+ #define __ABORT_H
+ 
+-#if defined CONFIG_ARCH_HAS_DATA_ABORT_MASK && IN_PROPER
++#if (defined CONFIG_ARCH_HAS_DATA_ABORT_MASK && IN_PROPER) || \
++    (defined CONFIG_ARCH_HAS_DATA_ABORT_MASK_PBL && IN_PBL)
+ 
+ /*
+  * data_abort_mask - ignore data aborts
