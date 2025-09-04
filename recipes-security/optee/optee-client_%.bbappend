@@ -12,4 +12,5 @@ EXTRA_OECMAKE += " \
 	-DCFG_TEE_CLIENT_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '1', d)}  \
 	-DCFG_TEE_SUPP_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '1', d)}  \
 	-DRPMB_EMU=n \
+	-DCFG_TEE_SUPPL_USER=root \
 "
