@@ -1,0 +1,167 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Sun, 27 Jul 2025 23:44:57 +0200
+Subject: [PATCH] fix(imx8m): don't reconfigure default region0
+
+The current code and comments can be read as: "The TZC-380 region 0 can
+be configured in size and attributes". This is not true, only the
+attributes can be set.
+
+The TZC-380 region 0 is the TZC default (fallback) region. This region
+is used if access to a certain DRAM address was done which isn't covered
+by any other region (see [1] for more information). Region 0 covers the
+complete AXI space from 0x0 to AXI-bus width. The access is secure-only
+after reset.
+
+The TZC-380 is not memory alias aware (see [1] for more information) and
+due to the DDR controller, the i.MX8M allows memory alias access.
+
+Configuring region 0 as secure + non-secure RW access opens the
+potential security risk of allowing access to secure only memory e.g.
+TEE memory area if the TEE didn't configure all memory aliases for its
+memory. In such case region 0 is used as fallback if an attackers access
+the TEE memory via memory aliases.
+
+To fix this don't touch the TZC-380 at all. The TZC-380 is bypassed
+by default if a platform doesn't require a TEE. If the platform requires
+a TEE, the TEE is the one which knows the secure areas so let the TEE
+configure the TZC-380 accordingly.
+
+Furthmore, since commits:
+ - 0324081af010 ("feat(imx8mp): restrict peripheral access to secure
+   world")
+ - 1156c76361c1 ("feat(imx8mm): restrict peripheral access to secure
+   world")
+the access is limited to the TEE too.
+
+[1] https://developer.arm.com/documentation/ddi0431/c
+
+Upstream-Status: Pending
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Change-Id: I0a0f9b5ad0017f38d767f583d7765a2f79861589
+---
+ plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c | 22 ----------------------
+ plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c | 22 ----------------------
+ plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c | 22 ----------------------
+ 3 files changed, 66 deletions(-)
+
+diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+index 03edc6e42371..3f230708262d 100644
+--- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
+@@ -130,26 +130,6 @@ static uint32_t get_spsr_for_bl33_entry(void)
+ 	return spsr;
+ }
+ 
+-void bl31_tzc380_setup(void)
+-{
+-	unsigned int val;
+-
+-	val = mmio_read_32(IMX_IOMUX_GPR_BASE + 0x28);
+-	if ((val & GPR_TZASC_EN) != GPR_TZASC_EN)
+-		return;
+-
+-	tzc380_init(IMX_TZASC_BASE);
+-
+-	/*
+-	 * Need to substact offset 0x40000000 from CPU address when
+-	 * programming tzasc region for i.mx8mm.
+-	 */
+-
+-	/* Enable 1G-5G S/NS RW */
+-	tzc380_configure_region(0, 0x00000000, TZC_ATTR_REGION_SIZE(TZC_REGION_SIZE_4G) |
+-		TZC_ATTR_REGION_EN_MASK | TZC_ATTR_SP_ALL);
+-}
+-
+ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 		u_register_t arg2, u_register_t arg3)
+ {
+@@ -219,8 +199,6 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ #if !defined(SPD_opteed) && !defined(SPD_trusty)
+ 	enable_snvs_privileged_access();
+ #endif
+-
+-	bl31_tzc380_setup();
+ }
+ 
+ #define MAP_BL31_TOTAL										   \
+diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+index 42d173e7a085..ef62b9a7fd49 100644
+--- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
+@@ -101,26 +101,6 @@ static uint32_t get_spsr_for_bl33_entry(void)
+ 	return spsr;
+ }
+ 
+-static void bl31_tzc380_setup(void)
+-{
+-	unsigned int val;
+-
+-	val = mmio_read_32(IMX_IOMUX_GPR_BASE + 0x28);
+-	if ((val & GPR_TZASC_EN) != GPR_TZASC_EN)
+-		return;
+-
+-	tzc380_init(IMX_TZASC_BASE);
+-
+-	/*
+-	 * Need to substact offset 0x40000000 from CPU address when
+-	 * programming tzasc region for i.mx8mn.
+-	 */
+-
+-	/* Enable 1G-5G S/NS RW */
+-	tzc380_configure_region(0, 0x00000000, TZC_ATTR_REGION_SIZE(TZC_REGION_SIZE_4G) |
+-		TZC_ATTR_REGION_EN_MASK | TZC_ATTR_SP_ALL);
+-}
+-
+ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 		u_register_t arg2, u_register_t arg3)
+ {
+@@ -203,8 +183,6 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ #if !defined(SPD_opteed) && !defined(SPD_trusty)
+ 	enable_snvs_privileged_access();
+ #endif
+-
+-	bl31_tzc380_setup();
+ }
+ 
+ #define MAP_BL31_TOTAL										   \
+diff --git a/plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c b/plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c
+index 141c94bbc5c9..607bcf264e3f 100644
+--- a/plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c
++++ b/plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c
+@@ -130,26 +130,6 @@ static uint32_t get_spsr_for_bl33_entry(void)
+ 	return spsr;
+ }
+ 
+-static void bl31_tzc380_setup(void)
+-{
+-	unsigned int val;
+-
+-	val = mmio_read_32(IMX_IOMUX_GPR_BASE + 0x28);
+-	if ((val & GPR_TZASC_EN) != GPR_TZASC_EN)
+-		return;
+-
+-	tzc380_init(IMX_TZASC_BASE);
+-
+-	/*
+-	 * Need to substact offset 0x40000000 from CPU address when
+-	 * programming tzasc region for i.mx8mp.
+-	 */
+-
+-	/* Enable 1G-5G S/NS RW */
+-	tzc380_configure_region(0, 0x00000000, TZC_ATTR_REGION_SIZE(TZC_REGION_SIZE_4G) |
+-		TZC_ATTR_REGION_EN_MASK | TZC_ATTR_SP_ALL);
+-}
+-
+ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 		u_register_t arg2, u_register_t arg3)
+ {
+@@ -226,8 +206,6 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ #if !defined(SPD_opteed) && !defined(SPD_trusty)
+ 	enable_snvs_privileged_access();
+ #endif
+-
+-	bl31_tzc380_setup();
+ }
+ 
+ #define MAP_BL31_TOTAL										   \

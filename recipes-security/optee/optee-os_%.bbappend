@@ -1,0 +1,68 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+
+require ${BPN}/patches/series.inc
+PV = "${UMPF_PV}"
+
+# The following line partially reverts meta-arm's commit [1], as the recipe
+# would otherwise fail to build. It should be removed starting with whinlatter.
+# [1] eea748608c82 ("arm: WORKDIR fixes")
+S = "${WORKDIR}/git"
+
+COMPATIBLE_MACHINE:imx8s-cpu ?= "imx8s-cpu"
+OPTEEMACHINE:imx8s-cpu = "imx-mx8mp"
+
+SKOV_OPTEE_DEVEL ?= "0"
+SKOV_OPTEE_DEVEL[doc] = "Set to 1 to have OP-TEE send debugging output to the console."
+# Todo: This is only a preliminary solution requiring one barebox instance for
+# production and another one to use in the field.
+# IMPORTANT: The production instance should never be leaked!
+SKOV_OPTEE_RPMB_WRITE_KEY ?= "0"
+SKOV_OPTEE_RPMB_WRITE_KEY[doc] = "Set to 1 to have OP-TEE write the RPMB security key - take care this is a one-time operation."
+
+do_configure[vardeps] += "SKOV_OPTEE_DEVEL"
+do_configure[vardeps] += "SKOV_OPTEE_RPMB_WRITE_KEY"
+
+# OP-TEE machine specific options
+EXTRA_OEMAKE:append = " \
+    CFG_TZDRAM_START=${OPTEE_LOADADDR} \
+    CFG_TZDRAM_SIZE=${OPTEE_CORE_SIZE} \
+    CFG_SHMEM_SIZE=${OPTEE_SHMEM_SIZE} \
+    CFG_DDR_SIZE=0x80000000 \
+    CFG_CORE_LARGE_PHYS_ADDR=y \
+    CFG_CORE_ARM64_PA_BITS=36 \
+    CFG_UART_BASE=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'UART2_BASE', '0', d)} \
+    CFG_TZC380=y \
+    CFG_TZASC_REGION0_SECURE=y \
+    CFG_TZASC_CHECK_ENABLED=y \
+    CFG_CAAM_INC_PRIBLOB=y \
+    CFG_NXP_CAAM=y \
+    CFG_NXP_CAAM_RNG_DRV=y \
+    CFG_NXP_CAAM_RUNTIME_JR=y \
+"
+
+# OP-TEE core options
+EXTRA_OEMAKE:append = " \
+    CFG_INSECURE=n \
+    CFG_GP_SOCKETS=n \
+    CFG_WITH_SOFTWARE_PRNG=y \
+    CFG_IN_TREE_EARLY_TAS='trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c pkcs11/fd02c9da-306c-48c7-a49c-bbd827ae86ee' \
+    CFG_PKCS11_TA=y \
+    CFG_RPMB_FS=y \
+    CFG_RPMB_FS_DEV_ID=2 \
+"
+
+# OP-TEE debugging options
+EXTRA_OEMAKE:append = " \
+    CFG_TEE_CORE_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '0', d)} \
+    CFG_TEE_TA_LOG_LEVEL=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', '4', '0', d)} \
+    CFG_TEE_CORE_DEBUG=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+    CFG_DEBUG_INFO=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+    CFG_TEE_CORE_TA_TRACE=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+    CFG_ENABLE_EMBEDDED_TESTS=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+    CFG_TA_MBEDTLS_SELF_TEST=${@oe.utils.vartrue('SKOV_OPTEE_DEVEL', 'y', 'n', d)} \
+"
+
+# Conditionally enable writing of the RPMB security key
+EXTRA_OEMAKE:append = " \
+    CFG_RPMB_WRITE_KEY=${@oe.utils.vartrue('SKOV_OPTEE_RPMB_WRITE_KEY', 'y', 'n', d)} \
+"

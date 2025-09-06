@@ -1,0 +1,65 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Wed, 28 Feb 2024 16:19:07 +0100
+Subject: [PATCH] core: rpmb: add platform specific hook to avoid rpmb key
+ exchange
+
+Currently the core already check if the key was written and don't
+trigger a new tee_rpmb_write_and_verify_key(). But this does not prevent
+us from attacks which involves: re-soldering the eMMC to re-trigger the
+key exchange.
+
+This new platform specific function can prevent such attacks, e.g. by
+checking an e-fuse and return true if the exchange was already done.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/include/tee/tee_fs.h |  7 +++++++
+ core/tee/tee_rpmb_fs.c    | 10 ++++++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/core/include/tee/tee_fs.h b/core/include/tee/tee_fs.h
+index 09b172794efe..1441bfd919e6 100644
+--- a/core/include/tee/tee_fs.h
++++ b/core/include/tee/tee_fs.h
+@@ -73,6 +73,13 @@ TEE_Result rpmb_mem_stats(struct pta_stats_alloc *stats, bool reset);
+  * prevent a RPMB key write in the wrong state.
+  */
+ bool plat_rpmb_key_is_ready(void);
++
++/**
++ * Weak function which can be overridden by platforms to indicate that the RPMB
++ * key was written. Defaults to false, platforms can return true to prevent a
++ * writting the RPMB key twice.
++ */
++bool plat_rpmb_key_was_written(void);
+ #else
+ static inline TEE_Result tee_rpmb_reinit(void)
+ {
+diff --git a/core/tee/tee_rpmb_fs.c b/core/tee/tee_rpmb_fs.c
+index cf7d6c02ecc9..2fcb261225ab 100644
+--- a/core/tee/tee_rpmb_fs.c
++++ b/core/tee/tee_rpmb_fs.c
+@@ -1087,6 +1087,11 @@ static TEE_Result tee_rpmb_write_and_verify_key(void)
+ 		return TEE_ERROR_BAD_STATE;
+ 	}
+ 
++	if (plat_rpmb_key_was_written()) {
++		EMSG("Key already written, abort RPMB write and verify key");
++		return TEE_ERROR_BAD_STATE;
++	}
++
+ 	DMSG("RPMB INIT: Writing Key value:");
+ 	DHEXDUMP(rpmb_ctx->key, RPMB_KEY_MAC_SIZE);
+ 
+@@ -3175,6 +3180,11 @@ bool __weak plat_rpmb_key_is_ready(void)
+ 	return true;
+ }
+ 
++bool __weak plat_rpmb_key_was_written(void)
++{
++	return false;
++}
++
+ #ifdef CFG_WITH_STATS
+ TEE_Result rpmb_mem_stats(struct pta_stats_alloc *stats, bool reset)
+ {

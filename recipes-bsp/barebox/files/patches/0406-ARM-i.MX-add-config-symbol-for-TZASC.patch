@@ -1,0 +1,43 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Mon, 30 Jun 2025 09:09:37 +0200
+Subject: [PATCH] ARM: i.MX: add config symbol for TZASC
+
+So far we build tzasc.c by default on i.MX8M. We need this only when
+CONFIG_PBL_OPTEE is enabled though, so add a config symbol for the TZASC
+and let it depend on PBL_OPTEE.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/mach-imx/Kconfig  | 5 +++++
+ arch/arm/mach-imx/Makefile | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
+index 552e7227a022..d2ad30028938 100644
+--- a/arch/arm/mach-imx/Kconfig
++++ b/arch/arm/mach-imx/Kconfig
+@@ -46,6 +46,11 @@ config ARCH_IMX_SCRATCHMEM
+ 	def_bool y
+ 	depends on ARCH_IMX8M || ARCH_IMX9
+ 
++config ARCH_IMX_TZASC
++	bool
++	depends on ARCH_IMX8M
++	default y if PBL_OPTEE
++
+ #
+ # PMIC configuration found on i.MX51 Babbadge board
+ #
+diff --git a/arch/arm/mach-imx/Makefile b/arch/arm/mach-imx/Makefile
+index 23f51fc66019..f81fa18e9214 100644
+--- a/arch/arm/mach-imx/Makefile
++++ b/arch/arm/mach-imx/Makefile
+@@ -21,7 +21,7 @@ obj-pbl-$(CONFIG_ARCH_IMX8M) += imx8m.o
+ obj-pbl-$(CONFIG_ARCH_IMX_SCRATCHMEM) += scratch.o
+ obj-$(CONFIG_ARCH_IMX9) += imx9.o imx-v3-image.o
+ lwl-$(CONFIG_ARCH_IMX_ATF) += atf.o
+-obj-pbl-$(CONFIG_ARCH_IMX8M) += tzasc.o
++obj-pbl-$(CONFIG_ARCH_IMX_TZASC) += tzasc.o
+ obj-pbl-$(CONFIG_ARCH_IMX_ROMAPI) += romapi.o
+ obj-$(CONFIG_IMX_IIM)	+= iim.o
+ obj-$(CONFIG_NAND_IMX) += nand.o

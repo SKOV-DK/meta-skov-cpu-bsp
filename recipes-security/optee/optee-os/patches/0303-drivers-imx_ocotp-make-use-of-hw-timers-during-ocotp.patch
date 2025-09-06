@@ -1,0 +1,55 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 7 Mar 2024 15:16:53 +0100
+Subject: [PATCH] drivers: imx_ocotp: make use of hw timers during
+ ocotp_ctrl_wait_for
+
+Use the builtin ARMv8a timer instead of assuming that the CPU is running
+at 500MHz and the poll takes around ~20us.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/imx_ocotp.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/core/drivers/imx_ocotp.c b/core/drivers/imx_ocotp.c
+index 6b5c4b2da219..786881f094f6 100644
+--- a/core/drivers/imx_ocotp.c
++++ b/core/drivers/imx_ocotp.c
+@@ -9,6 +9,7 @@
+ #include <imx.h>
+ #include <io.h>
+ #include <drivers/imx_ocotp.h>
++#include <kernel/delay_arch.h>
+ #include <kernel/tee_common_otp.h>
+ 
+ #define OCOTP_CTRL			0x0
+@@ -68,6 +69,21 @@ static inline void ocotp_clock_enable(void) { }
+ #error "Platform not supported"
+ #endif
+ 
++#if defined(CFG_MX8M)
++static TEE_Result ocotp_ctrl_wait_for(uint32_t mask)
++{
++	uint64_t timeout;
++
++	assert(g_base_addr);
++
++	timeout = timeout_init_us(20);
++	while (io_read32(g_base_addr + OCOTP_CTRL) & (mask))
++		if (timeout_elapsed(timeout))
++			return TEE_ERROR_BUSY;
++
++	return TEE_SUCCESS;
++}
++#else
+ static TEE_Result ocotp_ctrl_wait_for(uint32_t mask)
+ {
+ 	unsigned int loop = 0;
+@@ -86,6 +102,7 @@ static TEE_Result ocotp_ctrl_wait_for(uint32_t mask)
+ 
+ 	return TEE_ERROR_BUSY;
+ }
++#endif
+ 
+ TEE_Result imx_ocotp_read(unsigned int bank, unsigned int word, uint32_t *val)
+ {

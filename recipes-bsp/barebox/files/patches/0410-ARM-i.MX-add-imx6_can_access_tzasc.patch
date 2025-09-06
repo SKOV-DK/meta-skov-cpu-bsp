@@ -1,0 +1,76 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 27 Jun 2025 14:01:57 +0200
+Subject: [PATCH] ARM: i.MX: add imx6_can_access_tzasc()
+
+On ARMv7 there is no direct way to detect if we are in the secure or non
+secure world. Add a imx6_can_access_tzasc() for this purpose. When
+accessing the TZASC triggers a data abort then we are in the non secure
+world, because OP-TEE configures the CSU to forbid accesses to the TZASC
+from the normal world. This function can be used later to detect if we
+have to load OP-TEE or not.
+
+We'll need CONFIG_ARM_EXCEPTIONS_PBL for this functionality, so select
+this symbol in Kconfig.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/mach-imx/Kconfig |  1 +
+ arch/arm/mach-imx/tzasc.c | 13 +++++++++++++
+ include/mach/imx/tzasc.h  |  1 +
+ 3 files changed, 15 insertions(+)
+
+diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
+index 6892b1ff2ce0..e67c5f42d366 100644
+--- a/arch/arm/mach-imx/Kconfig
++++ b/arch/arm/mach-imx/Kconfig
+@@ -50,6 +50,7 @@ config ARCH_IMX_TZASC
+ 	bool
+ 	depends on ARCH_IMX6 || ARCH_IMX8M
+ 	default y if PBL_OPTEE
++	select ARM_EXCEPTIONS_PBL
+ 
+ #
+ # PMIC configuration found on i.MX51 Babbadge board
+diff --git a/arch/arm/mach-imx/tzasc.c b/arch/arm/mach-imx/tzasc.c
+index ed20ad8803a2..0fe7f6eb7f4a 100644
+--- a/arch/arm/mach-imx/tzasc.c
++++ b/arch/arm/mach-imx/tzasc.c
+@@ -13,6 +13,8 @@
+ #include <linux/sizes.h>
+ #include <mach/imx/imx8m-regs.h>
+ #include <io.h>
++#include <abort.h>
++#include <asm/barebox-arm.h>
+ 
+ /*******************************************************************************
+  *                         TZC380 defines
+@@ -329,6 +331,17 @@ bool imx6ul_tzc380_is_bypassed(void)
+ 	return !(readl(&gpr[9]) & MX6_GPR_TZASC1_EN);
+ }
+ 
++bool imx6_can_access_tzasc(void)
++{
++	arm_pbl_init_exceptions();
++
++	data_abort_mask();
++
++	readl(IOMEM(MX6_TZASC1_BASE));
++
++	return !data_abort_unmask();
++}
++
+ void imx8m_tzc380_init(void)
+ {
+ 	u32 __iomem *gpr = IOMEM(MX8M_IOMUXC_GPR_BASE_ADDR);
+diff --git a/include/mach/imx/tzasc.h b/include/mach/imx/tzasc.h
+index 0fbcdc2150e6..ca85704a8f45 100644
+--- a/include/mach/imx/tzasc.h
++++ b/include/mach/imx/tzasc.h
+@@ -10,6 +10,7 @@ void imx6q_tzc380_early_ns_region1(void);
+ void imx6ul_tzc380_early_ns_region1(void);
+ bool imx6q_tzc380_is_bypassed(void);
+ bool imx6ul_tzc380_is_bypassed(void);
++bool imx6_can_access_tzasc(void);
+ void imx8m_tzc380_init(void);
+ bool imx8m_tzc380_is_enabled(void);
+ 

@@ -1,0 +1,39 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 10 Jun 2025 23:02:07 +0200
+Subject: [PATCH] drivers: caam: fix AES GCM conditional compile
+
+Fix the CAAM driver compilation if neither CFG_NXP_CAAM_AE_CCM_DRV nor
+CFG_NXP_CAAM_AE_GCM_DRV was enabled, but the CAAM driver.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/crypto/caam/include/caam_ae.h | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/core/drivers/crypto/caam/include/caam_ae.h b/core/drivers/crypto/caam/include/caam_ae.h
+index e02fcc9d04e2..65f4eea891fb 100644
+--- a/core/drivers/crypto/caam/include/caam_ae.h
++++ b/core/drivers/crypto/caam/include/caam_ae.h
+@@ -7,6 +7,8 @@
+ 
+ #include <caam_common.h>
+ 
++#if defined(CFG_NXP_CAAM_AE_CCM_DRV) || defined(CFG_NXP_CAAM_AE_GCM_DRV)
++
+ /*
+  * Initialize the Authentication Encryption module
+  *
+@@ -14,4 +16,13 @@
+  */
+ enum caam_status caam_ae_init(vaddr_t ctrl_addr __unused);
+ 
++#else
++
++static inline enum caam_status caam_ae_init(vaddr_t ctrl_addr __unused)
++{
++	return CAAM_NO_ERROR;
++}
++
++#endif /* CFG_NXP_CAAM_AE_CCM_DRV || CFG_NXP_CAAM_AE_GCM_DRV */
++
+ #endif /* __CAAM_AE_H__ */

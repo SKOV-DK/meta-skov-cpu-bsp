@@ -1,0 +1,24 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Fri, 27 Jun 2025 10:45:48 +0200
+Subject: [PATCH] pbl: add panic_no_stacktrace()
+
+ARM code calls panic_no_stacktrace() when exceptions are enabled.
+In order to to add exception handling support for PBL introduce
+panic_no_stacktrace() for PBL as an alias to panic().
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ pbl/misc.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/pbl/misc.c b/pbl/misc.c
+index 1f0d992ce08b..075c6a854bc8 100644
+--- a/pbl/misc.c
++++ b/pbl/misc.c
+@@ -20,3 +20,6 @@ void __noreturn panic(const char *fmt, ...)
+ 	va_end(args);
+ 	while(1);
+ }
++
++void __noreturn panic_no_stacktrace(const char *fmt, ...)
++	__alias(panic);
