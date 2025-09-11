@@ -2,6 +2,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 
 SRC_URI:append:imx8s-cpu = " file://customized_openssl.cnf"
 
+RDEPENDS:${PN}-conf:append:imx8s-cpu = " pkcs11-provider optee-client"
+
 do_install:append:imx8s-cpu() {
     # Ensure that the upstream version of openssl.cnf did not change
     ACTUAL=$(md5sum ${B}/apps/openssl.cnf | awk '{print $1}')
