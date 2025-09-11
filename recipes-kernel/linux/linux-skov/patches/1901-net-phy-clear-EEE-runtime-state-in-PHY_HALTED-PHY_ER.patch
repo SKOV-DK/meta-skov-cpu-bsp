@@ -1,0 +1,29 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 18 Aug 2025 13:44:07 +0200
+Subject: [PATCH] net: phy: clear EEE runtime state in PHY_HALTED/PHY_ERROR
+
+Clear EEE runtime flags when the PHY transitions to HALTED or ERROR
+and the state machine drops the link. This avoids stale EEE state being
+reported via ethtool after the PHY is stopped or hits an error.
+
+Suggested-by: Russell King (Oracle) <linux@armlinux.org.uk>
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+Related discussion: https://lore.kernel.org/r/aKg7nf8YczCT6N0O@shell.armlinux.org.uk
+---
+ drivers/net/phy/phy.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/net/phy/phy.c b/drivers/net/phy/phy.c
+index d0c1718e2b16..7ba33651e04d 100644
+--- a/drivers/net/phy/phy.c
++++ b/drivers/net/phy/phy.c
+@@ -1552,6 +1552,8 @@ static enum phy_state_work _phy_state_machine(struct phy_device *phydev)
+ 	case PHY_ERROR:
+ 		if (phydev->link) {
+ 			phydev->link = 0;
++			phydev->eee_active = false;
++			phydev->enable_tx_lpi = false;
+ 			phy_link_down(phydev);
+ 		}
+ 		state_work = PHY_STATE_WORK_SUSPEND;
