@@ -1,13 +1,13 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Date: Tue, 22 Jul 2025 13:47:43 +0200
-Subject: [PATCH] Release 6.14/customers/skov/imx6/20250722-1
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Thu, 11 Sep 2025 09:01:34 +0200
+Subject: [PATCH] Release 6.14/customers/skov/imx6/20250911-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 48d2ce96398b..46bcecbd26bb 100644
+index 48d2ce96398b..3fe288f9a781 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -15,7 +15,7 @@ index 48d2ce96398b..46bcecbd26bb 100644
  PATCHLEVEL = 14
  SUBLEVEL = 11
 -EXTRAVERSION =
-+EXTRAVERSION =-20250722-1
++EXTRAVERSION =-20250911-1
  NAME = Baby Opossum Posse
  
  # *DOCUMENTATION*
