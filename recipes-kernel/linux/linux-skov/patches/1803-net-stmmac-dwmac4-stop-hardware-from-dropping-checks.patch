@@ -1,0 +1,59 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 18 Aug 2025 11:02:17 +0200
+Subject: [PATCH] net: stmmac: dwmac4: stop hardware from dropping
+ checksum-error packets
+
+Tell the MAC not to discard frames that fail TCP/IP checksum
+validation.
+
+By default, when the hardware checksum engine (CoE) is enabled,
+dwmac4 silently drops any packet where the offload engine detects
+a checksum error. These frames are not reported to the driver and
+are not counted in any statistics as dropped packets.
+
+Set the MTL_OP_MODE_DIS_TCP_EF bit when initializing the Rx channel so
+that all packets are delivered, even if they failed hardware checksum
+validation. CoE remains enabled, but instead of dropping such frames,
+the driver propagates the error status and marks the skb with
+CHECKSUM_NONE. This allows the stack to verify and drop the packet
+while updating statistics.
+
+This change follows the decision made in the discussion:
+Link: https://lore.kernel.org/all/20250625132117.1b3264e8@kernel.org/
+
+It depends on the previous patches that added proper error propagation
+in the Rx path.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://patch.msgid.link/20250818090217.2789521-4-o.rempel@pengutronix.de
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+---
+ drivers/net/ethernet/stmicro/stmmac/dwmac4.h     | 1 +
+ drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac4.h b/drivers/net/ethernet/stmicro/stmmac/dwmac4.h
+index 184d41a306af..4ff2f1cd86be 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac4.h
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac4.h
+@@ -392,6 +392,7 @@ static inline u32 mtl_chanx_base_addr(const struct dwmac4_addrs *addrs,
+ #define MTL_OP_MODE_RFA_SHIFT		8
+ 
+ #define MTL_OP_MODE_EHFC		BIT(7)
++#define MTL_OP_MODE_DIS_TCP_EF		BIT(6)
+ 
+ #define MTL_OP_MODE_RTC_MASK		GENMASK(1, 0)
+ #define MTL_OP_MODE_RTC_SHIFT		0
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c b/drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c
+index 0cb84a0041a4..d87a8b595e6a 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac4_dma.c
+@@ -268,6 +268,8 @@ static void dwmac4_dma_rx_chan_op_mode(struct stmmac_priv *priv,
+ 
+ 	mtl_rx_op = readl(ioaddr + MTL_CHAN_RX_OP_MODE(dwmac4_addrs, channel));
+ 
++	mtl_rx_op |= MTL_OP_MODE_DIS_TCP_EF;
++
+ 	if (mode == SF_DMA_MODE) {
+ 		pr_debug("GMAC: enable RX store and forward mode\n");
+ 		mtl_rx_op |= MTL_OP_MODE_RSF;

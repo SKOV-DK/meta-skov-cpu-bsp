@@ -1,6 +1,10 @@
 # umpf-base: v6.14.11
 # umpf-name: 6.14/customers/skov/imx6
+<<<<<<< HEAD
 # umpf-version: 6.14/customers/skov/imx6/20250815-1
+=======
+# umpf-version: 6.14/customers/skov/imx6/20250911-1
+>>>>>>> 5ed974c (linux-skov: update to 6.14/customers/skov/imx6/20250911-1 (v6.14 -> v6.14))
 # umpf-topic: v6.12/topic/drm-sched-accounting
 # umpf-hashinfo: a886925c1b1aedf839db4297e1b6a8e87e01b63d
 # umpf-topic-range: b9d5d463c216763cec719c04536ea9e14512cad4..a522d517242f4bf26bcfb8b64f179ffce4d108af
@@ -152,15 +156,51 @@ UMPF_SRC_URI += "\
 UMPF_SRC_URI += "\
   file://patches/1501-gpio-mxc-configure-dynamic-GPIO-base-for-CONFIG_GPIO.patch \
   "
+<<<<<<< HEAD
 # umpf-release: 6.14/customers/skov/imx6/20250815-1
 # umpf-topic-range: bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e..cb3f25a8df08ac535e13eb8f4884bc6d4229353d
 UMPF_SRC_URI += "\
   file://patches/1601-Release-6.14-customers-skov-imx6-20250815-1.patch \
+=======
+# umpf-topic: v6.14/topic/net-phy-micrel
+# umpf-hashinfo: ed0b251fdebce895ec36ed4536f3fe02a8abc0b6
+# umpf-topic-range: bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e..dc7a0a50a82ca7351dfb04f441f0f6ab414fc391
+UMPF_SRC_URI += "\
+  file://patches/1601-net-phy-micrel-add-MDI-MDI-X-control-support-for-KSZ.patch \
+  file://patches/1602-net-phy-micrel-Add-RX-error-counter-support-for-KSZ9.patch \
+  file://patches/1603-net-phy-micrel-add-cable-test-support-for-KSZ9477-cl.patch \
+  file://patches/1604-phy-micrel-add-Signal-Quality-Indicator-SQI-support-.patch \
+  "
+# umpf-topic: v6.14/topic/net-core-selftest
+# umpf-hashinfo: 1dd578317862ac36d5d1dda70d1513b643e6cd54
+# umpf-topic-range: dc7a0a50a82ca7351dfb04f441f0f6ab414fc391..e39821ed274126ccbd89021f5d70d9846d8f16a9
+UMPF_SRC_URI += "\
+  file://patches/1701-net-selftests-fix-TCP-packet-checksum.patch \
+  file://patches/1702-net-selftests-add-PHY-loopback-test-for-bad-TCP-chec.patch \
+  "
+# umpf-topic: v6.14/topic/net-stmmac
+# umpf-hashinfo: c827895d09a77d1567d06e68210c8b514154a217
+# umpf-topic-range: e39821ed274126ccbd89021f5d70d9846d8f16a9..2e0fee907101018017861c8442bb027b09287ee3
+UMPF_SRC_URI += "\
+  file://patches/1801-net-stmmac-Correctly-handle-Rx-checksum-offload-erro.patch \
+  file://patches/1802-net-stmmac-dwmac4-report-Rx-checksum-errors-in-statu.patch \
+  file://patches/1803-net-stmmac-dwmac4-stop-hardware-from-dropping-checks.patch \
+  "
+# umpf-topic: v6.14/topic/net-phy
+# umpf-hashinfo: b7fa645ee9393cbc7e9b006e755649b333adcaa6
+# umpf-topic-range: 2e0fee907101018017861c8442bb027b09287ee3..152a7da66f2d6d63fac1b3d8120729216da52d19
+UMPF_SRC_URI += "\
+  file://patches/1901-net-phy-clear-EEE-runtime-state-in-PHY_HALTED-PHY_ER.patch \
+  file://patches/1902-net-phy-Clear-link-specific-data-on-link-down.patch \
+  "
+# umpf-release: 6.14/customers/skov/imx6/20250911-1
+# umpf-topic-range: 152a7da66f2d6d63fac1b3d8120729216da52d19..1c534e2e3e30da30391fdbeeb76228ee8437acae
+UMPF_SRC_URI += "\
+  file://patches/2001-Release-6.14-customers-skov-imx6-20250911-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
-
 UMPF_BASE = "6.14.11"
-UMPF_VERSION = "20250815-1"
+UMPF_VERSION = "20250911-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION ?= "${UMPF_BASE}"
 # umpf-end

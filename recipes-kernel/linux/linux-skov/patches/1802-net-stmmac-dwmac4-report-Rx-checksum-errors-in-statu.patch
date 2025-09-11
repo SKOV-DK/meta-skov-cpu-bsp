@@ -1,0 +1,54 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 18 Aug 2025 11:02:16 +0200
+Subject: [PATCH] net: stmmac: dwmac4: report Rx checksum errors in status
+
+Propagate hardware checksum failures from the descriptor parser to the
+caller.
+
+Currently, dwmac4_wrback_get_rx_status() updates stats when the Rx
+descriptor signals an IP header or payload checksum error, but it does
+not reflect this in its return value. The higher-level stmmac_rx() code
+therefore cannot tell that hardware checksum validation failed.
+
+Set the csum_none flag in the returned status when either
+RDES1_IP_HDR_ERROR or RDES1_IP_PAYLOAD_ERROR is present. This aligns
+dwmac4 with enh_desc_coe_rdes0() and lets stmmac_rx() mark the skb as
+CHECKSUM_NONE for software verification.
+
+This is a preparatory step for disabling the hardware filter that drops
+frames which do not pass checksum validation.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://patch.msgid.link/20250818090217.2789521-3-o.rempel@pengutronix.de
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+---
+ drivers/net/ethernet/stmicro/stmmac/dwmac4_descs.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac4_descs.c b/drivers/net/ethernet/stmicro/stmmac/dwmac4_descs.c
+index a5fb31eb0192..aac68dc28dc1 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac4_descs.c
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac4_descs.c
+@@ -110,16 +110,20 @@ static int dwmac4_wrback_get_rx_status(struct stmmac_extra_stats *x,
+ 
+ 	message_type = (rdes1 & ERDES4_MSG_TYPE_MASK) >> 8;
+ 
+-	if (rdes1 & RDES1_IP_HDR_ERROR)
++	if (rdes1 & RDES1_IP_HDR_ERROR) {
+ 		x->ip_hdr_err++;
++		ret |= csum_none;
++	}
+ 	if (rdes1 & RDES1_IP_CSUM_BYPASSED)
+ 		x->ip_csum_bypassed++;
+ 	if (rdes1 & RDES1_IPV4_HEADER)
+ 		x->ipv4_pkt_rcvd++;
+ 	if (rdes1 & RDES1_IPV6_HEADER)
+ 		x->ipv6_pkt_rcvd++;
+-	if (rdes1 & RDES1_IP_PAYLOAD_ERROR)
++	if (rdes1 & RDES1_IP_PAYLOAD_ERROR) {
+ 		x->ip_payload_err++;
++		ret |= csum_none;
++	}
+ 
+ 	if (message_type == RDES_EXT_NO_PTP)
+ 		x->no_ptp_rx_msg_type_ext++;
