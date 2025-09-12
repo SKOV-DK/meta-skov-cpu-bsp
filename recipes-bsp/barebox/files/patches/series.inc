@@ -35,6 +35,11 @@ SRC_URI += "\
 SRC_URI += "\
   file://patches/0401-Release-2025.06.0-customers-skov-imx6-20250627-2.patch \
   "
+# umpf-topic-range: e44d8628b58279e87fbaa01cbb12dc726b6b1e95..848a56aa155937a9826ee3b58df60e53328f98bf
+SRC_URI += "\
+  file://patches/0501-mci-imx-esdhc-restore-longer-timeouts-for-idle.patch \
+  file://patches/0502-mci-sdhci-fix-too-short-timeout-in-sdhci_wait_idle_data.patch \
+  "
 UMPF_BASE = "2025.06.1"
 UMPF_VERSION = "20250627-2"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
