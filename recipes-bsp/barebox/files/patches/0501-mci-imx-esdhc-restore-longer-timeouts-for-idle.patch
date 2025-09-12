@@ -1,0 +1,92 @@
+commit e44d8628b58279e87fbaa01cbb12dc726b6b1e95
+Author: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date:   Wed Jul 2 12:59:46 2025 +0200
+
+    mci: imx-esdhc: restore longer timeouts for idle
+    
+    Commit 02986964885c ("mci: imx-esdhc: implement esdhc_poll using
+    sdhci_read32_poll_timeout") introduces sdhci_compute_timeout() which
+    takes a default timeout, but that default timeout is ignored in the
+    function.
+    
+    Commit bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
+    then makes use of this function and with this breaks the polling for DATA0
+    line by reducing the original 2.5s timeout to SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS
+    which is 10ms.
+    
+    With this writing to the card times out during a MMC_CMD_STOP_TRANSMISSION
+    command, observed on i.MX6ul.
+    
+    All these timeouts print errors and are not expected to trigger in
+    normal operation, therefore just make the hardcoded timeouts in the
+    driver the new minimum.
+    
+    Fixes: 02986964885c ("mci: imx-esdhc: implement esdhc_poll using sdhci_read32_poll_timeout")
+    Fixes: bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
+    Reported-by: Sascha Hauer <s.hauer@pengutronix.de>
+    Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+    Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+    Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+
+diff --git a/drivers/mci/imx-esdhc-common.c b/drivers/mci/imx-esdhc-common.c
+index 228f4a9b03..66f3edc670 100644
+--- a/drivers/mci/imx-esdhc-common.c
++++ b/drivers/mci/imx-esdhc-common.c
+@@ -394,7 +394,7 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 		 */
+ 		ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
+ 				 val & PRSSTAT_DAT0,
+-				 sdhci_compute_timeout(cmd, NULL, 2500 * MSECOND));
++				 max_t(u64, sdhci_compute_timeout(cmd, NULL), 2500 * MSECOND));
+ 		if (ret) {
+ 			dev_err(host->dev, "timeout PRSSTAT_DAT0\n");
+ 			goto undo_setup_data;
+@@ -419,7 +419,7 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 	/* Wait for the bus to be idle */
+ 	ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
+ 			 (val & (SDHCI_CMD_INHIBIT_CMD | SDHCI_CMD_INHIBIT_DATA)) == 0,
+-			 sdhci_compute_timeout(cmd, data, SECOND));
++			 max_t(u64, sdhci_compute_timeout(cmd, data), SECOND));
+ 	if (ret) {
+ 		dev_err(host->dev, "timeout 2\n");
+ 		return -ETIMEDOUT;
+@@ -427,7 +427,7 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
+ 
+ 	ret = esdhc_poll(host, SDHCI_PRESENT_STATE, val,
+ 			 (val & SDHCI_DATA_LINE_ACTIVE) == 0,
+-			 sdhci_compute_timeout(cmd, NULL, 100 * MSECOND));
++			 max_t(u64, sdhci_compute_timeout(cmd, NULL), 100 * MSECOND));
+ 	if (ret) {
+ 		dev_err(host->dev, "timeout 3\n");
+ 		return -ETIMEDOUT;
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index 17847a13ed..9bf886dfe3 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -836,7 +836,7 @@ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *da
+ 		    mmc_op_tuning(cmd->cmdidx)))
+ 		mask &= ~SDHCI_CMD_INHIBIT_DATA;
+ 
+-	timeout_ns = sdhci_compute_timeout(cmd, data, SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS);
++	timeout_ns = sdhci_compute_timeout(cmd, data);
+ 
+ 	ret = wait_on_timeout(timeout_ns,
+ 			!(sdhci_read32(host, SDHCI_PRESENT_STATE) & mask));
+diff --git a/drivers/mci/sdhci.h b/drivers/mci/sdhci.h
+index 25d257b231..ec82b1b8ff 100644
+--- a/drivers/mci/sdhci.h
++++ b/drivers/mci/sdhci.h
+@@ -372,12 +372,10 @@ void sdhci_set_bus_width(struct sdhci *host, int width);
+  * sdhci_compute_timeout() - compute suitable timeout for operation
+  * @cmd: MCI command being sent, can be NULL
+  * @data: MCI data being sent, can be NULL
+- * @default_timeout: fallback value
+  *
+  * Return: the number of nanoseconds to wait.
+  */
+-static inline ktime_t sdhci_compute_timeout(struct mci_cmd *cmd, struct mci_data *data,
+-					    ktime_t default_timeout)
++static inline ktime_t sdhci_compute_timeout(struct mci_cmd *cmd, struct mci_data *data)
+ {
+ 	if (data && data->timeout_ns != 0)
+ 		return data->timeout_ns;

@@ -50,10 +50,14 @@ UMPF_SRC_URI += "\
   file://patches/0414-ARM-i.MX-tqma6ulx-use-ENTRY_FUNCTION_WITHSTACK.patch \
   file://patches/0415-ARM-mach-imx-tzasc-keep-default-region-0-secure-sett.patch \
   "
-# umpf-release: 2025.06.0/customers/skov/imx6/20250901-1
-# umpf-topic-range: 757264fdbbd416db77237076d2d041315cc89e22..595f6e10be68b0d2013a1bf935dfcd67d376be2b
-UMPF_SRC_URI += "\
-  file://patches/0501-Release-2025.06.0-customers-skov-imx6-20250901-1.patch \
+# umpf-topic-range: e44d8628b58279e87fbaa01cbb12dc726b6b1e95..848a56aa155937a9826ee3b58df60e53328f98bf
+SRC_URI += "\
+  file://patches/0501-mci-imx-esdhc-restore-longer-timeouts-for-idle.patch \
+  file://patches/0502-mci-sdhci-fix-too-short-timeout-in-sdhci_wait_idle_data.patch \
+  "
+# umpf-release: 2025.06.0/customers/skov/imx6/20250912-1
+SRC_URI += "\
+  file://patches/0601-Release-2025.06.0-customers-skov-imx6-20250912-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 

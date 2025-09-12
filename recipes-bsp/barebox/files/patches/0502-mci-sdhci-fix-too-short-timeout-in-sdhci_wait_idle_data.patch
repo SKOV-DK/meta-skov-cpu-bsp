@@ -1,0 +1,41 @@
+commit 848a56aa155937a9826ee3b58df60e53328f98bf
+Author: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date:   Wed Jul 2 12:59:47 2025 +0200
+
+    mci: sdhci: fix too short timeout in sdhci_wait_idle_data
+    
+    cmd::busy_timeout is in milliseconds like its Linux counterpart and was
+    correctly used as such, when it was first added.
+    Switching the function to use SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS
+    instead of SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_MS mixed up the units and
+    probably reintroduced the regression that commit 8242c8e6fbef
+    ("mci: sdhci: use the busy_timeout value in the sdhci_wait_idle functions")
+    originally fixed.
+    
+    Fixes: bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
+    Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+    Link: https://lore.barebox.org/20250702105947.2232095-2-a.fatoum@pengutronix.de
+    Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+
+diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
+index 9bf886dfe3..38a108adb1 100644
+--- a/drivers/mci/sdhci.c
++++ b/drivers/mci/sdhci.c
+@@ -852,7 +852,7 @@ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *da
+ int sdhci_wait_idle_data(struct sdhci *host, struct mci_cmd *cmd)
+ {
+ 	u32 mask;
+-	unsigned timeout_ns;
++	ktime_t timeout_ns;
+ 	int ret;
+ 
+ 	mask = SDHCI_CMD_INHIBIT_CMD | SDHCI_CMD_INHIBIT_DATA;
+@@ -863,7 +863,7 @@ int sdhci_wait_idle_data(struct sdhci *host, struct mci_cmd *cmd)
+ 		mask &= ~SDHCI_CMD_INHIBIT_DATA;
+ 
+ 	if (cmd && cmd->busy_timeout != 0)
+-		timeout_ns = cmd->busy_timeout;
++		timeout_ns = ms_to_ktime(cmd->busy_timeout);
+ 
+ 	ret = wait_on_timeout(timeout_ns,
+ 			!(sdhci_read32(host, SDHCI_PRESENT_STATE) & mask));
