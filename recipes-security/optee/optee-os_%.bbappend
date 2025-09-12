@@ -47,6 +47,7 @@ EXTRA_OEMAKE:append = " \
     CFG_WITH_SOFTWARE_PRNG=y \
     CFG_IN_TREE_EARLY_TAS='trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c pkcs11/fd02c9da-306c-48c7-a49c-bbd827ae86ee' \
     CFG_PKCS11_TA=y \
+    CFG_REE_FS=n \
     CFG_RPMB_FS=y \
     CFG_RPMB_FS_DEV_ID=2 \
 "
