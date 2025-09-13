@@ -152,12 +152,6 @@ UMPF_SRC_URI += "\
 UMPF_SRC_URI += "\
   file://patches/1501-gpio-mxc-configure-dynamic-GPIO-base-for-CONFIG_GPIO.patch \
   "
-<<<<<<< HEAD
-# umpf-release: 6.14/customers/skov/imx6/20250815-1
-# umpf-topic-range: bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e..cb3f25a8df08ac535e13eb8f4884bc6d4229353d
-UMPF_SRC_URI += "\
-  file://patches/1601-Release-6.14-customers-skov-imx6-20250815-1.patch \
-=======
 # umpf-topic: v6.14/topic/net-phy-micrel
 # umpf-hashinfo: ed0b251fdebce895ec36ed4536f3fe02a8abc0b6
 # umpf-topic-range: bfe7bb9e29b7fe98cbd49910bdec6ca60a4adc0e..dc7a0a50a82ca7351dfb04f441f0f6ab414fc391
