@@ -1,10 +1,6 @@
 # umpf-base: v6.14.11
 # umpf-name: 6.14/customers/skov/imx6
-<<<<<<< HEAD
-# umpf-version: 6.14/customers/skov/imx6/20250815-1
-=======
 # umpf-version: 6.14/customers/skov/imx6/20250911-1
->>>>>>> 5ed974c (linux-skov: update to 6.14/customers/skov/imx6/20250911-1 (v6.14 -> v6.14))
 # umpf-topic: v6.12/topic/drm-sched-accounting
 # umpf-hashinfo: a886925c1b1aedf839db4297e1b6a8e87e01b63d
 # umpf-topic-range: b9d5d463c216763cec719c04536ea9e14512cad4..a522d517242f4bf26bcfb8b64f179ffce4d108af
