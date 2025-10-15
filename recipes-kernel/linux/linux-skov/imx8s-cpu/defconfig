@@ -1650,7 +1650,7 @@ CONFIG_DM_VERITY=y
 # CONFIG_DM_VERITY_FEC is not set
 # CONFIG_DM_SWITCH is not set
 # CONFIG_DM_LOG_WRITES is not set
-# CONFIG_DM_INTEGRITY is not set
+CONFIG_DM_INTEGRITY=y
 # CONFIG_DM_VDO is not set
 # CONFIG_TARGET_CORE is not set
 CONFIG_NETDEVICES=y
@@ -5058,6 +5058,9 @@ CONFIG_RANDSTRUCT_NONE=y
 # end of Kernel hardening options
 # end of Security options
 
+CONFIG_XOR_BLOCKS=y
+CONFIG_ASYNC_CORE=y
+CONFIG_ASYNC_XOR=y
 CONFIG_CRYPTO=y
 
 #
