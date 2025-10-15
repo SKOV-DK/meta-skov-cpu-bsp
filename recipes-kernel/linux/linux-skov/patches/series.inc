@@ -189,6 +189,7 @@ UMPF_SRC_URI += "\
   file://patches/2001-Release-6.14-customers-skov-imx6-20250911-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
+
 UMPF_BASE = "6.14.11"
 UMPF_VERSION = "20250911-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
