@@ -1,0 +1,24 @@
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Date: Thu, 26 Jun 2025 14:09:36 +0200
+Subject: [PATCH] ARM: i.MX8MP: skov: add new 7" jt070tm041 variant support
+
+Add new 7" JuTouch JT070TM041 board variant.
+
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 0266388849d2..0bc218b004d6 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -88,7 +88,7 @@ static const struct board_description imx8mp_variants[] = {
+ 	},
+ 
+ 	[3] = {
+-		.dts_compatible = "skov,imx8mp-skov-revc-tian-g07017",
++		.dts_compatible = "skov,imx8mp-skov-revc-jutouch-jt070tm041",
+ 	},
+ 
+ 	[4] = {

@@ -1,35 +1,38 @@
-commit e44d8628b58279e87fbaa01cbb12dc726b6b1e95
-Author: Ahmad Fatoum <a.fatoum@pengutronix.de>
-Date:   Wed Jul 2 12:59:46 2025 +0200
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Wed, 2 Jul 2025 12:59:46 +0200
+Subject: [PATCH] mci: imx-esdhc: restore longer timeouts for idle
 
-    mci: imx-esdhc: restore longer timeouts for idle
-    
-    Commit 02986964885c ("mci: imx-esdhc: implement esdhc_poll using
-    sdhci_read32_poll_timeout") introduces sdhci_compute_timeout() which
-    takes a default timeout, but that default timeout is ignored in the
-    function.
-    
-    Commit bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
-    then makes use of this function and with this breaks the polling for DATA0
-    line by reducing the original 2.5s timeout to SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS
-    which is 10ms.
-    
-    With this writing to the card times out during a MMC_CMD_STOP_TRANSMISSION
-    command, observed on i.MX6ul.
-    
-    All these timeouts print errors and are not expected to trigger in
-    normal operation, therefore just make the hardcoded timeouts in the
-    driver the new minimum.
-    
-    Fixes: 02986964885c ("mci: imx-esdhc: implement esdhc_poll using sdhci_read32_poll_timeout")
-    Fixes: bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
-    Reported-by: Sascha Hauer <s.hauer@pengutronix.de>
-    Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-    Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
-    Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Commit 02986964885c ("mci: imx-esdhc: implement esdhc_poll using
+sdhci_read32_poll_timeout") introduces sdhci_compute_timeout() which
+takes a default timeout, but that default timeout is ignored in the
+function.
+
+Commit bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
+then makes use of this function and with this breaks the polling for DATA0
+line by reducing the original 2.5s timeout to SDHCI_CMD_DEFAULT_BUSY_TIMEOUT_NS
+which is 10ms.
+
+With this writing to the card times out during a MMC_CMD_STOP_TRANSMISSION
+command, observed on i.MX6ul.
+
+All these timeouts print errors and are not expected to trigger in
+normal operation, therefore just make the hardcoded timeouts in the
+driver the new minimum.
+
+Fixes: 02986964885c ("mci: imx-esdhc: implement esdhc_poll using sdhci_read32_poll_timeout")
+Fixes: bbecd0b7bb7e ("mci: sdhci: add support for struct mci_data::timeout_ns")
+Reported-by: Sascha Hauer <s.hauer@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mci/imx-esdhc-common.c | 6 +++---
+ drivers/mci/sdhci.c            | 2 +-
+ drivers/mci/sdhci.h            | 4 +---
+ 3 files changed, 5 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mci/imx-esdhc-common.c b/drivers/mci/imx-esdhc-common.c
-index 228f4a9b03..66f3edc670 100644
+index 228f4a9b03fe..66f3edc670e0 100644
 --- a/drivers/mci/imx-esdhc-common.c
 +++ b/drivers/mci/imx-esdhc-common.c
 @@ -394,7 +394,7 @@ int __esdhc_send_cmd(struct fsl_esdhc_host *host, struct mci_cmd *cmd,
@@ -60,7 +63,7 @@ index 228f4a9b03..66f3edc670 100644
  		dev_err(host->dev, "timeout 3\n");
  		return -ETIMEDOUT;
 diff --git a/drivers/mci/sdhci.c b/drivers/mci/sdhci.c
-index 17847a13ed..9bf886dfe3 100644
+index 17847a13ed5f..9bf886dfe3f4 100644
 --- a/drivers/mci/sdhci.c
 +++ b/drivers/mci/sdhci.c
 @@ -836,7 +836,7 @@ int sdhci_wait_idle(struct sdhci *host, struct mci_cmd *cmd, struct mci_data *da
@@ -73,7 +76,7 @@ index 17847a13ed..9bf886dfe3 100644
  	ret = wait_on_timeout(timeout_ns,
  			!(sdhci_read32(host, SDHCI_PRESENT_STATE) & mask));
 diff --git a/drivers/mci/sdhci.h b/drivers/mci/sdhci.h
-index 25d257b231..ec82b1b8ff 100644
+index 25d257b23145..ec82b1b8ff9a 100644
 --- a/drivers/mci/sdhci.h
 +++ b/drivers/mci/sdhci.h
 @@ -372,12 +372,10 @@ void sdhci_set_bus_width(struct sdhci *host, int width);
