@@ -1,6 +1,6 @@
 # umpf-base: v6.14.11
 # umpf-name: 6.14/customers/skov/imx6
-# umpf-version: 6.14/customers/skov/imx6/20250911-1
+# umpf-version: 6.14/customers/skov/imx6/20251110-1
 # umpf-topic: v6.12/topic/drm-sched-accounting
 # umpf-hashinfo: a886925c1b1aedf839db4297e1b6a8e87e01b63d
 # umpf-topic-range: b9d5d463c216763cec719c04536ea9e14512cad4..a522d517242f4bf26bcfb8b64f179ffce4d108af
@@ -183,15 +183,21 @@ UMPF_SRC_URI += "\
   file://patches/1901-net-phy-clear-EEE-runtime-state-in-PHY_HALTED-PHY_ER.patch \
   file://patches/1902-net-phy-Clear-link-specific-data-on-link-down.patch \
   "
-# umpf-release: 6.14/customers/skov/imx6/20250911-1
-# umpf-topic-range: 152a7da66f2d6d63fac1b3d8120729216da52d19..1c534e2e3e30da30391fdbeeb76228ee8437acae
+# umpf-topic: v6.14/topic/tee
+# umpf-hashinfo: 9112bd3a023797db55354c6cd8f303e0588f291c
+# umpf-topic-range: 152a7da66f2d6d63fac1b3d8120729216da52d19..9656db50eaa22d7d5961d42620cc888d4beec055
 UMPF_SRC_URI += "\
-  file://patches/2001-Release-6.14-customers-skov-imx6-20250911-1.patch \
+  file://patches/2001-tee-shm-fix-slab-page-refcounting.patch \
+  "
+# umpf-release: 6.14/customers/skov/imx6/20251110-1
+# umpf-topic-range: 9656db50eaa22d7d5961d42620cc888d4beec055..774a35f39422ae1d6694ff28bd9f63423c4b63bb
+UMPF_SRC_URI += "\
+  file://patches/2101-Release-6.14-customers-skov-imx6-20251110-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "6.14.11"
-UMPF_VERSION = "20250911-1"
+UMPF_VERSION = "20251110-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION ?= "${UMPF_BASE}"
 # umpf-end
