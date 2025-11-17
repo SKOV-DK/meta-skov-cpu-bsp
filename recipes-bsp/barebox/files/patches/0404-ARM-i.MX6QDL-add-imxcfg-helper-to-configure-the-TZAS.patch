@@ -1,0 +1,32 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 26 Jun 2025 16:45:22 +0200
+Subject: [PATCH] ARM: i.MX6QDL: add imxcfg helper to configure the TZASC1/2
+
+On i.MX6 platforms we need to set the bypass mode within the DCD unlike
+the i.MX8M platforms which uses the PBL lowlevel code
+(imx8m_tzc380_init()).
+
+Add a helper for this to make the integration easier.
+
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ include/mach/imx/imx6q-tzasc.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+ create mode 100644 include/mach/imx/imx6q-tzasc.h
+
+diff --git a/include/mach/imx/imx6q-tzasc.h b/include/mach/imx/imx6q-tzasc.h
+new file mode 100644
+index 000000000000..968b17d5ec3f
+--- /dev/null
++++ b/include/mach/imx/imx6q-tzasc.h
+@@ -0,0 +1,8 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * Per default all clocks are on, except for TZASC1/2 CG11/2, so enable them
++ * before activate the modules (disable the bypass mode).
++ */
++wm 32 0x020c4070 0xffffffff
++/* Disable TZASC1/2 bypass */
++wm 32 0x020E0024 0x00000003

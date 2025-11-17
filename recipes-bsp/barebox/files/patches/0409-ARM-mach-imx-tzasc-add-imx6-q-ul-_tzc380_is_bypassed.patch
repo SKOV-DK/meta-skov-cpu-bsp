@@ -1,0 +1,79 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 26 Jun 2025 16:45:26 +0200
+Subject: [PATCH] ARM: mach-imx: tzasc: add imx6[q|ul]_tzc380_is_bypassed()
+
+The TZASC_BYP bits default to not bypass DDR transactions from the
+TZASC. These bits must be set while the DDR controller is inactive, so
+when the DDR controller is initialized in the DCD table and barebox is
+directly loaded and startes in DDR we must set the bits in the DCD.
+As this is board specific it's easy to forget this setting and the whole
+DDR is accessible by the normal world regardless of the TZASC
+configuration. This patch adds a check if the bits have been set
+correctly so that we can warn the user if necessary.
+
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Reviewed-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ arch/arm/mach-imx/tzasc.c | 26 ++++++++++++++++++++++++++
+ include/mach/imx/tzasc.h  |  2 ++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/arch/arm/mach-imx/tzasc.c b/arch/arm/mach-imx/tzasc.c
+index 169c4b9801e5..ed20ad8803a2 100644
+--- a/arch/arm/mach-imx/tzasc.c
++++ b/arch/arm/mach-imx/tzasc.c
+@@ -76,6 +76,9 @@
+ #define MX6_TZASC1_BASE			0x21d0000
+ #define MX6_TZASC2_BASE			0x21d4000
+ 
++#define MX6_GPR_TZASC1_EN		BIT(0)
++#define MX6_GPR_TZASC2_EN		BIT(1)
++
+ #define GPR_TZASC_EN					BIT(0)
+ #define GPR_TZASC_ID_SWAP_BYPASS		BIT(1)
+ #define GPR_TZASC_EN_LOCK				BIT(16)
+@@ -303,6 +306,29 @@ void imx6ul_tzc380_early_ns_region1(void)
+ 				  TZC380_REGION_SP_NS_RW);
+ }
+ 
++bool imx6q_tzc380_is_bypassed(void)
++{
++	u32 __iomem *gpr = IOMEM(MX6_IOMUXC_BASE_ADDR);
++
++	/*
++	 * MX6_GPR_TZASC1_EN and MX6_GPR_TZASC2_EN are sticky bits which
++	 * preserve their values once set until the next power-up cycle.
++	 */
++	return (readl(&gpr[9]) & (MX6_GPR_TZASC1_EN | MX6_GPR_TZASC2_EN)) !=
++	       (MX6_GPR_TZASC1_EN | MX6_GPR_TZASC2_EN);
++}
++
++bool imx6ul_tzc380_is_bypassed(void)
++{
++	u32 __iomem *gpr = IOMEM(MX6_IOMUXC_BASE_ADDR + 0x4000);
++
++	/*
++	 * MX6_GPR_TZASC1_EN is a sticky bit which preserves its value
++	 * once set until the next power-up cycle.
++	 */
++	return !(readl(&gpr[9]) & MX6_GPR_TZASC1_EN);
++}
++
+ void imx8m_tzc380_init(void)
+ {
+ 	u32 __iomem *gpr = IOMEM(MX8M_IOMUXC_GPR_BASE_ADDR);
+diff --git a/include/mach/imx/tzasc.h b/include/mach/imx/tzasc.h
+index eb479ad55c9c..0fbcdc2150e6 100644
+--- a/include/mach/imx/tzasc.h
++++ b/include/mach/imx/tzasc.h
+@@ -8,6 +8,8 @@
+ 
+ void imx6q_tzc380_early_ns_region1(void);
+ void imx6ul_tzc380_early_ns_region1(void);
++bool imx6q_tzc380_is_bypassed(void);
++bool imx6ul_tzc380_is_bypassed(void);
+ void imx8m_tzc380_init(void);
+ bool imx8m_tzc380_is_enabled(void);
+ 

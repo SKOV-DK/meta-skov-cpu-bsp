@@ -1,0 +1,34 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 5 Mar 2024 17:08:46 +0100
+Subject: [PATCH] drivers: imx_ocotp: fix clearing the error bit
+
+According the referene manuals the ERROR bit should be cleared by
+writting a '1' to the OCOTP_CTRL_CLR register and not by writting to the
+OCOTP_CTRL direct.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/imx_ocotp.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/core/drivers/imx_ocotp.c b/core/drivers/imx_ocotp.c
+index 717000fe9203..6b5c4b2da219 100644
+--- a/core/drivers/imx_ocotp.c
++++ b/core/drivers/imx_ocotp.c
+@@ -12,6 +12,7 @@
+ #include <kernel/tee_common_otp.h>
+ 
+ #define OCOTP_CTRL			0x0
++#define OCOTP_CTRL_CLR			0x8
+ 
+ #if defined(CFG_MX8MP)
+ #define OCOTP_CTRL_ERROR		BIT32(10)
+@@ -103,7 +104,7 @@ TEE_Result imx_ocotp_read(unsigned int bank, unsigned int word, uint32_t *val)
+ 	ocotp_clock_enable();
+ 
+ 	/* Clear error bit */
+-	io_clrbits32(g_base_addr + OCOTP_CTRL, OCOTP_CTRL_ERROR);
++	io_write32(g_base_addr + OCOTP_CTRL_CLR, OCOTP_CTRL_ERROR);
+ 
+ 	/* Wait for busy flag to be cleared */
+ 	ret = ocotp_ctrl_wait_for(OCOTP_CTRL_BUSY);

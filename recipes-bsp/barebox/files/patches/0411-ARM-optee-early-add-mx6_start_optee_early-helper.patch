@@ -1,0 +1,123 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Thu, 26 Jun 2025 16:45:27 +0200
+Subject: [PATCH] ARM: optee-early: add mx6_start_optee_early helper
+
+Add a i.MX6 specific helper function which covers most of the steps
+usually done within the board lowlevel code. All new i.MX6 boards are
+encouraged to use this helper to load OP-TEE since the helper validates
+that the TZC380 is enabled and setup the TZC380 region properly.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ Documentation/user/optee.rst | 22 +++++++++++++++-------
+ arch/arm/lib32/optee-early.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ include/tee/optee.h          |  4 ++++
+ 3 files changed, 61 insertions(+), 7 deletions(-)
+
+diff --git a/Documentation/user/optee.rst b/Documentation/user/optee.rst
+index 2729d21d2e44..88e651ddec57 100644
+--- a/Documentation/user/optee.rst
++++ b/Documentation/user/optee.rst
+@@ -19,14 +19,22 @@ During the PBL
+ ^^^^^^^^^^^^^^
+ 
+ To start OP-TEE during the lowlevel initialization of your board in the ``PBL``,
+-enable the ``CONFIG_PBL_OPTEE`` configuration variable. your board should then
++enable the ``CONFIG_PBL_OPTEE`` configuration variable. Your board should then
+ call the function ``start_optee_early(void* tee, void* fdt)`` with a valid tee
+-and FDT. Ensure that your OP-TEE is compiled with ``CFG_NS_ENTRY_ADDR`` unset,
+-otherwise OP-TEE will not correctly return to barebox after startup.
+-Since OP-TEE in the default configuration also modifies the device tree, don't
+-pass the barebox internal device tree, instead copy it into a different memory
+-location and pass it to OP-TEE afterwards.
+-The modified device tree can then be passed to the main barebox start function.
++and FDT. If you're running on an i.MX6 platform your board code should call
++``imx6q_start_optee_early()`` or ``imx6ul_start_optee_early()`` instead since it
++validates that the TZASC not bypassed and is configured as expected by OP-TEE.
++
++Ensure that your OP-TEE is compiled with ``CFG_NS_ENTRY_ADDR`` unset, otherwise
++OP-TEE will not correctly return to barebox after startup. Since OP-TEE in the
++default configuration also modifies the device tree, don't pass the barebox
++internal device tree, instead copy it into a different memory location and pass
++it to OP-TEE afterwards. The modified device tree can then be passed to the
++main barebox start function.
++
++.. note:: Modification of the device tree usually makes it bigger.
++  Some spare space must be left after the end of the device tree to
++  accommodate this.
+ 
+ Before Linux start
+ ^^^^^^^^^^^^^^^^^^
+diff --git a/arch/arm/lib32/optee-early.c b/arch/arm/lib32/optee-early.c
+index 735d829c99fb..6f842bdd2010 100644
+--- a/arch/arm/lib32/optee-early.c
++++ b/arch/arm/lib32/optee-early.c
+@@ -10,6 +10,8 @@
+ #include <tee/optee.h>
+ #include <debug_ll.h>
+ #include <string.h>
++#include <mach/imx/imx6.h>
++#include <mach/imx/tzasc.h>
+ 
+ static jmp_buf tee_buf;
+ 
+@@ -37,3 +39,43 @@ int start_optee_early(void *fdt, void *tee)
+ 
+ 	return 0;
+ }
++
++int imx6q_start_optee_early(void *fdt, void *tee, void *data_location,
++			    unsigned int data_location_size)
++{
++	if (imx6q_tzc380_is_bypassed())
++		panic("TZC380 is bypassed, abort OP-TEE loading\n");
++
++	/* Add early non-secure TZASC region1 to pass DTO */
++	imx6q_tzc380_early_ns_region1();
++
++	/*
++	 * Set the OP-TEE <-> barebox exchange data location to zero.
++	 * This is optional since recent OP-TEE versions perform the
++	 * memset too.
++	 */
++	if (data_location)
++		memset(data_location, 0, data_location_size);
++
++	return start_optee_early(fdt, tee);
++}
++
++int imx6ul_start_optee_early(void *fdt, void *tee, void *data_location,
++			     unsigned int data_location_size)
++{
++	if (imx6ul_tzc380_is_bypassed())
++		panic("TZC380 is bypassed, abort OP-TEE loading\n");
++
++	/* Add early non-secure TZASC region1 to pass DTO */
++	imx6ul_tzc380_early_ns_region1();
++
++	/*
++	 * Set the OP-TEE <-> barebox exchange data location to zero.
++	 * This is optional since recent OP-TEE versions perform the
++	 * memset too.
++	 */
++	if (data_location)
++		memset(data_location, 0, data_location_size);
++
++	return start_optee_early(fdt, tee);
++}
+diff --git a/include/tee/optee.h b/include/tee/optee.h
+index f52775dab5b4..943dbb8fdab6 100644
+--- a/include/tee/optee.h
++++ b/include/tee/optee.h
+@@ -54,6 +54,10 @@ static inline int optee_get_membase(u64 *membase)
+ #ifdef __PBL__
+ 
+ int start_optee_early(void* fdt, void* tee);
++int imx6q_start_optee_early(void *fdt, void *tee, void *data_location,
++			    unsigned int data_location_size);
++int imx6ul_start_optee_early(void *fdt, void *tee, void *data_location,
++			     unsigned int data_location_size);
+ 
+ #endif /* __PBL__ */
+ 

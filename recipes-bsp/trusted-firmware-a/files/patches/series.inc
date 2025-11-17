@@ -1,28 +1,21 @@
-# umpf-base: lts-v2.10.18
+# umpf-base: lts-v2.12.6
 # umpf-flags: upstreamstatus=insert
-# umpf-name: 2.10.18/customers/skov/imx8
-# umpf-version: 2.10.18/customers/skov/imx8/20250708-1
-# umpf-topic: v2.10/topic/imx8m-csu
-# umpf-hashinfo: d40d911f2d2bd4c04eb6b8fa1221bbb790a293dc
-# umpf-topic-range: 6768d7a8e2f15dbc1786a902d57368160d485a1f..1ed9a6a9c5d4256dfe4dec2f880807ad2d7b4ace
+# umpf-name: 2.12.6/customers/skov/imx8s
+# umpf-version: 2.12.6/customers/skov/imx8s/20250901-1
+# umpf-topic: v2.12/topic/imx8m-tzasc-fixes
+# umpf-hashinfo: ef41b81d9b5ae663d6833188fd5584a189c75415
+# umpf-topic-range: 10ae965e520d612c27866796632090222ce9036d..55ac489cbfa741c7377342ed96ffe33e5ec20b3c
 UMPF_SRC_URI += "\
-  file://patches/0001-fix-imx8m-fix-CSU_SA_REG-to-work-with-all-sa-registe.patch \
-  file://patches/0002-feat-imx8m-add-imx-csu_sa-enum-type-defines-for-imx8.patch \
-  file://patches/0003-feat-imx8m-add-defines-for-csu_sa-access-security.patch \
-  file://patches/0004-feat-imx8mm-set-and-lock-almost-all-peripherals-as-n.patch \
-  file://patches/0005-feat-imx8mm-restrict-peripheral-access-to-secure-wor.patch \
-  file://patches/0006-feat-imx8mp-set-and-lock-almost-all-peripherals-as-n.patch \
-  file://patches/0007-feat-imx8mp-restrict-peripheral-access-to-secure-wor.patch \
-  file://patches/0008-style-imx8m-add-parenthesis-to-CSU_HP_REG.patch \
+  file://patches/0001-fix-imx8m-don-t-reconfigure-default-region0.patch \
   "
-# umpf-release: 2.10.18/customers/skov/imx8/20250708-1
-# umpf-topic-range: 1ed9a6a9c5d4256dfe4dec2f880807ad2d7b4ace..a66709c993dc5e22edc5ac652fe4b0d454f0dd37
+# umpf-release: 2.12.6/customers/skov/imx8s/20250901-1
+# umpf-topic-range: 55ac489cbfa741c7377342ed96ffe33e5ec20b3c..1222f8d42339e3e8cd8bf5df80052bbf7213966d
 UMPF_SRC_URI += "\
-  file://patches/0101-Release-2.10.18-customers-skov-imx8-20250708-1.patch \
+  file://patches/0101-Release-2.12.6-customers-skov-imx8s-20250901-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
-UMPF_BASE = "lts-2.10.18"
-UMPF_VERSION = "20250708-1"
+UMPF_BASE = "lts-2.12.6"
+UMPF_VERSION = "20250901-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 # umpf-end

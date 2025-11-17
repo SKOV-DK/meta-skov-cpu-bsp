@@ -1,0 +1,59 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 17 Jun 2025 13:21:32 +0200
+Subject: [PATCH] drivers: tzc380: add tzc_verify_region0_secure helper
+
+Add a helper which verifies that region0 is only accessible by the
+secure world.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/tzc380.c         | 23 +++++++++++++++++++++++
+ core/include/drivers/tzc380.h |  1 +
+ 2 files changed, 24 insertions(+)
+
+diff --git a/core/drivers/tzc380.c b/core/drivers/tzc380.c
+index 091fe5ad23c2..3ce2c82bcf6a 100644
+--- a/core/drivers/tzc380.c
++++ b/core/drivers/tzc380.c
+@@ -315,6 +315,29 @@ TEE_Result tzc_regions_lockdown(void)
+ 	return TEE_SUCCESS;
+ }
+ 
++/*
++ * `tzc_verify_region0_secure` verifies that default region0 only permitts
++ * secure-world access to overcome memory alias access breaches.
++ *
++ * Return
++ *  - TEE_SUCCESS if region0 is secure world only access
++ *  - TEE_ERROR_SECURITY if region0 can be accessed be non-secure world
++ */
++TEE_Result tzc_verify_region0_secure(void)
++{
++	uint32_t val = 0;
++
++	assert(tzc.base);
++
++	val = tzc_read_region_attributes(tzc.base, 0);
++	val &= TZC_ATTR_SP_ALL;
++
++	if (val != TZC_ATTR_SP_S_RW)
++		return TEE_ERROR_SECURITY;
++
++	return TEE_SUCCESS;
++}
++
+ #if TRACE_LEVEL >= TRACE_DEBUG
+ 
+ static uint32_t tzc_read_region_base_low(vaddr_t base, uint32_t region)
+diff --git a/core/include/drivers/tzc380.h b/core/include/drivers/tzc380.h
+index fdcad274e1bb..521101fad171 100644
+--- a/core/include/drivers/tzc380.h
++++ b/core/include/drivers/tzc380.h
+@@ -219,6 +219,7 @@ void tzc_int_clear(void);
+ int tzc_auto_configure(vaddr_t addr, vaddr_t rsize, uint32_t attr,
+ 		       uint8_t region);
+ TEE_Result tzc_regions_lockdown(void);
++TEE_Result tzc_verify_region0_secure(void);
+ 
+ #if TRACE_LEVEL >= TRACE_DEBUG
+ void tzc_dump_state(void);

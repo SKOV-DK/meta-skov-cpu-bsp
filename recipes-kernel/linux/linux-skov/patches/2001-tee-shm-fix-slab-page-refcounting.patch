@@ -1,0 +1,46 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 25 Mar 2025 20:42:53 +0100
+Subject: [PATCH] tee: shm: fix slab page refcounting
+
+Skip manipulating the refcount in case of slab pages according commit
+b9c0e49abfca ("mm: decline to manipulate the refcount on a slab page").
+
+Fixes: b9c0e49abfca ("mm: decline to manipulate the refcount on a slab page")
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ drivers/tee/tee_shm.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/tee/tee_shm.c b/drivers/tee/tee_shm.c
+index daf6e5cfd59a..35f0ac359b12 100644
+--- a/drivers/tee/tee_shm.c
++++ b/drivers/tee/tee_shm.c
+@@ -19,16 +19,24 @@ static void shm_put_kernel_pages(struct page **pages, size_t page_count)
+ {
+ 	size_t n;
+ 
+-	for (n = 0; n < page_count; n++)
+-		put_page(pages[n]);
++	for (n = 0; n < page_count; n++) {
++		struct page *page = pages[n];
++
++		if (!PageSlab(page))
++			put_page(page);
++	}
+ }
+ 
+ static void shm_get_kernel_pages(struct page **pages, size_t page_count)
+ {
+ 	size_t n;
+ 
+-	for (n = 0; n < page_count; n++)
+-		get_page(pages[n]);
++	for (n = 0; n < page_count; n++) {
++		struct page *page = pages[n];
++
++		if (!PageSlab(page))
++			get_page(page);
++	}
+ }
+ 
+ static void release_registered_pages(struct tee_shm *shm)

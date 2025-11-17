@@ -1,0 +1,80 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Wed, 18 Jun 2025 18:24:21 +0200
+Subject: [PATCH] drivers: caam: split nsjobring release into boot_final
+
+If OP-TEE doesn't need the CAAM jobring, CFG_NXP_CAAM_RUNTIME_JR can be
+set to 'n' to release the used jobring. But the current driver
+architecture doesn't honor the fact that there could still be users of
+the CAAM during the OP-TEE startup. E.g. tee_cryp_init() can use the
+CAAM RNG to seed a PRNG. Such use-case let the system hang because we
+already released the jobring.
+
+To fix this move the jobring release out of the crypto_driver_init()
+into a dedicated finish_caam() function which gets called during
+boot_final(). To share the jrcfg state between the different initcalls
+we have to make jrcfg file global.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/drivers/crypto/caam/caam_ctrl.c | 32 +++++++++++++++++++++++---------
+ 1 file changed, 23 insertions(+), 9 deletions(-)
+
+diff --git a/core/drivers/crypto/caam/caam_ctrl.c b/core/drivers/crypto/caam/caam_ctrl.c
+index 51df78b24d83..450ae3bee45b 100644
+--- a/core/drivers/crypto/caam/caam_ctrl.c
++++ b/core/drivers/crypto/caam/caam_ctrl.c
+@@ -33,12 +33,13 @@
+ static_assert((CFG_TZDRAM_START + CFG_TZDRAM_SIZE) < UINT32_MAX);
+ #endif
+ 
++static struct caam_jrcfg jrcfg;
++
+ /* Crypto driver initialization */
+ static TEE_Result crypto_driver_init(void)
+ {
+ 	TEE_Result retresult = TEE_ERROR_GENERIC;
+ 	enum caam_status retstatus = CAAM_FAILURE;
+-	struct caam_jrcfg jrcfg = {};
+ 
+ 	/* Enable the CAAM Clock */
+ 	caam_hal_clk_enable(true);
+@@ -174,14 +175,6 @@ static TEE_Result crypto_driver_init(void)
+ 	/* Everything is OK, register the Power Management handler */
+ 	caam_pwr_init();
+ 
+-	/*
+-	 * Configure Job Rings to NS World
+-	 * If the Driver Crypto is not used CFG_NXP_CAAM_RUNTIME_JR is not
+-	 * enable, hence relax the JR used for the CAAM configuration to
+-	 * the Non-Secure
+-	 */
+-	if (jrcfg.base)
+-		caam_hal_cfg_setup_nsjobring(&jrcfg);
+ 
+ 	retresult = TEE_SUCCESS;
+ exit_init:
+@@ -211,3 +204,24 @@ static TEE_Result init_caam_late(void)
+ }
+ 
+ early_init_late(init_caam_late);
++
++static TEE_Result finish_caam(void)
++{
++	/*
++	 * Configure Job Rings to NS World
++	 * If the Driver Crypto is not used CFG_NXP_CAAM_RUNTIME_JR is not
++	 * enable, hence relax the JR used for the CAAM configuration to
++	 * the Non-Secure.
++	 *
++	 * The Non-Secure release have to happen late since there could still
++	 * be users of the CAAM. E.g. the RNG can be used as seed for the PRNG:
++	 *   - tee_cryp_init()
++	 *      -> plat_rng_init()
++	 */
++	if (jrcfg.base)
++		caam_hal_cfg_setup_nsjobring(&jrcfg);
++
++	return TEE_SUCCESS;
++}
++
++boot_final(finish_caam);

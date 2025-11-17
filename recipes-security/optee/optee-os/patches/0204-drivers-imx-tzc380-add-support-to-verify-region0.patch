@@ -1,0 +1,61 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 17 Jun 2025 13:27:53 +0200
+Subject: [PATCH] drivers: imx: tzc380: add support to verify region0
+
+There are platforms where memory aliasing can't be prevented, e.g. the
+i.MX8M. If the previous running firmware configured region0, which
+covers the whole AXI address space, to be accessible from secure and
+non-secure world the OP-TEE core memory would be accessible via memory
+aliasing.
+
+To prevent such attacks we need to ensure that region0 is accessible
+from the secure world only.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ core/arch/arm/plat-imx/conf.mk  |  6 ++++++
+ core/arch/arm/plat-imx/tzc380.c | 14 ++++++++++++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/core/arch/arm/plat-imx/conf.mk b/core/arch/arm/plat-imx/conf.mk
+index 71e288748cc0..33d329655342 100644
+--- a/core/arch/arm/plat-imx/conf.mk
++++ b/core/arch/arm/plat-imx/conf.mk
+@@ -549,6 +549,12 @@ ifneq (,$(filter y, $(CFG_MX6) $(CFG_MX7)))
+ CFG_IMX_CSU ?= y
+ endif
+ 
++ifneq (,$(filter y, $(CFG_MX8M)))
++ifneq ($(CFG_INSECURE),y)
++$(call force,CFG_TZASC_REGION0_SECURE,y)
++endif
++endif
++
+ ifeq ($(filter y, $(CFG_PSCI_ARM32)), y)
+ CFG_HWSUPP_MEM_PERM_WXN = n
+ CFG_IMX_WDOG ?= y
+diff --git a/core/arch/arm/plat-imx/tzc380.c b/core/arch/arm/plat-imx/tzc380.c
+index 2350221d7a77..fd15c2b09081 100644
+--- a/core/arch/arm/plat-imx/tzc380.c
++++ b/core/arch/arm/plat-imx/tzc380.c
+@@ -67,6 +67,20 @@ static TEE_Result imx_configure_tzasc(void)
+ 
+ 		tzc_init(addr[i]);
+ 
++		/*
++		 * TZC380 is not memory alias aware so an attacker could read
++		 * the OP-TEE core memory if the system does support memory
++		 * aliasing.
++		 *
++		 * To fix this region0 needs to be configured as secure access
++		 * only (0xc). This is the default if not changed by the
++		 * previous running firmware. Region0 covers the complete
++		 * platform AXI address space.
++		 */
++		if (IS_ENABLED(CFG_TZASC_REGION0_SECURE) &&
++		    tzc_verify_region0_secure() != TEE_SUCCESS)
++			panic("region0 is not secure configured, non-secure memory alias access possible!");
++
+ 		region = imx_tzc_auto_configure(CFG_DRAM_BASE, CFG_DDR_SIZE,
+ 						TZC_ATTR_SP_NS_RW, region);
+ 		region = imx_tzc_auto_configure(CFG_TZDRAM_START,
