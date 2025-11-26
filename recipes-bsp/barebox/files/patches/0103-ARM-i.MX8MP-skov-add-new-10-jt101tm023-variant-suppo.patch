@@ -1,0 +1,35 @@
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Date: Wed, 25 Jun 2025 14:51:11 +0200
+Subject: [PATCH] ARM: i.MX8MP: skov: add new 10" jt101tm023 variant support
+
+Add new 10" JuTouch JT101TM023 board variant incl. the possible HDMI
+sub-variant.
+
+Unfortunately HDMI variants have no dedicated revision encoding, instead
+HDMI variants are encoded via a sub-variant in SW via barebox-state. Add
+a dedicated Rev.C compatible so the compatible can be used by systemd
+services, albeit Rev.B-HDMI and Rev.C-HDMI don't differ.
+
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ arch/arm/boards/skov-imx8mp/board.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boards/skov-imx8mp/board.c b/arch/arm/boards/skov-imx8mp/board.c
+index 0e471a3437bf..0266388849d2 100644
+--- a/arch/arm/boards/skov-imx8mp/board.c
++++ b/arch/arm/boards/skov-imx8mp/board.c
+@@ -90,6 +90,12 @@ static const struct board_description imx8mp_variants[] = {
+ 	[3] = {
+ 		.dts_compatible = "skov,imx8mp-skov-revc-tian-g07017",
+ 	},
++
++	[4] = {
++		.dts_compatible = "skov,imx8mp-skov-revc-jutouch-jt101tm023",
++		.dts_compatible_hdmi = "skov,imx8mp-skov-revc-hdmi",
++		.flags = SKOV_IMX8MP_HAS_HDMI,
++	},
+ };
+ 
+ static const struct board_description imx8mp_basic_variant = {

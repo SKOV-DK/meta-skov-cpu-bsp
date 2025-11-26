@@ -1,6 +1,6 @@
 # umpf-base: v2025.06.1
-# umpf-name: 2025.06.0/customers/skov/imx6
-# umpf-version: 2025.06.0/customers/skov/imx6/20250901-1
+# umpf-name: 2025.06.1/customers/skov/imx6
+# umpf-version: 2025.06.1/customers/skov/imx6/20251126-1
 # umpf-topic: v2025.02.0/customers/skov/imx6
 # umpf-hashinfo: a5e36061c79278440238800873474f1a72538f0e
 # umpf-topic-range: 7e5ea8eb09a1ca3b13e89586411f5a60ae8fd5b3..c9f1f50e5a2bc34ea178939fa48e577dea5fd642
@@ -8,60 +8,62 @@ UMPF_SRC_URI += "\
   file://patches/0001-video-edid-increase-number-of-retries-to-request-EDI.patch \
   "
 # umpf-topic: v2025.06.0/customers/skov/imx8mp
-# umpf-hashinfo: d7b19c3a9a6929c3051fd6e0e5433ca305800ecf
-# umpf-topic-range: c9f1f50e5a2bc34ea178939fa48e577dea5fd642..91262660ce272d2d310797402953821eb5e766ad
+# umpf-hashinfo: 263ef246e22d635e4d4045f5de5cf3a6fbeb7dec
+# umpf-topic-range: c9f1f50e5a2bc34ea178939fa48e577dea5fd642..4d0e135569ea91805a8e768afc3f0fe99c9d44bb
 UMPF_SRC_URI += "\
   file://patches/0101-ARM-i.MX8MP-skov-halt-startup-until-power-is-good.patch \
   file://patches/0102-ARM-i.MX8MP-skov-halt-startup-until-power-is-good.patch \
-  file://patches/0103-dts-src-add-new-skov-i.MX8MP-10inch-variant.patch \
-  file://patches/0104-ARM-i.MX8MP-skov-add-new-10-jt101tm023-variant-suppo.patch \
-  file://patches/0105-ARM-i.MX8MP-skov-add-new-7-jt070tm041-variant-suppor.patch \
+  file://patches/0103-ARM-i.MX8MP-skov-add-new-10-jt101tm023-variant-suppo.patch \
+  file://patches/0104-ARM-i.MX8MP-skov-add-new-7-jt070tm041-variant-suppor.patch \
   "
 # umpf-topic: v2025.02.0/customers/skov/arm9cpu
 # umpf-hashinfo: e534542da7f998677e29802bb8b067ca99ccbbe0
-# umpf-topic-range: 91262660ce272d2d310797402953821eb5e766ad..2eaebc494e08b29e3da0b11d868f2a373dfb0587
+# umpf-topic-range: 4d0e135569ea91805a8e768afc3f0fe99c9d44bb..1815f41f3e9977b0cfbc90312f90656ab5080397
 UMPF_SRC_URI += "\
   file://patches/0201-usb-ohci-at91-fix-possible-hang-chainloading-barebox.patch \
   file://patches/0202-HACK-ARM-at91-import-AT91Bootstrap-patch-pmc-fix-PLL.patch \
   "
+# umpf-topic: v2025.06.0/customers/skov/backports
+# umpf-hashinfo: 3efb2d5d911c9d5d458796d00c0a2466c75b0ca7
+# umpf-topic-range: 1815f41f3e9977b0cfbc90312f90656ab5080397..a47827f742dabcf9738b8fe126e6da44f724c3e5
+UMPF_SRC_URI += "\
+  file://patches/0301-mci-imx-esdhc-restore-longer-timeouts-for-idle.patch \
+  file://patches/0302-mci-sdhci-fix-too-short-timeout-in-sdhci_wait_idle_d.patch \
+  "
 # umpf-topic: v2025.04.0/topic/imx6-clk
 # umpf-hashinfo: 77c953e6806c34e7b15560e521809f3dd3a024ae
-# umpf-topic-range: 2eaebc494e08b29e3da0b11d868f2a373dfb0587..6d680fa071d4adca1c4f71bdd87de783f17f9a73
+# umpf-topic-range: a47827f742dabcf9738b8fe126e6da44f724c3e5..66ee5bf8939aff9f15a35b2bada16fad9123676b
 UMPF_SRC_URI += "\
-  file://patches/0301-video-IPUv3-LDB-fix-LVDS-serial-clock-configuration.patch \
+  file://patches/0401-video-IPUv3-LDB-fix-LVDS-serial-clock-configuration.patch \
   "
 # umpf-topic: v2025.06.0/topic/arm-optee-early-helper
 # umpf-hashinfo: c0b787bc8499c1aff302f5c9a76c56b60e7bb7c2
-# umpf-topic-range: 6d680fa071d4adca1c4f71bdd87de783f17f9a73..757264fdbbd416db77237076d2d041315cc89e22
+# umpf-topic-range: 66ee5bf8939aff9f15a35b2bada16fad9123676b..3731192115c329e931625e148ccf662ed47506de
 UMPF_SRC_URI += "\
-  file://patches/0401-pbl-add-panic_no_stacktrace.patch \
-  file://patches/0402-arch-Allow-data_abort_mask-in-PBL.patch \
-  file://patches/0403-ARM-add-exception-handling-support-for-PBL.patch \
-  file://patches/0404-ARM-i.MX6QDL-add-imxcfg-helper-to-configure-the-TZAS.patch \
-  file://patches/0405-ARM-i.MX6Q-add-imx6_get_mmdc_sdram_size.patch \
-  file://patches/0406-ARM-i.MX-add-config-symbol-for-TZASC.patch \
-  file://patches/0407-ARM-mach-imx-tzasc-add-region-configure-helpers.patch \
-  file://patches/0408-ARM-mach-imx-tzasc-add-imx6-q-ul-_tzc380_early_ns_re.patch \
-  file://patches/0409-ARM-mach-imx-tzasc-add-imx6-q-ul-_tzc380_is_bypassed.patch \
-  file://patches/0410-ARM-i.MX-add-imx6_can_access_tzasc.patch \
-  file://patches/0411-ARM-optee-early-add-mx6_start_optee_early-helper.patch \
-  file://patches/0412-ARM-i.MX-tqma6ulx-fix-barebox-chainloading-with-OP-T.patch \
-  file://patches/0413-ARM-i.MX-Webasto-ccbv2-fix-barebox-chainloading-with.patch \
-  file://patches/0414-ARM-i.MX-tqma6ulx-use-ENTRY_FUNCTION_WITHSTACK.patch \
-  file://patches/0415-ARM-mach-imx-tzasc-keep-default-region-0-secure-sett.patch \
+  file://patches/0501-pbl-add-panic_no_stacktrace.patch \
+  file://patches/0502-arch-Allow-data_abort_mask-in-PBL.patch \
+  file://patches/0503-ARM-add-exception-handling-support-for-PBL.patch \
+  file://patches/0504-ARM-i.MX6QDL-add-imxcfg-helper-to-configure-the-TZAS.patch \
+  file://patches/0505-ARM-i.MX6Q-add-imx6_get_mmdc_sdram_size.patch \
+  file://patches/0506-ARM-i.MX-add-config-symbol-for-TZASC.patch \
+  file://patches/0507-ARM-mach-imx-tzasc-add-region-configure-helpers.patch \
+  file://patches/0508-ARM-mach-imx-tzasc-add-imx6-q-ul-_tzc380_early_ns_re.patch \
+  file://patches/0509-ARM-mach-imx-tzasc-add-imx6-q-ul-_tzc380_is_bypassed.patch \
+  file://patches/0510-ARM-i.MX-add-imx6_can_access_tzasc.patch \
+  file://patches/0511-ARM-optee-early-add-mx6_start_optee_early-helper.patch \
+  file://patches/0512-ARM-i.MX-tqma6ulx-fix-barebox-chainloading-with-OP-T.patch \
+  file://patches/0513-ARM-i.MX-Webasto-ccbv2-fix-barebox-chainloading-with.patch \
+  file://patches/0514-ARM-i.MX-tqma6ulx-use-ENTRY_FUNCTION_WITHSTACK.patch \
+  file://patches/0515-ARM-mach-imx-tzasc-keep-default-region-0-secure-sett.patch \
   "
-# umpf-topic-range: e44d8628b58279e87fbaa01cbb12dc726b6b1e95..848a56aa155937a9826ee3b58df60e53328f98bf
-SRC_URI += "\
-  file://patches/0501-mci-imx-esdhc-restore-longer-timeouts-for-idle.patch \
-  file://patches/0502-mci-sdhci-fix-too-short-timeout-in-sdhci_wait_idle_data.patch \
-  "
-# umpf-release: 2025.06.0/customers/skov/imx6/20250912-1
-SRC_URI += "\
-  file://patches/0601-Release-2025.06.0-customers-skov-imx6-20250912-1.patch \
+# umpf-release: 2025.06.1/customers/skov/imx6/20251126-1
+# umpf-topic-range: 3731192115c329e931625e148ccf662ed47506de..f021235848b381e29ee30e1118bbd4abcd4600b3
+UMPF_SRC_URI += "\
+  file://patches/0601-Release-2025.06.1-customers-skov-imx6-20251126-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "2025.06.1"
-UMPF_VERSION = "20250901-1"
+UMPF_VERSION = "20251126-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 # umpf-end

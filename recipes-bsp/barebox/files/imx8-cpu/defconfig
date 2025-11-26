@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Barebox/arm64 2025.06.1-20250901-1 Configuration
+# Barebox/arm64 2025.06.1-20251126-1 Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARCH_LINUX_NAME="arm64"
