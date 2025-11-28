@@ -88,11 +88,6 @@ if [ -n "${PART_NO}" ] ; then
    if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" -64s; then
       failure "Failed to expand ${PART_NO}th partition of ${MEDIUM} to the end of the device."
    fi
-
-   echo "Resizing ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
-   if ! resize2fs -p "${TGT_DEV}"p"${PART_NO}"; then
-      failure "Failed to resize ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
-   fi
 fi
 
 echo "Disabling the ${MEDIUM}'s first boot partition's read-only mode."

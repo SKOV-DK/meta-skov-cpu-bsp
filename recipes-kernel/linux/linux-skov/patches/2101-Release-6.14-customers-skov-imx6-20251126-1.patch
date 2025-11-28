@@ -1,13 +1,13 @@
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
-Date: Mon, 10 Nov 2025 20:50:23 +0100
-Subject: [PATCH] Release 6.14/customers/skov/imx6/20251110-1
+Date: Wed, 26 Nov 2025 14:06:18 +0100
+Subject: [PATCH] Release 6.14/customers/skov/imx6/20251126-1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 48d2ce96398b..9fa9a6b069c2 100644
+index 48d2ce96398b..f954ea3121b5 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
@@ -15,7 +15,7 @@ index 48d2ce96398b..9fa9a6b069c2 100644
  PATCHLEVEL = 14
  SUBLEVEL = 11
 -EXTRAVERSION =
-+EXTRAVERSION =-20251110-1
++EXTRAVERSION =-20251126-1
  NAME = Baby Opossum Posse
  
  # *DOCUMENTATION*

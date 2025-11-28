@@ -1,0 +1,26 @@
+From: Marco Felsch <m.felsch@pengutronix.de>
+Date: Tue, 4 Nov 2025 16:03:17 +0100
+Subject: [PATCH] dt-bindings: arm: fsl: add Skov Rev.C HDMI support
+
+From software perspective, Rev.C HDMI and Rev.B HDMI don't differ since
+the panel is connected via HDMI and the touchscreen is connected via
+USB. However, the bootloader firmware expects to find a dts with the
+correct revc-hdmi compatible.
+
+Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
+---
+ Documentation/devicetree/bindings/arm/fsl.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/fsl.yaml b/Documentation/devicetree/bindings/arm/fsl.yaml
+index 1eaa55da812d..ec41348b89dd 100644
+--- a/Documentation/devicetree/bindings/arm/fsl.yaml
++++ b/Documentation/devicetree/bindings/arm/fsl.yaml
+@@ -1102,6 +1102,7 @@ properties:
+               - skov,imx8mp-skov-revb-hdmi # SKOV i.MX8MP climate control without panel
+               - skov,imx8mp-skov-revb-lt6 # SKOV i.MX8MP climate control with 7” panel
+               - skov,imx8mp-skov-revb-mi1010ait-1cp1 # SKOV i.MX8MP climate control with 10.1" panel
++              - skov,imx8mp-skov-revc-hdmi # SKOV i.MX8MP climate control without panel
+               - skov,imx8mp-skov-revc-bd500 # SKOV i.MX8MP climate control with LED frontplate
+               - skov,imx8mp-skov-revc-tian-g07017 # SKOV i.MX8MP climate control with LED frontplate
+               - toradex,verdin-imx8mp     # Verdin iMX8M Plus Modules
