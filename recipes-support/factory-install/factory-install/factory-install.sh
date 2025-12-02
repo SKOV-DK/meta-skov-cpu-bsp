@@ -25,6 +25,7 @@ WIC=@WIC@
 BAREBOX_RENAME=@BAREBOX_RENAME@
 DATADIR=@DATADIR@
 PART_NO=@PART_NO@
+RESIZE=@RESIZE@
 
 
 show_splash () {
@@ -87,6 +88,13 @@ if [ -n "${PART_NO}" ] ; then
    echo "Expanding ${PART_NO}th partition of ${MEDIUM} to the end of the device."
    if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" -64s; then
       failure "Failed to expand ${PART_NO}th partition of ${MEDIUM} to the end of the device."
+   fi
+
+   if [ "${RESIZE}" = "true" ] ; then
+      echo "Resizing ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
+      if ! resize2fs -p "${TGT_DEV}"p"${PART_NO}"; then
+         failure "Failed to resize ext4 on ${PART_NO}th partition of ${MEDIUM} accordingly."
+      fi
    fi
 fi
 

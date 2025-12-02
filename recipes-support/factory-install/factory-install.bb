@@ -19,6 +19,8 @@ TGT_MMC = "mmcblk2"
 PART_NO ?= ""
 PART_NO:imx8-cpu = "6"
 PART_NO:imx8s-cpu = "9"
+RESIZE = "true"
+RESIZE:imx8s-cpu = "false"
 
 WIC_IMAGE:imx8-cpu = "${FACTORY_INSTALL_IMAGE}"
 WIC_IMAGE:imx8s-cpu = "${FACTORY_INSTALL_IMAGE}-secbootimg"
@@ -64,6 +66,7 @@ do_install() {
         --expression=s,@BAREBOX_RENAME@,${BAREBOX_RENAME}, \
         --expression=s,@DATADIR@,${datadir}/factory-install/, \
         --expression=s,@PART_NO@,${PART_NO}, \
+        --expression=s,@RESIZE@,${RESIZE}, \
         --in-place ${D}${bindir}/factory-install.sh
 
     install -d ${D}${datadir}/factory-install
