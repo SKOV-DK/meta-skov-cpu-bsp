@@ -2,3 +2,5 @@
 # would otherwise fail to build. It should be removed starting with whinlatter.
 # [1] eea748608c82 ("arm: WORKDIR fixes")
 S = "${WORKDIR}/git"
+
+COMPATIBLE_MACHINE:imx8s-cpu ?= "imx8s-cpu"
