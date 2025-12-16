@@ -9,6 +9,12 @@ kernel_namespaces:
   present:
   - USER_NS
 
+kernel_initrd:
+  description: |
+    At the moment initramfs support is mandatory for Verified Boot to set up the
+    dm-verity-protected block device containing the root-FS.
+  value: True
+
 kernel_swap:
   description: |
     Swap was explicitly enabled to stay compatible with the imx6-cpu, see commit [1].
