@@ -6,6 +6,9 @@ global bootm.image=/dev/mmc1.system.fit
 global linux.bootargs.dyn.rootwait=rootwait
 global linux.bootargs.dyn.rauc=rauc.external
 
-global linux.bootargs.dyn.bootentries="init=/usr/sbin/platsch fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot net.ifnames=0"
+global linux.bootargs.dyn.bootentries="fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot net.ifnames=0"
+if [ ${global.hostname} != "imx8mp-skov-revc-bd500" ]; then
+    global linux.bootargs.dyn.init_platsch="init=/usr/sbin/platsch"
+fi
 
 detect mmc1
