@@ -5,4 +5,4 @@ global bootm.root_dev=mmc2.failsafe
 global bootm.image=/dev/mmc2.failsafe.fit
 global linux.bootargs.dyn.rootwait=rootwait
 
-global linux.bootargs.dyn.bootentries="init=/usr/sbin/platsch fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot"
+global linux.bootargs.dyn.bootentries="fsck.repair=yes usbcore.autosuspend=-1 hw_protection=reboot"
