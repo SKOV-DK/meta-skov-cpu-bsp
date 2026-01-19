@@ -1,1 +1,1 @@
- init=/usr/sbin/platsch --basename splash 
+ platsch_basename=splash 
