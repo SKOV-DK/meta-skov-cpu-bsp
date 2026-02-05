@@ -86,7 +86,7 @@ if [ -n "${PART_NO}" ] ; then
    fi
 
    echo "Expanding ${PART_NO}th partition of ${MEDIUM} to the end of the device."
-   if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" -64s; then
+   if ! parted --script "${TGT_DEV}" -- resizepart "${PART_NO}" 100%; then
       failure "Failed to expand ${PART_NO}th partition of ${MEDIUM} to the end of the device."
    fi
 
