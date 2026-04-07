@@ -1,0 +1,14 @@
+#!/bin/sh
+
+DISPLAY=""
+if [ ! ${state.display.xres} -eq 0 ]; then
+        DISPLAY="$DISPLAY display.xres=${state.display.xres}"
+fi
+if [ ! ${state.display.yres} -eq 0 ]; then
+        DISPLAY="$DISPLAY display.yres=${state.display.yres}"
+fi
+if [ ! ${state.display.external} -eq 0 ]; then
+        DISPLAY="$DISPLAY display.external=${state.display.external}"
+fi
+
+global linux.bootargs.display="$DISPLAY"
