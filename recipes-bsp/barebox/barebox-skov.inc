@@ -99,7 +99,7 @@ python __anonymous() {
         d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
     else:
         # Expect pre-built artifacts from SRC_URI (provided by the product layer).
-        d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_check_srk_artifacts")
+        d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_prepare_srk_artifacts")
 }
 
 python barebox_habv4_srk_index_check() {
@@ -162,28 +162,21 @@ barebox_habv4_generate_imx_srk_table[cleandirs] = "${B}"
 
 # Validate that the SRK artifacts are found in the workdir
 # and copy them into the build directory.
-python barebox_habv4_check_srk_artifacts() {
+python barebox_habv4_prepare_srk_artifacts() {
     import os
+    import shutil
     workdir = d.getVar("WORKDIR")
+    b = d.getVar("B")
+    os.makedirs(b, exist_ok=True)
     for f in ("imx-srk-table.bin", "imx-srk-fuse.bin"):
-        path = os.path.join(workdir, f)
-        if not os.path.exists(path):
+        src = os.path.join(workdir, f)
+        if not os.path.exists(src):
             bb.fatal(
                 f"{f} not found in WORKDIR. The product layer must provide "
                 "both imx-srk-table.bin and imx-srk-fuse.bin via SRC_URI "
                 "(e.g. in a barebox.bbappend in meta-sbc)."
             )
-}
-
-do_configure:prepend() {
-    if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
-        if [ "${BAREBOX_HABV4_GENERATE_SRK_TABLE}" != "1" ]; then
-            # Copy the pre-built SRK artifacts (provided by the product layer via
-            # SRC_URI) into the build directory so do_compile can reference them.
-            cp "${WORKDIR}/imx-srk-table.bin" "${B}/imx-srk-table.bin"
-            cp "${WORKDIR}/imx-srk-fuse.bin" "${B}/imx-srk-fuse.bin"
-        fi
-    fi
+        shutil.copy2(src, os.path.join(b, f))
 }
 
 do_compile:prepend() {
