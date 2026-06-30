@@ -29,10 +29,10 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  3 files changed, 37 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-index 9b21d0650b6c..0de5f24a830e 100644
+index 5e385380cee2..d11c337b740c 100644
 --- a/drivers/clk/clk.c
 +++ b/drivers/clk/clk.c
-@@ -66,7 +66,7 @@ int clk_enable(struct clk *clk)
+@@ -81,7 +81,7 @@ int clk_enable(struct clk *clk)
  	return 0;
  }
  
@@ -41,7 +41,7 @@ index 9b21d0650b6c..0de5f24a830e 100644
  {
  	struct clk_hw *hw;
  
-@@ -91,9 +91,15 @@ void clk_disable(struct clk *clk)
+@@ -106,9 +106,15 @@ void clk_disable(struct clk *clk)
  	if (!clk->enable_count) {
  		if (clk->ops->disable)
  			clk->ops->disable(hw);
@@ -83,10 +83,10 @@ index 867c0977be78..447d928ad4ce 100644
  
  static int at91_ohci_probe_dt(struct device *dev)
 diff --git a/include/linux/clk.h b/include/linux/clk.h
-index 7ae4c48ca27f..9cf758dc4bd9 100644
+index dc96a584398c..16884d45a401 100644
 --- a/include/linux/clk.h
 +++ b/include/linux/clk.h
-@@ -84,11 +84,27 @@ int clk_enable(struct clk *clk);
+@@ -85,11 +85,27 @@ int clk_enable(struct clk *clk);
   *
   * Implementation detail: if the clock source is shared between
   * multiple drivers, clk_enable() calls must be balanced by the
