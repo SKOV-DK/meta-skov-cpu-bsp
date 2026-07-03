@@ -4,7 +4,7 @@
 # If an SP requires another SP to be already loaded it must be listed lower.
 
 # TS SPs UUIDs definitions
-require backports-meta-arm-whinlatter/recipes-security/trusted-services/ts-uuid.inc
+require backports-meta-arm-wrynose/recipes-security/trusted-services/ts-uuid.inc
 
 TS_ENV ?= "opteesp"
 TS_BIN = "${RECIPE_SYSROOT}/usr/${TS_ENV}/bin"
@@ -85,6 +85,13 @@ DEPENDS:append  = "${@bb.utils.contains('MACHINE_FEATURES', 'ts-logging', \
                                         ' ts-sp-logging', '' , d)}"
 SP_PATHS:append = "${@bb.utils.contains('MACHINE_FEATURES', 'ts-logging', \
                                         ' ${TS_BIN}/${LOGGING_SP_UUID}${SP_EXT}', '', d)}"
+
+# FTPM SP
+DEPENDS:append  = "${@bb.utils.contains('MACHINE_FEATURES', 'ts-ftpm', \
+                                        ' ts-sp-ftpm', '' , d)}"
+
+SP_PATHS:append = "${@bb.utils.contains('MACHINE_FEATURES', 'ts-ftpm', \
+                                        ' ${TS_BIN}/${TS_FTPM_UUID}${SP_EXT}', '', d)}"
 
 
 EXTRA_OEMAKE:append = "${@oe.utils.conditional('SP_PATHS', '', '', \

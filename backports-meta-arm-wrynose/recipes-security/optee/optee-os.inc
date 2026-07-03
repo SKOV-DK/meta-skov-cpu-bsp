@@ -12,9 +12,9 @@ CVE_PRODUCT = "linaro:op-tee op-tee:op-tee_os"
 
 DEPENDS = "python3-pyelftools-native python3-cryptography-native"
 
-DEPENDS:append:toolchain-clang = " compiler-rt"
+DEPENDS:append:toolchain-clang = " lld-native compiler-rt"
 
-SRC_URI = "git://github.com/OP-TEE/optee_os.git;branch=master;protocol=https"
+SRC_URI = "git://github.com/OP-TEE/optee_os.git;protocol=https;${OPTEE_SRC_URI_BRANCH_OR_TAG}"
 
 B = "${WORKDIR}/build"
 
@@ -37,10 +37,6 @@ LDFLAGS[unexport] = "1"
 CPPFLAGS[unexport] = "1"
 AS[unexport] = "1"
 LD[unexport] = "1"
-
-do_compile:prepend() {
-	PLAT_LIBGCC_PATH=$(${CC} -print-libgcc-file-name)
-}
 
 do_compile() {
     oe_runmake -C ${S} all
