@@ -2,5 +2,5 @@ require backports-meta-arm-wrynose/recipes-security/optee/optee-os.inc
 
 DEPENDS += "dtc-native"
 
-# 4.9.0
-SRCREV = "c2b0684fcd89929976a8726e6e3af922b48dd2c7"
+# 4.10.0
+SRCREV = "753afbbee1682f5d16fd30e87b31058a4fd4f4b8"
