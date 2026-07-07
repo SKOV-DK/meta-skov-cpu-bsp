@@ -1,0 +1,47 @@
+From: Fabian Pflug <f.pflug@pengutronix.de>
+Date: Mon, 20 Apr 2026 12:37:28 +0200
+Subject: [PATCH] core: pta: manufacturing: make glitching harder
+
+By adding a random delay before the if that compares security relevant
+values.
+
+Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
+---
+ core/pta/manufacturing.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
+index 02c7d7488dbb..1694c02c7f1a 100644
+--- a/core/pta/manufacturing.c
++++ b/core/pta/manufacturing.c
+@@ -5,6 +5,20 @@
+ 
+ #include <kernel/pseudo_ta.h>
+ #include <pta_manufacturing.h>
++#include <crypto/crypto.h>
++
++static void rand_delay(void)
++{
++	volatile int loops = 0;
++
++	crypto_rng_read(&loops, sizeof(loops));
++	loops &= 0x3FF; /* cap to 10 bits */
++
++	while (--loops >= 0) {
++		loops++;
++		loops--;
++	}
++}
+ 
+ TEE_Result __weak
+ pta_manufacturing_query_state(enum pta_manufacturing_state *state)
+@@ -56,6 +70,9 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
+ 	if (res)
+ 		return res;
+ 
++	/* make glitching harder by adding a random delay. */
++	rand_delay();
++
+ 	if (next < current)
+ 		return TEE_ERROR_SECURITY;
+ 
