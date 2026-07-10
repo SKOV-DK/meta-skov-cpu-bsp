@@ -1,14 +1,12 @@
-require backports-meta-arm-whinlatter/recipes-security/optee/optee-test.inc
+require backports-meta-arm-wrynose/recipes-security/optee/optee-test.inc
 
-# v4.6.0
-SRCREV = "a9e9495f4d57b97022008ad11198195e7e044c5d"
+# v4.9.0
+SRCREV = "b27648ea8472cceceb8dda368a965c709066f7aa"
 
-LIC_FILES_CHKSUM = "file://LICENSE.md;md5=a8fa504109e4cd7ea575bc49ea4be560"
-
-SRC_URI += " \
-    file://0001-build-make-cmake-add-Werror-based-on-CFG_WERROR.patch \
-    file://0001-regression_1000-Re-order-the-include-of-sys-stat.h-h.patch \
-"
+LIC_FILES_CHKSUM = "file://LICENSE.md;md5=a8fa504109e4cd7ea575bc49ea4be560 \
+                    file://LICENSE-BSD;md5=dca16d6efa93b55d0fd662ae5cd6feeb \
+                    file://LICENSE-GPL;md5=10e86b5d2a6cb0e2b9dcfdd26a9ac58d \
+                   "
 
 # Include ffa_spmc test group if the SPMC test is enabled.
 # Supported after op-tee v3.20

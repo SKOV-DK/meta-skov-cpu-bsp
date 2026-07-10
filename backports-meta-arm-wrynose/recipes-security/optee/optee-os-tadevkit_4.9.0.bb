@@ -1,4 +1,4 @@
-require backports-meta-arm-whinlatter/recipes-security/optee/optee-os_${PV}.bb
+require backports-meta-arm-wrynose/recipes-security/optee/optee-os_${PV}.bb
 
 SUMMARY = "OP-TEE Trusted OS TA devkit"
 DESCRIPTION = "OP-TEE TA devkit for build TAs"
