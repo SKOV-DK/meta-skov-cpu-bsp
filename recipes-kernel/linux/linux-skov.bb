@@ -40,3 +40,5 @@ RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
 
 KERNEL_IMAGETYPES:append:imx8-cpu = " Image.gz"
 KERNEL_IMAGETYPES:append:imx8s-cpu = " Image.gz"
+KERNEL_MODULE_PROBECONF += "rndis_host"
+module_conf_rndis_host = "blacklist rndis_host"
