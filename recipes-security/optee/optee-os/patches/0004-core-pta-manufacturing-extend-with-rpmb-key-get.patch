@@ -1,0 +1,105 @@
+From: Fabian Pflug <f.pflug@pengutronix.de>
+Date: Mon, 20 Apr 2026 13:06:52 +0200
+Subject: [PATCH] core: pta: manufacturing: extend with rpmb key get
+
+Add a function to query the RPMB key corresponding to a given CID. This
+allows to remove the write key code from OP-TEE and push it into the
+non-secure world.
+
+Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
+---
+ core/pta/manufacturing.c                | 42 +++++++++++++++++++++++++++++++++
+ lib/libutee/include/pta_manufacturing.h | 13 ++++++++++
+ 2 files changed, 55 insertions(+)
+
+diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
+index 1694c02c7f1a..e632405d8d8a 100644
+--- a/core/pta/manufacturing.c
++++ b/core/pta/manufacturing.c
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include <kernel/pseudo_ta.h>
++#include <tee/tee_fs.h>
+ #include <pta_manufacturing.h>
+ #include <crypto/crypto.h>
+ 
+@@ -82,6 +83,45 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
+ 	return pta_manufacturing_set_state(next);
+ }
+ 
++static TEE_Result manufacturing_get_rpmb_key(uint32_t param_types,
++					     TEE_Param params[TEE_NUM_PARAMS])
++{
++	uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
++					  TEE_PARAM_TYPE_MEMREF_OUTPUT,
++					  TEE_PARAM_TYPE_NONE,
++					  TEE_PARAM_TYPE_NONE);
++	enum pta_manufacturing_state current = PTA_MANUFACTURING_STATE_LOCKED;
++	TEE_Result res = TEE_ERROR_GENERIC;
++
++	if (exp_pt != param_types) {
++		DMSG("Wrong parameters");
++		return TEE_ERROR_BAD_PARAMETERS;
++	}
++	if (params[0].memref.size != RPMB_EMMC_CID_SIZE) {
++		DMSG("Wrong buffer size %d != %d", params[0].memref.size,
++		     RPMB_EMMC_CID_SIZE);
++		return TEE_ERROR_BAD_PARAMETERS;
++	}
++
++	res = pta_manufacturing_query_state(&current);
++	if (res)
++		return res;
++
++	/* make glitching harder by adding a random delay. */
++	rand_delay();
++
++	if (current > PTA_MANUFACTURING_STATE_OPEN)
++		return TEE_ERROR_ACCESS_DENIED;
++
++	if (!plat_rpmb_key_is_ready()) {
++		DMSG("platform indicates RPMB key is not ready");
++		return TEE_ERROR_BAD_STATE;
++	}
++
++	return tee_rpmb_key_gen(params[0].memref.buffer,
++				params[1].memref.buffer, params[1].memref.size);
++}
++
+ static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
+ 				 uint32_t param_types,
+ 				 TEE_Param params[TEE_NUM_PARAMS])
+@@ -91,6 +131,8 @@ static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
+ 		return manufacturing_get_state(param_types, params);
+ 	case PTA_MANUFACTURING_SET_STATE:
+ 		return manufacturing_set_state(param_types, params);
++	case PTA_MANUFACTURING_GET_RPMB_KEY:
++		return manufacturing_get_rpmb_key(param_types, params);
+ 	default:
+ 		break;
+ 	}
+diff --git a/lib/libutee/include/pta_manufacturing.h b/lib/libutee/include/pta_manufacturing.h
+index 2458fa8e88d5..72e256ee74d2 100644
+--- a/lib/libutee/include/pta_manufacturing.h
++++ b/lib/libutee/include/pta_manufacturing.h
+@@ -41,6 +41,19 @@ enum pta_manufacturing_state {
+  */
+ #define PTA_MANUFACTURING_SET_STATE	0x1
+ 
++/*
++ * Get the RPMB key for the specified CID
++ *
++ * [in]		memref[0]	CID
++ * [out]	memref[1]	RPMB Key
++ *
++ * Result:
++ * TEE_SUCCESS - Invoke command success
++ * TEE_ERROR_BAD_PARAMETERS - Incorrect params or buffer sizes
++ * TEE_ERROR_ACCESS_DENIED - Manufacturing state does not allow access to key
++ */
++#define PTA_MANUFACTURING_GET_RPMB_KEY	0x2
++
+ /**
+  * Weak functions to be overwritten by platforms to store and retrieve the
+  * state.
