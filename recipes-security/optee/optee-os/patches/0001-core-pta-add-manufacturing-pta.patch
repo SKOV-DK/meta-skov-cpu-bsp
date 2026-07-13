@@ -1,0 +1,205 @@
+From: Fabian Pflug <f.pflug@pengutronix.de>
+Date: Mon, 20 Apr 2026 11:47:06 +0200
+Subject: [PATCH] core: pta: add manufacturing pta
+
+The idea behind the manufacturing PTA is that it allows to help access
+all data needed during manufacturing and then close of the device to
+disable access.
+
+The manufacturing PTA will be developed to be a replacement for
+RPMB_WRITE_KEY, but with the possibility for additional functionality.
+
+Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
+---
+ core/pta/manufacturing.c                | 85 +++++++++++++++++++++++++++++++++
+ core/pta/sub.mk                         |  3 +-
+ lib/libutee/include/pta_manufacturing.h | 52 ++++++++++++++++++++
+ mk/config.mk                            |  5 ++
+ 4 files changed, 144 insertions(+), 1 deletion(-)
+ create mode 100644 core/pta/manufacturing.c
+ create mode 100644 lib/libutee/include/pta_manufacturing.h
+
+diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
+new file mode 100644
+index 000000000000..02c7d7488dbb
+--- /dev/null
++++ b/core/pta/manufacturing.c
+@@ -0,0 +1,85 @@
++// SPDX-License-Identifier: BSD-2-Clause
++/*
++ * Copyright (c) 2026, Pengutronix e.K.
++ */
++
++#include <kernel/pseudo_ta.h>
++#include <pta_manufacturing.h>
++
++TEE_Result __weak
++pta_manufacturing_query_state(enum pta_manufacturing_state *state)
++{
++	*state = PTA_MANUFACTURING_STATE_UNKNOWN;
++	return TEE_SUCCESS;
++}
++
++TEE_Result __weak
++pta_manufacturing_set_state(enum pta_manufacturing_state state __unused)
++{
++	return TEE_ERROR_NOT_IMPLEMENTED;
++}
++
++static TEE_Result manufacturing_get_state(uint32_t param_types,
++					  TEE_Param params[TEE_NUM_PARAMS])
++{
++	uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_OUTPUT,
++					  TEE_PARAM_TYPE_NONE,
++					  TEE_PARAM_TYPE_NONE,
++					  TEE_PARAM_TYPE_NONE);
++
++	if (exp_pt != param_types) {
++		DMSG("Wrong parameters");
++		return TEE_ERROR_BAD_PARAMETERS;
++	}
++
++	return pta_manufacturing_query_state(&params[0].value.a);
++}
++
++static TEE_Result manufacturing_set_state(uint32_t param_types,
++					  TEE_Param params[TEE_NUM_PARAMS])
++{
++	uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
++					  TEE_PARAM_TYPE_NONE,
++					  TEE_PARAM_TYPE_NONE,
++					  TEE_PARAM_TYPE_NONE);
++	enum pta_manufacturing_state next = PTA_MANUFACTURING_STATE_UNKNOWN;
++	enum pta_manufacturing_state current = PTA_MANUFACTURING_STATE_LOCKED;
++	TEE_Result res = TEE_ERROR_GENERIC;
++
++	if (exp_pt != param_types) {
++		DMSG("Wrong parameters");
++		return TEE_ERROR_BAD_PARAMETERS;
++	}
++
++	next = (enum pta_manufacturing_state)params[0].value.a;
++	res = pta_manufacturing_query_state(&current);
++	if (res)
++		return res;
++
++	if (next < current)
++		return TEE_ERROR_SECURITY;
++
++	if (next == current)
++		return TEE_SUCCESS;
++
++	return pta_manufacturing_set_state(next);
++}
++
++static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
++				 uint32_t param_types,
++				 TEE_Param params[TEE_NUM_PARAMS])
++{
++	switch (cmd_id) {
++	case PTA_MANUFACTURING_QUERY_STATE:
++		return manufacturing_get_state(param_types, params);
++	case PTA_MANUFACTURING_SET_STATE:
++		return manufacturing_set_state(param_types, params);
++	default:
++		break;
++	}
++	return TEE_ERROR_NOT_IMPLEMENTED;
++}
++
++pseudo_ta_register(.uuid = PTA_MANUFACTURING_UUID, .name = "manufacturing",
++		   .flags = PTA_DEFAULT_FLAGS,
++		   .invoke_command_entry_point = invoke_command);
+diff --git a/core/pta/sub.mk b/core/pta/sub.mk
+index 42fa03302c1a..de1c739a02db 100644
+--- a/core/pta/sub.mk
++++ b/core/pta/sub.mk
+@@ -14,6 +14,7 @@ srcs-$(CFG_SCMI_PTA) += scmi.c
+ srcs-$(CFG_HWRNG_PTA) += hwrng.c
+ srcs-$(CFG_RTC_PTA) += rtc.c
+ srcs-$(CFG_WIDEVINE_PTA) += widevine.c
++srcs-$(CFG_MANUFACTURING_PTA) += manufacturing.c
+ 
+ subdirs-y += bcm
+ subdirs-y += stm32mp
+@@ -29,4 +30,4 @@ depends-rproc_pub_key = $(RPROC_SIGN_KEY) scripts/pem_to_pub_c.py
+ recipe-rproc_pub_key = $(PYTHON3) scripts/pem_to_pub_c.py \
+ 	--prefix rproc_pub_key --key $(RPROC_SIGN_KEY)    \
+ 	--out $(sub-dir-out)/rproc_pub_key.c
+-endif
+\ No newline at end of file
++endif
+diff --git a/lib/libutee/include/pta_manufacturing.h b/lib/libutee/include/pta_manufacturing.h
+new file mode 100644
+index 000000000000..2458fa8e88d5
+--- /dev/null
++++ b/lib/libutee/include/pta_manufacturing.h
+@@ -0,0 +1,52 @@
++/* SPDX-License-Identifier: BSD-2-Clause */
++/*
++ * Copyright (c) 2026, Pengutronix e.K.
++ */
++
++#ifndef __PTA_MANUFACTURING_H
++#define __PTA_MANUFACTURING_H
++
++#define PTA_MANUFACTURING_UUID { 0x74cc7cc3, 0xe393, 0x4ed9, { \
++			 0xa0, 0xf2, 0x95, 0x72, 0xf5, 0x87, 0x83, 0xb2 } }
++
++enum pta_manufacturing_state {
++	PTA_MANUFACTURING_STATE_UNKNOWN    = -1,
++	PTA_MANUFACTURING_STATE_OPEN       = 0,
++	PTA_MANUFACTURING_STATE_LOCKED     = 1,
++};
++
++/*
++ * Query the key state of manufacturing.
++ *
++ * [out]	value[0].a	one of PTA_MANUFACTURING_STATE_*
++ *
++ * Result:
++ * TEE_SUCCESS - Invoke command success
++ */
++#define PTA_MANUFACTURING_QUERY_STATE	0x0
++
++/*
++ * Set the manufacturing state.
++ *
++ * Set the state of manufacturing. It is only allowed to increase, never to
++ * decrease the manufacturing state.
++ * Setting the same state as currently active will result in success.
++ *
++ * [in]		value[0].a	one of PTA_MANUFACTURING_STATE_*
++ *
++ * Result:
++ * TEE_SUCCESS - Invoke command success
++ * TEE_ERROR_BAD_PARAMETERS - Incorrect input param
++ * TEE_ERROR_SECURITY - Input parameter is lower then current setting
++ */
++#define PTA_MANUFACTURING_SET_STATE	0x1
++
++/**
++ * Weak functions to be overwritten by platforms to store and retrieve the
++ * state.
++ */
++TEE_Result pta_manufacturing_query_state(enum pta_manufacturing_state *state);
++
++TEE_Result pta_manufacturing_set_state(enum pta_manufacturing_state state);
++
++#endif /* __PTA_MANUFACTURING_H */
+diff --git a/mk/config.mk b/mk/config.mk
+index ce156ed21ab0..e550717951f1 100644
+--- a/mk/config.mk
++++ b/mk/config.mk
+@@ -716,6 +716,11 @@ $(eval $(call cfg-depends-all,CFG_SECSTOR_TA_MGMT_PTA,CFG_SECSTOR_TA))
+ CFG_SYSTEM_PTA ?= $(CFG_WITH_USER_TA)
+ $(eval $(call cfg-depends-all,CFG_SYSTEM_PTA,CFG_WITH_USER_TA))
+ 
++# The manufacturing pseudo TA provides an interface to set and query the
++# manufacturing state of the device and to query information needed for
++# manufacturing.
++CFG_MANUFACTURING_PTA ?= n
++
+ # Enable the pseudo TA for enumeration of TEE based devices for the normal
+ # world OS.
+ CFG_DEVICE_ENUM_PTA ?= y

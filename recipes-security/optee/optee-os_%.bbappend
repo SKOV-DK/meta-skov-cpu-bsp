@@ -7,9 +7,10 @@ PV = "${UMPF_PV}"
 # would otherwise fail to build. It should be removed starting with whinlatter.
 # [1] eea748608c82 ("arm: WORKDIR fixes")
 S = "${WORKDIR}/git"
+OPTEE_SRC_URI_BRANCH_OR_TAG = "branch=master"
 
 COMPATIBLE_MACHINE:imx8s-cpu ?= "imx8s-cpu"
-OPTEEMACHINE:imx8s-cpu = "imx-mx8mp"
+OPTEEMACHINE:imx8s-cpu = "imx-mx8mpevk"
 
 SKOV_OPTEE_DEVEL ?= "0"
 SKOV_OPTEE_DEVEL[doc] = "Set to 1 to have OP-TEE send debugging output to the console."
@@ -67,4 +68,10 @@ EXTRA_OEMAKE:append = " \
 # Conditionally enable writing of the RPMB security key
 EXTRA_OEMAKE:append = " \
     CFG_RPMB_WRITE_KEY=${@oe.utils.vartrue('SKOV_OPTEE_RPMB_WRITE_KEY', 'y', 'n', d)} \
+"
+
+# Enable and configure Manufacturing-pTA
+EXTRA_OEMAKE:append = " \
+    CFG_MANUFACTURING_PTA=y \
+    CFG_IMX_OCOTP_MANUFACTURING_BIT=0 \
 "

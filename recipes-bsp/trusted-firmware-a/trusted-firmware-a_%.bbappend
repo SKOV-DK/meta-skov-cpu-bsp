@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-require files/patches/series.inc
-PV = "${UMPF_PV}"
+# require files/patches/series.inc
+# PV = "${UMPF_PV}"
 
 COMPATIBLE_MACHINE = "imx8-cpu|imx8s-cpu"
 
@@ -26,7 +26,7 @@ BAREBOX_TFA_BIN:imx8s-cpu = "${TFA_PLATFORM}-${TFA_BUILD_TARGET}.bin-optee"
 
 do_deploy:append:mx8m-generic-bsp() {
     # Provide the TF-A binary under the filename that barebox expects
-    ln -s ${TFA_BUILD_TARGET}-${TFA_PLATFORM}.bin ${DEPLOYDIR}/${BAREBOX_TFA_BIN}
+    ln -s ${PN}/${TFA_BUILD_TARGET}.bin ${DEPLOYDIR}/${BAREBOX_TFA_BIN}
 }
 
 # The following lines partially revert meta-arm's commit [1], as the recipe would

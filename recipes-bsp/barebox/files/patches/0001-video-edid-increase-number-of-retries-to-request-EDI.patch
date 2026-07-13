@@ -20,7 +20,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/video/edid.c b/drivers/video/edid.c
-index 7e6747ccd521..2baf6646d9e5 100644
+index 4491dec547c4..5dcc8c4dcd2f 100644
 --- a/drivers/video/edid.c
 +++ b/drivers/video/edid.c
 @@ -29,6 +29,7 @@
@@ -31,7 +31,7 @@ index 7e6747ccd521..2baf6646d9e5 100644
  
  #include "edid.h"
  
-@@ -813,6 +814,10 @@ edid_do_read_i2c(struct i2c_adapter *adapter, unsigned char *buf,
+@@ -811,6 +812,10 @@ edid_do_read_i2c(struct i2c_adapter *adapter, unsigned char *buf,
  	unsigned char segment = block >> 1;
  	unsigned char xfers = segment ? 3 : 2;
  	int ret, retries = 5;

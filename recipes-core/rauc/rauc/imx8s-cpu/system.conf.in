@@ -6,6 +6,7 @@ bootloader=barebox
 mountprefix=/run/rauc
 data-directory=@RAUC_DATA_DIR@
 statusfile=@RAUC_DATA_DIR@/system.raucs
+bundle-formats=-plain
 
 [keyring]
 path=@RAUC_KEYRING_FILE@
