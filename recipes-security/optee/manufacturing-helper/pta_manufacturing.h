@@ -10,9 +10,9 @@
 	{ 0x74cc7cc3, 0xe393, 0x4ed9, { 0xa0, 0xf2, 0x95, 0x72, 0xf5, 0x87, 0x83, 0xb2 } }
 
 enum pta_manufacturing_state {
-	PTA_MANUFACTURING_STATE_UNKNOWN  = -1,
+	PTA_MANUFACTURING_STATE_UNKNOWN = -1,
 	PTA_MANUFACTURING_STATE_UNLOCKED = 0,
-	PTA_MANUFACTURING_STATE_LOCKED   = 1,
+	PTA_MANUFACTURING_STATE_LOCKED = 1,
 };
 
 /*
@@ -23,7 +23,7 @@ enum pta_manufacturing_state {
  * Result:
  * TEE_SUCCESS - Invoke command success
  */
-#define PTA_MANUFACTURING_QUERY_STATE	0x0
+#define PTA_MANUFACTURING_QUERY_STATE 0x0
 
 /*
  * Set the manufacturing state.
@@ -39,7 +39,7 @@ enum pta_manufacturing_state {
  * TEE_ERROR_BAD_PARAMETERS - Incorrect input param
  * TEE_ERROR_SECURITY - Input parameter is lower than current setting
  */
-#define PTA_MANUFACTURING_SET_STATE	0x1
+#define PTA_MANUFACTURING_SET_STATE 0x1
 
 /*
  * Get the RPMB key for the specified CID
@@ -52,6 +52,6 @@ enum pta_manufacturing_state {
  * TEE_ERROR_BAD_PARAMETERS - Incorrect params or buffer sizes
  * TEE_ERROR_ACCESS_DENIED - Manufacturing state does not allow access to key
  */
-#define PTA_MANUFACTURING_GET_RPMB_KEY	0x2
+#define PTA_MANUFACTURING_GET_RPMB_KEY 0x2
 
 #endif /* __PTA_MANUFACTURING_H */
