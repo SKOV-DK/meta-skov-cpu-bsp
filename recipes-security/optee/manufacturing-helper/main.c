@@ -47,8 +47,8 @@ static TEEC_Result print_state(TEEC_Session *sess)
 	case PTA_MANUFACTURING_STATE_UNKNOWN:
 		printf("State is UNKNOWN\n");
 		break;
-	case PTA_MANUFACTURING_STATE_OPEN:
-		printf("State is OPEN\n");
+	case PTA_MANUFACTURING_STATE_UNLOCKED:
+		printf("State is UNLOCKED\n");
 		break;
 	case PTA_MANUFACTURING_STATE_LOCKED:
 		printf("State is LOCKED\n");
