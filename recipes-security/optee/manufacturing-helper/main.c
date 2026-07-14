@@ -156,8 +156,7 @@ static int burn_rpmb_key(uint16_t dev_id, uint8_t *rpmb_key, size_t key_length, 
 
 	snprintf(command, sizeof(command), "mmc rpmb write-key /dev/mmcblk%urpmb - 2>&1", dev_id);
 	if (verbose >= 1)
-		fprintf(stderr, "Start command '%s' and feed the binary key to its STDIN.\n",
-			command);
+		printf("Start command '%s' and feed the binary key to its STDIN.\n", command);
 
 	fp = popen(!dry_run ? command : "cat > /dev/null 2>&1", "w");
 	if (fp == NULL) {
@@ -250,6 +249,7 @@ int main(int argc, char *argv[])
 	bool status = false;
 	bool lock = false;
 
+	/* clang-format off */
 	static struct option long_options[] = { { "dry-run",   no_argument,       0, 'n' },
 						{ "verbose",   no_argument,       0, 'v' },
 						{ "status",    no_argument,       0, 's' },
@@ -257,6 +257,7 @@ int main(int argc, char *argv[])
 						{ "help",      no_argument,       0, 'h' },
 						{ "write-key", required_argument, 0, 'w' },
 						{ 0, 0, 0, 0 } };
+	/* clang-format on */
 
 	/*
 	 * getopt_long() shall not print error messages by itself
@@ -272,7 +273,7 @@ int main(int argc, char *argv[])
 
 		case 'n':
 			dry_run = true;
-			fprintf(stderr, "Performing a trial run without making any changes.\n");
+			printf("Performing a trial run without making any changes.\n");
 			break;
 
 		case 'v':
