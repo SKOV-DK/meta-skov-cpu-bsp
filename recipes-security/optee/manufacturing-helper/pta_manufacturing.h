@@ -16,7 +16,7 @@ enum pta_manufacturing_state {
 };
 
 /*
- * Query the key state of manufacturing.
+ * Query the state of manufacturing.
  *
  * [out]	value[0].a	one of PTA_MANUFACTURING_STATE_*
  *
@@ -37,7 +37,7 @@ enum pta_manufacturing_state {
  * Result:
  * TEE_SUCCESS - Invoke command success
  * TEE_ERROR_BAD_PARAMETERS - Incorrect input param
- * TEE_ERROR_SECURITY - Input parameter is lower then current setting
+ * TEE_ERROR_SECURITY - Input parameter is lower than current setting
  */
 #define PTA_MANUFACTURING_SET_STATE	0x1
 
