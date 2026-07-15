@@ -7,14 +7,14 @@ values.
 
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
- core/pta/manufacturing.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ core/pta/manufacturing.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
 diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
-index 02c7d7488dbb..1694c02c7f1a 100644
+index 1b68700a964a..d4f1d434763f 100644
 --- a/core/pta/manufacturing.c
 +++ b/core/pta/manufacturing.c
-@@ -5,6 +5,20 @@
+@@ -5,6 +5,25 @@
  
  #include <kernel/pseudo_ta.h>
  #include <pta_manufacturing.h>
@@ -22,20 +22,25 @@ index 02c7d7488dbb..1694c02c7f1a 100644
 +
 +static void rand_delay(void)
 +{
-+	volatile int loops = 0;
++	volatile int dummy = 0;
++	int loops = 0;
 +
 +	crypto_rng_read(&loops, sizeof(loops));
 +	loops &= 0x3FF; /* cap to 10 bits */
 +
 +	while (--loops >= 0) {
-+		loops++;
-+		loops--;
++		/*
++		 * dummy is marked volatile to prevent the compiler from
++		 * optimizing the loop and the expected delay away.
++		 */
++		dummy++;
++		dummy--;
 +	}
 +}
  
  TEE_Result __weak
  pta_manufacturing_query_state(enum pta_manufacturing_state *state)
-@@ -56,6 +70,9 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
+@@ -62,6 +81,9 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
  	if (res)
  		return res;
  

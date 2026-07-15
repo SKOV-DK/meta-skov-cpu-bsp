@@ -1,15 +1,16 @@
 From: Fabian Pflug <f.pflug@pengutronix.de>
 Date: Mon, 20 Apr 2026 09:58:10 +0200
-Subject: [PATCH] plat-imx: add state check for rpmb-pta with fuses
+Subject: [PATCH] plat-imx: add state implementation for rpmb-pta based on
+ eFuse
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Add a way to store the manufacturing state via fuses, by burning the
-first WIDTH general purpose fuse bits on i.MX MCU's.
-
-If only a subset of fuses get burnt then during readout the bits are
-filled not with 0, but with the bit of the last bit, resulting in a
-potentially higher value and less privileges.
+Add a way to lock the access to the RPMB authentication key by burning and
+checking a general purpose eFuse on i.MX SoCs.
 
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  core/arch/arm/plat-imx/conf.mk | 19 +++++++++++++++++++
  core/arch/arm/plat-imx/main.c  | 37 +++++++++++++++++++++++++++++++++++++
@@ -46,7 +47,7 @@ index 574d9b61979c..b29619237a8a 100644
  CFG_DDR_SIZE ?= 0x40000000
  CFG_NS_ENTRY_ADDR ?= 0x80800000
 diff --git a/core/arch/arm/plat-imx/main.c b/core/arch/arm/plat-imx/main.c
-index 500505074d78..5faa7bc5905e 100644
+index 500505074d78..e56260cf2ec7 100644
 --- a/core/arch/arm/plat-imx/main.c
 +++ b/core/arch/arm/plat-imx/main.c
 @@ -32,12 +32,14 @@
@@ -82,7 +83,7 @@ index 500505074d78..5faa7bc5905e 100644
 +	res = imx_ocotp_read(CFG_IMX_OCOTP_MANUFACTURING_BANK,
 +			     CFG_IMX_OCOTP_MANUFACTURING_WORD, &val);
 +	if (res) {
-+		EMSG("Failed to read manufacturing fuse(s).");
++		EMSG("Failed to read manufacturing fuse.");
 +		*state = PTA_MANUFACTURING_STATE_UNKNOWN;
 +		return res;
 +	}

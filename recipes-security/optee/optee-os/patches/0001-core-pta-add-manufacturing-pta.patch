@@ -11,20 +11,20 @@ RPMB_WRITE_KEY, but with the possibility for additional functionality.
 
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
- core/pta/manufacturing.c                | 85 +++++++++++++++++++++++++++++++++
+ core/pta/manufacturing.c                | 91 +++++++++++++++++++++++++++++++++
  core/pta/sub.mk                         |  3 +-
- lib/libutee/include/pta_manufacturing.h | 52 ++++++++++++++++++++
+ lib/libutee/include/pta_manufacturing.h | 55 ++++++++++++++++++++
  mk/config.mk                            |  5 ++
- 4 files changed, 144 insertions(+), 1 deletion(-)
+ 4 files changed, 153 insertions(+), 1 deletion(-)
  create mode 100644 core/pta/manufacturing.c
  create mode 100644 lib/libutee/include/pta_manufacturing.h
 
 diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
 new file mode 100644
-index 000000000000..02c7d7488dbb
+index 000000000000..1b68700a964a
 --- /dev/null
 +++ b/core/pta/manufacturing.c
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,91 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2026, Pengutronix e.K.
@@ -37,7 +37,7 @@ index 000000000000..02c7d7488dbb
 +pta_manufacturing_query_state(enum pta_manufacturing_state *state)
 +{
 +	*state = PTA_MANUFACTURING_STATE_UNKNOWN;
-+	return TEE_SUCCESS;
++	return TEE_ERROR_NOT_IMPLEMENTED;
 +}
 +
 +TEE_Result __weak
@@ -53,22 +53,28 @@ index 000000000000..02c7d7488dbb
 +					  TEE_PARAM_TYPE_NONE,
 +					  TEE_PARAM_TYPE_NONE,
 +					  TEE_PARAM_TYPE_NONE);
++	enum pta_manufacturing_state current = PTA_MANUFACTURING_STATE_UNKNOWN;
++	TEE_Result res = TEE_ERROR_GENERIC;
 +
 +	if (exp_pt != param_types) {
 +		DMSG("Wrong parameters");
 +		return TEE_ERROR_BAD_PARAMETERS;
 +	}
 +
-+	return pta_manufacturing_query_state(&params[0].value.a);
++	res = pta_manufacturing_query_state(&current);
++	if (res)
++		return res;
++
++	params[0].value.a = (uint32_t)current;
++	return TEE_SUCCESS;
 +}
 +
 +static TEE_Result manufacturing_set_state(uint32_t param_types,
 +					  TEE_Param params[TEE_NUM_PARAMS])
 +{
-+	uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
-+					  TEE_PARAM_TYPE_NONE,
-+					  TEE_PARAM_TYPE_NONE,
-+					  TEE_PARAM_TYPE_NONE);
++	uint32_t exp_pt =
++		TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT, TEE_PARAM_TYPE_NONE,
++				TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE);
 +	enum pta_manufacturing_state next = PTA_MANUFACTURING_STATE_UNKNOWN;
 +	enum pta_manufacturing_state current = PTA_MANUFACTURING_STATE_LOCKED;
 +	TEE_Result res = TEE_ERROR_GENERIC;
@@ -131,10 +137,10 @@ index 42fa03302c1a..de1c739a02db 100644
 +endif
 diff --git a/lib/libutee/include/pta_manufacturing.h b/lib/libutee/include/pta_manufacturing.h
 new file mode 100644
-index 000000000000..2458fa8e88d5
+index 000000000000..c9fdda144e1f
 --- /dev/null
 +++ b/lib/libutee/include/pta_manufacturing.h
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,55 @@
 +/* SPDX-License-Identifier: BSD-2-Clause */
 +/*
 + * Copyright (c) 2026, Pengutronix e.K.
@@ -143,24 +149,27 @@ index 000000000000..2458fa8e88d5
 +#ifndef __PTA_MANUFACTURING_H
 +#define __PTA_MANUFACTURING_H
 +
-+#define PTA_MANUFACTURING_UUID { 0x74cc7cc3, 0xe393, 0x4ed9, { \
-+			 0xa0, 0xf2, 0x95, 0x72, 0xf5, 0x87, 0x83, 0xb2 } }
++#define PTA_MANUFACTURING_UUID \
++	{ 0x74cc7cc3,          \
++	  0xe393,              \
++	  0x4ed9,              \
++	  { 0xa0, 0xf2, 0x95, 0x72, 0xf5, 0x87, 0x83, 0xb2 } }
 +
 +enum pta_manufacturing_state {
-+	PTA_MANUFACTURING_STATE_UNKNOWN    = -1,
-+	PTA_MANUFACTURING_STATE_OPEN       = 0,
-+	PTA_MANUFACTURING_STATE_LOCKED     = 1,
++	PTA_MANUFACTURING_STATE_UNKNOWN = -1,
++	PTA_MANUFACTURING_STATE_UNLOCKED = 0,
++	PTA_MANUFACTURING_STATE_LOCKED = 1,
 +};
 +
 +/*
-+ * Query the key state of manufacturing.
++ * Query the state of manufacturing.
 + *
 + * [out]	value[0].a	one of PTA_MANUFACTURING_STATE_*
 + *
 + * Result:
 + * TEE_SUCCESS - Invoke command success
 + */
-+#define PTA_MANUFACTURING_QUERY_STATE	0x0
++#define PTA_MANUFACTURING_QUERY_STATE 0x0
 +
 +/*
 + * Set the manufacturing state.
@@ -174,9 +183,9 @@ index 000000000000..2458fa8e88d5
 + * Result:
 + * TEE_SUCCESS - Invoke command success
 + * TEE_ERROR_BAD_PARAMETERS - Incorrect input param
-+ * TEE_ERROR_SECURITY - Input parameter is lower then current setting
++ * TEE_ERROR_SECURITY - Input parameter is lower than current setting
 + */
-+#define PTA_MANUFACTURING_SET_STATE	0x1
++#define PTA_MANUFACTURING_SET_STATE 0x1
 +
 +/**
 + * Weak functions to be overwritten by platforms to store and retrieve the
