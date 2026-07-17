@@ -13,7 +13,7 @@ Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
  2 files changed, 55 insertions(+)
 
 diff --git a/core/pta/manufacturing.c b/core/pta/manufacturing.c
-index 1694c02c7f1a..e632405d8d8a 100644
+index d4f1d434763f..527662994689 100644
 --- a/core/pta/manufacturing.c
 +++ b/core/pta/manufacturing.c
 @@ -4,6 +4,7 @@
@@ -24,7 +24,7 @@ index 1694c02c7f1a..e632405d8d8a 100644
  #include <pta_manufacturing.h>
  #include <crypto/crypto.h>
  
-@@ -82,6 +83,45 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
+@@ -93,6 +94,45 @@ static TEE_Result manufacturing_set_state(uint32_t param_types,
  	return pta_manufacturing_set_state(next);
  }
  
@@ -43,7 +43,7 @@ index 1694c02c7f1a..e632405d8d8a 100644
 +		return TEE_ERROR_BAD_PARAMETERS;
 +	}
 +	if (params[0].memref.size != RPMB_EMMC_CID_SIZE) {
-+		DMSG("Wrong buffer size %d != %d", params[0].memref.size,
++		DMSG("Wrong buffer size %ld != %d", params[0].memref.size,
 +		     RPMB_EMMC_CID_SIZE);
 +		return TEE_ERROR_BAD_PARAMETERS;
 +	}
@@ -55,7 +55,7 @@ index 1694c02c7f1a..e632405d8d8a 100644
 +	/* make glitching harder by adding a random delay. */
 +	rand_delay();
 +
-+	if (current > PTA_MANUFACTURING_STATE_OPEN)
++	if (current > PTA_MANUFACTURING_STATE_UNLOCKED)
 +		return TEE_ERROR_ACCESS_DENIED;
 +
 +	if (!plat_rpmb_key_is_ready()) {
@@ -70,7 +70,7 @@ index 1694c02c7f1a..e632405d8d8a 100644
  static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
  				 uint32_t param_types,
  				 TEE_Param params[TEE_NUM_PARAMS])
-@@ -91,6 +131,8 @@ static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
+@@ -102,6 +142,8 @@ static TEE_Result invoke_command(void *sess_ctx __unused, uint32_t cmd_id,
  		return manufacturing_get_state(param_types, params);
  	case PTA_MANUFACTURING_SET_STATE:
  		return manufacturing_set_state(param_types, params);
@@ -80,12 +80,12 @@ index 1694c02c7f1a..e632405d8d8a 100644
  		break;
  	}
 diff --git a/lib/libutee/include/pta_manufacturing.h b/lib/libutee/include/pta_manufacturing.h
-index 2458fa8e88d5..72e256ee74d2 100644
+index c9fdda144e1f..beaf3e3bd412 100644
 --- a/lib/libutee/include/pta_manufacturing.h
 +++ b/lib/libutee/include/pta_manufacturing.h
-@@ -41,6 +41,19 @@ enum pta_manufacturing_state {
+@@ -44,6 +44,19 @@ enum pta_manufacturing_state {
   */
- #define PTA_MANUFACTURING_SET_STATE	0x1
+ #define PTA_MANUFACTURING_SET_STATE 0x1
  
 +/*
 + * Get the RPMB key for the specified CID
@@ -98,7 +98,7 @@ index 2458fa8e88d5..72e256ee74d2 100644
 + * TEE_ERROR_BAD_PARAMETERS - Incorrect params or buffer sizes
 + * TEE_ERROR_ACCESS_DENIED - Manufacturing state does not allow access to key
 + */
-+#define PTA_MANUFACTURING_GET_RPMB_KEY	0x2
++#define PTA_MANUFACTURING_GET_RPMB_KEY 0x2
 +
  /**
   * Weak functions to be overwritten by platforms to store and retrieve the
