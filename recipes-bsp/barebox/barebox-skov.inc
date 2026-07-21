@@ -60,6 +60,11 @@ BAREBOX_HABV4_SIGNING_KEY_ROLE[doc] = "The i.MX HABv4 key role to use for signin
 # Remember to keep the value of barebox' CONFIG_HABV4_SRK_INDEX in sync!
 BAREBOX_HABV4_SIGNING_KEY_ROLE ?= "imx_habv4_srk1"
 
+BAREBOX_HABV4_GENERATE_SRK_TABLE[doc] = "Set to '1' to generate imx-srk-table.bin and imx-srk-fuse.bin from the HSM \
+    (requires all 4 SRK roles to be accessible). The generated files will be deployed to DEPLOY_DIR_IMAGE \
+    so they can be committed to the product layer. Default '0' expects pre-built artifacts via SRC_URI."
+BAREBOX_HABV4_GENERATE_SRK_TABLE ?= "0"
+
 # Remember to keep the value of barebox' CONFIG_CRYPTO_PUBLIC_KEYS in sync!
 FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
@@ -85,10 +90,16 @@ python __anonymous() {
 
     d.setVar("BAREBOX_SRK_INDEX", key_index)
 
-    # Add SRK table generation and check of indices as prefuncs.
-    d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
+    # Add SRK index check and OP-TEE check as prefuncs.
     d.appendVarFlag("do_compile", "prefuncs", " barebox_habv4_srk_index_check")
     d.appendVarFlag("do_compile", "prefuncs", " barebox_optee_check")
+
+    if d.getVar("BAREBOX_HABV4_GENERATE_SRK_TABLE") == "1":
+        # Generate the SRK table and fuse binary from the HSM (one-time operation).
+        d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_generate_imx_srk_table")
+    else:
+        # Expect pre-built artifacts from SRC_URI (provided by the product layer).
+        d.appendVarFlag("do_configure", "prefuncs", " barebox_habv4_prepare_srk_artifacts")
 }
 
 python barebox_habv4_srk_index_check() {
@@ -117,6 +128,21 @@ python barebox_optee_check() {
         bb.fatal(f"Unexpected CONFIG_OPTEE_SHM_SIZE, expected '{hex(expected_optee_shm_size)}', got '{hex(config_optee_shm_size)}'")
 }
 
+# The imx-srk-table.bin AND imx-srk-fuse.bin are one-time artifacts derived 
+# solely from the four SRK *public* keys.
+# They are safe to store in the product layer under version
+# control and must only be regenerated if the PKI tree is rebuilt from scratch.
+#
+# To generate, ensure all 4 SRK HSM roles are accessible and set the folloing in local.conf:
+#   BAREBOX_HABV4_GENERATE_SRK_TABLE = "1"
+#
+# Run the build normally. Both artifacts are deployed to DEPLOY_DIR_IMAGE:
+#   imx-srk-table.bin  — SRK public key table (used by barebox/HAB at runtime)
+#   imx-srk-fuse.bin   — SHA-256 hash of the table (burned into eFuses once)
+#
+# Commit both files to the product layer and add them to SRC_URI in the
+# barebox.bbappend.
+# Remove BAREBOX_HABV4_GENERATE_SRK_TABLE from local.conf afterwards.
 barebox_habv4_generate_imx_srk_table() {
     signing_prepare
 
@@ -133,6 +159,25 @@ barebox_habv4_generate_imx_srk_table() {
 }
 # Make sure no previous key material is accidentally used.
 barebox_habv4_generate_imx_srk_table[cleandirs] = "${B}"
+
+# Validate that the SRK artifacts are found in the workdir
+# and copy them into the build directory.
+python barebox_habv4_prepare_srk_artifacts() {
+    import os
+    import shutil
+    workdir = d.getVar("WORKDIR")
+    b = d.getVar("B")
+    os.makedirs(b, exist_ok=True)
+    for f in ("imx-srk-table.bin", "imx-srk-fuse.bin"):
+        src = os.path.join(workdir, f)
+        if not os.path.exists(src):
+            bb.fatal(
+                f"{f} not found in WORKDIR. The product layer must provide "
+                "both imx-srk-table.bin and imx-srk-fuse.bin via SRC_URI "
+                "(e.g. in a barebox.bbappend in meta-sbc)."
+            )
+        shutil.copy2(src, os.path.join(b, f))
+}
 
 do_compile:prepend() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
@@ -163,6 +208,9 @@ do_install:append() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
         install -d ${D}/boot/
         install -m 0644 ${B}/imx-srk-fuse.bin ${D}/boot/
+        # Deploy generated SRK artifacts
+        install -m 0644 ${B}/imx-srk-table.bin ${DEPLOY_DIR_IMAGE}/
+        install -m 0644 ${B}/imx-srk-fuse.bin ${DEPLOY_DIR_IMAGE}/
     fi
 }
 
