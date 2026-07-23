@@ -1,5 +1,7 @@
 require recipes-bsp/barebox/barebox.inc
 
+COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu|imx8s-cpu"
+
 SRC_URI += "file://defconfig"
 
 # Maintained by Pengutronix
