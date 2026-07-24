@@ -26,6 +26,9 @@ do_compile:prepend () {
 	fi
 }
 
+BAREBOX_ENV_DIR[doc] = "Overlay the barebox built-in environment with the environment provided by the BSP if specified."
+BAREBOX_ENV_DIR = "${B}"
+
 BAREBOX_FIRMWARE_DEP = ""
 BAREBOX_FIRMWARE_DEP:mx8m-generic-bsp = "trusted-firmware-a:do_deploy imx-boot-firmware-files:do_deploy"
 BAREBOX_FIRMWARE_DEP:append:imx8s-cpu = " optee-os:do_deploy"
@@ -129,7 +132,7 @@ barebox_habv4_generate_imx_srk_table() {
 
     srktool --hab_ver 4 \
         --table "${B}/imx-srk-table.bin" \
-        --efuses "${B}/imx-srk-fuse.bin" \
+        --efuses "${BAREBOX_ENV_DIR}/imx-srk-fuse.bin" \
         --digest sha256 \
         --certs "${B}/srk1.der,${B}/srk2.der,${B}/srk3.der,${B}/srk4.der"
 }
@@ -143,7 +146,7 @@ do_compile:prepend() {
         # Prepare the installation of imx-srk-fuse.bin into barebox' environment
         # to simplify burning it
         mkdir -p "${WORKDIR}/env"
-        cp "${B}/imx-srk-fuse.bin" "${WORKDIR}/env"
+        cp "${BAREBOX_ENV_DIR}/imx-srk-fuse.bin" "${WORKDIR}/env"
 
         export CONFIG_HABV4_TABLE_BIN="${B}/imx-srk-table.bin"
 
@@ -164,7 +167,7 @@ do_compile:prepend() {
 do_install:append() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
         install -d ${D}/boot/
-        install -m 0644 ${B}/imx-srk-fuse.bin ${D}/boot/
+        install -m 0644 ${BAREBOX_ENV_DIR}/imx-srk-fuse.bin ${D}/boot/
     fi
 }
 
