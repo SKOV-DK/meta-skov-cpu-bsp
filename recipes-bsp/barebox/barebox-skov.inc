@@ -67,7 +67,6 @@ FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', ' \
                    virtual/fit-signing \
                    openssl-native \
-                   openssl \
                    ', '' , d)}"
 
 export HOST_EXTRACFLAGS
