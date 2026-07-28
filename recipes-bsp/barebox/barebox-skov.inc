@@ -184,8 +184,6 @@ BAREBOX_FIRMWARE_DEP:append:imx8s-cpu = " optee-os:do_deploy"
 
 do_compile[depends] += "${BAREBOX_FIRMWARE_DEP}"
 
-BAREBOX_FIRMWARE_DIR:mx8m-generic-bsp = "${S}/firmware"
-
 BAREBOX_TFA_BIN:imx8-cpu = "imx8mp-bl31.bin"
 BAREBOX_TFA_BIN:imx8s-cpu = "imx8mp-bl31.bin-optee"
 
