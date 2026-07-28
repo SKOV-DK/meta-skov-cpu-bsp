@@ -5,8 +5,7 @@ PROVIDES = "virtual/bootloader"
 
 inherit kernel-arch deploy cml1 pkgconfig
 
-LICENSE = "GPL-2.0-only"
-LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
+LICENSE ?= "GPL-2.0-only"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
@@ -160,7 +159,6 @@ require files/${MACHINE}/env/env.inc
 PV = "${UMPF_BASE}"
 DEPENDS += "coreutils-native lz4-native"
 
-LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
 SRC_URI[sha256sum] = "521b427efe4d5199641fd6440ed77226fed3ba7088ee2f6361b510187f700f09"
 
