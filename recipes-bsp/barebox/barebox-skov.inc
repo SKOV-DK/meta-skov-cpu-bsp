@@ -45,6 +45,7 @@ BAREBOX_BUILDSYSTEM_VERSION ??= "${@get_layer_rev(os.path.dirname(d.getVar('FILE
 EXTRA_OEMAKE = " \
   CROSS_COMPILE=${TARGET_PREFIX} -C ${S} O=${B} \
   BUILDSYSTEM_VERSION=${BAREBOX_BUILDSYSTEM_VERSION} \
+  CONFIG_EXTRA_FIRMWARE_DIR=${BAREBOX_FIRMWARE_DIR} \
 "
 
 do_configure() {
@@ -62,8 +63,8 @@ do_configure() {
 	cml1_do_configure
 }
 
-BAREBOX_FIRMWARE_DIR ?= ""
-BAREBOX_FIRMWARE_DIR[doc] = "Overwrite barebox' firmware blobs search directory (CONFIG_EXTRA_FIRMWARE_DIR) with this path"
+BAREBOX_FIRMWARE_DIR[doc] = "Overwrite barebox' firmware blobs search directory (CONFIG_EXTRA_FIRMWARE_DIR) with this path, default ${B}/firmware"
+BAREBOX_FIRMWARE_DIR ??= "${B}/firmware"
 
 do_compile () {
 	# If there is an 'env' directory, append its content
@@ -75,12 +76,6 @@ do_compile () {
 	        sed -i -e "s,^\(CONFIG_DEFAULT_ENVIRONMENT_PATH=.*\)\"$,\1 .yocto-defaultenv\"," \
 		                ${B}/.config; \
 
-	fi
-
-	# If ${BAREBOX_FIRMWARE_DIR} is set, use that for CONFIG_EXTRA_FIRMWARE_DIR
-	if [ -n "${BAREBOX_FIRMWARE_DIR}" ]; then
-		sed -i -e "s,^\(CONFIG_EXTRA_FIRMWARE_DIR=\"\).*\"$,\1${BAREBOX_FIRMWARE_DIR}\"," \
-				${B}/.config
 	fi
 
 	# Barebox uses pkg-config only for building native tools
