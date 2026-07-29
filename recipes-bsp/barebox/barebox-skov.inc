@@ -12,6 +12,9 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 DEPENDS += "bison-native flex-native lz4-native"
 
+S = "${WORKDIR}/barebox-${PV}"
+B = "${WORKDIR}/build"
+
 # For some platforms and configuration, the barebox build process will require
 # additional host tools that can be activated/deactivated here.
 PACKAGECONFIG ??= "openssl libusb fit"
@@ -20,15 +23,11 @@ PACKAGECONFIG[openssl] = ",,openssl-native"
 PACKAGECONFIG[libusb] = ",,libusb1-native"
 PACKAGECONFIG[fit] = ",,u-boot-tools-native dtc-native"
 
+# unlike the kernel, barebox may build against host tools like openssl
+export HOST_EXTRACFLAGS
+
 PACKAGES += "${PN}-bareboxenv ${PN}-bareboxcrc32 ${PN}-kernel-install \
          ${PN}-bareboximd"
-
-SRC_URI = "http://barebox.org/download/barebox-${PV}.tar.bz2"
-
-S = "${WORKDIR}/barebox-${PV}"
-B = "${WORKDIR}/build"
-
-BAREBOX_CONFIG ?= ""
 
 def find_cfgs(d):
     sources=src_patches(d, True)
@@ -46,13 +45,20 @@ def get_layer_rev(path):
         rev = ""
     return rev.strip()
 
+BAREBOX_BUILDSYSTEM_VERSION[doc] = "Build system version to add to the barebox image. By default this is the git description of the containing layer."
 BAREBOX_BUILDSYSTEM_VERSION ??= "${@get_layer_rev(os.path.dirname(d.getVar('FILE')))}"
+
+BAREBOX_FIRMWARE_DIR[doc] = "Overwrite barebox' firmware blobs search directory (CONFIG_EXTRA_FIRMWARE_DIR) with this path, default ${B}/firmware"
+BAREBOX_FIRMWARE_DIR ??= "${B}/firmware"
 
 EXTRA_OEMAKE = " \
   CROSS_COMPILE=${TARGET_PREFIX} -C ${S} O=${B} \
   BUILDSYSTEM_VERSION=${BAREBOX_BUILDSYSTEM_VERSION} \
   CONFIG_EXTRA_FIRMWARE_DIR=${BAREBOX_FIRMWARE_DIR} \
 "
+
+BAREBOX_CONFIG[doc] = "The barebox kconfig defconfig file. Not used if a file called defconfig is added to the SRC_URI."
+BAREBOX_CONFIG ?= ""
 
 do_configure() {
 	if [ -e ${WORKDIR}/defconfig ]; then
@@ -69,8 +75,8 @@ do_configure() {
 	cml1_do_configure
 }
 
-BAREBOX_FIRMWARE_DIR[doc] = "Overwrite barebox' firmware blobs search directory (CONFIG_EXTRA_FIRMWARE_DIR) with this path, default ${B}/firmware"
-BAREBOX_FIRMWARE_DIR ??= "${B}/firmware"
+BAREBOX_ENV_DIR[doc] = "Overlay the barebox built-in environment with the environment provided by the BSP if specified."
+BAREBOX_ENV_DIR ??= "${UNPACKDIR}/env/"
 
 do_compile () {
 	# If there is an 'env' directory, append its content
@@ -157,7 +163,10 @@ addtask deploy before do_build after do_compile
 
 COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu|imx8s-cpu"
 
-SRC_URI += "file://defconfig"
+SRC_URI = " \
+    http://barebox.org/download/barebox-${PV}.tar.bz2 \
+    file://defconfig \
+"
 
 # Maintained by Pengutronix
 require files/patches/series.inc
@@ -180,7 +189,6 @@ do_compile:prepend () {
 	fi
 }
 
-BAREBOX_ENV_DIR[doc] = "Overlay the barebox built-in environment with the environment provided by the BSP if specified."
 BAREBOX_ENV_DIR = "${B}"
 
 BAREBOX_FIRMWARE_DEP = ""
@@ -219,8 +227,6 @@ FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'virtual/fit-signing', '', d)}"
 
 PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'openssl', '', d)} fit"
-
-export HOST_EXTRACFLAGS
 
 python __anonymous() {
     if not bb.utils.contains("MACHINE_FEATURES", "habv4", True, False, d):
