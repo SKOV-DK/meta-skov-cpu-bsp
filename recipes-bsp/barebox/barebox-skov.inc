@@ -10,7 +10,15 @@ PROVIDES += "virtual/bootloader"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-DEPENDS = "libusb1-native lzop-native bison-native flex-native"
+DEPENDS += "bison-native flex-native lz4-native"
+
+# For some platforms and configuration, the barebox build process will require
+# additional host tools that can be activated/deactivated here.
+PACKAGECONFIG ??= "openssl libusb fit"
+
+PACKAGECONFIG[openssl] = ",,openssl-native"
+PACKAGECONFIG[libusb] = ",,libusb1-native"
+PACKAGECONFIG[fit] = ",,u-boot-tools-native dtc-native"
 
 PACKAGES += "${PN}-bareboxenv ${PN}-bareboxcrc32 ${PN}-kernel-install \
          ${PN}-bareboximd"
@@ -158,7 +166,7 @@ require files/patches-skov/series.inc
 require files/${MACHINE}/env/env.inc
 
 PV = "${UMPF_BASE}"
-DEPENDS += "coreutils-native lz4-native"
+DEPENDS += "coreutils-native lzop-native"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
 SRC_URI[sha256sum] = "521b427efe4d5199641fd6440ed77226fed3ba7088ee2f6361b510187f700f09"
@@ -208,10 +216,9 @@ inherit barebox-habv4
 # Remember to keep the value of barebox' CONFIG_CRYPTO_PUBLIC_KEYS in sync!
 FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
-DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', ' \
-                   virtual/fit-signing \
-                   openssl-native \
-                   ', '' , d)}"
+DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'virtual/fit-signing', '', d)}"
+
+PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'openssl', '', d)}"
 
 export HOST_EXTRACFLAGS
 
