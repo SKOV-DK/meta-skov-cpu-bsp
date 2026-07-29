@@ -218,7 +218,7 @@ FITIMAGE_SIGNING_KEY_ROLE ?= "fit"
 
 DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'virtual/fit-signing', '', d)}"
 
-PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'openssl', '', d)}"
+PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'openssl', '', d)} fit"
 
 export HOST_EXTRACFLAGS
 
