@@ -14,6 +14,8 @@ DEPENDS += "bison-native flex-native lz4-native"
 
 S = "${WORKDIR}/barebox-${PV}"
 B = "${WORKDIR}/build"
+KBUILD_OUTPUT = "${B}"
+OE_TERMINAL_EXPORTS += "KBUILD_OUTPUT"
 
 # For some platforms and configuration, the barebox build process will require
 # additional host tools that can be activated/deactivated here.
@@ -22,6 +24,9 @@ PACKAGECONFIG ??= "openssl libusb fit"
 PACKAGECONFIG[openssl] = ",,openssl-native"
 PACKAGECONFIG[libusb] = ",,libusb1-native"
 PACKAGECONFIG[fit] = ",,u-boot-tools-native dtc-native"
+
+export KBUILD_BUILD_USER ?= "oe-user"
+export KBUILD_BUILD_HOST ?= "oe-host"
 
 # unlike the kernel, barebox may build against host tools like openssl
 export HOST_EXTRACFLAGS
