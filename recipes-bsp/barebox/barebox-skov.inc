@@ -91,6 +91,12 @@ BAREBOX_ENV_DIR[doc] = "Overlay the barebox built-in environment with the enviro
 BAREBOX_ENV_DIR ??= "${UNPACKDIR}/env/"
 
 do_compile () {
+	export userccflags="${TARGET_LDFLAGS}${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS}"
+	unset LDFLAGS
+	unset CFLAGS
+	unset CPPFLAGS
+	unset CXXFLAGS
+	unset MACHINE
 	# If there is an 'env' directory, append its content
 	# to the compiled environment
 	if [ -d ${WORKDIR}/env/ ]; then \
@@ -106,13 +112,6 @@ do_compile () {
 	export PKG_CONFIG_LIBDIR="${STAGING_DIR_NATIVE}${libdir}/pkgconfig:${STAGING_DIR_NATIVE}/usr/share/pkgconfig"
 	export PKG_CONFIG_SYSROOT_DIR=
 	export PKG_CONFIG_PATH="${STAGING_DIR_NATIVE}"
-
-	export userccflags="${TARGET_LDFLAGS}${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS}"
-	unset LDFLAGS
-	unset CFLAGS
-	unset CPPFLAGS
-	unset CXXFLAGS
-	unset MACHINE
 
 	oe_runmake
 }
