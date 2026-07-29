@@ -63,6 +63,15 @@ BAREBOX_CONFIG:qemuarm = "multi_v7_defconfig"
 BAREBOX_CONFIG:qemuarm64 = "multi_v8_defconfig"
 BAREBOX_CONFIG:qemux86-64 = "efi_defconfig"
 
+# prevent from acting as non-buildable provider
+python () {
+    bareboxconfig = d.getVar('BAREBOX_CONFIG')
+    bareboxdefconfig = 'file://defconfig' in d.getVar('SRC_URI')
+
+    if not bareboxconfig and not bareboxdefconfig:
+        raise bb.parse.SkipRecipe("BAREBOX_CONFIG must be set in the %s machine configuration or file://defconfig must be given in SRC_URI." % d.getVar("MACHINE"))
+}
+
 do_configure() {
 	if [ -e ${WORKDIR}/defconfig ]; then
 		cp ${WORKDIR}/defconfig ${B}/.config
