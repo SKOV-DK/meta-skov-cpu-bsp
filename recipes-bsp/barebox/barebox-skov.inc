@@ -29,15 +29,6 @@ export HOST_EXTRACFLAGS
 PACKAGES += "${PN}-bareboxenv ${PN}-bareboxcrc32 ${PN}-kernel-install \
          ${PN}-bareboximd"
 
-def find_cfgs(d):
-    sources=src_patches(d, True)
-    sources_list=[]
-    for s in sources:
-        if s.endswith('.cfg'):
-            sources_list.append(s)
-
-    return sources_list
-
 def get_layer_rev(path):
     try:
         rev, _ = bb.process.run("git describe --match='' --always --dirty --broken", cwd=path)
