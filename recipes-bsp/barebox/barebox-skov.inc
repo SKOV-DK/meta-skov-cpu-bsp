@@ -1,11 +1,12 @@
 SUMMARY = "Barebox - a bootloader that inherits the best of U-Boot and the Linux kernel"
 HOMEPAGE = "http://www.barebox.org/"
 SECTION = "bootloaders"
-PROVIDES = "virtual/bootloader"
 
 inherit kernel-arch deploy cml1 pkgconfig
 
 LICENSE ?= "GPL-2.0-only"
+
+PROVIDES += "virtual/bootloader"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
