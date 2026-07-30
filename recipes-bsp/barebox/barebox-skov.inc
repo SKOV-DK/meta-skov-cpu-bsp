@@ -99,9 +99,9 @@ do_compile () {
 	unset MACHINE
 	# If there is an 'env' directory, append its content
 	# to the compiled environment
-	if [ -d ${WORKDIR}/env/ ]; then \
+	if [ -d ${BAREBOX_ENV_DIR} ]; then \
 		mkdir -p ${S}/.yocto-defaultenv
-		cp -r ${WORKDIR}/env/* ${S}/.yocto-defaultenv/; \
+		cp -r ${BAREBOX_ENV_DIR}/* ${S}/.yocto-defaultenv/; \
 		grep -q .yocto-defaultenv ${B}/.config || \
 	        sed -i -e "s,^\(CONFIG_DEFAULT_ENVIRONMENT_PATH=.*\)\"$,\1 .yocto-defaultenv\"," \
 		                ${B}/.config; \
@@ -195,12 +195,15 @@ SRC_URI[sha256sum] = "521b427efe4d5199641fd6440ed77226fed3ba7088ee2f6361b510187f
 # environment via BAREBOX_AUTOBOOT_TIMEOUT
 do_compile:prepend () {
 	if [ -n "${BAREBOX_AUTOBOOT_TIMEOUT}" ]; then
-		mkdir -p ${WORKDIR}/env/nv
-		printf "${BAREBOX_AUTOBOOT_TIMEOUT}\n" > ${WORKDIR}/env/nv/autoboot_timeout
+		mkdir -p ${BAREBOX_ENV_DIR}/nv
+		printf "${BAREBOX_AUTOBOOT_TIMEOUT}\n" > ${BAREBOX_ENV_DIR}/nv/autoboot_timeout
 	fi
 }
 
-BAREBOX_ENV_DIR = "${B}"
+# Backport UNPACKDIR from wrynose's bitbake.conf so the class-style BAREBOX_ENV_DIR
+# default also works on scarthgap.
+# Drop this compatibility code once the branch moves to wrynose or newer.
+UNPACKDIR ??= "${WORKDIR}/sources"
 
 BAREBOX_FIRMWARE_DEP = ""
 BAREBOX_FIRMWARE_DEP:mx8m-generic-bsp = "trusted-firmware-a:do_deploy imx-boot-firmware-files:do_deploy"
@@ -239,6 +242,18 @@ DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'virtual/fit-signi
 
 PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'openssl', '', d)} fit"
 
+# On scarthgap, do_unpack places file://env sources in ${WORKDIR}/env. Copy them to
+# ${BAREBOX_ENV_DIR} in a do_unpack postfunc for compatibility with the class-style
+# environment layout.
+# Drop this compatibility code once the branch moves to wrynose or newer.
+copy_to_unpack_dir() {
+	if [ -d "${WORKDIR}/env" ]; then
+                mkdir -p "${BAREBOX_ENV_DIR}"
+                cp -r "${WORKDIR}/env/." "${BAREBOX_ENV_DIR}"
+	fi
+}
+do_unpack[postfuncs] += "copy_to_unpack_dir"
+
 python __anonymous() {
     if not bb.utils.contains("MACHINE_FEATURES", "habv4", True, False, d):
         return
@@ -266,11 +281,6 @@ python barebox_optee_check() {
 do_compile:prepend() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'true', 'false', d)}; then
         signing_prepare
-
-        # Prepare the installation of imx-srk-fuse.bin into barebox' environment
-        # to simplify burning it
-        mkdir -p "${WORKDIR}/env"
-        cp "${BAREBOX_ENV_DIR}/imx-srk-fuse.bin" "${WORKDIR}/env"
 
         signing_use_role "${FITIMAGE_SIGNING_KEY_ROLE}"
         export PKCS11_FIT_URI="${PKCS11_URI}"
