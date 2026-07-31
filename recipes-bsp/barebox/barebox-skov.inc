@@ -110,6 +110,16 @@ do_compile () {
 	fi
 }
 
+BAREBOX_BINARY[doc] = "Specify the barebox binary to install. If not specified all barebox artifacts are installed."
+BAREBOX_BINARY ??= "${@'barebox.efi' if d.getVar('EFI_PROVIDER') == 'barebox' else ''}"
+BAREBOX_SUFFIX[doc] = "Specify the suffix for ${BAREBOX_IMAGE}."
+BAREBOX_SUFFIX ??= "img"
+BAREBOX_IMAGE[doc] = "A unique barebox image name. Unused if ${BAREBOX_BINARY} is not set."
+BAREBOX_IMAGE_DEFAULT ?= "${PN}-${MACHINE}-${PV}-${PR}.${BAREBOX_SUFFIX}"
+BAREBOX_IMAGE ?= "${@'${EFI_BOOT_IMAGE}' if d.getVar('EFI_PROVIDER') == 'barebox' else '${BAREBOX_IMAGE_DEFAULT}'}"
+
+BAREBOX_INSTALL_PATH ?= "${@'${EFI_FILES_PATH}' if d.getVar('EFI_PROVIDER') == 'barebox' else '/boot'}"
+
 do_install() {
 	if grep "CONFIG_BAREBOXENV_TARGET=y" ${B}/.config; then
 		install -d ${D}${bindir}
@@ -127,7 +137,27 @@ do_install() {
 		install -d ${D}${bindir}
 		install -m 0755 ${B}/scripts/bareboximd-target ${D}${bindir}/bareboximd
 	fi
+
+	if [ -n "${BAREBOX_BINARY}" ]; then
+
+		BAREBOX_BIN=${B}/${BAREBOX_BINARY}
+		if [ ! -f "${BAREBOX_BIN}" ]; then
+			BAREBOX_BIN=${B}/images/${BAREBOX_BINARY}
+		fi
+		if [ ! -f "${BAREBOX_BIN}" ]; then
+			bbfatal "Failed to locate ${BAREBOX_BINARY}"
+		fi
+
+		install -D -m 644 ${BAREBOX_BIN} ${D}${BAREBOX_INSTALL_PATH}/${BAREBOX_IMAGE}
+		ln -sf ${BAREBOX_IMAGE} ${D}${BAREBOX_INSTALL_PATH}/${BAREBOX_BINARY}
+	else
+		install -d ${D}${BAREBOX_INSTALL_PATH}/
+		for image in $(cat ${B}/barebox-flash-images); do
+			install -m 644 ${B}/${image} ${D}${BAREBOX_INSTALL_PATH}/
+		done
+	fi
 }
+FILES:${PN} = "${BAREBOX_INSTALL_PATH}"
 
 # Suffix that allows to create different barebox images in one BSP
 BAREBOX_IMAGE_SUFFIX ?= ""
@@ -158,7 +188,6 @@ do_deploy () {
 	done
 }
 
-FILES:${PN} = ""
 FILES:${PN}-bareboxenv = "${bindir}/bareboxenv"
 FILES:${PN}-bareboxcrc32 = "${bindir}/bareboxcrc32"
 FILES:${PN}-kernel-install = "${bindir}/kernel-install"
@@ -291,5 +320,3 @@ do_install:append() {
         install -m 0644 ${BAREBOX_ENV_DIR}/imx-srk-fuse.bin ${D}/boot/
     fi
 }
-
-FILES:${PN} += "${@bb.utils.contains('MACHINE_FEATURES', 'habv4', '/boot/imx-srk-fuse.bin', '' , d)}"
