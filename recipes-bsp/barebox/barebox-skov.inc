@@ -73,8 +73,8 @@ python () {
 }
 
 do_configure() {
-	if [ -e ${WORKDIR}/defconfig ]; then
-		cp ${WORKDIR}/defconfig ${B}/.config
+	if [ -e ${UNPACKDIR}/defconfig ]; then
+		cp ${UNPACKDIR}/defconfig ${B}/.config
 	else
 		if [ -n "${BAREBOX_CONFIG}" ]; then
 			oe_runmake ${BAREBOX_CONFIG}
@@ -97,6 +97,8 @@ do_compile () {
 	unset CPPFLAGS
 	unset CXXFLAGS
 	unset MACHINE
+	# Allow to use ${UNPACKDIR} in kconfig options to include additionally fetched files
+	export UNPACKDIR=${UNPACKDIR}
 	# If there is an 'env' directory, append its content
 	# to the compiled environment
 	if [ -d ${BAREBOX_ENV_DIR} ]; then \
@@ -244,12 +246,16 @@ PACKAGECONFIG = "libusb ${@bb.utils.contains('MACHINE_FEATURES', 'habv4', 'opens
 
 # On scarthgap, do_unpack places file://env sources in ${WORKDIR}/env. Copy them to
 # ${BAREBOX_ENV_DIR} in a do_unpack postfunc for compatibility with the class-style
-# environment layout.
+# environment layout. Likewise, copy barebox' defconfig from ${WORKDIR} to ${UNPACKDIR}.
 # Drop this compatibility code once the branch moves to wrynose or newer.
 copy_to_unpack_dir() {
 	if [ -d "${WORKDIR}/env" ]; then
                 mkdir -p "${BAREBOX_ENV_DIR}"
                 cp -r "${WORKDIR}/env/." "${BAREBOX_ENV_DIR}"
+	fi
+
+	if [ -f "${WORKDIR}/defconfig" ]; then
+                cp "${WORKDIR}/defconfig" "${UNPACKDIR}"
 	fi
 }
 do_unpack[postfuncs] += "copy_to_unpack_dir"
