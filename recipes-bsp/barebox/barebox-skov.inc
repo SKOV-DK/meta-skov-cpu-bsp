@@ -53,6 +53,8 @@ EXTRA_OEMAKE = " \
   CROSS_COMPILE=${TARGET_PREFIX} -C ${S} O=${B} \
   BUILDSYSTEM_VERSION=${BAREBOX_BUILDSYSTEM_VERSION} \
   CONFIG_EXTRA_FIRMWARE_DIR=${BAREBOX_FIRMWARE_DIR} \
+  PKG_CONFIG=pkg-config-native \
+  CROSS_PKG_CONFIG=pkg-config \
 "
 
 BAREBOX_CONFIG[doc] = "The barebox kconfig defconfig file. Not used if a file called defconfig is added to the SRC_URI."
@@ -99,23 +101,13 @@ do_compile () {
 	unset MACHINE
 	# Allow to use ${UNPACKDIR} in kconfig options to include additionally fetched files
 	export UNPACKDIR=${UNPACKDIR}
-	# If there is an 'env' directory, append its content
-	# to the compiled environment
-	if [ -d ${BAREBOX_ENV_DIR} ]; then \
-		mkdir -p ${S}/.yocto-defaultenv
-		cp -r ${BAREBOX_ENV_DIR}/* ${S}/.yocto-defaultenv/; \
-		grep -q .yocto-defaultenv ${B}/.config || \
-	        sed -i -e "s,^\(CONFIG_DEFAULT_ENVIRONMENT_PATH=.*\)\"$,\1 .yocto-defaultenv\"," \
-		                ${B}/.config; \
 
+	if [ -d ${BAREBOX_ENV_DIR} ]; then
+		BAREBOX_DEFAULT_ENV="$(grep ^CONFIG_DEFAULT_ENVIRONMENT_PATH .config | cut -d '=' -f 2 | tr -d '"')"
+		oe_runmake CONFIG_DEFAULT_ENVIRONMENT_PATH="\"${BAREBOX_DEFAULT_ENV} ${BAREBOX_ENV_DIR}\""
+	else
+		oe_runmake
 	fi
-
-	# Barebox uses pkg-config only for building native tools
-	export PKG_CONFIG_LIBDIR="${STAGING_DIR_NATIVE}${libdir}/pkgconfig:${STAGING_DIR_NATIVE}/usr/share/pkgconfig"
-	export PKG_CONFIG_SYSROOT_DIR=
-	export PKG_CONFIG_PATH="${STAGING_DIR_NATIVE}"
-
-	oe_runmake
 }
 
 do_install() {
