@@ -17,6 +17,8 @@ B = "${WORKDIR}/build"
 KBUILD_OUTPUT = "${B}"
 OE_TERMINAL_EXPORTS += "KBUILD_OUTPUT"
 
+require conf/image-uefi.conf
+
 # For some platforms and configuration, the barebox build process will require
 # additional host tools that can be activated/deactivated here.
 PACKAGECONFIG ??= "openssl libusb fit"
@@ -55,6 +57,11 @@ EXTRA_OEMAKE = " \
 
 BAREBOX_CONFIG[doc] = "The barebox kconfig defconfig file. Not used if a file called defconfig is added to the SRC_URI."
 BAREBOX_CONFIG ?= ""
+
+# set sensible default configs for some of oe-core's QEMU MACHINEs
+BAREBOX_CONFIG:qemuarm = "multi_v7_defconfig"
+BAREBOX_CONFIG:qemuarm64 = "multi_v8_defconfig"
+BAREBOX_CONFIG:qemux86-64 = "efi_defconfig"
 
 do_configure() {
 	if [ -e ${WORKDIR}/defconfig ]; then
