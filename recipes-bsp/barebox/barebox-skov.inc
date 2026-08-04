@@ -1,7 +1,11 @@
-SUMMARY = "Barebox - a bootloader that inherits the best of U-Boot and the Linux kernel"
-HOMEPAGE = "http://www.barebox.org/"
-SECTION = "bootloaders"
+SUMMARY = "barebox is a bootloader designed for embedded systems. It runs on a variety of architectures including x86, ARM, MIPS, PowerPC and others."
+DESCRIPTION = "barebox aims to be a versatile and flexible bootloader not only for booting embedded Linux systems, \
+but also for initial hardware bringup and development. \
+Users should feel right at home with a shell with UNIX-like virtual file system access to hardware, \
+Linux kernel driver API for making driver porting easier, \
+and a subset of the POSIX C library for writing more command-line utilities."
 
+require barebox-common.inc
 inherit kernel-arch deploy cml1 pkgconfig
 
 LICENSE ?= "GPL-2.0-only"
@@ -32,9 +36,6 @@ export KBUILD_BUILD_HOST ?= "oe-host"
 
 # unlike the kernel, barebox may build against host tools like openssl
 export HOST_EXTRACFLAGS
-
-PACKAGES += "${PN}-bareboxenv ${PN}-bareboxcrc32 ${PN}-kernel-install \
-         ${PN}-bareboximd"
 
 def get_layer_rev(path):
     try:
@@ -121,23 +122,6 @@ BAREBOX_IMAGE ?= "${@'${EFI_BOOT_IMAGE}' if d.getVar('EFI_PROVIDER') == 'barebox
 BAREBOX_INSTALL_PATH ?= "${@'${EFI_FILES_PATH}' if d.getVar('EFI_PROVIDER') == 'barebox' else '/boot'}"
 
 do_install() {
-	if grep "CONFIG_BAREBOXENV_TARGET=y" ${B}/.config; then
-		install -d ${D}${bindir}
-		install -m 0755 ${B}/scripts/bareboxenv-target ${D}${bindir}/bareboxenv
-	fi
-	if grep "CONFIG_BAREBOXCRC32_TARGET=y" ${B}/.config; then
-		install -d ${D}${bindir}
-		install -m 0755 ${B}/scripts/bareboxcrc32-target ${D}${bindir}/bareboxcrc32
-	fi
-	if grep "CONFIG_KERNEL_INSTALL_TARGET=y" ${B}/.config; then
-		install -d ${D}${bindir}
-		install -m 0755 ${B}/scripts/kernel-install-target ${D}${bindir}/kernel-install
-	fi
-	if grep "CONFIG_IMD_TARGET=y" ${B}/.config; then
-		install -d ${D}${bindir}
-		install -m 0755 ${B}/scripts/bareboximd-target ${D}${bindir}/bareboximd
-	fi
-
 	if [ -n "${BAREBOX_BINARY}" ]; then
 
 		BAREBOX_BIN=${B}/${BAREBOX_BINARY}
@@ -188,31 +172,13 @@ do_deploy () {
 	done
 }
 
-FILES:${PN}-bareboxenv = "${bindir}/bareboxenv"
-FILES:${PN}-bareboxcrc32 = "${bindir}/bareboxcrc32"
-FILES:${PN}-kernel-install = "${bindir}/kernel-install"
-FILES:${PN}-bareboximd = "${bindir}/bareboximd"
-
 addtask deploy before do_build after do_compile
 
-COMPATIBLE_MACHINE = "imx6-cpu|imx8-cpu|imx8s-cpu"
+SRC_URI += "file://defconfig"
 
-SRC_URI = " \
-    http://barebox.org/download/barebox-${PV}.tar.bz2 \
-    file://defconfig \
-"
-
-# Maintained by Pengutronix
-require files/patches/series.inc
-# Patches not yet folded into the Pengutronix patch stack
-require files/patches-skov/series.inc
 require files/${MACHINE}/env/env.inc
 
-PV = "${UMPF_BASE}"
 DEPENDS += "coreutils-native lzop-native"
-
-LIC_FILES_CHKSUM = "file://COPYING;md5=f5125d13e000b9ca1f0d3364286c4192"
-SRC_URI[sha256sum] = "521b427efe4d5199641fd6440ed77226fed3ba7088ee2f6361b510187f700f09"
 
 # Allow autoboot_timeout adjustment for automation from local.conf or
 # environment via BAREBOX_AUTOBOOT_TIMEOUT
