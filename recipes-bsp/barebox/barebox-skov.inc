@@ -143,36 +143,23 @@ do_install() {
 }
 FILES:${PN} = "${BAREBOX_INSTALL_PATH}"
 
-# Suffix that allows to create different barebox images in one BSP
-BAREBOX_IMAGE_SUFFIX ?= ""
-# This allows a machine.conf to specify the required images to install instead
-# of installing all found images
-BAREBOX_IMAGES ??= "*.img"
-BAREBOX_IMAGES_TO_DEPLOY = "${@' '.join('${B}/images/%s' % i for i in d.getVar('BAREBOX_IMAGES').split())}"
-
-do_deploy[cleandirs] = "${DEPLOYDIR}"
-do_deploy[vardepsexclude] = "DATETIME"
 do_deploy () {
-	install -d ${DEPLOYDIR}
-	if [ -e ${B}/barebox-flash-image ]; then
-		install -m 644 -t ${DEPLOYDIR}/ ${B}/barebox-flash-image
-	fi
-	if [ -e ${B}/barebox.efi ]; then
-		install -m 644 -t ${DEPLOYDIR}/ ${B}/barebox.efi
-	fi
-	for IMAGE in ${BAREBOX_IMAGES_TO_DEPLOY}; do
-		if [ -e ${IMAGE} ]; then
-			BAREBOX_IMG_BASENAME=$(basename ${IMAGE} .img)${BAREBOX_IMAGE_SUFFIX}
-			install -m 644 -T ${IMAGE} ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}-${DATETIME}.img
-			ln -sf ${BAREBOX_IMG_BASENAME}-${DATETIME}.img ${DEPLOYDIR}/${BAREBOX_IMG_BASENAME}.img
-		else
-			# Throw an error if the user specified image(s) can't be installed
-			[ "${BAREBOX_IMAGES}" != "*.img" ] && bberror "Image ${IMAGE} not found" || true
-		fi
-	done
-}
+	if [ -n "${BAREBOX_BINARY}" ]; then
 
-addtask deploy before do_build after do_compile
+		BAREBOX_BIN=${B}/${BAREBOX_BINARY}
+		if [ ! -f "${BAREBOX_BIN}" ]; then
+			BAREBOX_BIN=${B}/images/${BAREBOX_BINARY}
+		fi
+
+		install -D -m 644 ${BAREBOX_BIN} ${DEPLOYDIR}/${BAREBOX_IMAGE}
+		ln -sf ${BAREBOX_IMAGE} ${DEPLOYDIR}/${BAREBOX_BINARY}
+	else
+		for image in $(cat ${B}/barebox-flash-images); do
+			cp ${B}/${image} ${DEPLOYDIR}
+		done
+	fi
+}
+addtask deploy after do_compile
 
 SRC_URI += "file://defconfig"
 
