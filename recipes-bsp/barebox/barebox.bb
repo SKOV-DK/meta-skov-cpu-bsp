@@ -1,4 +1,1 @@
 require barebox-skov.inc
-
-BAREBOX_BINARY := "${BAREBOX_IMAGE}"
-BAREBOX_IMAGE = "${BAREBOX_IMAGE_DEFAULT}"

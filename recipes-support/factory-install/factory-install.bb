@@ -29,8 +29,8 @@ WIC = "${WIC_IMAGE}-${MACHINE}.rootfs.wic"
 
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET = "${BAREBOX_PADDING_OFFSET}K"
-BAREBOX_RENAME ?= "${BAREBOX_IMAGE}"
-BAREBOX_RENAME = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_IMAGE}"
+BAREBOX_RENAME ?= "${BAREBOX_BINARY}"
+BAREBOX_RENAME = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_BINARY}"
 
 # Ensure that all needed artifacts are available for inclusion
 do_compile[depends] += "${WIC_IMAGE}:do_image_complete"
@@ -53,7 +53,7 @@ RDEPENDS:${PN} = " \
 do_compile() {
     zstd -f -k -T0 -c ${ZSTD_COMPRESSION_LEVEL} ${DEPLOY_DIR_IMAGE}/${WIC} > ${B}/${WIC}.zst
 
-    dd if=${DEPLOY_DIR_IMAGE}/${BAREBOX_IMAGE} of=${B}/${BAREBOX_RENAME} \
+    dd if=${DEPLOY_DIR_IMAGE}/${BAREBOX_BINARY} of=${B}/${BAREBOX_RENAME} \
        iflag=skip_bytes skip=${BAREBOX_OFFSET}
 }
 
