@@ -8,7 +8,7 @@ SRC_URI = " \
 
 inherit systemd
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 COMPATIBLE_MACHINE = "imx8-cpu|imx8s-cpu"
 
@@ -30,7 +30,7 @@ WIC = "${WIC_IMAGE}-${MACHINE}.rootfs.wic"
 BAREBOX_OFFSET ?= "0"
 BAREBOX_OFFSET = "${BAREBOX_PADDING_OFFSET}K"
 BAREBOX_RENAME ?= "${BAREBOX_BINARY}"
-BAREBOX_RENAME = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_BINARY}"
+BAREBOX_RENAME = "${BAREBOX_PADDING_OFFSET}KiB-shaved-${BAREBOX_BiNARY}"
 
 # Ensure that all needed artifacts are available for inclusion
 do_compile[depends] += "${WIC_IMAGE}:do_image_complete"
@@ -75,7 +75,7 @@ do_install() {
     install -m 0644 ${B}/${BAREBOX_RENAME}                  ${D}${datadir}/factory-install
 
     install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/factory-install.service ${D}${systemd_unitdir}/system
+    install -m 0644 ${UNPACKDIR}/factory-install.service ${D}${systemd_unitdir}/system
 }
 
 FILES:${PN} = " \
