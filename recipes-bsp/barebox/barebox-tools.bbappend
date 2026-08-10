@@ -10,5 +10,3 @@ BAREBOX_TOOLS = " \
     bareboximd \
 "
 
-# Drop this compatibility code once the branch moves to wrynose or newer.
-S = "${WORKDIR}/barebox-${PV}"

@@ -28,9 +28,3 @@ do_deploy:append:mx8m-generic-bsp() {
     # Provide the TF-A binary under the filename that barebox expects
     ln -s ${PN}/${TFA_BUILD_TARGET}.bin ${DEPLOYDIR}/${BAREBOX_TFA_BIN}
 }
-
-# The following lines partially revert meta-arm's commit [1], as the recipe would
-# otherwise fail to build. They should be removed starting with whinlatter.
-# [1] eea748608c82 ("arm: WORKDIR fixes")
-S = "${WORKDIR}/git"
-BB_GIT_DEFAULT_DESTSUFFIX ?= "git"
