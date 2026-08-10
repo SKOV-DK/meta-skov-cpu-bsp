@@ -10,7 +10,7 @@
 # WIC but postprocess the image (see IMAGE_CMD:append:wic () in common-image-
 # append.inc).
 #
-# part barebox --source rawcopy --sourceparams="file=${BAREBOX_IMAGE},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET}k --no-table
+# part barebox --source rawcopy --sourceparams="file=${BAREBOX_BINARY},skip=${BAREBOX_PADDING_SKIP}" --offset ${BAREBOX_PADDING_OFFSET}k --no-table
 
 part --part-name barebox-environment --part-type ${PART_TYPE_BAREBOX_ENV}    --align 1024 --fixed-size 1M   --source empty
 part --part-name system.fit          --part-type ${PART_TYPE_LINUX_RESERVED} --align 1024 --fixed-size 64M  --source rawcopy --sourceparams="file=${FITIMAGE_IMAGE_LINK_NAME}"
