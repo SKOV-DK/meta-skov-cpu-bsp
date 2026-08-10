@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Marco Felsch <m.felsch@pengutronix.de>
 Date: Wed, 18 Jun 2025 18:24:21 +0200
 Subject: [PATCH] drivers: caam: split nsjobring release into boot_final

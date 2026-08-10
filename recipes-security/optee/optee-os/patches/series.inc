@@ -19,9 +19,9 @@ UMPF_SRC_URI += "\
   "
 # umpf-release: v4.10/customers/skov/imx6/20260716-1
 # umpf-topic-range: 9b9ead3391d1795fb38999de098f18603af52b93..bb95f170cdb83d9dfda840ab50ddc0e9674c8744
-UMPF_SRC_URI += "\
-  file://patches/0201-Release-v4.10-customers-skov-imx6-20260716-1.patch \
-  "
+#UMPF_SRC_URI += "\
+#  file://patches/0201-Release-v4.10-customers-skov-imx6-20260716-1.patch \
+#  "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "4.10.0"

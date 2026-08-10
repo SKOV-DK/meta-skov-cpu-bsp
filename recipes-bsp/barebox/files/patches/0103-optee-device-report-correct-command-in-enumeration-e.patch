@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Thu, 2 Jul 2026 12:38:51 +0200
 Subject: [PATCH] optee: device: report correct command in enumeration error

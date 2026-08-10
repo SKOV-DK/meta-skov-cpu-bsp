@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Fabian Pflug <f.pflug@pengutronix.de>
 Date: Mon, 20 Apr 2026 11:47:06 +0200
 Subject: [PATCH] core: pta: add manufacturing pta

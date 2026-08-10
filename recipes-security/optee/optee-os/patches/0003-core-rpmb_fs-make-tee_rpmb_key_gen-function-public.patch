@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Fabian Pflug <f.pflug@pengutronix.de>
 Date: Wed, 15 Apr 2026 09:36:44 +0200
 Subject: [PATCH] core: rpmb_fs: make tee_rpmb_key_gen function public

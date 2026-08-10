@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
 Date: Mon, 9 Jul 2018 12:14:57 +0200
 Subject: [PATCH] video/edid: increase number of retries to request EDID via

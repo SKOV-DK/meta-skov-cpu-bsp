@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
 Date: Fri, 19 Jun 2026 14:47:03 +0200
 Subject: [PATCH] ARM: boards: skov-imx6: fix device tree path of state node
