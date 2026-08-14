@@ -1,6 +1,6 @@
 # umpf-base: v6.14.11
 # umpf-name: 6.14/customers/skov/imx6
-# umpf-version: 6.14/customers/skov/imx6/20251126-1
+# umpf-version: 6.14/customers/skov/imx6/20260811-1
 # umpf-topic: v6.12/topic/drm-sched-accounting
 # umpf-hashinfo: a886925c1b1aedf839db4297e1b6a8e87e01b63d
 # umpf-topic-range: b9d5d463c216763cec719c04536ea9e14512cad4..a522d517242f4bf26bcfb8b64f179ffce4d108af
@@ -191,15 +191,23 @@ UMPF_SRC_URI += "\
 UMPF_SRC_URI += "\
   file://patches/2001-tee-shm-fix-slab-page-refcounting.patch \
   "
-# umpf-release: 6.14/customers/skov/imx6/20251126-1
-# umpf-topic-range: 89d8f6d64dc963b50cb697c4a6fd4d511cd7c3ff..91cbdce96e7724ebd013e63c929d97cc9ce80375
+# umpf-topic: v6.14/customers/skov/backports
+# umpf-hashinfo: 55df8bf88d9fa11e63621d96ab9f175f19a1a8e6
+# umpf-topic-range: 89d8f6d64dc963b50cb697c4a6fd4d511cd7c3ff..bf5df00cd095d7041d9ef0e16e840ad2116c335c
 UMPF_SRC_URI += "\
-  file://patches/2101-Release-6.14-customers-skov-imx6-20251126-1.patch \
+  file://patches/2101-soc-imx8m-Cleanup-with-adding-imx8m_soc_-un-prepare.patch \
+  file://patches/2102-soc-imx8m-Introduce-soc_uid-hook.patch \
+  file://patches/2103-soc-imx8m-Dump-higher-64bits-UID.patch \
+  "
+# umpf-release: 6.14/customers/skov/imx6/20260811-1
+# umpf-topic-range: bf5df00cd095d7041d9ef0e16e840ad2116c335c..576f8e27efcbd32b811ba1cc4053ce0710e6e07b
+UMPF_SRC_URI += "\
+  file://patches/2201-Release-6.14-customers-skov-imx6-20260811-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "6.14.11"
-UMPF_VERSION = "20251126-1"
+UMPF_VERSION = "20260811-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION ?= "${UMPF_BASE}"
 # umpf-end
