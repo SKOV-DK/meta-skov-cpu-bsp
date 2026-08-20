@@ -9,6 +9,8 @@ Content-Transfer-Encoding: 8bit
 Add a way to lock the access to the RPMB authentication key by burning and
 checking a general purpose eFuse on i.MX SoCs.
 
+Upstream-Status: Pending
+
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---

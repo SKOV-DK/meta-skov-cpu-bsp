@@ -1,0 +1,475 @@
+From: Jonas Rebmann <jre@pengutronix.de>
+Date: Tue, 25 Nov 2025 11:13:27 +0100
+Subject: [PATCH] ta: system data: add new trusted application
+
+Upstream-Status: Pending
+
+Signed-off-by: Jonas Rebmann <jre@pengutronix.de>
+Signed-off-by: Michael Tretter <m.tretter@pengutronix.de>
+---
+ ta/system_data/include/system_data_ta.h |  43 ++++
+ ta/system_data/sub.mk                   |   3 +
+ ta/system_data/system_data_ta.c         | 353 ++++++++++++++++++++++++++++++++
+ ta/system_data/user_ta.mk               |   1 +
+ ta/system_data/user_ta_header_defines.h |  24 +++
+ 5 files changed, 424 insertions(+)
+ create mode 100644 ta/system_data/include/system_data_ta.h
+ create mode 100644 ta/system_data/sub.mk
+ create mode 100644 ta/system_data/system_data_ta.c
+ create mode 100644 ta/system_data/user_ta.mk
+ create mode 100644 ta/system_data/user_ta_header_defines.h
+
+diff --git a/ta/system_data/include/system_data_ta.h b/ta/system_data/include/system_data_ta.h
+new file mode 100644
+index 000000000000..6823d327b263
+--- /dev/null
++++ b/ta/system_data/include/system_data_ta.h
+@@ -0,0 +1,43 @@
++/* SPDX-License-Identifier: BSD-2-Clause */
++#ifndef TA_SYSTEM_DATA_H
++#define TA_SYSTEM_DATA_H
++
++#include <stdint.h>
++
++#define TA_SYSTEM_DATA_UUID \
++	{ 0x41beaf7a, 0x2665, 0x4011, \
++		{ 0xbe, 0xf6, 0x93, 0xff, 0x66, 0x45, 0x3c, 0x1b} }
++
++/*
++ * TA_SYSTEM_DATA_CMD_READ - Read a stored object
++ * param[0] (memref) ID used the identify the persistent object
++ * param[1] (memref) system_data_object dumped from the persistent object
++ * param[2] unused
++ * param[3] unused
++ */
++#define TA_SYSTEM_DATA_CMD_READ			0
++
++/*
++ * TA_SYSTEM_DATA_CMD_WRITE - Persistently store an object, create if it doesn't exist
++ * param[0] (memref) ID used the identify the persistent object
++ * param[1] (memref) system_data_object to be written in the persistent object
++ * param[2] unused
++ * param[3] unused
++ */
++#define TA_SYSTEM_DATA_CMD_WRITE		1
++
++/* Types of write limitation */
++
++/* Unrestricted write access: */
++#define TA_SYSTEM_DATA_MODE_UNRESTRICTED		1
++/* Only allow writes that strictly increase the first differing byte: */
++#define TA_SYSTEM_DATA_MODE_ROLLBACK_PROTECT	2
++/* Immutable after initial creation: */
++#define TA_SYSTEM_DATA_MODE_WRITE_ONCE		3
++
++struct system_data_object {
++	uint32_t mode;
++	char data[];
++};
++
++#endif /*TA_SYSTEM_DATA_H*/
+diff --git a/ta/system_data/sub.mk b/ta/system_data/sub.mk
+new file mode 100644
+index 000000000000..e06dd8edf4ba
+--- /dev/null
++++ b/ta/system_data/sub.mk
+@@ -0,0 +1,3 @@
++global-incdirs-y += include
++global-incdirs-y += .
++srcs-y += system_data_ta.c
+diff --git a/ta/system_data/system_data_ta.c b/ta/system_data/system_data_ta.c
+new file mode 100644
+index 000000000000..e92c08630b79
+--- /dev/null
++++ b/ta/system_data/system_data_ta.c
+@@ -0,0 +1,353 @@
++// SPDX-License-Identifier: BSD-2-Clause
++
++#include <tee_internal_api.h>
++#include <tee_internal_api_extensions.h>
++
++#include <system_data_ta.h>
++
++#include <string.h>
++
++#define SYSTEM_DATA_HEADER_SZ offsetof(struct system_data_object, data)
++
++static const uint32_t storageid = TEE_STORAGE_PRIVATE;
++
++TEE_Result TA_CreateEntryPoint(void)
++{
++	return TEE_SUCCESS;
++}
++
++void TA_DestroyEntryPoint(void)
++{
++}
++
++TEE_Result TA_OpenSessionEntryPoint(uint32_t __unused param_types,
++				    TEE_Param __unused params[4],
++				    void __unused **sess_ctx)
++{
++	return TEE_SUCCESS;
++}
++
++void TA_CloseSessionEntryPoint(void __unused *sess_ctx)
++{
++}
++
++/**
++ * entry_cmp - evaluate system_data_object's data section regarding rollback protection rules
++ *
++ * @old_entry:		object as currently present in persistent storage
++ * @old_entry_sz:	total size of old object
++ * @new_entry:		object requested as replacement
++ * @new_entry_sz:	total size of new object
++ *
++ * Returns -1 for a change conforming the rules, 0 if data and length are equal, 1 otherwise
++ */
++static int entry_cmp(const struct system_data_object *old_entry, size_t old_entry_sz,
++			 const struct system_data_object *new_entry, size_t new_entry_sz)
++{
++	const char *old_data = old_entry->data;
++	size_t old_data_sz = old_entry_sz - SYSTEM_DATA_HEADER_SZ;
++	const char *new_data = new_entry->data;
++	size_t new_data_sz = new_entry_sz - SYSTEM_DATA_HEADER_SZ;
++	size_t min_sz;
++	int cmp;
++
++	min_sz = old_data_sz < new_data_sz ? old_data_sz : new_data_sz;
++
++	/* old standards didn't mandate memcmp to return 0 if num is 0 */
++	if (min_sz == 0)
++		cmp = 0;
++	else
++		cmp = memcmp(old_data, new_data, min_sz);
++
++	if (cmp < 0) {
++		return -1; /* legal change: data was "increased" */
++	} else if (old_data_sz == new_data_sz && cmp == 0) {
++		return 0; /* legal to leave data completely unchanged, even if empty */
++	} else {
++		return 1; /* illegal: data was "decreased", truncated or appended */
++	}
++}
++
++static TEE_Result cmd_write(uint32_t param_types, TEE_Param params[4])
++{
++	const uint32_t exp_param_types =
++		TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT, /* ID */
++				TEE_PARAM_TYPE_MEMREF_INPUT, /* data */
++				TEE_PARAM_TYPE_NONE,
++				TEE_PARAM_TYPE_NONE);
++	TEE_ObjectHandle write_object = TEE_HANDLE_NULL;
++	TEE_ObjectHandle read_object = TEE_HANDLE_NULL;
++	TEE_ObjectInfo read_object_info = { };
++	TEE_Result res = TEE_ERROR_GENERIC;
++	char *obj_id = NULL;
++	size_t obj_id_sz = 0;
++	struct system_data_object *old_entry = NULL;
++	size_t old_entry_sz = 0;
++	struct system_data_object *new_entry = NULL;
++	size_t new_entry_sz = 0;
++	uint32_t obj_data_flag = 0;
++	int cmp;
++
++	/*
++	 * Safely get the invocation parameters
++	 */
++	if (param_types != exp_param_types)
++		return TEE_ERROR_BAD_PARAMETERS;
++
++	obj_id_sz = params[0].memref.size;
++	obj_id = TEE_Malloc(obj_id_sz, 0);
++	if (!obj_id)
++		return TEE_ERROR_OUT_OF_MEMORY;
++
++	TEE_MemMove(obj_id, params[0].memref.buffer, obj_id_sz);
++
++	new_entry_sz = params[1].memref.size;
++	if (new_entry_sz < SYSTEM_DATA_HEADER_SZ) {
++		EMSG("Request has missing or incomplete header");
++		return TEE_ERROR_BAD_FORMAT;
++	}
++	new_entry = TEE_Malloc(new_entry_sz, 0);
++	if (!new_entry) {
++		res = TEE_ERROR_OUT_OF_MEMORY;
++		goto out1;
++	}
++	TEE_MemMove(new_entry, params[1].memref.buffer, new_entry_sz);
++
++	/*
++	 * Handle mode setting
++	 */
++	obj_data_flag = TEE_DATA_FLAG_ACCESS_READ |		/* we can later read the oject */
++			TEE_DATA_FLAG_OVERWRITE;		/* destroy existing object of same ID */
++
++	switch (new_entry->mode) {
++	case TA_SYSTEM_DATA_MODE_UNRESTRICTED:
++	case TA_SYSTEM_DATA_MODE_ROLLBACK_PROTECT:
++		obj_data_flag |=
++			TEE_DATA_FLAG_ACCESS_WRITE |		/* we can later write into the object */
++			TEE_DATA_FLAG_ACCESS_WRITE_META;	/* we can later destroy or rename the object */
++		break;
++	case TA_SYSTEM_DATA_MODE_WRITE_ONCE:
++		obj_data_flag |=
++			TEE_DATA_FLAG_ACCESS_WRITE; /* needed to write data on initial creation */
++		/* no WRITE_META: object cannot be deleted or renamed after creation */
++		break;
++	default:
++		return TEE_ERROR_NOT_SUPPORTED;
++	}
++
++	/*
++	 * Try to load existing object at selected storaged ID
++	 */
++	res = TEE_OpenPersistentObject(storageid,
++					obj_id, obj_id_sz,
++					TEE_DATA_FLAG_ACCESS_READ |
++					TEE_DATA_FLAG_SHARE_READ,
++					&read_object);
++	if (res != TEE_SUCCESS && res != TEE_ERROR_ITEM_NOT_FOUND) {
++		EMSG("Failed to open persistent object, res=0x%08x", res);
++		goto out2;
++	}
++
++	/*
++	 * Check mode restrictions if object exists
++	 */
++	if (res == TEE_SUCCESS) {
++
++		res = TEE_GetObjectInfo1(read_object, &read_object_info);
++		if (res != TEE_SUCCESS) {
++			EMSG("Failed to get persistent object info, res=0x%08x", res);
++			goto out2;
++		}
++
++		if (read_object_info.dataSize < SYSTEM_DATA_HEADER_SZ) {
++			res = TEE_ERROR_BAD_STATE;
++			EMSG("Object has missing or incomplete header");
++			TEE_CloseObject(read_object);
++			goto out2;
++		}
++
++		old_entry = TEE_Malloc(read_object_info.dataSize, 0);
++		if (!old_entry) {
++			res = TEE_ERROR_OUT_OF_MEMORY;
++			TEE_CloseObject(read_object);
++			goto out2;
++		}
++
++		res = TEE_ReadObjectData(read_object, old_entry, read_object_info.dataSize, &old_entry_sz);
++		TEE_CloseObject(read_object);
++		if (res != TEE_SUCCESS) {
++			EMSG("Failed to read object data, res=0x%08x", res);
++			TEE_Free(old_entry);
++			goto out2;
++		}
++		if (old_entry->mode != new_entry->mode) {
++			EMSG("Mode of existing object (%i) differs from requested mode (%i)", old_entry->mode, new_entry->mode);
++			res = TEE_ERROR_ACCESS_DENIED;
++			TEE_Free(old_entry);
++			goto out2;
++		}
++		switch (old_entry->mode) {
++		case TA_SYSTEM_DATA_MODE_WRITE_ONCE:
++			EMSG("Updating write once object prohibited");
++			res = TEE_ERROR_ACCESS_DENIED;
++			TEE_Free(old_entry);
++			goto out2;
++		case TA_SYSTEM_DATA_MODE_ROLLBACK_PROTECT:
++			cmp = entry_cmp(old_entry, old_entry_sz, new_entry, new_entry_sz);
++			if (cmp > 0) {
++				EMSG("Updating rollback protected object to value not strictly greater prohibited");
++				res = TEE_ERROR_ACCESS_DENIED;
++				TEE_Free(old_entry);
++				goto out2;
++			} else if (cmp == 0) {
++				/* data blocks are identical, skip write */
++				res = TEE_SUCCESS;
++				TEE_Free(old_entry);
++				goto out2;
++			}
++			/* cmp < 0 continue to perform the update */
++			break;
++		case TA_SYSTEM_DATA_MODE_UNRESTRICTED:
++			/* No restriction */
++			break;
++		default:
++			res = TEE_ERROR_NOT_SUPPORTED;
++			TEE_Free(old_entry);
++			goto out2;
++		}
++		TEE_Free(old_entry);
++	}
++
++	/*
++	 * Create object in secure storage and fill with data
++	 */
++	res = TEE_CreatePersistentObject(storageid,
++					obj_id, obj_id_sz,
++					obj_data_flag,
++					TEE_HANDLE_NULL,
++					NULL, 0,		/* we may not fill it right now */
++					&write_object);
++	if (res != TEE_SUCCESS) {
++		EMSG("TEE_CreatePersistentObject with flags 0x%08x failed 0x%08x", obj_data_flag, res);
++		goto out2;
++	}
++
++	res = TEE_WriteObjectData(write_object, new_entry, new_entry_sz);
++	if (res != TEE_SUCCESS) {
++		EMSG("TEE_WriteObjectData failed 0x%08x", res);
++		goto out3;
++	} else {
++		res = TEE_SUCCESS;
++	}
++out3:
++	TEE_CloseObject(write_object);
++out2:
++	TEE_Free(new_entry);
++out1:
++	TEE_Free(obj_id);
++	return res;
++}
++
++static TEE_Result cmd_read(uint32_t param_types, TEE_Param params[4])
++{
++	const uint32_t exp_param_types =
++		TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
++				TEE_PARAM_TYPE_MEMREF_OUTPUT,
++				TEE_PARAM_TYPE_NONE,
++				TEE_PARAM_TYPE_NONE);
++	TEE_ObjectHandle object = TEE_HANDLE_NULL;
++	TEE_ObjectInfo object_info = { };
++	TEE_Result res = TEE_ERROR_GENERIC;
++	size_t read_bytes = 0;
++	char *obj_id = NULL;
++	size_t obj_id_sz = 0;
++	char *data = NULL;
++	size_t data_sz = 0;
++
++	/*
++	 * Safely get the invocation parameters
++	 */
++	if (param_types != exp_param_types)
++		return TEE_ERROR_BAD_PARAMETERS;
++
++	obj_id_sz = params[0].memref.size;
++	obj_id = TEE_Malloc(obj_id_sz, 0);
++	if (!obj_id)
++		return TEE_ERROR_OUT_OF_MEMORY;
++
++	TEE_MemMove(obj_id, params[0].memref.buffer, obj_id_sz);
++
++	data_sz = params[1].memref.size;
++
++	/*
++	 * Check the object exist and can be dumped into output buffer
++	 * then dump it.
++	 */
++	res = TEE_OpenPersistentObject(storageid,
++					obj_id, obj_id_sz,
++					TEE_DATA_FLAG_ACCESS_READ |
++					TEE_DATA_FLAG_SHARE_READ,
++					&object);
++	if (res != TEE_SUCCESS) {
++		EMSG("Failed to open persistent object, res=0x%08x", res);
++		TEE_Free(obj_id);
++		return res;
++	}
++
++	res = TEE_GetObjectInfo1(object, &object_info);
++	if (res != TEE_SUCCESS) {
++		EMSG("Failed to create persistent object, res=0x%08x", res);
++		goto exit;
++	}
++
++	if (object_info.dataSize > data_sz) {
++		/*
++		 * Provided buffer is too short.
++		 * Return the expected size together with status "short buffer"
++		 */
++		params[1].memref.size = object_info.dataSize;
++		res = TEE_ERROR_SHORT_BUFFER;
++		goto exit;
++	}
++
++	data = TEE_Malloc(data_sz, 0);
++	if (!data) {
++		TEE_CloseObject(object);
++		TEE_Free(obj_id);
++		return TEE_ERROR_OUT_OF_MEMORY;
++	}
++
++	res = TEE_ReadObjectData(object, data, object_info.dataSize,
++				 &read_bytes);
++	if (res == TEE_SUCCESS)
++		TEE_MemMove(params[1].memref.buffer, data, read_bytes);
++	if (res != TEE_SUCCESS || read_bytes != object_info.dataSize) {
++		EMSG("TEE_ReadObjectData failed 0x%08x, read %" PRIuPTR " over %" PRIuPTR,
++				res, read_bytes, object_info.dataSize);
++		goto exit;
++	}
++
++	/* Return the number of byte effectively filled */
++	params[1].memref.size = read_bytes;
++exit:
++	TEE_CloseObject(object);
++	TEE_Free(obj_id);
++	TEE_Free(data);
++	return res;
++}
++
++TEE_Result TA_InvokeCommandEntryPoint(void __unused *session,
++				      uint32_t command,
++				      uint32_t param_types,
++				      TEE_Param params[4])
++{
++	switch (command) {
++	case TA_SYSTEM_DATA_CMD_WRITE:
++		return cmd_write(param_types, params);
++	case TA_SYSTEM_DATA_CMD_READ:
++		return cmd_read(param_types, params);
++	default:
++		EMSG("Command ID 0x%x is not supported", command);
++		return TEE_ERROR_NOT_SUPPORTED;
++	}
++}
+diff --git a/ta/system_data/user_ta.mk b/ta/system_data/user_ta.mk
+new file mode 100644
+index 000000000000..b835372712c0
+--- /dev/null
++++ b/ta/system_data/user_ta.mk
+@@ -0,0 +1 @@
++user-ta-uuid := 41beaf7a-2665-4011-bef6-93ff66453c1b
+diff --git a/ta/system_data/user_ta_header_defines.h b/ta/system_data/user_ta_header_defines.h
+new file mode 100644
+index 000000000000..f3a4bb900ddc
+--- /dev/null
++++ b/ta/system_data/user_ta_header_defines.h
+@@ -0,0 +1,24 @@
++/* SPDX-License-Identifier: BSD-2-Clause */
++/*
++ * Copyright (c) 2025, Jonas Rebmann, Pengutronix e.K.
++ */
++
++#ifndef USER_TA_HEADER_DEFINES_H
++#define USER_TA_HEADER_DEFINES_H
++
++#include <system_data_ta.h>
++
++#define TA_UUID				TA_SYSTEM_DATA_UUID
++
++#define TA_FLAGS			TA_FLAG_SINGLE_INSTANCE | TA_FLAG_DEVICE_ENUM_TEE_STORAGE_PRIVATE
++
++#define TA_STACK_SIZE			(2 * 1024)
++#define TA_DATA_SIZE			(32 * 1024)
++
++/* The gpd.ta.version property */
++#define TA_VERSION	"1.0"
++
++/* The gpd.ta.description property */
++#define TA_DESCRIPTION	"A simple TA for system data storage with write limitations"
++
++#endif /* USER_TA_HEADER_DEFINES_H */
