@@ -1,0 +1,143 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Thu, 19 Mar 2026 16:16:43 +0100
+Subject: [PATCH] security: Add rollback protection support
+
+Upstream-Status: Pending
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ security/Kconfig    | 29 +++++++++++++++++++++++++++++
+ security/Makefile   |  1 +
+ security/Sconfig    |  6 ++++++
+ security/rollback.c | 47 +++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 83 insertions(+)
+ create mode 100644 security/rollback.c
+
+diff --git a/security/Kconfig b/security/Kconfig
+index cb5cc2b92bc2..1639f6177e4c 100644
+--- a/security/Kconfig
++++ b/security/Kconfig
+@@ -17,6 +17,7 @@ config INSECURE
+ 
+ 	    - changes the default of global.env.autoprobe to 1
+ 	    - allows enablement of CRYPTO_BUILTIN_DEVELOPMENT_KEYS
++	    - allows enablement of ROLLBACK_VIOLATION
+ 
+ source "security/Kconfig.policy"
+ 
+@@ -187,6 +188,34 @@ config PBL_OPTEE_DTB_MAX_SIZE
+ 
+ endmenu
+ 
++config ROLLBACK_PROTECTION
++	bool
++	depends on OPTEE_SYSTEM_DATA
++	prompt "Rollback Protection"
++	help
++	  Compare compiled-in rollback index with a rollback index in secure
++	  storage and refuse to work if it is smaller.
++
++if ROLLBACK_PROTECTION
++config ROLLBACK_INDEX
++	int
++	default 0
++	prompt "Rollback counter"
++	help
++	  The rollback counter for this build. barebox will only start if the rollback
++	  counter is equal to or higher than the rollback counter written into the hardware.
++	  During startup barebox will write the current rollback counter to the hardware.
++
++config ROLLBACK_VIOLATION
++	bool
++	depends on INSECURE
++	prompt "Allow starting barebox with rollback violation"
++	help
++	  Say y here to permit starting barebox even though the rollback counter is
++	  violated. This option should never be enabled in a production build.
++
++endif
++
+ source "lib/Kconfig.hardening"
+ 
+ config HAS_INSECURE_DEFAULTS
+diff --git a/security/Makefile b/security/Makefile
+index 4c847e3fbf34..797fae3dc617 100644
+--- a/security/Makefile
++++ b/security/Makefile
+@@ -8,6 +8,7 @@ obj-$(CONFIG_JWT)		+= jwt.o
+ obj-pbl-$(CONFIG_HAVE_OPTEE)	+= optee.o
+ obj-$(CONFIG_BLOBGEN)		+= blobgen.o
+ obj-$(CONFIG_PASSWORD)		+= password.o
++obj-pbl-$(CONFIG_ROLLBACK_PROTECTION) += rollback.o
+ 
+ # Default password handling
+ # ---------------------------------------------------------------------------
+diff --git a/security/Sconfig b/security/Sconfig
+index e57daf5b0552..fbe7bfc41a0c 100644
+--- a/security/Sconfig
++++ b/security/Sconfig
+@@ -32,3 +32,9 @@ config POLICY_NAME
+ 	              take steps to unlock the device for analysis purposes.
+ 	              Board code should make sure to delete secret and
+ 	              confidential data before activating this policy.
++
++config ROLLBACK_VIOLATION
++	bool "Allow starting barebox with rollback violation"
++	help
++	  Say y here to permit starting barebox eventhough the rollback counter is
++	  violated.
+\ No newline at end of file
+diff --git a/security/rollback.c b/security/rollback.c
+new file mode 100644
+index 000000000000..7fb8adb2ea76
+--- /dev/null
++++ b/security/rollback.c
+@@ -0,0 +1,47 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#include <init.h>
++#include <system_data.h>
++#include <image-metadata.h>
++#include <security/config.h>
++#include <asm/byteorder.h>
++
++BAREBOX_IMD_TAG_STRING(rollback_index, IMD_TYPE_PARAMETER,
++			"rollback-index=" __stringify(CONFIG_ROLLBACK_INDEX), 1);
++
++static int rollback_protect(void)
++{
++	__be64 buffer;
++	struct system_data *system_data;
++	int ret;
++	uint64_t rollback_index = CONFIG_ROLLBACK_INDEX;
++
++	system_data = system_data_get();
++	if (!system_data) {
++		pr_err("Cannot get system-data\n");
++		ret = -EINVAL;
++		goto err;
++	}
++
++	buffer = cpu_to_be64(rollback_index);
++
++	ret = system_data_write(system_data, &buffer,
++				sizeof(buffer), "barebox-rollback-index",
++				SYSTEM_DATA_MODE_ROLLBACK_PROTECT);
++	if (ret < 0)
++		goto err;
++
++	pr_info("written rollback counter 0x%016llx\n", rollback_index);
++
++	return 0;
++
++err:
++	if ((IS_ENABLED(CONFIG_SECURITY_POLICY) || IS_ENABLED(CONFIG_ROLLBACK_VIOLATION)) &&
++	    IS_ALLOWED(SCONFIG_ROLLBACK_VIOLATION))
++		pr_warn("Rollback protection violated\n");
++	else
++		panic("Rollback protection violated\n");
++
++	return ret;
++}
++
++late_initcall(rollback_protect);
+\ No newline at end of file

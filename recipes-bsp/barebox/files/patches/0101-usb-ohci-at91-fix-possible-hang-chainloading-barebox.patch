@@ -20,6 +20,8 @@ The proper solution would be to support propagation of clock rate change
 requests, but till we have that, patch the driver, so only the immediate
 clock is disabled and not its parents.
 
+Upstream-Status: Pending
+
 Reviewed-by: Sam Ravnborg <sam@ravnborg.org>
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
@@ -29,7 +31,7 @@ Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
  3 files changed, 37 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-index 5e385380cee2..d11c337b740c 100644
+index 99f995fb0224..60fbafa06293 100644
 --- a/drivers/clk/clk.c
 +++ b/drivers/clk/clk.c
 @@ -81,7 +81,7 @@ int clk_enable(struct clk *clk)
