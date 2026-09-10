@@ -4,6 +4,8 @@ Subject: [PATCH] drm/imx: ipuv3-plane: add debug output
 
 Add detailed debug output to ipu_plane_atomic_check.
 
+Upstream-Status: Pending
+
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/drm/imx/ipuv3/ipuv3-plane.c | 61 ++++++++++++++++++++++++++-------

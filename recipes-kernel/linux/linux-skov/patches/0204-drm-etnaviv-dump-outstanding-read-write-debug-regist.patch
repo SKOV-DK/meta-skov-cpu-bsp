@@ -6,13 +6,15 @@ Subject: [PATCH] drm/etnaviv: dump outstanding read/write debug registers on
 To diagnose GPU hangs it might be helpful to know if there are any
 outstanding memory transactions.
 
+Upstream-Status: Pending
+
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
  drivers/gpu/drm/etnaviv/etnaviv_dump.c | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_dump.c b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
-index 4162976f5d81..54ebda4f5ecb 100644
+index 2cd223461eba..1c951b2fc2a3 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_dump.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_dump.c
 @@ -55,6 +55,9 @@ static const unsigned short etnaviv_dump_registers[] = {

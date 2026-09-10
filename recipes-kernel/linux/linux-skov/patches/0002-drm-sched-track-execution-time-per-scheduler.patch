@@ -8,16 +8,18 @@ needs stronger ordering on the fence completion than what is currently
 provided and it's unclear if all drivers can provide the necessary
 ordering.
 
+Upstream-Status: Pending
+
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
  drivers/gpu/drm/scheduler/sched_main.c | 17 +++++++++++++++++
  1 file changed, 17 insertions(+)
 
 diff --git a/drivers/gpu/drm/scheduler/sched_main.c b/drivers/gpu/drm/scheduler/sched_main.c
-index 4e504a129643..73fcd994e4f8 100644
+index 6035f59318bc..2d03991d0f20 100644
 --- a/drivers/gpu/drm/scheduler/sched_main.c
 +++ b/drivers/gpu/drm/scheduler/sched_main.c
-@@ -547,6 +547,11 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)
+@@ -507,6 +507,11 @@ static void drm_sched_job_begin(struct drm_sched_job *s_job)
  	spin_lock(&sched->job_list_lock);
  	list_add_tail(&s_job->list, &sched->pending_list);
  	drm_sched_start_timeout(sched);
@@ -29,15 +31,15 @@ index 4e504a129643..73fcd994e4f8 100644
  	spin_unlock(&sched->job_list_lock);
  }
  
-@@ -1087,6 +1092,7 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
+@@ -1128,6 +1133,7 @@ drm_sched_select_entity(struct drm_gpu_scheduler *sched)
  static struct drm_sched_job *
- drm_sched_get_finished_job(struct drm_gpu_scheduler *sched)
+ drm_sched_get_finished_job(struct drm_gpu_scheduler *sched, bool *have_more)
  {
 +	struct drm_gpu_scheduler_stats *stats = sched->stats;
  	struct drm_sched_job *job, *next;
  
  	spin_lock(&sched->job_list_lock);
-@@ -1118,6 +1124,17 @@ drm_sched_get_finished_job(struct drm_gpu_scheduler *sched)
+@@ -1162,6 +1168,17 @@ drm_sched_get_finished_job(struct drm_gpu_scheduler *sched, bool *have_more)
  
  	spin_unlock(&sched->job_list_lock);
  
