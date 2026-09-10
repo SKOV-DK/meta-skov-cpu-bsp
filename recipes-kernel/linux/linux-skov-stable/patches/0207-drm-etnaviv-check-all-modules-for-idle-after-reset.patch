@@ -1,0 +1,33 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 1 Dec 2025 20:20:15 +0100
+Subject: [PATCH] drm/etnaviv: check all modules for idle after reset
+
+While the FE is an important part of the GPU, which needs to be idle
+after reset, all other modules should be idle after a proper reset.
+Check all present modules for being idle to determine wether the
+reset was successful.
+
+Upstream-Status: Pending
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 6838165aa09f..df92d4888142 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -584,9 +584,9 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 		/* read idle register. */
+ 		idle = gpu_read(gpu, VIVS_HI_IDLE_STATE);
+ 
+-		/* try resetting again if FE is not idle */
+-		if ((idle & VIVS_HI_IDLE_STATE_FE) == 0) {
+-			dev_dbg(gpu->dev, "FE is not idle\n");
++		/* try resetting again if any module is not idle */
++		if ((idle & gpu->idle_mask) != gpu->idle_mask) {
++			dev_dbg(gpu->dev, "GPU modules not idle\n");
+ 			continue;
+ 		}
+ 
