@@ -9,18 +9,20 @@ uninitialized DMA mask. Let the driver core know that this isn't a
 missing configuration, but a non DMA capable device by pointing the
 dma_mask to the coherent_dma_mask.
 
+Upstream-Status: Pending
+
 Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
 ---
  drivers/pmdomain/imx/gpc.c | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/pmdomain/imx/gpc.c b/drivers/pmdomain/imx/gpc.c
-index f18c7e6e75dd..ab0a40539f88 100644
+index 42e50c9b4fb9..6eee637f7b9e 100644
 --- a/drivers/pmdomain/imx/gpc.c
 +++ b/drivers/pmdomain/imx/gpc.c
-@@ -491,6 +491,7 @@ static int imx_gpc_probe(struct platform_device *pdev)
+@@ -489,6 +489,7 @@ static int imx_gpc_probe(struct platform_device *pdev)
  			pd_pdev->dev.parent = &pdev->dev;
- 			pd_pdev->dev.of_node = np;
+ 			pd_pdev->dev.of_node = of_node_get(np);
  			pd_pdev->dev.fwnode = of_fwnode_handle(np);
 +			pd_pdev->dev.dma_mask = &pd_pdev->dev.coherent_dma_mask;
  

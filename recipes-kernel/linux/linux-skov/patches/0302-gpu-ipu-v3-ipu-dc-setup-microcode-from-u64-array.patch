@@ -9,6 +9,8 @@ The 42-bit DC microcode words are created from instruction macros with
 their parameter names aligned to the documentation. Only the WRG and
 WROD instrucion are used, so drop the WCLK instruction for now.
 
+Upstream-Status: Pending
+
 Signed-off-by: Philipp Zabel <p.zabel@pengutronix.de>
 ---
  drivers/gpu/ipu-v3/ipu-dc.c | 82 ++++++++++++++++++++++-----------------------
