@@ -1,0 +1,32 @@
+#
+# Automatically generated file; DO NOT EDIT.
+# Barebox Security Configuration
+#
+SCONFIG_POLICY_NAME="lockdown"
+# SCONFIG_ROLLBACK_VIOLATION is not set
+
+#
+# General Settings
+#
+# SCONFIG_CONSOLE_INPUT is not set
+SCONFIG_SHELL=y
+# SCONFIG_ENVIRONMENT_LOAD is not set
+# end of General Settings
+
+#
+# Boot Policy
+#
+# end of Boot Policy
+
+#
+# USB Gadget Policy
+#
+# end of USB Gadget Policy
+
+#
+# Command Policy
+#
+# SCONFIG_CMD_GO is not set
+# end of Command Policy
+
+# SCONFIG_FS_EXTERNAL is not set
