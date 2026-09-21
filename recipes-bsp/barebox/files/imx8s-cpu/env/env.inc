@@ -7,6 +7,7 @@ SRC_URI += "\
   file://env/nv/boot.default \
   file://env/nv/boot.watchdog_timeout \
   file://env/nv/bootm.provide_machine_id \
+  file://env/nv/bootm.provide_policy \
   file://env/nv/bootchooser.disable_on_zero_attempts \
   file://env/nv/bootchooser.reset_attempts \
   file://env/nv/bootchooser.reset_priorities \
