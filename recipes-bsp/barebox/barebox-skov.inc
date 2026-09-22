@@ -7,8 +7,13 @@ and a subset of the POSIX C library for writing more command-line utilities."
 
 require barebox-common.inc
 inherit barebox
+inherit ${@'barebox-security-policies' if d.getVar('MACHINE') == 'imx8s-cpu' else ''}
 
 SRC_URI += "file://defconfig"
+SRC_URI:append:imx8s-cpu = " \
+    file://security/devel.sconfig \
+    file://security/lockdown.sconfig \
+"
 
 require files/${MACHINE}/env/env.inc
 

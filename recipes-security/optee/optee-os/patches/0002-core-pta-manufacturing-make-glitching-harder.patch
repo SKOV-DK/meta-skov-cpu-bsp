@@ -5,6 +5,8 @@ Subject: [PATCH] core: pta: manufacturing: make glitching harder
 By adding a random delay before the if that compares security relevant
 values.
 
+Upstream-Status: Pending
+
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
  core/pta/manufacturing.c | 22 ++++++++++++++++++++++

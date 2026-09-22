@@ -1,0 +1,58 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 21 Sep 2026 10:59:06 +0200
+Subject: [PATCH] security: rollback: no rollback protection during
+ provisioning
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The system-data TA needs secure storage in the RPMB which is only usable after
+the SoC specific authentication key has been persisted. So check the fuse burned
+by the manufacturing TA as it signals that this requirement is available.
+
+Upstream-Status: Pending
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ security/rollback.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/security/rollback.c b/security/rollback.c
+index 7fb8adb2ea76..d14a67905cb9 100644
+--- a/security/rollback.c
++++ b/security/rollback.c
+@@ -1,7 +1,11 @@
+ // SPDX-License-Identifier: GPL-2.0-only
++
++#define pr_fmt(fmt) "rollback: " fmt
++
+ #include <init.h>
+ #include <system_data.h>
+ #include <image-metadata.h>
++#include <mach/imx/ocotp-fusemap.h>
+ #include <security/config.h>
+ #include <asm/byteorder.h>
+ 
+@@ -14,6 +18,22 @@ static int rollback_protect(void)
+ 	struct system_data *system_data;
+ 	int ret;
+ 	uint64_t rollback_index = CONFIG_ROLLBACK_INDEX;
++	bool manufacturing_complete = true;
++	u32 value = U32_MAX;
++
++	/* Check the manufacturing fuse: OCOTP BANK 14, WORD 0, BIT 0 */
++	ret = imx_ocotp_read_field(MX8M_OCOTP_GP1_0, &value);
++	if (ret < 0) {
++		pr_err("Failed to read manufacturing fuse.\n");
++		goto err;
++	}
++	manufacturing_complete = value & BIT(0);
++
++	if (!manufacturing_complete) {
++		/* The system-data TA requires a provisioned RPMB. */
++		pr_notice("Still in production, no support for rollback protection yet.\n");
++		return 0;
++	}
+ 
+ 	system_data = system_data_get();
+ 	if (!system_data) {

@@ -8,6 +8,8 @@ upstream (e.g. by a fixup created via "git commit --fixup=amend:<commit>").
 
 [1] b0c9fca3dc9f ("[CHG CORE-19777] Barebox: Stay in bootloader until power is detected OK")
 
+Upstream-Status: Pending
+
 Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
 ---
  arch/arm/boards/skov-imx8mp/lowlevel.c | 46 ++++++++++++++++++----------------

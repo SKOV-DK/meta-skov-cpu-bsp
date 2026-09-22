@@ -6,6 +6,8 @@ Add a function to query the RPMB key corresponding to a given CID. This
 allows to remove the write key code from OP-TEE and push it into the
 non-secure world.
 
+Upstream-Status: Pending
+
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
  core/pta/manufacturing.c                | 42 +++++++++++++++++++++++++++++++++

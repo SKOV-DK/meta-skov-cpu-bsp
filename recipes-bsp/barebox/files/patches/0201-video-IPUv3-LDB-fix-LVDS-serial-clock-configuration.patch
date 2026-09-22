@@ -49,6 +49,8 @@ pll5_video (rate 980042000
                                     2400000.ipu@2400000.of_di0_pixel (rate 70002992
 
 Fixes: af3d99396a8b ("clk: imx: improve precision of AV PLL to 1 Hz")
+Upstream-Status: Pending
+
 Signed-off-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 ---
 Cc: Philipp Zabel <p.zabel@pengutronix.de>
