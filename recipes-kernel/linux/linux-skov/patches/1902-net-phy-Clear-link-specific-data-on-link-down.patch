@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Wed, 10 Sep 2025 09:09:23 +0200
 Subject: [PATCH] net: phy: Clear link-specific data on link down

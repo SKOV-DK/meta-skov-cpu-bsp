@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Fri, 3 Nov 2023 11:10:11 +0100
 Subject: [PATCH] arm64: dts: imx8mp-skov: describe HDMI display pipeline

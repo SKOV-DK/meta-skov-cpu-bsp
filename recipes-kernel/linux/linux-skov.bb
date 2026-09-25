@@ -5,7 +5,7 @@ SECTION = "kernel"
 KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddefconfig || oe_runmake -C ${S} O=${B} CC="${KERNEL_CC}" oldnoconfig"
 
 # CVE exclusions
-include recipes-kernel/linux/cve-exclusion.inc
+#include recipes-kernel/linux/cve-exclusion.inc
 include recipes-kernel/linux/cve-exclusion_6.14.inc
 
 KERNEL_EXTRA_FEATURES:append = " features/debug/debug-kernel.scc"
@@ -15,21 +15,27 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 DEPENDS += "nativesdk-flex nativesdk-lzop lzop-native"
 RDEPENDS:${PN} = "flex lzop"
 
+#LINUX_VERSION = "7.2"
 PR = "r0"
 PV = "${LINUX_VERSION}"
+#PV = "${LINUX_VERSION}+git"
 
 #SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LINUX_VERSION}.tar.gz"
 SRC_URI = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-${LINUX_VERSION}.tar.xz"
 SRC_URI[sha256sum] = "3f1ccd0a6dc9c9777cb6fcef357c77e4a2386c84c52b6d5bbcda79c16af33b1b"
+#SRC_URI = "https://www.kernel.org/pub/linux/kernel/v7.x/linux-${LINUX_VERSION}.tar.xz"
+#SRC_URI[sha256sum] = "f9fef3d14c0df53819026f4be74459835c2a0b0dcbf5b5bbd9ea19f0829402b3"
 FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 300 --passive-ftp"
 
 SRC_URI += "file://defconfig"
 
 require linux-skov/patches/series.inc
 # Patches not yet folded into the Pengutronix patch stack
-require linux-skov/patches-skov/series.inc
+#require linux-skov/patches-skov/series.inc
 
-S = "${WORKDIR}/linux-${LINUX_VERSION}"
+#S = "${UNPACKDIR}"
+S = "${UNPACKDIR}/linux-${LINUX_VERSION}"
+#S = "${WORKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
 # file. Leaving it empty here ensures an early explicit build failure.
@@ -40,5 +46,4 @@ RDEPENDS:${KERNEL_PACKAGE_NAME}-base = ""
 
 KERNEL_IMAGETYPES:append:imx8-cpu = " Image.gz"
 KERNEL_IMAGETYPES:append:imx8s-cpu = " Image.gz"
-KERNEL_MODULE_PROBECONF += "rndis_host"
-module_conf_rndis_host = "blacklist rndis_host"
+INSANE_SKIP:${PN}-src += "buildpaths"

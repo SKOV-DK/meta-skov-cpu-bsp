@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Wed, 26 Jul 2017 15:41:43 +0200
 Subject: [PATCH] gpu: ipu-v3: ipu-dc: setup microcode from u64 array

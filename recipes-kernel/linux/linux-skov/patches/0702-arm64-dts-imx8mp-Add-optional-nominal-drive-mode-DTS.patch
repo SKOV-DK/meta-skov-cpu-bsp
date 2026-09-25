@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Thu, 18 Apr 2024 17:22:40 +0200
 Subject: [PATCH] arm64: dts: imx8mp: Add optional nominal drive mode DTSI

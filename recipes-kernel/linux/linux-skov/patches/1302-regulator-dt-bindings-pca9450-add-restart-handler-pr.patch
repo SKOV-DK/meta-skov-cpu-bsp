@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Holger Assmann <h.assmann@pengutronix.de>
 Date: Fri, 19 Apr 2024 08:29:01 +0200
 Subject: [PATCH] regulator: dt-bindings: pca9450: add restart handler priority

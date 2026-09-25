@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Mon, 18 Aug 2025 11:02:17 +0200
 Subject: [PATCH] net: stmmac: dwmac4: stop hardware from dropping

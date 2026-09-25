@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Mon, 13 May 2024 16:22:32 +0200
 Subject: [PATCH] thermal: core: allow user configuration of hardware

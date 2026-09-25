@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Lucas Stach <l.stach@pengutronix.de>
 Date: Mon, 2 Dec 2024 18:40:06 +0100
 Subject: [PATCH] drm/etnaviv: reset bit 0 when disabling pulse eater for reset

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Tue, 24 Oct 2023 15:37:20 +0200
 Subject: [PATCH] HACK: arm64: dts: imx8mp: Hook up MLMIX reset to power domain

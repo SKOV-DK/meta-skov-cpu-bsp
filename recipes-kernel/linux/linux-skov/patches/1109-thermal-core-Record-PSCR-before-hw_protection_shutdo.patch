@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 16 Jan 2024 13:05:57 +0100
 Subject: [PATCH] thermal: core: Record PSCR before hw_protection_shutdown()

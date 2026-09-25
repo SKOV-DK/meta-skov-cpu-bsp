@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 16 Jan 2024 06:31:34 +0100
 Subject: [PATCH] arm64: dts: freescale: imx8mp-skov: add PSCR node

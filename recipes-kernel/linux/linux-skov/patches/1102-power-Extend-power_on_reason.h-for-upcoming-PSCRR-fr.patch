@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Mon, 22 Jan 2024 14:03:25 +0100
 Subject: [PATCH] power: Extend power_on_reason.h for upcoming PSCRR framework

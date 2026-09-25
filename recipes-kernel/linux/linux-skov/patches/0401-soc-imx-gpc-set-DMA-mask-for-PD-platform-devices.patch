@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Lucas Stach <l.stach@pengutronix.de>
 Date: Wed, 12 Sep 2018 15:45:34 +0200
 Subject: [PATCH] soc: imx: gpc: set DMA mask for PD platform devices

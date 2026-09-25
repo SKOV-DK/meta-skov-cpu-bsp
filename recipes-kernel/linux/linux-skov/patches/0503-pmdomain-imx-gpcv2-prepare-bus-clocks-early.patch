@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Lucas Stach <l.stach@pengutronix.de>
 Date: Thu, 15 Dec 2022 17:32:51 +0100
 Subject: [PATCH] pmdomain: imx: gpcv2: prepare bus clocks early

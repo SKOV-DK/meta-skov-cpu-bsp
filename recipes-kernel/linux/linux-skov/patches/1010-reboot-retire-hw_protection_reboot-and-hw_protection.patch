@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Mon, 13 May 2024 14:14:13 +0200
 Subject: [PATCH] reboot: retire hw_protection_reboot and

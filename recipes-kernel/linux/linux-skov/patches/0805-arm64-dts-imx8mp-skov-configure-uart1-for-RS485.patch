@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Tue, 17 Dec 2024 12:15:17 +0100
 Subject: [PATCH] arm64: dts: imx8mp-skov: configure uart1 for RS485

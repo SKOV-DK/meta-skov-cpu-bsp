@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Fri, 3 Nov 2023 11:10:11 +0100
 Subject: [PATCH] dt-bindings: display/lvds-codec: add ti,sn65lvds822

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Thu, 14 Mar 2024 11:30:16 +0100
 Subject: [PATCH] arm64: dts: imx8mp-skov: add revC BD500 board

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 14 Nov 2023 11:35:04 +0100
 Subject: [PATCH] arm64: dts: imx8mp-skov: fix phy-mode

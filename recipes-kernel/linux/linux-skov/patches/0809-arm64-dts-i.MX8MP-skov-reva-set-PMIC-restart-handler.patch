@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Thu, 14 Dec 2023 14:36:46 +0100
 Subject: [PATCH] arm64: dts: i.MX8MP: skov-reva: set PMIC restart handler

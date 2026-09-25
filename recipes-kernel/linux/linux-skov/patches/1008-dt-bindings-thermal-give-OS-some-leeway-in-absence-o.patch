@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Mon, 13 May 2024 13:16:53 +0200
 Subject: [PATCH] dt-bindings: thermal: give OS some leeway in absence of

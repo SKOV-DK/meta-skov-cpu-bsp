@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Christian Wendt <cwe@skov.com>
 Date: Wed, 23 Apr 2025 15:50:23 +0200
 Subject: [PATCH] rtc: pcf85063: ensure 12 hour mode is disabled

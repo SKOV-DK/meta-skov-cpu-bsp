@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Tue, 14 Nov 2023 13:32:51 +0100
 Subject: [PATCH] WIP: mmc: core: shut down storage as early as possible

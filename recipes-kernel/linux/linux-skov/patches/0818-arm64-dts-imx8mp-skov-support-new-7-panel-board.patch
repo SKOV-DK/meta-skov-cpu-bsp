@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Ahmad Fatoum <a.fatoum@pengutronix.de>
 Date: Wed, 27 Nov 2024 12:29:32 +0100
 Subject: [PATCH] arm64: dts: imx8mp-skov: support new 7" panel board

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
 Date: Wed, 25 Jun 2025 15:07:44 +0200
 Subject: [PATCH] dt-bindings: vendor-prefixes: Add JuTouch Technology Co, Ltd

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Wed, 17 Jan 2024 06:58:44 +0100
 Subject: [PATCH] dt-bindings: power: reset: add generic PSCRR binding trackers

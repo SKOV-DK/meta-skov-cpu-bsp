@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 Date: Mon, 18 Aug 2025 13:44:07 +0200
 Subject: [PATCH] net: phy: clear EEE runtime state in PHY_HALTED/PHY_ERROR
