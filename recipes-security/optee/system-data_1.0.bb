@@ -13,7 +13,7 @@ LIC_FILES_CHKSUM = " \
 
 COMPATIBLE_MACHINE = "imx8s-cpu"
 
-DEPENDS += "optee-client openssl"
+DEPENDS += "optee-client"
 
 SRC_URI = " \
     file://CMakeLists.txt \
