@@ -1,7 +1,7 @@
 # umpf-base: v2026.09.0
 # umpf-flags: upstreamstatus=insert
 # umpf-name: 2026.09.0/customers/skov/imx6
-# umpf-version: 2026.09.0/customers/skov/imx6/20260921-1
+# umpf-version: 2026.09.0/customers/skov/imx6/20260929-1
 # umpf-topic: v2026.09.0/customers/skov/imx6
 # umpf-hashinfo: ec31f743deec4f419952cf6e1a76d4fe4f6f11e9
 # umpf-topic-range: 4aa5dcd400d5b9cecfd24e68c6f05cd128c75c43..d90843b781380c622bce7e2dd5d1c6f4a66ad17f
@@ -31,24 +31,26 @@ UMPF_SRC_URI += "\
   file://patches/0304-common-oftree-add-rollback-index-to-bootargs-fixup.patch \
   "
 # umpf-topic: v2026.09.0/customers/skov/imx8mp
-# umpf-hashinfo: 7f927897def4ab14476dbe67a66186f251764965
-# umpf-topic-range: 578123dffa0ce60a57975d10337359aeba45538b..45be9465426213f4fa2799773f33e8e7952919f1
+# umpf-hashinfo: 74638cbee135b54a6b5eedc2775822fdcda12847
+# umpf-topic-range: 578123dffa0ce60a57975d10337359aeba45538b..f46d17cdb42696ebb7d631a113b94045f82e3f5c
 UMPF_SRC_URI += "\
   file://patches/0401-ARM-i.MX8MP-skov-halt-startup-until-power-is-good.patch \
   file://patches/0402-ARM-i.MX8MP-skov-halt-startup-until-power-is-good.patch \
   file://patches/0403-include-ocotp.h-add-missing-include.patch \
-  file://patches/0404-common-skov_select_secpolicy-implement-choice-of-sec.patch \
-  file://patches/0405-include-ocotp.h-add-missing-include.patch \
-  file://patches/0406-security-rollback-no-rollback-protection-during-prov.patch \
+  file://patches/0404-include-ocotp.h-add-missing-include.patch \
+  file://patches/0405-common-skov_select_secpolicy-implement-choice-of-sec.patch \
+  file://patches/0406-security-rollback-no-rollback-protection-for-i.MX6-a.patch \
+  file://patches/0407-security-rollback-no-rollback-protection-during-prov.patch \
+  file://patches/0408-commands-sconfig-fix-command-description.patch \
   "
-# umpf-release: 2026.09.0/customers/skov/imx6/20260921-1
-# umpf-topic-range: 45be9465426213f4fa2799773f33e8e7952919f1..65dfbda4ec5e35bdbd1ae4c08ae1ebe45f705988
+# umpf-release: 2026.09.0/customers/skov/imx6/20260929-1
+# umpf-topic-range: f46d17cdb42696ebb7d631a113b94045f82e3f5c..769eefce5c4a1706217645e1ddef046cb586d218
 UMPF_SRC_URI += "\
-  file://patches/0501-Release-2026.09.0-customers-skov-imx6-20260921-1.patch \
+  file://patches/0501-Release-2026.09.0-customers-skov-imx6-20260929-1.patch \
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
 UMPF_BASE = "2026.09.0"
-UMPF_VERSION = "20260921-1"
+UMPF_VERSION = "20260929-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 # umpf-end
