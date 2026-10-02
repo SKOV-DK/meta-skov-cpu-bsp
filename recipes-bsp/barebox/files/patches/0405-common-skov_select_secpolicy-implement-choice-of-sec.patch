@@ -15,8 +15,8 @@ Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
 ---
  common/Makefile                |  1 +
- common/skov_select_secpolicy.c | 72 ++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 73 insertions(+)
+ common/skov_select_secpolicy.c | 77 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 78 insertions(+)
  create mode 100644 common/skov_select_secpolicy.c
 
 diff --git a/common/Makefile b/common/Makefile
@@ -33,14 +33,15 @@ index 6b97edc2c334..b6fb11e77f06 100644
  obj-$(CONFIG_BAREBOX_UPDATE_IMX_NAND_FCB) += imx-bbu-nand-fcb.o
 diff --git a/common/skov_select_secpolicy.c b/common/skov_select_secpolicy.c
 new file mode 100644
-index 000000000000..ca49267b2140
+index 000000000000..696e5f93b8a4
 --- /dev/null
 +++ b/common/skov_select_secpolicy.c
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,77 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later
 +
 +#define pr_fmt(fmt) "skov-secpolicy: " fmt
 +
++#include <of.h>
 +#include <hab.h>
 +#include <init.h>
 +#include <linux/string.h> /* for memcmp() */
@@ -80,6 +81,10 @@ index 000000000000..ca49267b2140
 +	bool manufacturing_complete = true;
 +	u32 value = U32_MAX;
 +	int err = 0;
++
++	/* No support for the outdated i.MX6 and ARM9 boards. */
++	if (!of_machine_is_compatible("skov,imx8mp"))
++		return 0;
 +
 +	/* Check the manufacturing fuse: OCOTP BANK 14, WORD 0, BIT 0 */
 +	err = imx_ocotp_read_field(MX8M_OCOTP_GP1_0, &value);

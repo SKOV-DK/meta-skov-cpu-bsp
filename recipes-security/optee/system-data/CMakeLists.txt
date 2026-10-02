@@ -3,7 +3,6 @@ project(system-data LANGUAGES C)
 
 include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(CRYPTO REQUIRED libcrypto)
 
 pkg_check_modules(TEEC teec)
 if(TEEC_FOUND)

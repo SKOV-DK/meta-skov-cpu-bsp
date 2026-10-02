@@ -1,0 +1,24 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Tue, 29 Sep 2026 12:35:21 +0200
+Subject: [PATCH] security: rollback: no rollback protection for i.MX6 and ARM9
+
+Upstream-Status: Pending
+---
+ security/rollback.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/security/rollback.c b/security/rollback.c
+index 7fb8adb2ea76..dc381b9dd148 100644
+--- a/security/rollback.c
++++ b/security/rollback.c
+@@ -15,6 +15,10 @@ static int rollback_protect(void)
+ 	int ret;
+ 	uint64_t rollback_index = CONFIG_ROLLBACK_INDEX;
+ 
++	/* No support for the outdated i.MX6 and ARM9 boards. */
++	if (!of_machine_is_compatible("skov,imx8mp"))
++		return 0;
++
+ 	system_data = system_data_get();
+ 	if (!system_data) {
+ 		pr_err("Cannot get system-data\n");

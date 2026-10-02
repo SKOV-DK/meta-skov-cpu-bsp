@@ -18,7 +18,7 @@ Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
  1 file changed, 20 insertions(+)
 
 diff --git a/security/rollback.c b/security/rollback.c
-index 7fb8adb2ea76..d14a67905cb9 100644
+index dc381b9dd148..cd69a8b08207 100644
 --- a/security/rollback.c
 +++ b/security/rollback.c
 @@ -1,7 +1,11 @@
@@ -33,13 +33,17 @@ index 7fb8adb2ea76..d14a67905cb9 100644
  #include <security/config.h>
  #include <asm/byteorder.h>
  
-@@ -14,6 +18,22 @@ static int rollback_protect(void)
+@@ -14,11 +18,27 @@ static int rollback_protect(void)
  	struct system_data *system_data;
  	int ret;
  	uint64_t rollback_index = CONFIG_ROLLBACK_INDEX;
 +	bool manufacturing_complete = true;
 +	u32 value = U32_MAX;
-+
+ 
+ 	/* No support for the outdated i.MX6 and ARM9 boards. */
+ 	if (!of_machine_is_compatible("skov,imx8mp"))
+ 		return 0;
+ 
 +	/* Check the manufacturing fuse: OCOTP BANK 14, WORD 0, BIT 0 */
 +	ret = imx_ocotp_read_field(MX8M_OCOTP_GP1_0, &value);
 +	if (ret < 0) {
@@ -53,6 +57,7 @@ index 7fb8adb2ea76..d14a67905cb9 100644
 +		pr_notice("Still in production, no support for rollback protection yet.\n");
 +		return 0;
 +	}
- 
++
  	system_data = system_data_get();
  	if (!system_data) {
+ 		pr_err("Cannot get system-data\n");

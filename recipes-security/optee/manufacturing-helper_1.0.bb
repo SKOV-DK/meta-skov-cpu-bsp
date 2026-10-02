@@ -5,7 +5,7 @@ write it to the eMMC RPMB, and permanently lock the device by burning the \
 SoC's related eFuse.\
 "
 
-LICENSE = "MIT"
+LICENSE = "MIT & BSD-2-Clause"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 LIC_FILES_CHKSUM += "file://cid.c;endline=26;md5=0e1d328f8775df082ad0b1319d3d4839"
 
