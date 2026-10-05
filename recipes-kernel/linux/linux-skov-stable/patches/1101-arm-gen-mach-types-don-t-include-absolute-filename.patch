@@ -1,0 +1,40 @@
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Date: Wed, 3 Jun 2026 16:12:10 +0200
+Subject: [PATCH] arm: gen-mach-types: don't include absolute filename
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+mach-types.h is part of the kapi and as such shipped in the
+linux-headers package. The embedded build path makes that package
+non-reproducible without going through an extra step of normalizing the
+path. YOCTO has similar problems in the kernel debug source package.
+
+Make the path relative to the kernel source tree which is enough to
+find the tool that has generated the file.
+
+Upstream-Status: Pending
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Acked-by: Alexander Stein <alexander.stein@ew.tq-group.com>
+Acked-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
+Acked-by: Ryan Eatmon <reatmon@ti.com>
+Link: https://lore.kernel.org/lkml/20260603-arm-remove-path-from-mach-types-h-v1-1-cda9890ba788@pengutronix.de/
+Signed-off-by: Roland Hieber <rhi@pengutronix.de>
+---
+ arch/arm/tools/gen-mach-types | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/tools/gen-mach-types b/arch/arm/tools/gen-mach-types
+index cbe1c33bb871..65ec262b31e6 100644
+--- a/arch/arm/tools/gen-mach-types
++++ b/arch/arm/tools/gen-mach-types
+@@ -24,7 +24,7 @@ NF == 3 {
+ 
+ END	{
+ 	  printf("/*\n");
+-	  printf(" * This was automagically generated from %s!\n", FILENAME);
++	  printf(" * This was automagically generated from arch/arm/tools/gen-mach-types!\n");
+ 	  printf(" * Do NOT edit\n");
+ 	  printf(" */\n\n");
+ 	  printf("#ifndef __ASM_ARM_MACH_TYPE_H\n");
