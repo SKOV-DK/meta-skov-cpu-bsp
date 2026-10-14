@@ -1,0 +1,71 @@
+From: Martin Domig <martin.domig@wolfvision.net>
+Date: Wed, 6 May 2026 11:51:40 +0200
+Subject: [PATCH] common: oftree: add rollback index to bootargs fixup
+
+Add support for propagating the rollback protection index from system
+data to the device tree. When CONFIG_ROLLBACK_PROTECTION is enabled,
+the rollback index is read from system data and written as a
+'barebox-rollback-index' property to the bootargs node.
+
+This allows the kernel or subsequent boot stages to verify the rollback
+protection status.
+
+Upstream-Status: Pending
+---
+ common/oftree.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/common/oftree.c b/common/oftree.c
+index 7aaed70e4016..d68c69605cf3 100644
+--- a/common/oftree.c
++++ b/common/oftree.c
+@@ -19,6 +19,7 @@
+ #include <watchdog.h>
+ #include <globalvar.h>
+ #include <magicvar.h>
++#include <system_data.h>
+ 
+ #define MAX_LEVEL	32		/* how deeply nested we will go */
+ 
+@@ -211,6 +212,30 @@ static int of_write_bootargs(struct device_node *node)
+ 	return ret;
+ }
+ 
++static int of_fixup_bootargs_rollback(struct device_node *root,
++				       struct device_node *node)
++{
++	if (IS_ENABLED(CONFIG_ROLLBACK_PROTECTION)) {
++		struct system_data *system_data;
++		__be64 buffer;
++		ssize_t size;
++		uint64_t rollback_index;
++
++		system_data = system_data_get();
++		if (system_data) {
++			size = system_data_read(system_data, &buffer, sizeof(buffer),
++					       "barebox-rollback-index");
++			if (size == sizeof(buffer)) {
++				rollback_index = be64_to_cpu(buffer);
++				of_property_write_u64(node, "barebox-rollback-index",
++						     rollback_index);
++			}
++		}
++	}
++
++	return 0;
++}
++
+ static int of_fixup_bootargs(struct device_node *root, void *unused)
+ {
+ 	struct device_node *node;
+@@ -250,6 +275,10 @@ static int of_fixup_bootargs(struct device_node *root, void *unused)
+ 	if (err)
+ 		return err;
+ 
++	err = of_fixup_bootargs_rollback(root, node);
++	if (err)
++		return err;
++
+ 	if (IS_ENABLED(CONFIG_RISCV)) {
+ 		const char *hartid;
+ 

@@ -14,6 +14,8 @@ into a dedicated finish_caam() function which gets called during
 boot_final(). To share the jrcfg state between the different initcalls
 we have to make jrcfg file global.
 
+Upstream-Status: Pending
+
 Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
 ---
  core/drivers/crypto/caam/caam_ctrl.c | 32 +++++++++++++++++++++++---------

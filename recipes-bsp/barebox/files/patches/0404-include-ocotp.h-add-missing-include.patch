@@ -1,0 +1,32 @@
+From: =?UTF-8?q?Ulrich=20=C3=96lmann?= <u.oelmann@pengutronix.de>
+Date: Mon, 21 Sep 2026 10:47:36 +0200
+Subject: [PATCH] include: ocotp.h: add missing include
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Otherwise GCC complains:
+
+  <PATH>/barebox-2026.09.0/include/mach/imx/ocotp.h:23:33: error: implicit declaration of function 'GENMASK' [-Werror=implicit-function-declaration]
+     23 | #define OCOTP_WORD_MASK         GENMASK( 7,  0)
+        |                                 ^~~~~~~
+
+Upstream-Status: Pending
+
+Signed-off-by: Ulrich Ölmann <u.oelmann@pengutronix.de>
+---
+ include/mach/imx/ocotp.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/mach/imx/ocotp.h b/include/mach/imx/ocotp.h
+index 2d8fcc7c2657..a3eee070546b 100644
+--- a/include/mach/imx/ocotp.h
++++ b/include/mach/imx/ocotp.h
+@@ -6,6 +6,7 @@
+ #include <linux/bitfield.h>
+ #include <linux/types.h>
+ #include <linux/io.h>
++#include <linux/bits.h>
+ 
+ #define OCOTP_SHADOW_OFFSET		0x400
+ #define OCOTP_SHADOW_SPACING		0x10

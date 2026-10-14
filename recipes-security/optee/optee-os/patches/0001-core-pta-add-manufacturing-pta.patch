@@ -9,6 +9,8 @@ disable access.
 The manufacturing PTA will be developed to be a replacement for
 RPMB_WRITE_KEY, but with the possibility for additional functionality.
 
+Upstream-Status: Pending
+
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
  core/pta/manufacturing.c                | 91 +++++++++++++++++++++++++++++++++

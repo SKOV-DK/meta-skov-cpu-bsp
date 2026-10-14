@@ -1,0 +1,193 @@
+From: Michael Tretter <m.tretter@pengutronix.de>
+Date: Wed, 28 Jan 2026 22:25:23 +0100
+Subject: [PATCH] tee: optee: system_data: add command
+
+This adds a command to acces system_data variables.
+
+Upstream-Status: Pending
+
+Signed-off-by: Michael Tretter <m.tretter@pengutronix.de>
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ commands/Kconfig       |   6 +++
+ commands/Makefile      |   1 +
+ commands/system_data.c | 142 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 149 insertions(+)
+ create mode 100644 commands/system_data.c
+
+diff --git a/commands/Kconfig b/commands/Kconfig
+index c8804c8e17fe..4185b4fdb52b 100644
+--- a/commands/Kconfig
++++ b/commands/Kconfig
+@@ -2745,6 +2745,12 @@ config CMD_STACKSMASH
+ 	  This commands trashes the stack to test stackprotector and
+ 	  guard page. This command does not return.
+ 
++config CMD_SYSTEM_DATA
++	tristate "system_data"
++	depends on OPTEE_SYSTEM_DATA
++	help
++	  Access data objects stored in the system data TA.
++
+ # end Miscellaneous commands
+ endmenu
+ 
+diff --git a/commands/Makefile b/commands/Makefile
+index 7f0c68a5e58e..2b3f79d00393 100644
+--- a/commands/Makefile
++++ b/commands/Makefile
+@@ -173,5 +173,6 @@ obj-$(CONFIG_CMD_HOST)		+= host.o
+ obj-$(CONFIG_CMD_DMSETUP)	+= dmsetup.o
+ obj-$(CONFIG_CMD_VERITYSETUP)	+= veritysetup.o
+ obj-$(CONFIG_CMD_SCONFIG)	+= sconfig.o
++obj-$(CONFIG_CMD_SYSTEM_DATA)	+= system_data.o
+ obj-$(CONFIG_CMD_RKSECURE)	+= rksecure.o
+ UBSAN_SANITIZE_ubsan.o := y
+diff --git a/commands/system_data.c b/commands/system_data.c
+new file mode 100644
+index 000000000000..ba3a23a8448d
+--- /dev/null
++++ b/commands/system_data.c
+@@ -0,0 +1,142 @@
++// SPDX-License-Identifier: GPL-2.0-only
++
++#include <common.h>
++
++#include <command.h>
++#include <getopt.h>
++#include <libfile.h>
++#include <fs.h>
++#include <driver.h>
++
++#include <system_data.h>
++
++static int do_system_data_read(struct system_data *system_data,
++			       int argc, char *argv[])
++{
++	char *id;
++	char *file;
++	ssize_t size;
++	void *data;
++	int ret;
++
++	/* Eat the sub command */
++	argc -= 1;
++	argv += 1;
++
++	if (argc != 2)
++		return COMMAND_ERROR_USAGE;
++	id = argv[0];
++	file = argv[1];
++
++	size = system_data_read(system_data, 0, 0, id);
++	if (size < 0)
++		return size;
++
++	data = malloc(size);
++	if (!data)
++		return -ENOMEM;
++
++	size = system_data_read(system_data, data, size, id);
++	if (size < 0) {
++		ret = size;
++		goto out;
++	}
++
++	ret = write_file(file, data, size);
++	if (ret)
++		return ret;
++
++out:
++	free(data);
++
++	return ret;
++}
++
++static int do_system_data_write(struct system_data *system_data,
++				int argc, char *argv[])
++{
++	enum system_data_mode mode = SYSTEM_DATA_MODE_INVALID;
++	size_t size;
++	void *data;
++	int ret;
++	ssize_t outsize;
++	int opt;
++	char *id;
++	char *file;
++
++	while ((opt = getopt(argc, argv, "m:")) > 0) {
++		switch (opt) {
++		case 'm':
++			mode = system_data_mode_by_name(optarg);
++			break;
++		}
++	}
++	argc -= optind;
++	argv += optind;
++
++	if (argc != 2)
++		return COMMAND_ERROR_USAGE;
++	id = argv[0];
++	file = argv[1];
++
++	if (mode == SYSTEM_DATA_MODE_INVALID)
++		return COMMAND_ERROR_USAGE;
++
++	ret = read_file_2(file, &size, &data, FILESIZE_MAX);
++	if (ret)
++		return ret;
++
++	outsize = system_data_write(system_data, data, size, id, mode);
++	if (outsize < 0)
++		ret = outsize;
++
++	free(data);
++
++	return ret;
++}
++
++static int do_system_data(int argc, char *argv[])
++{
++	struct system_data *system_data;
++	int ret = COMMAND_ERROR_USAGE;
++
++	if (argc < 2)
++		return COMMAND_ERROR_USAGE;
++
++	system_data = system_data_get();
++	if (!system_data) {
++		printf("Cannot get system_data\n");
++		return COMMAND_ERROR;
++	}
++
++	/* Eat the command */
++	argc -= 1;
++	argv += 1;
++
++	if (strcmp(argv[0], "write") == 0)
++		ret = do_system_data_write(system_data, argc, argv);
++	else if (strcmp(argv[0], "read") == 0)
++		ret = do_system_data_read(system_data, argc, argv);
++	else
++		ret = COMMAND_ERROR_USAGE;
++
++	return ret;
++}
++
++BAREBOX_CMD_HELP_START(system_data)
++BAREBOX_CMD_HELP_TEXT("Access data objects in the system data store")
++BAREBOX_CMD_HELP_TEXT("")
++BAREBOX_CMD_HELP_TEXT("commands")
++BAREBOX_CMD_HELP_OPT ("write -m <mode> <id> <file>", "write <file> as data object <id> with mode <mode> to the store")
++BAREBOX_CMD_HELP_OPT ("read <id> <file>", "read data object <id> from the store to <file>")
++BAREBOX_CMD_HELP_TEXT("")
++BAREBOX_CMD_HELP_TEXT("<mode> can be one of unrestricted, rollback_protect, write_once")
++BAREBOX_CMD_HELP_END
++
++BAREBOX_CMD_START(system_data)
++	.cmd = do_system_data,
++	BAREBOX_CMD_DESC("System data store")
++	BAREBOX_CMD_OPTS("<command> [options...]")
++	BAREBOX_CMD_GROUP(CMD_GRP_MISC)
++	BAREBOX_CMD_HELP(cmd_system_data_help)
++BAREBOX_CMD_END

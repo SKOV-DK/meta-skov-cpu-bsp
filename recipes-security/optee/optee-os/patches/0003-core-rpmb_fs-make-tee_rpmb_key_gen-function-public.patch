@@ -6,6 +6,8 @@ Remove the static from tee_rpmb_key_gen and add it to the header in
 order to make it available for other parts of the code to generate the
 RPMB key based on a provided CID.
 
+Upstream-Status: Pending
+
 Signed-off-by: Fabian Pflug <f.pflug@pengutronix.de>
 ---
  core/include/tee/tee_fs.h |  8 ++++++++
