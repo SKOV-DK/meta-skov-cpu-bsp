@@ -1,0 +1,68 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 020f20c8ce66..f2e01c602d45 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -260,7 +260,6 @@ reg_vdd_soc: BUCK1 {
+ 				regulator-name = "VDD_SOC";
+ 				regulator-min-microvolt = <850000>;
+ 				regulator-max-microvolt = <850000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -270,7 +269,6 @@ reg_vdd_arm: BUCK2 {
+ 				regulator-name = "VDD_ARM";
+ 				regulator-min-microvolt = <850000>;
+ 				regulator-max-microvolt = <1000000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -282,7 +280,6 @@ reg_vdd_3v3: BUCK4 {
+ 				regulator-name = "VDD_3V3";
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -291,7 +288,6 @@ reg_vdd_1v8: BUCK5 {
+ 				regulator-name = "VDD_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -300,7 +296,6 @@ reg_nvcc_dram_1v1: BUCK6 {
+ 				regulator-name = "NVCC_DRAM_1V1";
+ 				regulator-min-microvolt = <1100000>;
+ 				regulator-max-microvolt = <1100000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -309,7 +304,6 @@ reg_nvcc_snvs_1v8: LDO1 {
+ 				regulator-name = "NVCC_SNVS_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -318,7 +312,6 @@ reg_vdda_1v8: LDO3 {
+ 				regulator-name = "VDDA_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -327,7 +320,6 @@ reg_nvcc_sd2: LDO5 {
+ 				regulator-name = "NVCC_SD2";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <3300000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
