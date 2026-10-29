@@ -1,0 +1,50 @@
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Date: Mon, 17 Feb 2025 23:53:35 +0100
+Subject: [PATCH] fixup! arm64: dts: imx8mp-skov: add revC BD500 board
+
+Upstream-Status: Pending
+---
+ .../boot/dts/freescale/imx8mp-skov-revc-bd500.dts  | 30 ++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+index b816c6cd3bca..3a19288dde98 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-revc-bd500.dts
+@@ -53,6 +53,36 @@ led_lan2_green: led-8 {
+ 		};
+ 	};
+ 
++	/* TODO: Can we benefit from the multicolor support?
++	 * For now add the nodes, but disabled, so they can easily
++	 * be enabled via bootloader OF fixup for evaluation in Linux.
++	 */
++	system-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		leds = <&led_lan2_red>, <&led_lan2_green>;
++		function = LED_FUNCTION_STATUS;
++		status = "disabled";
++	};
++
++	lan1-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		function = LED_FUNCTION_LAN;
++		function-enumerator = <1>;
++		leds = <&led_lan1_red>, <&led_lan1_green>;
++		status = "disabled";
++	};
++
++	lan2-led {
++		compatible = "leds-group-multicolor";
++		color = <LED_COLOR_ID_MULTI>;
++		function = LED_FUNCTION_LAN;
++		function-enumerator = <2>;
++		leds = <&led_system_red>, <&led_system_green>;
++		status = "disabled";
++	};
++
+ 	gpio-keys {
+ 		compatible = "gpio-keys";
+ 

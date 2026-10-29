@@ -1,0 +1,36 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 1 Dec 2025 20:15:28 +0100
+Subject: [PATCH] drm/etnaviv: use fine-grained MLCG to disable clock gating in
+ reset
+
+Flipping the global clock gating switch in VIVS_PM_POWER_CONTROLS does
+seem to have unintended side effects whe the GPU is hung. It leads to
+incomplete resets, most likely due to the synchronous reset not
+propagating through all parts of the GPU.
+
+Use the fine grained module level clock gating disable switches in
+VIVS_PM_MODULE_CONTROLS to disable clock gating at the start of the
+reset sequence.
+
+Upstream-Status: Pending
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index f61c8d7901c7..6838165aa09f 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -542,8 +542,8 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 		unsigned int fscale = 1 << (6 - gpu->freq_scale);
+ 		u32 pulse_eater = 0x01590880;
+ 
+-		/* disable clock gating */
+-		gpu_write_power_sync(gpu, VIVS_PM_POWER_CONTROLS, 0x0);
++		/* disable module clock gating */
++		gpu_write_power_sync(gpu, VIVS_PM_MODULE_CONTROLS, 0xffffffff);
+ 
+ 		/* disable pulse eater */
+ 		pulse_eater |= BIT(17);

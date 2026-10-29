@@ -1,0 +1,44 @@
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 1 Dec 2025 20:22:43 +0100
+Subject: [PATCH] drm/etnaviv: check MMUv2 status after reset
+
+A fully GPU reset is the only way to disable the MMUv2 and the
+driver depends on the MMU being disabled after a reset to be able
+to properly restart the GPU. Validate this assumption by checking
+that the reset actually did disable the MMU.
+
+Upstream-Status: Pending
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index df92d4888142..8dbb3454cbc8 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -600,6 +600,23 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 			continue;
+ 		}
+ 
++		/* try resetting again if MMUv2 is not disabled */
++		if (gpu->identity.minor_features1 & chipMinorFeatures1_MMU_VERSION) {
++			if (gpu->sec_mode == ETNA_SEC_KERNEL) {
++				if (gpu_read(gpu, VIVS_MMUv2_SEC_CONTROL) &
++				    VIVS_MMUv2_SEC_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			} else {
++				if (gpu_read(gpu, VIVS_MMUv2_CONTROL) &
++				    VIVS_MMUv2_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			}
++		}
++
+ 		/* enable debug register access */
+ 		control &= ~VIVS_HI_CLOCK_CONTROL_DISABLE_DEBUG_REGISTERS;
+ 		gpu_write(gpu, VIVS_HI_CLOCK_CONTROL, control);
