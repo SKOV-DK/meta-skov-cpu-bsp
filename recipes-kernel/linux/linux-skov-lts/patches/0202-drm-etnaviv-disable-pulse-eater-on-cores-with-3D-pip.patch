@@ -16,10 +16,10 @@ Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-index c553cc27165c..f61c8d7901c7 100644
+index b59131daab07..ceebc4c8ba8c 100644
 --- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
 +++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
-@@ -750,9 +750,10 @@ static void etnaviv_gpu_setup_pulse_eater(struct etnaviv_gpu *gpu)
+@@ -767,9 +767,10 @@ static void etnaviv_gpu_setup_pulse_eater(struct etnaviv_gpu *gpu)
  	if ((gpu->identity.revision > 0x5420) &&
  	    (gpu->identity.features & chipFeatures_PIPE_3D))
  	{

@@ -19,7 +19,7 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  4 files changed, 51 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index ec4f3462bf80..c1fee39ae3c0 100644
+index f9905eb4f174..566a7ad50f26 100644
 --- a/drivers/mmc/core/bus.c
 +++ b/drivers/mmc/core/bus.c
 @@ -16,6 +16,7 @@

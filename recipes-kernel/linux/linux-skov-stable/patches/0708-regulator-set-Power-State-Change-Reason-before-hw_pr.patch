@@ -15,7 +15,7 @@ Reviewed-by: Mark Brown <broonie@kernel.org>
  1 file changed, 6 insertions(+)
 
 diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-index 97b4ee5d2990..8b2a1d7ab7d0 100644
+index bb0b7268b2b5..a551468d274e 100644
 --- a/drivers/regulator/core.c
 +++ b/drivers/regulator/core.c
 @@ -19,6 +19,7 @@
@@ -26,7 +26,7 @@ index 97b4ee5d2990..8b2a1d7ab7d0 100644
  #include <linux/reboot.h>
  #include <linux/regmap.h>
  #include <linux/regulator/of_regulator.h>
-@@ -5321,6 +5322,7 @@ EXPORT_SYMBOL_GPL(regulator_bulk_free);
+@@ -5339,6 +5340,7 @@ EXPORT_SYMBOL_GPL(regulator_bulk_free);
  static void regulator_handle_critical(struct regulator_dev *rdev,
  				      unsigned long event)
  {
@@ -34,7 +34,7 @@ index 97b4ee5d2990..8b2a1d7ab7d0 100644
  	const char *reason = NULL;
  
  	if (!rdev->constraints->system_critical)
-@@ -5329,17 +5331,21 @@ static void regulator_handle_critical(struct regulator_dev *rdev,
+@@ -5347,17 +5349,21 @@ static void regulator_handle_critical(struct regulator_dev *rdev,
  	switch (event) {
  	case REGULATOR_EVENT_UNDER_VOLTAGE:
  		reason = "System critical regulator: voltage drop detected";

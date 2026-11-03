@@ -15,10 +15,10 @@ Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
  2 files changed, 32 insertions(+)
 
 diff --git a/drivers/nvmem/core.c b/drivers/nvmem/core.c
-index b61028ae0651..217d5b2917a4 100644
+index 4b1754d89b7a..0306794c63f7 100644
 --- a/drivers/nvmem/core.c
 +++ b/drivers/nvmem/core.c
-@@ -1789,6 +1789,31 @@ int nvmem_cell_write(struct nvmem_cell *cell, void *buf, size_t len)
+@@ -1791,6 +1791,31 @@ int nvmem_cell_write(struct nvmem_cell *cell, void *buf, size_t len)
  
  EXPORT_SYMBOL_GPL(nvmem_cell_write);
  

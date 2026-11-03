@@ -1,6 +1,6 @@
 require linux-skov-common.inc
 
-SRC_URI[sha256sum] = "2b69564f7d4fea0c859b1959ba33709ee6e9139bd100e30a853b57159a8221b8"
+SRC_URI[sha256sum] = "81764a545072d160748beff4d9de2e7d95aa9f16e8261110288f067a2cc61d71"
 
 require linux-skov-stable/patches/series.inc
 # Patches not yet folded into the Pengutronix patch stack

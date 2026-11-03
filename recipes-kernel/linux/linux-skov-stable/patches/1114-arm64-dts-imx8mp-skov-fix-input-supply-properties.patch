@@ -1,0 +1,102 @@
+From: Roland Hieber <rhi@pengutronix.de>
+Date: Sat, 14 Nov 2026 00:02:02 +0100
+Subject: [PATCH] arm64: dts: imx8mp-skov: fix input supply properties
+
+The nxp,pca9450c node used the non-standard 'vin-supply' binding until
+now. Upstream commit 4c33cef58965eb655a0a ("regulator: pca9450: link
+regulator inputs to supply groups") added support for 'in*-supply'
+bindings, so move to this standardized binding to fix errors on boot:
+
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/LDO1
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/BUCK6
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/BUCK5
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/BUCK4
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/BUCK2
+  nxp-pca9450 0-0025: Failed to create device link (0x180) with supplier regulator-5v-p for /soc@0/bus@30800000/i2c@30a20000/pmic@25/regulators/BUCK1
+
+Suggested-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
+Upstream-Status: Pending
+
+Signed-off-by: Roland Hieber <rhi@pengutronix.de>
+---
+ arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi | 12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+index 5453e590f64f..1c97f2c2873a 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mp-skov-reva.dtsi
+@@ -275,13 +275,16 @@ pmic@25 {
+ 		pinctrl-0 = <&pinctrl_pmic>;
+ 		interrupts-extended = <&gpio1 3 IRQ_TYPE_EDGE_RISING>;
+ 		priority = <200>;
++		inl1-supply = <&reg_5v_p>;
++		inb13-supply = <&reg_5v_p>;
++		inb26-supply = <&reg_5v_p>;
++		inb45-supply = <&reg_5v_p>;
+ 
+ 		regulators {
+ 			reg_vdd_soc: BUCK1 {
+ 				regulator-name = "VDD_SOC";
+ 				regulator-min-microvolt = <850000>;
+ 				regulator-max-microvolt = <850000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -291,7 +294,6 @@ reg_vdd_arm: BUCK2 {
+ 				regulator-name = "VDD_ARM";
+ 				regulator-min-microvolt = <850000>;
+ 				regulator-max-microvolt = <1000000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 				regulator-ramp-delay = <3125>;
+@@ -303,7 +305,6 @@ reg_vdd_3v3: BUCK4 {
+ 				regulator-name = "VDD_3V3";
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -312,7 +313,6 @@ reg_vdd_1v8: BUCK5 {
+ 				regulator-name = "VDD_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -321,7 +321,6 @@ reg_nvcc_dram_1v1: BUCK6 {
+ 				regulator-name = "NVCC_DRAM_1V1";
+ 				regulator-min-microvolt = <1100000>;
+ 				regulator-max-microvolt = <1100000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -330,7 +329,6 @@ reg_nvcc_snvs_1v8: LDO1 {
+ 				regulator-name = "NVCC_SNVS_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -339,7 +337,6 @@ reg_vdda_1v8: LDO3 {
+ 				regulator-name = "VDDA_1V8";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <1800000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
+@@ -348,7 +345,6 @@ reg_nvcc_sd2: LDO5 {
+ 				regulator-name = "NVCC_SD2";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <3300000>;
+-				vin-supply = <&reg_5v_p>;
+ 				regulator-boot-on;
+ 				regulator-always-on;
+ 			};
