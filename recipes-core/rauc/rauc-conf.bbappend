@@ -26,5 +26,5 @@ do_configure:append() {
        --expression=s,@RAUC_HANDLER_PRE_INSTALL@,"${RAUC_HANDLER_PRE_INSTALL}", \
        --expression=s,@RAUC_HANDLER_POST_INSTALL@,"${RAUC_HANDLER_POST_INSTALL}", \
        --expression=s,@RAUC_HANDLER_SYSTEM_INFO@,"${RAUC_HANDLER_SYSTEM_INFO}", \
-      ${WORKDIR}/${MACHINE}/system.conf.in > ${WORKDIR}/system.conf
+      ${UNPACKDIR}/${MACHINE}/system.conf.in > ${UNPACKDIR}/system.conf
 }

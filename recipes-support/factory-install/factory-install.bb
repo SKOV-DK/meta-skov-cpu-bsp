@@ -8,7 +8,7 @@ SRC_URI = " \
 
 inherit systemd
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 COMPATIBLE_MACHINE = "imx8-cpu|imx8s-cpu"
 
@@ -75,7 +75,7 @@ do_install() {
     install -m 0644 ${B}/${BAREBOX_RENAME}                  ${D}${datadir}/factory-install
 
     install -d ${D}${systemd_unitdir}/system
-    install -m 0644 ${WORKDIR}/factory-install.service ${D}${systemd_unitdir}/system
+    install -m 0644 ${UNPACKDIR}/factory-install.service ${D}${systemd_unitdir}/system
 }
 
 FILES:${PN} = " \

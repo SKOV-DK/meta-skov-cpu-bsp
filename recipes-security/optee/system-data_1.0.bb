@@ -22,6 +22,6 @@ SRC_URI = " \
     file://tlv.h \
 "
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 inherit cmake pkgconfig

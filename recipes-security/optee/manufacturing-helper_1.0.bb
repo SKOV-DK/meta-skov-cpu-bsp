@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 LIC_FILES_CHKSUM += "file://cid.c;endline=26;md5=0e1d328f8775df082ad0b1319d3d4839"
 
 COMPATIBLE_MACHINE = "imx8s-cpu"
+S = "${UNPACKDIR}"
 
 DEPENDS += "optee-client"
 
@@ -20,8 +21,6 @@ SRC_URI = " \
     file://manufacturing_helper.h \
     file://cid.c \
 "
-
-S = "${WORKDIR}"
 
 RDEPENDS:${PN} += "mmc-utils"
 

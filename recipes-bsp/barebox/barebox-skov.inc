@@ -28,10 +28,6 @@ do_compile:prepend () {
 	fi
 }
 
-# Backport UNPACKDIR from wrynose's bitbake.conf so the class-style BAREBOX_ENV_DIR
-# default also works on scarthgap.
-# Drop this compatibility code once the branch moves to wrynose or newer.
-UNPACKDIR ??= "${WORKDIR}/sources"
 
 BAREBOX_FIRMWARE_DEP = ""
 BAREBOX_FIRMWARE_DEP:mx8m-generic-bsp = "trusted-firmware-a:do_deploy imx-boot-firmware-files:do_deploy"

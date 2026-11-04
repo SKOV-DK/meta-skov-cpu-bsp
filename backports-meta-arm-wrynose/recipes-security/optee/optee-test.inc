@@ -15,7 +15,7 @@ SRC_URI = "git://github.com/OP-TEE/optee_test.git;protocol=https;${OPTEE_SRC_URI
            file://run-ptest \
           "
 
-B = "${WORKDIR}/build"
+B = "${UNPACKDIR}/build"
 
 EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  OPTEE_OPENSSL_EXPORT=${STAGING_INCDIR} \

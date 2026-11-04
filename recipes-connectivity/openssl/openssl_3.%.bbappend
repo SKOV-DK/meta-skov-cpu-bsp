@@ -31,5 +31,5 @@ Update the customized version and refresh the expected hash (${B}/apps/openssl.c
     fi
 
     ACTUAL12=$(printf '%s' "$ACTUAL" | cut -c1-12)
-    install -m 0644 ${WORKDIR}/customized_openssl_${ACTUAL12}.cnf ${D}${sysconfdir}/ssl/openssl.cnf
+    install -m 0644 ${UNPACKDIR}/customized_openssl_${ACTUAL12}.cnf ${D}${sysconfdir}/ssl/openssl.cnf
 }

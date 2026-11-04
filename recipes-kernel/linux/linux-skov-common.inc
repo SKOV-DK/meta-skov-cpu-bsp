@@ -24,7 +24,7 @@ FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 300 --passive-ftp"
 
 SRC_URI += "file://defconfig"
 
-S = "${WORKDIR}/linux-${LINUX_VERSION}"
+S = "${UNPACKDIR}/linux-${LINUX_VERSION}"
 
 # Override COMPATIBLE_MACHINE to include your machine in a bbappend
 # file. Leaving it empty here ensures an early explicit build failure.
