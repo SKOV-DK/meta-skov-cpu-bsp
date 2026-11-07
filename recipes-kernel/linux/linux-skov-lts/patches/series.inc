@@ -20,14 +20,11 @@ UMPF_SRC_URI += "\
 # umpf-hashinfo: cf1c23c7f83fe9040dd7153c08ecbb6d96d89947
 # umpf-topic-range: 7a454b41c6e0206a4a8a65902b08153c5c86bb6d..d6b24d97ce5eb3e0a0cc133d5031b1a59d23e185
 UMPF_SRC_URI += "\
-  file://patches/0201-drm-etnaviv-force-flush-on-power-register-ops.patch \
   file://patches/0202-drm-etnaviv-reset-bit-0-when-disabling-pulse-eater-f.patch \
   file://patches/0203-drm-etnaviv-disable-pulse-eater-on-cores-with-3D-pip.patch \
   file://patches/0204-drm-etnaviv-dump-outstanding-read-write-debug-regist.patch \
   file://patches/0205-drm-etnaviv-remove-unnecessary-cache-flushes-on-pipe.patch \
   file://patches/0206-drm-etnaviv-use-fine-grained-MLCG-to-disable-clock-g.patch \
-  file://patches/0207-drm-etnaviv-check-all-modules-for-idle-after-reset.patch \
-  file://patches/0208-drm-etnaviv-check-MMUv2-status-after-reset.patch \
   "
 # umpf-topic: v6.18/topic/imx-drm
 # umpf-hashinfo: d48565f3620d9a73b586e831f24fa0a3c13c86c6
@@ -112,7 +109,7 @@ UMPF_SRC_URI += "\
   "
 SRC_URI += "${UMPF_SRC_URI}"
 
-UMPF_BASE = "6.18.60"
+UMPF_BASE = "6.18.62"
 UMPF_VERSION = "20260918-1"
 UMPF_PV = "${UMPF_BASE}-${UMPF_VERSION}"
 LINUX_VERSION ?= "${UMPF_BASE}"
