@@ -1,0 +1,47 @@
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+Date: Mon, 27 Oct 2025 13:44:14 +0100
+Subject: [PATCH] regulator: dt-bindings: nxp,pca9450: document input supplies
+
+Add missing supply properties for PCA945x input pin groups:
+- inl1-supply (for LDOs)
+- inb13-supply (for BUCK1/3)
+- inb26-supply (for BUCK2/6)
+- inb45-supply (for BUCK4/5)
+
+These properties describe external power sources for each input group.
+
+Upstream-Status: Pending
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+Link: https://patch.msgid.link/20251027124415.989301-2-o.rempel@pengutronix.de
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ .../bindings/regulator/nxp,pca9450-regulator.yaml         | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml b/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
+index a5486c36830f..863717984a79 100644
+--- a/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
++++ b/Documentation/devicetree/bindings/regulator/nxp,pca9450-regulator.yaml
+@@ -41,6 +41,21 @@ properties:
+   interrupts:
+     maxItems: 1
+ 
++  inl1-supply:
++    description: Regulator supply for the INL1 pin group, powering LDOx
++
++  inb13-supply:
++    description:
++      Regulator supply for the INB13 pin group, powering BUCK1 and BUCK3.
++
++  inb26-supply:
++    description:
++      Regulator supply for the INB26 pin group, powering BUCK2 and BUCK6.
++
++  inb45-supply:
++    description:
++      Regulator supply for the INB45 pin group, powering BUCK4 and BUCK5.
++
+   regulators:
+     type: object
+     description: |
