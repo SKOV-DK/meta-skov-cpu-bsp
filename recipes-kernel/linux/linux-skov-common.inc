@@ -6,7 +6,7 @@ KERNEL_CONFIG_COMMAND = "oe_runmake_call -C ${S} CC="${KERNEL_CC}" O=${B} olddef
 
 # CVE exclusions
 include recipes-kernel/linux/cve-exclusion.inc
-include recipes-kernel/linux/cve-exclusion_6.14.inc
+include recipes-kernel/linux/cve-exclusion_6.18.inc
 
 KERNEL_EXTRA_FEATURES:append = " features/debug/debug-kernel.scc"
 
